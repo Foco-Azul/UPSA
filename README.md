@@ -2,6 +2,9 @@
 
 A new Flutter project.
 
+Flutter version : 3.13.0
+Java version : 21.0.0
+
 
 ## Getting Started
 

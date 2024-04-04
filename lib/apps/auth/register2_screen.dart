@@ -136,20 +136,20 @@ class _Register2ScreenState extends State<Register2Screen> {
                           Container(
                               margin: EdgeInsets.only(top: 24),
                               child: MyButton(
-  elevation: 0,
-  borderRadiusAll: 4,
-  onPressed: () {
-    // Aquí puedes realizar la acción que desees al presionar el botón
-    print('Botón "REGISTER" presionado');
-  },
-  padding: MySpacing.xy(20, 20),
-  child: MyText.labelMedium(
-    "REGISTER",
-    fontWeight: 600,
-    color: theme.colorScheme.onPrimary,
-  ),
-)
-),
+                                  elevation: 0,
+                                  borderRadiusAll: 4,
+                                  onPressed: () {
+                                    // Aquí puedes realizar la acción que desees al presionar el botón
+                                    print('Botón "REGISTER" presionado');
+                                  },
+                                  padding: MySpacing.xy(20, 20),
+                                  child: MyText.labelMedium(
+                                    "REGISTRARME",
+                                    fontWeight: 600,
+                                    color: theme.colorScheme.onPrimary,
+                                  ),
+                                )
+                              ),
                         ],
                       ),
                     )

@@ -1,46 +1,36 @@
-import 'package:flutter/material.dart';
-import 'package:upsa/apps/auth/login2_screen.dart';
-
-void main() => runApp(const MyApp());
-
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: "Mi App",
-      home: Inicio(),
-    );
-  }
-}
-
-class Inicio extends StatelessWidget {
-  const Inicio({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Mi App"),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text("Contenido"),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Login2Screen()),
-                );
-              },
-              child: const Text('Ir a la segunda pantalla'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+    import 'package:flutter/material.dart';
+    import 'package:upsa/screens/dashboard_screen.dart';
+    import 'package:upsa/screens/login_screen.dart';
+    import 'package:upsa/screens/signup_screen.dart';
+    
+    void main() {
+      runApp(const Home());
+    }
+    
+    class Home extends StatefulWidget {
+      const Home({Key? key}) : super(key: key);
+    
+      @override
+      _HomeState createState() => _HomeState();
+    }
+    
+    class _HomeState extends State<Home> {
+      @override
+      Widget build(BuildContext context) {
+       return MaterialApp(
+        title: "Strapi App",
+        home: const Login(),
+        routes: {
+         Dashboard.namedRoute: (ctx) => const Dashboard(),
+         Login.namedRoute: (ctx) => const Login(),
+         Signup.namedRoute: (ctx) => const Signup()
+        },
+        onGenerateRoute: (settings) {
+         return MaterialPageRoute(builder: (context) => const Dashboard());
+        },
+        onUnknownRoute: (settings) {
+         return MaterialPageRoute(builder: (context) => const Dashboard());
+        },
+       );
+      }
+    }

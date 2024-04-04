@@ -45,6 +45,7 @@ app.*.map.json
 
 # Constants 
 /lib/constants/app.dart
+.env
 
 # Flutkit
 /.idea/
