@@ -1,36 +1,57 @@
-    import 'package:flutter/material.dart';
-    import 'package:upsa/screens/dashboard_screen.dart';
-    import 'package:upsa/screens/login_screen.dart';
-    import 'package:upsa/screens/signup_screen.dart';
-    
-    void main() {
-      runApp(const Home());
-    }
-    
-    class Home extends StatefulWidget {
-      const Home({Key? key}) : super(key: key);
-    
-      @override
-      _HomeState createState() => _HomeState();
-    }
-    
-    class _HomeState extends State<Home> {
-      @override
-      Widget build(BuildContext context) {
-       return MaterialApp(
-        title: "Strapi App",
-        home: const Login(),
-        routes: {
-         Dashboard.namedRoute: (ctx) => const Dashboard(),
-         Login.namedRoute: (ctx) => const Login(),
-         Signup.namedRoute: (ctx) => const Signup()
-        },
-        onGenerateRoute: (settings) {
-         return MaterialPageRoute(builder: (context) => const Dashboard());
-        },
-        onUnknownRoute: (settings) {
-         return MaterialPageRoute(builder: (context) => const Dashboard());
-        },
-       );
-      }
-    }
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:upsa/helpers/localizations/app_localization_delegate.dart';
+import 'package:upsa/helpers/localizations/language.dart';
+import 'package:upsa/helpers/theme/app_notifier.dart';
+import 'package:upsa/helpers/theme/app_theme.dart';
+import 'package:upsa/homes/screen_home.dart'; // Importa ScreenHome
+import 'package:provider/provider.dart';
+
+Future<void> main() async {
+  //You will need to initialize AppThemeNotifier class for theme changes.
+  WidgetsFlutterBinding.ensureInitialized();
+  // MobileAds.instance.initialize();
+  AppTheme.init();
+
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  runApp(
+    MultiProvider(
+      providers:[
+        ChangeNotifierProvider<AppNotifier>(create: (context) => AppNotifier()),
+      ],
+    child: MyApp(),
+    )
+  );
+}
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AppNotifier>(
+        builder: (BuildContext context, AppNotifier value, Widget? child) {
+          return GetMaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.theme,
+            home: HomesScreen(),
+            builder: (context, child) {
+              return Directionality(
+                textDirection: AppTheme.textDirection,
+                child: child ?? Container(),
+              );
+            },
+            localizationsDelegates: [
+              AppLocalizationsDelegate(context),
+              // Add this line
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: Language.getLocales(),
+            // home: IntroScreen(),
+            // home: CookifyShowcaseScreen(),
+          );
+        });
+
+  }
+}

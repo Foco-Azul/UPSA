@@ -4,7 +4,7 @@ import 'dart:convert';
     List<User> UserFromJson(String str) =>
        List<User>.from(json.decode(str).map((x) => User.fromJson(x)));
     // getting a single user from json
-    User singleUserFromJson(String str) => User.fromJson(json.decode(str));
+    User singleUserFromJson(String str) => User.fromJson(json.decode(str)["user"]);
     
     // user class
     class User {
@@ -17,6 +17,7 @@ import 'dart:convert';
        required this.blocked,
        required this.createdAt,
        required this.updatedAt,
+       //required this.role,
       });
     
       int id;
@@ -27,6 +28,7 @@ import 'dart:convert';
       bool blocked;
       DateTime createdAt;
       DateTime updatedAt;
+      //int role;
     
       factory User.fromJson(Map<String, dynamic> json) => User(
          id: json["id"],
@@ -37,5 +39,6 @@ import 'dart:convert';
          blocked: json["blocked"],
          createdAt: DateTime.parse(json["createdAt"]),
          updatedAt: DateTime.parse(json["updatedAt"]),
+         //role: json["role"]["id"],
         );
     }

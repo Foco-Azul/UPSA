@@ -4,6 +4,7 @@
 * */
 
 import 'package:upsa/apps/auth/register2_screen.dart';
+import 'package:upsa/helpers/theme/app_notifier.dart';
 import 'package:upsa/helpers/theme/app_theme.dart';
 import 'package:upsa/helpers/widgets/my_button.dart';
 import 'package:upsa/helpers/widgets/my_container.dart';
@@ -12,8 +13,12 @@ import 'package:upsa/helpers/widgets/my_text.dart';
 import 'package:upsa/helpers/widgets/my_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:provider/provider.dart';
+import 'package:upsa/utils/server.dart';
+import 'package:upsa/models/user.dart';
 
 class Login2Screen extends StatefulWidget {
+  static const namedRoute = "login2-screen";
   @override
   _Login2ScreenState createState() => _Login2ScreenState();
 }
@@ -23,13 +28,40 @@ class _Login2ScreenState extends State<Login2Screen> {
   late CustomTheme customTheme;
   late ThemeData theme;
 
+  String _email = "";
+  String _password = "";
+  String _error = "";
+  
+
   @override
   void initState() {
     super.initState();
     customTheme = AppTheme.customTheme;
     theme = AppTheme.theme;
   }
+  void _login() async {
+    try {
+      User user = (await ApiService().getUsers(_email, _password))!;
+      print("usuario");
+      print(user);
+      if (user == null) {
+        setState(() {
+          _error = "Your account does not exist.";
+        });
+      } else {
+        // Setear _isLoggedIn a true cuando el login es exitoso
+        Provider.of<AppNotifier>(context, listen: false).login();
+        print("se ingreso a la cuenta");
+        // Navigate to the dashboard screen.
+        //Navigator.pushNamed(context, Dashboard.namedRoute);
+      }
 
+    } on Exception catch (e) {
+      setState(() {
+        _error = e.toString().substring(11);
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,19 +87,24 @@ class _Login2ScreenState extends State<Login2Screen> {
                   children: <Widget>[
                     Container(
                       margin: EdgeInsets.only(bottom: 24, top: 8),
-                      child: MyText.titleLarge("LOGIN", fontWeight: 600),
+                      child: MyText.titleLarge("ACCEDER", fontWeight: 600),
                     ),
                     Container(
                       padding: EdgeInsets.only(left: 16, right: 16),
                       child: Column(
                         children: <Widget>[
                           TextFormField(
+                            onChanged: (value) {
+                              setState(() {
+                                _email = value;
+                              });
+                            },
                             style: MyTextStyle.bodyLarge(
                                 letterSpacing: 0.1,
                                 color: theme.colorScheme.onBackground,
                                 fontWeight: 500),
                             decoration: InputDecoration(
-                              hintText: "Email",
+                              hintText: "Correo electronico",
                               hintStyle: MyTextStyle.titleSmall(
                                   letterSpacing: 0.1,
                                   color: theme.colorScheme.onBackground,
@@ -78,12 +115,17 @@ class _Login2ScreenState extends State<Login2Screen> {
                           Container(
                             margin: EdgeInsets.only(top: 16),
                             child: TextFormField(
+                              onChanged: (value) {
+                                setState(() {
+                                  _password = value;
+                                });
+                              },
                               style: MyTextStyle.bodyLarge(
                                   letterSpacing: 0.1,
                                   color: theme.colorScheme.onBackground,
                                   fontWeight: 500),
                               decoration: InputDecoration(
-                                hintText: "Password",
+                                hintText: "Contraseña",
                                 hintStyle: MyTextStyle.titleSmall(
                                     letterSpacing: 0.1,
                                     color: theme.colorScheme.onBackground,
@@ -106,7 +148,7 @@ class _Login2ScreenState extends State<Login2Screen> {
                           Container(
                             margin: EdgeInsets.only(top: 16),
                             alignment: Alignment.centerRight,
-                            child: MyText.bodyMedium("Forgot Password?",
+                            child: MyText.bodyMedium("¿Olvidaste tu contraseña?",
                                 fontWeight: 500),
                           ),
                           Container(
@@ -124,7 +166,7 @@ class _Login2ScreenState extends State<Login2Screen> {
                                   visualDensity: VisualDensity.compact,
                                 ),
                                 MyText(
-                                  "Remember me",
+                                  "Recuerdame",
                                 )
                               ],
                             ),
@@ -135,8 +177,8 @@ class _Login2ScreenState extends State<Login2Screen> {
                                 elevation: 0,
                                 borderRadiusAll: 4,
                                 padding: MySpacing.y(20),
-                                onPressed: () {},
-                                child: MyText.labelMedium("LOGIN",
+                                onPressed: () => _login(),
+                                child: MyText.labelMedium("Ingresar",
                                     fontWeight: 600,
                                     color: theme.colorScheme.onPrimary,
                                     letterSpacing: 0.5)),
@@ -144,7 +186,7 @@ class _Login2ScreenState extends State<Login2Screen> {
                           Container(
                             margin: EdgeInsets.symmetric(vertical: 16),
                             child: Center(
-                              child: MyText.bodyMedium("OR", fontWeight: 500),
+                              child: MyText.bodyMedium("O", fontWeight: 500),
                             ),
                           ),
                           MyButton.block(
@@ -155,7 +197,7 @@ class _Login2ScreenState extends State<Login2Screen> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: <Widget>[
-                                  MyText.bodyLarge("Login with Google",
+                                  MyText.bodyLarge("Ingresar con Google",
                                       fontWeight: 600,
                                       color: theme.colorScheme.onPrimary,
                                       letterSpacing: 0.3),
@@ -180,10 +222,10 @@ class _Login2ScreenState extends State<Login2Screen> {
                     child: RichText(
                       text: TextSpan(children: <TextSpan>[
                         TextSpan(
-                            text: "Don't have an Account? ",
+                            text: "¿No tienes una cuenta? ",
                             style: MyTextStyle.bodyMedium(fontWeight: 500)),
                         TextSpan(
-                            text: " Register",
+                            text: " Registrarse",
                             style: MyTextStyle.bodyMedium(
                                 fontWeight: 600,
                                 color: theme.colorScheme.primary)),

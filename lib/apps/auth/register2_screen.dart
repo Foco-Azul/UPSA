@@ -53,7 +53,7 @@ class _Register2ScreenState extends State<Register2Screen> {
                   children: <Widget>[
                     Container(
                       margin: EdgeInsets.only(top: 8),
-                      child: MyText.titleLarge("REGISTER", fontWeight: 600),
+                      child: MyText.titleLarge("REGISTRARSE", fontWeight: 600),
                     ),
                     Container(
                       padding: EdgeInsets.only(left: 16, right: 16, top: 8),
@@ -66,7 +66,7 @@ class _Register2ScreenState extends State<Register2Screen> {
                                   color: theme.colorScheme.onBackground,
                                   fontWeight: 500),
                               decoration: InputDecoration(
-                                hintText: "Name",
+                                hintText: "Nombre completo",
                                 hintStyle: MyTextStyle.bodyLarge(
                                     color: theme.colorScheme.onBackground,
                                     fontWeight: 500),
@@ -82,7 +82,7 @@ class _Register2ScreenState extends State<Register2Screen> {
                                   color: theme.colorScheme.onBackground,
                                   fontWeight: 500),
                               decoration: InputDecoration(
-                                hintText: "Email",
+                                hintText: "Correo electronico",
                                 hintStyle: MyTextStyle.bodyLarge(
                                     color: theme.colorScheme.onBackground,
                                     fontWeight: 500),
@@ -98,7 +98,7 @@ class _Register2ScreenState extends State<Register2Screen> {
                                   color: theme.colorScheme.onBackground,
                                   fontWeight: 500),
                               decoration: InputDecoration(
-                                hintText: "Number",
+                                hintText: "Telefono",
                                 hintStyle: MyTextStyle.bodyLarge(
                                     color: theme.colorScheme.onBackground,
                                     fontWeight: 500),
@@ -114,7 +114,7 @@ class _Register2ScreenState extends State<Register2Screen> {
                                   color: theme.colorScheme.onBackground,
                                   fontWeight: 500),
                               decoration: InputDecoration(
-                                hintText: "Password",
+                                hintText: "Contraseña",
                                 hintStyle: MyTextStyle.bodyLarge(
                                     color: theme.colorScheme.onBackground,
                                     fontWeight: 500),
@@ -166,10 +166,10 @@ class _Register2ScreenState extends State<Register2Screen> {
                   child: RichText(
                     text: TextSpan(children: <TextSpan>[
                       TextSpan(
-                          text: "I've already an Account? ",
+                          text: "¿Ya tienes una cuenta? ",
                           style: MyTextStyle.bodyMedium(fontWeight: 500)),
                       TextSpan(
-                          text: " Login",
+                          text: " Ingresar",
                           style: MyTextStyle.bodyMedium(
                               fontWeight: 600,
                               color: theme.colorScheme.primary)),
