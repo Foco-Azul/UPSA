@@ -3,20 +3,30 @@
 * Version : 1.0.0
 * */
 
+import 'dart:convert';
+
 import 'package:upsa/helpers/extensions/theme_extension.dart';
 import 'package:upsa/helpers/localizations/language.dart';
 import 'package:upsa/helpers/theme/app_theme.dart';
 import 'package:upsa/helpers/theme/theme_type.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:upsa/custom/models/user.dart';
 
 class AppNotifier extends ChangeNotifier {
   late SharedPreferences _prefs;
   int _count = 0;
+
   bool _isLoggedIn = false;
+  User _user = User();
+  UserMeta _userMeta = UserMeta();
 
   int get count => _count;
+
   bool get isLoggedIn => _isLoggedIn;
+  User get user => _user;
+  UserMeta get userMeta => _userMeta;
+
   AppNotifier() {
     init();
   }
@@ -33,6 +43,16 @@ class AppNotifier extends ChangeNotifier {
     _prefs = await SharedPreferences.getInstance();
     _count = _prefs.getInt('count') ?? 0;
     _isLoggedIn = _prefs.getBool('isLoggedIn') ?? false;
+    String? userJson = _prefs.getString('user');
+    if (userJson != null && _isLoggedIn) {
+      Map<String, dynamic> userMap = json.decode(userJson);
+      _user = User.fromJson(userMap);
+    }
+    String? userMetaJson = _prefs.getString('user');
+    if (userMetaJson != null && _isLoggedIn) {
+      Map<String, dynamic> userMetaMap = json.decode(userMetaJson);
+      _user = User.fromJson(userMetaMap);
+    }
   }
   Future<void> _resetPrefs() async {
     _prefs = await SharedPreferences.getInstance();
@@ -84,8 +104,10 @@ class AppNotifier extends ChangeNotifier {
     AppTheme.resetThemeData();
   }
   void _saveToPrefs() {
-    _prefs.setInt('count', _count);
-    _prefs.setBool('isLoggedIn', _isLoggedIn);
+      _prefs.setInt('count', _count);
+      _prefs.setBool('isLoggedIn', _isLoggedIn);
+      _prefs.setString('user', json.encode(_user.toJson())); // Aquí convertimos el objeto User a JSON
+      _prefs.setString('userMeta', json.encode(_userMeta.toJson())); 
   }
 
   void incrementCount() {
@@ -105,5 +127,15 @@ class AppNotifier extends ChangeNotifier {
   }
   void limpiarValores() async {
     await _resetPrefs();
+  }
+  void setUser(User user) {
+    _user = user;
+    _saveToPrefs();
+    notifyListeners();
+  }
+  void setUserMeta(UserMeta user) {
+    _userMeta = userMeta;
+    _saveToPrefs();
+    notifyListeners();
   }
 }

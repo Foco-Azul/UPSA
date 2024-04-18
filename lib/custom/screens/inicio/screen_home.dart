@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:upsa/custom/screens/actividades/screen_actividades.dart';
+import 'package:upsa/custom/screens/campus/screen_campus.dart';
+import 'package:upsa/custom/screens/inicio/screen_inicio.dart';
+import 'package:upsa/custom/screens/noticias/screen_noticias.dart';
+import 'package:upsa/custom/screens/perfil/app_setting_screen.dart';
+import 'package:upsa/custom/screens/perfil/profile_screen.dart';
+import 'package:upsa/custom/widgets/appBar.dart';
+import 'package:upsa/custom/widgets/bottomNavigationBar.dart';
+import 'package:upsa/custom/widgets/select_language_dialog.dart';
 import 'package:upsa/helpers/extensions/extensions.dart';
 import 'package:upsa/helpers/theme/app_notifier.dart';
 import 'package:upsa/helpers/theme/app_theme.dart';
 import 'package:upsa/helpers/theme/theme_type.dart';
-import 'package:upsa/helpers/widgets/my_button.dart';
 import 'package:upsa/helpers/widgets/my_container.dart';
 import 'package:upsa/helpers/widgets/my_spacing.dart';
 import 'package:upsa/helpers/widgets/my_text.dart';
-import 'package:upsa/homes/app_setting_screen.dart';
-import 'package:upsa/homes/select_language_dialog.dart';
 import 'package:upsa/images.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:upsa/apps/auth/login2_screen.dart';
 
 class HomesScreen extends StatefulWidget {
   HomesScreen({Key? key}) : super(key: key);
+  static const namedRoute = "home-screen";
 
   @override
   _HomesScreenState createState() => _HomesScreenState();
@@ -32,7 +36,14 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
   late ThemeData theme;
   late CustomTheme customTheme;
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
+  
+  @override
+  void initState() {
+    super.initState();
 
+    theme = AppTheme.theme;
+    customTheme = AppTheme.customTheme;
+  }
   void changeTheme() {
     print(Provider.of<AppNotifier>(context, listen: false).count);
     Provider.of<AppNotifier>(context, listen: false).incrementCount();
@@ -56,24 +67,20 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
     }
     setState(() {});
   }
-  void launchDocumentation() async {
-    String url = "https://flutkit.coderthemes.com/index.html";
-    await launchUrl(Uri.parse(url));
-  }
-  void launchCodecanyonURL() async {
-    String url = "https://codecanyon.net/item/flutkit-flutter-ui-kit/27510289";
-    await launchUrl(Uri.parse(url));
-  }
-  void launchChangeLog() async {
-    String url = "https://flutkit.coderthemes.com/changelogs.html";
-    await launchUrl(Uri.parse(url));
-  }
-
+  
+  final List<Widget> bottomBarPages = [
+    Inicio(),
+    Actividades(),
+    Campus(),
+    Noticias(),
+    ProfileScreen(),
+  ];
   @override
   Widget build(BuildContext context) {
     String contador = (Provider.of<AppNotifier>(context, listen: false).count).toString();
     String logueado = (Provider.of<AppNotifier>(context, listen: false).isLoggedIn).toString();
-    String nombre = "nose";
+    bool isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
+    String nombre = (Provider.of<AppNotifier>(context, listen: false).user).toString();
     return Consumer<AppNotifier>(
       builder: (context, value, child) {
         isDark = AppTheme.themeType == ThemeType.dark;
@@ -85,105 +92,21 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
           child: Scaffold(
             key: _drawerKey,
             drawer: _buildDrawer(),
-            appBar: AppBar(
-              elevation: 0,
-              actions: [
-                InkWell(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Login2Screen()));
-                  },
-                  child: Container(
-                    padding: MySpacing.x(20),
-                    child: Icon( // Utiliza el widget Icon para mostrar el icono
-                      LucideIcons.user, // Nombre del icono de LucideIcons
-                      color: theme.colorScheme.onBackground,
-                      size: 25,
-                    ),
-                  ),
-                ),
-                InkWell(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => AppSettingScreen()));
-                  },
-                  child: Container(
-                    padding: MySpacing.x(20),
-                    child: Icon( // Utiliza el widget Icon para mostrar el icono
-                      LucideIcons.bell, // Nombre del icono de LucideIcons
-                      color: theme.colorScheme.onBackground,
-                      size: 25,
-                    ),
-                  ),
-                ),
-              ],
+            appBar: CustomAppBar(
+              isLoggedIn: isLoggedIn,
+              pantalla: selectedIndex,
+              onProfileTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen()));
+              },
+              onSettingsTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => AppSettingScreen()));
+              },
             ),
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Contador: '+contador),
-                  Text('Estoy logueado: '+logueado),
-                  Text('Mi nombre es: '+nombre),
-                ],
-              ),
-            ),
-            bottomNavigationBar: FlashyTabBar(
-              iconSize: 20,
-              backgroundColor: theme.colorScheme.background,
+            body: bottomBarPages[selectedIndex],
+            bottomNavigationBar: CustomBottomNavigationBar(
               selectedIndex: selectedIndex,
-              animationDuration: Duration(milliseconds: 500),
-              showElevation: true,
-              items: [
-                FlashyTabBarItem(
-                  icon: Icon(LucideIcons.home),
-                  title: const Text(
-                    'Inicio',
-                  ),
-                  activeColor: theme.colorScheme.primary,
-                  inactiveColor: theme.colorScheme.primary,
-                ),
-                FlashyTabBarItem(
-                  icon: Icon(LucideIcons.trophy),
-                  title: Text(
-                    'Actividades',
-                    style: TextStyle(
-                      fontSize: 11.4,
-                    ),
-                  ),
-                  activeColor: theme.colorScheme.primary,
-                  inactiveColor: theme.colorScheme.primary,
-                ),
-                FlashyTabBarItem(
-                  icon: Icon(LucideIcons.bookOpen),
-                  title: Text(
-                    'Campus',
-                  ),
-                  activeColor: theme.colorScheme.primary,
-                  inactiveColor: theme.colorScheme.primary,
-                ),
-                FlashyTabBarItem(
-                  icon: Icon(LucideIcons.pin),
-                  title: Text(
-                    'Noticias',
-                  ),
-                  activeColor: theme.colorScheme.primary,
-                  inactiveColor: theme.colorScheme.primary,
-                ),
-                FlashyTabBarItem(
-                  icon: Icon(LucideIcons.info),
-                  title: Text(
-                    'Info',
-                  ),
-                  activeColor: theme.colorScheme.primary,
-                  inactiveColor: theme.colorScheme.primary,
-                ),
-              ],
               onItemSelected: (index) {
+                print(selectedIndex);
                 setState(() {
                   selectedIndex = index;
                 });
@@ -194,7 +117,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
       }
     );
   }
-  Widget _buildDrawer() {
+Widget _buildDrawer() {
     return MyContainer.none(
       margin:
           MySpacing.fromLTRB(16, MySpacing.safeAreaTop(context) + 16, 16, 16),
@@ -356,91 +279,6 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
                 ],
               ),
             ),
-            MySpacing.height(20),
-            Divider(
-              thickness: 1,
-            ),
-            MySpacing.height(16),
-            Container(
-              margin: MySpacing.x(20),
-              child: Column(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      launchDocumentation();
-                    },
-                    highlightColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    child: Row(
-                      children: [
-                        MyContainer(
-                          paddingAll: 12,
-                          borderRadiusAll: 4,
-                          color: CustomTheme.skyBlue.withAlpha(20),
-                          child: Image(
-                            height: 20,
-                            width: 20,
-                            image: AssetImage(Images.documentationIcon),
-                            color: CustomTheme.skyBlue,
-                          ),
-                        ),
-                        MySpacing.width(16),
-                        Expanded(
-                          child: MyText.bodyLarge(
-                            'documentation'.tr(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  MySpacing.height(20),
-                  InkWell(
-                    onTap: () {
-                      launchChangeLog();
-                    },
-                    highlightColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    child: Row(
-                      children: [
-                        MyContainer(
-                          paddingAll: 12,
-                          borderRadiusAll: 4,
-                          color: CustomTheme.peach.withAlpha(20),
-                          child: Image(
-                            height: 20,
-                            width: 20,
-                            image: AssetImage(Images.changeLogIcon),
-                            color: CustomTheme.peach,
-                          ),
-                        ),
-                        MySpacing.width(16),
-                        Expanded(
-                          child: MyText.bodyLarge(
-                            'changelog'.tr(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            MySpacing.height(20),
-            Center(
-              child: MyButton(
-                borderRadiusAll: 4,
-                elevation: 0,
-                onPressed: () {
-                  launchCodecanyonURL();
-                },
-                splashColor: theme.colorScheme.onPrimary.withAlpha(40),
-                backgroundColor: theme.colorScheme.primary,
-                child: MyText(
-                  'buy_now'.tr(),
-                  color: theme.colorScheme.onPrimary,
-                ),
-              ),
-            )
           ],
         ),
       )),

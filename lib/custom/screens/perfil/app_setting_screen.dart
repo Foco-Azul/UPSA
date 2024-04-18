@@ -1,17 +1,14 @@
 import 'package:upsa/helpers/extensions/extensions.dart';
-import 'package:upsa/homes/select_language_dialog.dart';
-import 'package:upsa/images.dart';
 import 'package:upsa/helpers/theme/app_notifier.dart';
 import 'package:upsa/helpers/theme/app_theme.dart';
 import 'package:upsa/helpers/theme/theme_type.dart';
-import 'package:upsa/helpers/widgets/my_button.dart';
 import 'package:upsa/helpers/widgets/my_container.dart';
 import 'package:upsa/helpers/widgets/my_spacing.dart';
 import 'package:upsa/helpers/widgets/my_text.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:upsa/images.dart';
 
 class AppSettingScreen extends StatefulWidget {
   const AppSettingScreen({Key? key}) : super(key: key);
@@ -52,25 +49,8 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
       Provider.of<AppNotifier>(context, listen: false)
           .updateTheme(ThemeType.light);
     }
-
     setState(() {});
   }
-
-  void launchCodecanyonURL() async {
-    String url = "https://1.envato.market/flutkit";
-    await launchUrl(Uri.parse(url));
-  }
-
-  void launchDocumentation() async {
-    String url = "https://flutkit.coderthemes.com/index.html";
-    await launchUrl(Uri.parse(url));
-  }
-
-  void launchChangeLog() async {
-    String url = "https://flutkit.coderthemes.com/changelogs.html";
-    await launchUrl(Uri.parse(url));
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<AppNotifier>(
@@ -86,7 +66,7 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
             appBar: AppBar(
               elevation: 0,
               title: MyText.titleMedium(
-                "settings".tr(),
+                "Configuración de la App".tr(),
                 fontWeight: 600,
               ),
               leading: InkWell(
@@ -109,44 +89,6 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
               child: ListView(
                 padding: MySpacing.fromLTRB(20, 8, 20, 20),
                 children: [
-                  InkWell(
-                    onTap: () {
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) =>
-                              SelectLanguageDialog());
-                    },
-                    highlightColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    child: Row(
-                      children: [
-                        MyContainer(
-                          paddingAll: 12,
-                          borderRadiusAll: 4,
-                          color: CustomTheme.peach.withAlpha(20),
-                          child: Image(
-                            height: 20,
-                            width: 20,
-                            image: AssetImage(Images.languageOutline),
-                            color: CustomTheme.peach,
-                          ),
-                        ),
-                        MySpacing.width(16),
-                        Expanded(
-                          child: MyText.bodyLarge(
-                            'language'.tr(),
-                          ),
-                        ),
-                        MySpacing.width(16),
-                        Icon(
-                          LucideIcons.chevronRight,
-                          size: 18,
-                          color: theme.colorScheme.onBackground,
-                        ).autoDirection(),
-                      ],
-                    ),
-                  ),
-                  MySpacing.height(20),
                   InkWell(
                     onTap: () {
                       changeDirection();
@@ -225,101 +167,6 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                   ),
                   MySpacing.height(20),
                   Divider(),
-                  MySpacing.height(20),
-                  // InkWell(
-                  //   onTap: () {
-                  //     Navigator.push(context,
-                  //         MaterialPageRoute(builder: (context) => AdsScreen()));
-                  //   },
-                  //   highlightColor: Colors.transparent,
-                  //   splashColor: Colors.transparent,
-                  //   child: MyContainer(
-                  //     paddingAll: 16,
-                  //     borderRadiusAll: 4,
-                  //     color: CustomTheme.blue.withAlpha(20),
-                  //     child: MyText.bodyLarge(
-                  //       'Click to Demo Ads'.tr(),
-                  //       textAlign: TextAlign.center,
-                  //       color: CustomTheme.blue,
-                  //       fontWeight: 600,
-                  //     ),
-                  //   ),
-                  // ),
-                  MySpacing.height(20),
-                  InkWell(
-                    onTap: () {
-                      launchDocumentation();
-                    },
-                    highlightColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    child: Row(
-                      children: [
-                        MyContainer(
-                          paddingAll: 12,
-                          borderRadiusAll: 4,
-                          color: CustomTheme.skyBlue.withAlpha(20),
-                          child: Image(
-                            height: 20,
-                            width: 20,
-                            image: AssetImage(Images.documentationIcon),
-                            color: CustomTheme.skyBlue,
-                          ),
-                        ),
-                        MySpacing.width(16),
-                        Expanded(
-                          child: MyText.bodyLarge(
-                            'documentation'.tr(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  MySpacing.height(20),
-                  InkWell(
-                    onTap: () {
-                      launchChangeLog();
-                    },
-                    highlightColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    child: Row(
-                      children: [
-                        MyContainer(
-                          paddingAll: 12,
-                          borderRadiusAll: 4,
-                          color: CustomTheme.peach.withAlpha(20),
-                          child: Image(
-                            height: 20,
-                            width: 20,
-                            image: AssetImage(Images.changeLogIcon),
-                            color: CustomTheme.peach,
-                          ),
-                        ),
-                        MySpacing.width(16),
-                        Expanded(
-                          child: MyText.bodyLarge(
-                            'changelog'.tr(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  MySpacing.height(20),
-                  Center(
-                    child: MyButton(
-                      borderRadiusAll: 4,
-                      elevation: 0,
-                      onPressed: () {
-                        launchCodecanyonURL();
-                      },
-                      splashColor: theme.colorScheme.onPrimary.withAlpha(40),
-                      backgroundColor: theme.colorScheme.primary,
-                      child: MyText.labelMedium(
-                        'buy_now'.tr(),
-                        color: theme.colorScheme.onPrimary,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  )
                 ],
               ),
             ),
