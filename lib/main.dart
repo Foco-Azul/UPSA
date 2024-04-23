@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart'; 
 import 'package:provider/provider.dart';
 import 'package:upsa/custom/screens/inicio/screen_home.dart';
+import 'package:upsa/custom/utils/push_notifications_service.dart';
 import 'package:upsa/helpers/localizations/app_localization_delegate.dart';
 import 'package:upsa/helpers/localizations/language.dart';
 import 'package:upsa/helpers/theme/app_notifier.dart';
@@ -12,6 +13,7 @@ import 'package:upsa/helpers/theme/app_theme.dart';
 Future<void> main() async {
   //You will need to initialize AppThemeNotifier class for theme changes.
   WidgetsFlutterBinding.ensureInitialized();
+  await PushNotificationService.initializeApp();
   // MobileAds.instance.initialize();
   AppTheme.init();
 
@@ -33,6 +35,7 @@ class MyApp extends StatelessWidget {
           return GetMaterialApp(
             debugShowCheckedModeBanner: false,
             theme: AppTheme.theme,
+            title: "UPSA",
             home: HomesScreen(),
             builder: (context, child) {
               return Directionality(
