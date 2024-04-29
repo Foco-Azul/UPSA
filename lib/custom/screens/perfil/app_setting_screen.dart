@@ -1,14 +1,14 @@
-import 'package:upsa/helpers/extensions/extensions.dart';
-import 'package:upsa/helpers/theme/app_notifier.dart';
-import 'package:upsa/helpers/theme/app_theme.dart';
-import 'package:upsa/helpers/theme/theme_type.dart';
-import 'package:upsa/helpers/widgets/my_container.dart';
-import 'package:upsa/helpers/widgets/my_spacing.dart';
-import 'package:upsa/helpers/widgets/my_text.dart';
+import 'package:flutkit/helpers/extensions/extensions.dart';
+import 'package:flutkit/helpers/theme/app_notifier.dart';
+import 'package:flutkit/helpers/theme/app_theme.dart';
+import 'package:flutkit/helpers/theme/theme_type.dart';
+import 'package:flutkit/helpers/widgets/my_container.dart';
+import 'package:flutkit/helpers/widgets/my_spacing.dart';
+import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
-import 'package:upsa/images.dart';
+import 'package:flutkit/images.dart';
 
 class AppSettingScreen extends StatefulWidget {
   const AppSettingScreen({Key? key}) : super(key: key);

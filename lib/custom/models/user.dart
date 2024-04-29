@@ -58,12 +58,13 @@ class User {
     "blocked": blocked,
     "createdAt": createdAt?.toIso8601String(),
     "updatedAt": updatedAt?.toIso8601String(),
+    "completada": completada,
     //"userMeta": userMeta,
     //"role": role,
   };
   @override
   String toString() {
-    return 'User{id: $id, username: $username, email: $email, provider: $provider, confirmed: $confirmed, blocked: $blocked, createdAt: $createdAt, updatedAt: $updatedAt}';
+    return 'User{id: $id, username: $username, email: $email, provider: $provider, confirmed: $confirmed, blocked: $blocked, createdAt: $createdAt, updatedAt: $updatedAt, completada: $completada}';
   }
   
 }

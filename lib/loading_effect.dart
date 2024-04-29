@@ -1,10 +1,10 @@
-import 'package:upsa/helpers/theme/app_theme.dart';
-import 'package:upsa/helpers/theme/theme_type.dart';
+import 'package:flutkit/helpers/theme/app_theme.dart';
+import 'package:flutkit/helpers/theme/theme_type.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shimmer/shimmer.dart';
 
-import 'package:upsa/helpers/widgets/my_spacing.dart';
+import 'package:flutkit/helpers/widgets/my_spacing.dart';
 
 //----------------------- Loading Screens  (Shimmer Effects) ---------------------------//
 

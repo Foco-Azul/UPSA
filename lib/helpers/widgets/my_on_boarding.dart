@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:upsa/helpers/widgets/my_page_dragger.dart';
-import 'package:upsa/helpers/widgets/my_page_indicator.dart';
-import 'package:upsa/helpers/widgets/my_page_reveal.dart';
-import 'package:upsa/helpers/widgets/my_pages.dart';
+import 'package:flutkit/helpers/widgets/my_page_dragger.dart';
+import 'package:flutkit/helpers/widgets/my_page_indicator.dart';
+import 'package:flutkit/helpers/widgets/my_page_reveal.dart';
+import 'package:flutkit/helpers/widgets/my_pages.dart';
 import 'package:flutter/material.dart';
 
 class MyOnBoarding extends StatefulWidget {

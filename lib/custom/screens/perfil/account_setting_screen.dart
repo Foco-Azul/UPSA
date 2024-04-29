@@ -4,17 +4,17 @@
 * */
 
 import 'package:provider/provider.dart';
-import 'package:upsa/custom/controllers/profile_controller.dart';
-import 'package:upsa/custom/models/user.dart';
-import 'package:upsa/custom/utils/server.dart';
-import 'package:upsa/helpers/theme/app_notifier.dart';
-import 'package:upsa/helpers/theme/app_theme.dart';
-import 'package:upsa/helpers/widgets/my_spacing.dart';
-import 'package:upsa/helpers/widgets/my_text.dart';
-import 'package:upsa/helpers/widgets/my_text_style.dart';
+import 'package:flutkit/custom/controllers/profile_controller.dart';
+import 'package:flutkit/custom/models/user.dart';
+import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/helpers/theme/app_notifier.dart';
+import 'package:flutkit/helpers/theme/app_theme.dart';
+import 'package:flutkit/helpers/widgets/my_spacing.dart';
+import 'package:flutkit/helpers/widgets/my_text.dart';
+import 'package:flutkit/helpers/widgets/my_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:upsa/loading_effect.dart';
+import 'package:flutkit/loading_effect.dart';
 
 class AccountSettingScreen extends StatefulWidget {
   @override
@@ -103,18 +103,14 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                             letterSpacing: 0,
                             color: theme.colorScheme.onBackground,
                             fontWeight: 500,
-                            fontSize: 12),
+                            fontSize: 14),
                           initialValue: _primerNombre,
                           decoration: InputDecoration(
-                            labelText: "Primer nombre",
+                            labelText: "Primer nombre *",
                             enabled: false, 
                             border: theme.inputDecorationTheme.border,
                             enabledBorder: theme.inputDecorationTheme.border,
                             focusedBorder: theme.inputDecorationTheme.focusedBorder,
-                            prefixIcon: Icon(
-                              LucideIcons.user,
-                              size: 22,
-                            ),
                           ),
                           keyboardType: TextInputType.name,
                           textCapitalization: TextCapitalization.sentences,
@@ -134,17 +130,13 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                               letterSpacing: 0,
                               color: theme.colorScheme.onBackground,
                               fontWeight: 500,
-                              fontSize: 12),
+                              fontSize: 14),
                             initialValue: _segundoNombre,
                             decoration: InputDecoration(
                               labelText: "Segundo nombre",
                               border: theme.inputDecorationTheme.border,
                               enabledBorder: theme.inputDecorationTheme.border,
                               focusedBorder: theme.inputDecorationTheme.focusedBorder,
-                              prefixIcon: Icon(
-                                LucideIcons.user,
-                                size: 22,
-                              ),
                             ),
                             keyboardType: TextInputType.name,
                             textCapitalization: TextCapitalization.sentences,
@@ -167,18 +159,14 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                             letterSpacing: 0,
                             color: theme.colorScheme.onBackground,
                             fontWeight: 500,
-                            fontSize: 12),
+                            fontSize: 14),
                           initialValue: _apellidoPaterno,
                           decoration: InputDecoration(
                             enabled: false, 
-                            labelText: "Apellido paterno",
+                            labelText: "Apellido paterno *",
                             border: theme.inputDecorationTheme.border,
                             enabledBorder: theme.inputDecorationTheme.border,
                             focusedBorder: theme.inputDecorationTheme.focusedBorder,
-                            prefixIcon: Icon(
-                              LucideIcons.user,
-                              size: 22,
-                            ),
                           ),
                           keyboardType: TextInputType.name,
                           textCapitalization: TextCapitalization.sentences,
@@ -198,17 +186,13 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                               letterSpacing: 0,
                               color: theme.colorScheme.onBackground,
                               fontWeight: 500,
-                              fontSize: 12),
+                              fontSize: 14),
                             initialValue: _apellidoMaterno,
                             decoration: InputDecoration(
                               labelText: "Apellido materno",
                               border: theme.inputDecorationTheme.border,
                               enabledBorder: theme.inputDecorationTheme.border,
                               focusedBorder: theme.inputDecorationTheme.focusedBorder,
-                              prefixIcon: Icon(
-                                LucideIcons.user,
-                                size: 22,
-                              ),
                             ),
                             keyboardType: TextInputType.name,
                             textCapitalization: TextCapitalization.sentences,
@@ -232,13 +216,65 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                       border: theme.inputDecorationTheme.border,
                       enabledBorder: theme.inputDecorationTheme.border,
                       focusedBorder: theme.inputDecorationTheme.focusedBorder,
-                      prefixIcon: Icon(
-                        LucideIcons.mail,
-                        size: 22,
-                      ),
                     ),
                     keyboardType: TextInputType.emailAddress,
                     initialValue: _email,
+                  ),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  margin: MySpacing.top(16),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                          style: MyTextStyle.titleSmall(
+                            letterSpacing: 0,
+                            color: theme.colorScheme.onBackground,
+                            fontWeight: 500,
+                            fontSize: 14),
+                          initialValue: _primerNombre,
+                          decoration: InputDecoration(
+                            labelText: "Celular 1 *",
+                            enabled: false, 
+                            border: theme.inputDecorationTheme.border,
+                            enabledBorder: theme.inputDecorationTheme.border,
+                            focusedBorder: theme.inputDecorationTheme.focusedBorder,
+                          ),
+                          keyboardType: TextInputType.name,
+                          textCapitalization: TextCapitalization.sentences,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: Padding(
+                          padding: MySpacing.left(8),
+                          child: TextFormField(
+                            onChanged: (value) {
+                              setState(() {
+                                _segundoNombre = value;
+                              });
+                            },
+                            style: MyTextStyle.titleSmall(
+                              letterSpacing: 0,
+                              color: theme.colorScheme.onBackground,
+                              fontWeight: 500,
+                              fontSize: 14),
+                            initialValue: _segundoNombre,
+                            decoration: InputDecoration(
+                              labelText: "Celular 2",
+                              border: theme.inputDecorationTheme.border,
+                              enabledBorder: theme.inputDecorationTheme.border,
+                              focusedBorder: theme.inputDecorationTheme.focusedBorder,
+                            ),
+                            keyboardType: TextInputType.name,
+                            textCapitalization: TextCapitalization.sentences,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Container(
@@ -256,14 +292,405 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                       fontSize: 14),
                     initialValue: _telefono,
                     decoration: InputDecoration(
-                      labelText: "Teléfono",
+                      labelText: "Telf Docimicilio",
                       border: theme.inputDecorationTheme.border,
                       enabledBorder: theme.inputDecorationTheme.border,
                       focusedBorder: theme.inputDecorationTheme.focusedBorder,
-                      prefixIcon: Icon(
-                        LucideIcons.phone,
-                        size: 22,
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  margin: MySpacing.top(16),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                          style: MyTextStyle.titleSmall(
+                            letterSpacing: 0,
+                            color: theme.colorScheme.onBackground,
+                            fontWeight: 500,
+                            fontSize: 14),
+                          initialValue: _primerNombre,
+                          decoration: InputDecoration(
+                            labelText: "Cédula de identidad *",
+                            enabled: false, 
+                            border: theme.inputDecorationTheme.border,
+                            enabledBorder: theme.inputDecorationTheme.border,
+                            focusedBorder: theme.inputDecorationTheme.focusedBorder,
+                          ),
+                          keyboardType: TextInputType.name,
+                          textCapitalization: TextCapitalization.sentences,
+                        ),
                       ),
+                      Expanded(
+                        flex: 1,
+                        child: Padding(
+                          padding: MySpacing.left(8),
+                          child: TextFormField(
+                            onChanged: (value) {
+                              setState(() {
+                                _segundoNombre = value;
+                              });
+                            },
+                            style: MyTextStyle.titleSmall(
+                              letterSpacing: 0,
+                              color: theme.colorScheme.onBackground,
+                              fontWeight: 500,
+                              fontSize: 14),
+                            initialValue: _segundoNombre,
+                            decoration: InputDecoration(
+                              labelText: "Extensión",
+                              border: theme.inputDecorationTheme.border,
+                              enabledBorder: theme.inputDecorationTheme.border,
+                              focusedBorder: theme.inputDecorationTheme.focusedBorder,
+                            ),
+                            keyboardType: TextInputType.name,
+                            textCapitalization: TextCapitalization.sentences,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  margin: MySpacing.top(16),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                          style: MyTextStyle.titleSmall(
+                            letterSpacing: 0,
+                            color: theme.colorScheme.onBackground,
+                            fontWeight: 500,
+                            fontSize: 14),
+                          initialValue: _primerNombre,
+                          decoration: InputDecoration(
+                            labelText: "Sexo",
+                            enabled: false, 
+                            border: theme.inputDecorationTheme.border,
+                            enabledBorder: theme.inputDecorationTheme.border,
+                            focusedBorder: theme.inputDecorationTheme.focusedBorder,
+                          ),
+                          keyboardType: TextInputType.name,
+                          textCapitalization: TextCapitalization.sentences,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: Padding(
+                          padding: MySpacing.left(8),
+                          child: TextFormField(
+                            onChanged: (value) {
+                              setState(() {
+                                _segundoNombre = value;
+                              });
+                            },
+                            style: MyTextStyle.titleSmall(
+                              letterSpacing: 0,
+                              color: theme.colorScheme.onBackground,
+                              fontWeight: 500,
+                              fontSize: 14),
+                            initialValue: _segundoNombre,
+                            decoration: InputDecoration(
+                              labelText: "Fecha de nacimiento",
+                              border: theme.inputDecorationTheme.border,
+                              enabledBorder: theme.inputDecorationTheme.border,
+                              focusedBorder: theme.inputDecorationTheme.focusedBorder,
+                            ),
+                            keyboardType: TextInputType.name,
+                            textCapitalization: TextCapitalization.sentences,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  margin: MySpacing.top(16),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                          style: MyTextStyle.titleSmall(
+                            letterSpacing: 0,
+                            color: theme.colorScheme.onBackground,
+                            fontWeight: 500,
+                            fontSize: 14),
+                          initialValue: _primerNombre,
+                          decoration: InputDecoration(
+                            labelText: "Departamento colegio",
+                            enabled: false, 
+                            border: theme.inputDecorationTheme.border,
+                            enabledBorder: theme.inputDecorationTheme.border,
+                            focusedBorder: theme.inputDecorationTheme.focusedBorder,
+                          ),
+                          keyboardType: TextInputType.name,
+                          textCapitalization: TextCapitalization.sentences,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: Padding(
+                          padding: MySpacing.left(8),
+                          child: TextFormField(
+                            onChanged: (value) {
+                              setState(() {
+                                _segundoNombre = value;
+                              });
+                            },
+                            style: MyTextStyle.titleSmall(
+                              letterSpacing: 0,
+                              color: theme.colorScheme.onBackground,
+                              fontWeight: 500,
+                              fontSize: 14),
+                            initialValue: _segundoNombre,
+                            decoration: InputDecoration(
+                              labelText: "Colegio *",
+                              border: theme.inputDecorationTheme.border,
+                              enabledBorder: theme.inputDecorationTheme.border,
+                              focusedBorder: theme.inputDecorationTheme.focusedBorder,
+                            ),
+                            keyboardType: TextInputType.name,
+                            textCapitalization: TextCapitalization.sentences,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  margin: MySpacing.top(16),
+                  child: TextFormField(
+                    onChanged: (value) {
+                      setState(() {
+                        _telefono = value;
+                      });
+                    },
+                    style: MyTextStyle.titleSmall(
+                      letterSpacing: 0,
+                      color: theme.colorScheme.onBackground,
+                      fontWeight: 500,
+                      fontSize: 14),
+                    initialValue: _telefono,
+                    decoration: InputDecoration(
+                      labelText: "¿En qué curso de secundaria estás?",
+                      border: theme.inputDecorationTheme.border,
+                      enabledBorder: theme.inputDecorationTheme.border,
+                      focusedBorder: theme.inputDecorationTheme.focusedBorder,
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(top: 24, bottom: 0),
+                  child: MyText.bodyLarge("Datos del padre, madre o tutor",
+                      fontWeight: 600, letterSpacing: 0),
+                ),
+                Container(
+                  margin: MySpacing.top(16),
+                  child: TextFormField(
+                    onChanged: (value) {
+                      setState(() {
+                        _telefono = value;
+                      });
+                    },
+                    style: MyTextStyle.titleSmall(
+                      letterSpacing: 0,
+                      color: theme.colorScheme.onBackground,
+                      fontWeight: 500,
+                      fontSize: 14),
+                    initialValue: _telefono,
+                    decoration: InputDecoration(
+                      labelText: "Nombres",
+                      border: theme.inputDecorationTheme.border,
+                      enabledBorder: theme.inputDecorationTheme.border,
+                      focusedBorder: theme.inputDecorationTheme.focusedBorder,
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  margin: MySpacing.top(16),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                          style: MyTextStyle.titleSmall(
+                            letterSpacing: 0,
+                            color: theme.colorScheme.onBackground,
+                            fontWeight: 500,
+                            fontSize: 14),
+                          initialValue: _primerNombre,
+                          decoration: InputDecoration(
+                            labelText: "Apellido paterno",
+                            enabled: false, 
+                            border: theme.inputDecorationTheme.border,
+                            enabledBorder: theme.inputDecorationTheme.border,
+                            focusedBorder: theme.inputDecorationTheme.focusedBorder,
+                          ),
+                          keyboardType: TextInputType.name,
+                          textCapitalization: TextCapitalization.sentences,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: Padding(
+                          padding: MySpacing.left(8),
+                          child: TextFormField(
+                            onChanged: (value) {
+                              setState(() {
+                                _segundoNombre = value;
+                              });
+                            },
+                            style: MyTextStyle.titleSmall(
+                              letterSpacing: 0,
+                              color: theme.colorScheme.onBackground,
+                              fontWeight: 500,
+                              fontSize: 14),
+                            initialValue: _segundoNombre,
+                            decoration: InputDecoration(
+                              labelText: "Apellido materno",
+                              border: theme.inputDecorationTheme.border,
+                              enabledBorder: theme.inputDecorationTheme.border,
+                              focusedBorder: theme.inputDecorationTheme.focusedBorder,
+                            ),
+                            keyboardType: TextInputType.name,
+                            textCapitalization: TextCapitalization.sentences,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  margin: MySpacing.top(16),
+                  child: TextFormField(
+                    onChanged: (value) {
+                      setState(() {
+                        _telefono = value;
+                      });
+                    },
+                    style: MyTextStyle.titleSmall(
+                      letterSpacing: 0,
+                      color: theme.colorScheme.onBackground,
+                      fontWeight: 500,
+                      fontSize: 14),
+                    initialValue: _telefono,
+                    decoration: InputDecoration(
+                      labelText: "Nº Celular",
+                      border: theme.inputDecorationTheme.border,
+                      enabledBorder: theme.inputDecorationTheme.border,
+                      focusedBorder: theme.inputDecorationTheme.focusedBorder,
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                Container(
+                  margin: MySpacing.top(16),
+                  child: TextFormField(
+                    onChanged: (value) {
+                      setState(() {
+                        _telefono = value;
+                      });
+                    },
+                    style: MyTextStyle.titleSmall(
+                      letterSpacing: 0,
+                      color: theme.colorScheme.onBackground,
+                      fontWeight: 500,
+                      fontSize: 14),
+                    initialValue: _telefono,
+                    decoration: InputDecoration(
+                      labelText: "E-mail",
+                      border: theme.inputDecorationTheme.border,
+                      enabledBorder: theme.inputDecorationTheme.border,
+                      focusedBorder: theme.inputDecorationTheme.focusedBorder,
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(top: 24, bottom: 0),
+                  child: MyText.bodyLarge("Información adicional",
+                      fontWeight: 600, letterSpacing: 0),
+                ),
+                Container(
+                  margin: MySpacing.top(16),
+                  child: TextFormField(
+                    onChanged: (value) {
+                      setState(() {
+                        _telefono = value;
+                      });
+                    },
+                    style: MyTextStyle.titleSmall(
+                      letterSpacing: 0,
+                      color: theme.colorScheme.onBackground,
+                      fontWeight: 500,
+                      fontSize: 14),
+                    initialValue: _telefono,
+                    decoration: InputDecoration(
+                      labelText: "¿Tienes Algún(a) Hermano(a) Que Esté Actualmente En La UPSA?",
+                      border: theme.inputDecorationTheme.border,
+                      enabledBorder: theme.inputDecorationTheme.border,
+                      focusedBorder: theme.inputDecorationTheme.focusedBorder,
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                Container(
+                  margin: MySpacing.top(16),
+                  child: TextFormField(
+                    onChanged: (value) {
+                      setState(() {
+                        _telefono = value;
+                      });
+                    },
+                    style: MyTextStyle.titleSmall(
+                      letterSpacing: 0,
+                      color: theme.colorScheme.onBackground,
+                      fontWeight: 500,
+                      fontSize: 14),
+                    initialValue: _telefono,
+                    decoration: InputDecoration(
+                      labelText: "Si Respondiste Que Si ¿Cuál Es Su Nombre Completo?",
+                      border: theme.inputDecorationTheme.border,
+                      enabledBorder: theme.inputDecorationTheme.border,
+                      focusedBorder: theme.inputDecorationTheme.focusedBorder,
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                Container(
+                  margin: MySpacing.top(16),
+                  child: TextFormField(
+                    onChanged: (value) {
+                      setState(() {
+                        _telefono = value;
+                      });
+                    },
+                    style: MyTextStyle.titleSmall(
+                      letterSpacing: 0,
+                      color: theme.colorScheme.onBackground,
+                      fontWeight: 500,
+                      fontSize: 14),
+                    initialValue: _telefono,
+                    decoration: InputDecoration(
+                      labelText: "¿Hijo/a de Graduado Upsa?",
+                      border: theme.inputDecorationTheme.border,
+                      enabledBorder: theme.inputDecorationTheme.border,
+                      focusedBorder: theme.inputDecorationTheme.focusedBorder,
                     ),
                     keyboardType: TextInputType.number,
                   ),

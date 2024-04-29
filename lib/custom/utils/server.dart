@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:flutkit/custom/models/categoria.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
-import 'package:upsa/custom/models/user.dart';
-import 'package:upsa/helpers/theme/app_notifier.dart';
+import 'package:flutkit/custom/models/user.dart';
+import 'package:flutkit/helpers/theme/app_notifier.dart';
     
 class ApiService {
   //LOGIN
@@ -23,9 +24,8 @@ class ApiService {
           "identifier": email, 
           "password": pass 
           }),
-        //body: body,
       );
-
+      print('RESPUESTA: ${response.body}');
       if (response.statusCode == 200) {
         User _model = singleUserFromJson(response.body);
         return _model;
@@ -101,6 +101,7 @@ class ApiService {
     } catch (e) {
       throw Exception(e);
     }
+    return null;
   }
 
   Future<bool> registrarMeta(BuildContext context, int idUser, String primerNombre, String apellidoPaterno) async {
@@ -202,6 +203,24 @@ class ApiService {
       if (response.statusCode == 200) {
         UserMeta _userMeta = getSingleUserMetaFronJson(response.body);
         return _userMeta;
+      } else {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<List<Categoria>> getCategorias () async{
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse(dotenv.get('baseUrl') + '/categorias');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      print('RESPONSE: ${response.body}');
+      if (response.statusCode == 200) {
+        List<Categoria> _categorias = categoriaFromJson(response.body);
+        return _categorias;
       } else {
         throw Exception(jsonDecode(response.body)["error"]["message"]);
       }

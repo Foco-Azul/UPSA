@@ -2,15 +2,15 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:provider/provider.dart';
-import 'package:upsa/custom/models/user.dart';
-import 'package:upsa/custom/screens/perfil/account_setting_screen.dart';
-import 'package:upsa/custom/utils/server.dart';
-import 'package:upsa/helpers/theme/app_notifier.dart';
-import 'package:upsa/helpers/theme/app_theme.dart';
-import 'package:upsa/helpers/widgets/my_button.dart';
-import 'package:upsa/helpers/widgets/my_spacing.dart';
-import 'package:upsa/helpers/widgets/my_text.dart';
-import 'package:upsa/helpers/widgets/my_text_style.dart';
+import 'package:flutkit/custom/models/user.dart';
+import 'package:flutkit/custom/screens/perfil/account_setting_screen.dart';
+import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/helpers/theme/app_notifier.dart';
+import 'package:flutkit/helpers/theme/app_theme.dart';
+import 'package:flutkit/helpers/widgets/my_button.dart';
+import 'package:flutkit/helpers/widgets/my_spacing.dart';
+import 'package:flutkit/helpers/widgets/my_text.dart';
+import 'package:flutkit/helpers/widgets/my_text_style.dart';
 
 class VerificationDialog extends StatefulWidget {
   final ThemeData theme;

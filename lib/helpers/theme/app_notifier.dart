@@ -5,13 +5,13 @@
 
 import 'dart:convert';
 
-import 'package:upsa/helpers/extensions/theme_extension.dart';
-import 'package:upsa/helpers/localizations/language.dart';
-import 'package:upsa/helpers/theme/app_theme.dart';
-import 'package:upsa/helpers/theme/theme_type.dart';
+import 'package:flutkit/helpers/extensions/theme_extension.dart';
+import 'package:flutkit/helpers/localizations/language.dart';
+import 'package:flutkit/helpers/theme/app_theme.dart';
+import 'package:flutkit/helpers/theme/theme_type.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:upsa/custom/models/user.dart';
+import 'package:flutkit/custom/models/user.dart';
 
 class AppNotifier extends ChangeNotifier {
   late SharedPreferences _prefs;

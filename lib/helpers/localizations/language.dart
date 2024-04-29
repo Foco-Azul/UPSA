@@ -1,5 +1,5 @@
-import 'package:upsa/helpers/localizations/translator.dart';
-import 'package:upsa/helpers/theme/app_theme.dart';
+import 'package:flutkit/helpers/localizations/translator.dart';
+import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,7 +9,6 @@ class Language {
   final String languageName;
 
   static List<Language> languages = [
-    Language(Locale('es'), "Español"),
     Language(Locale('en'), "English"),
     Language(Locale('hi'), "Hindi"),
     Language(

@@ -1,4 +1,4 @@
-name: upsa
+name: flutkit
 description: A new Flutter project.
 
 
@@ -32,7 +32,7 @@ dependencies:
   # Base Dependencies
   cupertino_icons: ^1.0.3
   provider: ^6.0.2
-  shared_preferences: ^2.2.2
+  shared_preferences: ^2.0.5
   google_fonts: ^4.0.4
 
 
@@ -68,18 +68,16 @@ dependencies:
   blur: ^3.1.0
 #  google_mobile_ads: ^3.0.0
   flutter_blurhash: ^0.7.0
+  firebase_core: ^2.30.1
+  firebase_messaging: ^14.9.1
+  flutter_dotenv: ^5.1.0
+  flutter_otp_text_field: ^1.1.3+2
+  http: ^0.13.6
 #  flutx: ^0.2.0-rc.1
 #  flutx: ^0.1.2
 
 #module:
 #  androidX: true
-
-  http: ^0.13.6
-  flutter_dotenv: ^5.1.0
-  pinput: ^4.0.0
-  flutter_otp_text_field: ^1.1.3+2
-  firebase_core: ^2.24.2
-  firebase_messaging: ^14.7.10
 
 dev_dependencies:
   flutter_lints: ^2.0.1
@@ -101,7 +99,6 @@ flutter:
 
   assets:
     - .env
-
     # Map Styles
     - assets/map/
 

@@ -3,12 +3,17 @@
 * Version : 1.0.0
 * */
 
-import 'package:upsa/helpers/theme/app_theme.dart';
-import 'package:upsa/helpers/widgets/my_spacing.dart';
-import 'package:upsa/helpers/widgets/my_text.dart';
-import 'package:upsa/helpers/widgets/my_text_style.dart';
+import 'package:flutkit/custom/controllers/profile_controller.dart';
+import 'package:flutkit/custom/models/user.dart';
+import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/helpers/theme/app_notifier.dart';
+import 'package:flutkit/helpers/theme/app_theme.dart';
+import 'package:flutkit/helpers/widgets/my_spacing.dart';
+import 'package:flutkit/helpers/widgets/my_text.dart';
+import 'package:flutkit/helpers/widgets/my_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:provider/provider.dart';
 
 class PasswordSettingScreen extends StatefulWidget {
   @override
@@ -19,20 +24,30 @@ class _PasswordSettingScreenState extends State<PasswordSettingScreen> {
   bool _passwordVisible = false;
   late CustomTheme customTheme;
   late ThemeData theme;
-
+  late ProfileController controller;
   String _primerNombre = "", _apellidoPaterno = "", _email = "";
   String _segundoNombre = "", _apellidoMaterno = "", _telefono = "";
-
   @override
   void initState() {
     super.initState();
     customTheme = AppTheme.customTheme;
     theme = AppTheme.theme;
-    cargarDatos();
+    _cargarDatos();
   }
 
-  void cargarDatos(){
-    _email = "ddsaddas";
+  void _cargarDatos() async{
+    User user = Provider.of<AppNotifier>(context, listen: false).user;
+    UserMeta userMeta = await ApiService().getUserMeta(user.id!);
+    setState(() {
+      _email = user.email!;
+      _primerNombre = userMeta.primerNombre!;
+      _segundoNombre = userMeta.segundoNombre!;
+      _apellidoPaterno = userMeta.apellidoPaterno!;
+      _apellidoMaterno = userMeta.apellidoMaterno!;
+      _telefono = userMeta.telefono!.toString();
+      controller.uiLoading = false;
+    });
+    print(userMeta.primerNombre);
   }
 
   @override
@@ -50,13 +65,96 @@ class _PasswordSettingScreenState extends State<PasswordSettingScreen> {
           ),
         ),
         centerTitle: true,
-        title: MyText.titleMedium("Configuración de la contraseña", fontWeight: 600),
+        title: MyText.titleMedium("Mi cuenta", fontWeight: 600),
       ),
       body: ListView(
         padding: MySpacing.nTop(20),
         children: <Widget>[
-          MyText.bodyLarge("Cambiar contraseña",
+          Container(
+            margin: EdgeInsets.only(top: 24, bottom: 0),
+            child: MyText.bodyLarge("Datos del usuario",
             fontWeight: 600, letterSpacing: 0),
+          ),
+          Container(
+            width: MediaQuery.of(context).size.width,
+            margin: MySpacing.top(16),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                Expanded(
+                  flex: 1,
+                  child: TextFormField(
+                    style: MyTextStyle.titleSmall(
+                      letterSpacing: 0,
+                      color: theme.colorScheme.onBackground,
+                      fontWeight: 500,
+                      fontSize: 14),
+                    initialValue: _primerNombre,
+                    decoration: InputDecoration(
+                      labelText: "Primer nombre *",
+                      enabled: false, 
+                      border: theme.inputDecorationTheme.border,
+                      enabledBorder: theme.inputDecorationTheme.border,
+                      focusedBorder: theme.inputDecorationTheme.focusedBorder,
+                    ),
+                    keyboardType: TextInputType.name,
+                    textCapitalization: TextCapitalization.sentences,
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Padding(
+                    padding: MySpacing.left(8),
+                    child: TextFormField(
+                      onChanged: (value) {
+                        setState(() {
+                          _segundoNombre = value;
+                        });
+                      },
+                      style: MyTextStyle.titleSmall(
+                        letterSpacing: 0,
+                        color: theme.colorScheme.onBackground,
+                        fontWeight: 500,
+                        fontSize: 14),
+                      initialValue: _segundoNombre,
+                      decoration: InputDecoration(
+                        labelText: "Apellido paterno",
+                        border: theme.inputDecorationTheme.border,
+                        enabledBorder: theme.inputDecorationTheme.border,
+                        focusedBorder: theme.inputDecorationTheme.focusedBorder,
+                      ),
+                      keyboardType: TextInputType.name,
+                      textCapitalization: TextCapitalization.sentences,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            margin: MySpacing.top(16),
+            child: TextFormField(
+              enabled: false, // Esto hace que el campo sea editable
+              style: MyTextStyle.titleSmall(
+                letterSpacing: 0,
+                color: theme.colorScheme.onBackground,
+                fontWeight: 500,
+                fontSize: 14),
+              decoration: InputDecoration(
+                labelText: "Correo electrónico",
+                border: theme.inputDecorationTheme.border,
+                enabledBorder: theme.inputDecorationTheme.border,
+                focusedBorder: theme.inputDecorationTheme.focusedBorder,
+              ),
+              keyboardType: TextInputType.emailAddress,
+              initialValue: _email,
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 24, bottom: 0),
+            child: MyText.bodyLarge("Cambiar contraseña",
+                fontWeight: 600, letterSpacing: 0),
+          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -65,7 +163,6 @@ class _PasswordSettingScreenState extends State<PasswordSettingScreen> {
                 child: TextFormField(
                   onChanged: (value) {
                     setState(() {
-                      _email = value;
                     });
                   },
                   style: MyTextStyle.titleSmall(
@@ -102,7 +199,6 @@ class _PasswordSettingScreenState extends State<PasswordSettingScreen> {
                 child: TextFormField(
                   onChanged: (value) {
                     setState(() {
-                      _email = value;
                     });
                   },
                   style: MyTextStyle.titleSmall(

@@ -1,20 +1,20 @@
-import 'dart:async';
-import 'dart:ui';
+import 'package:flutkit/custom/auth/validar_email.dart';
+import 'package:flutkit/homes/homes_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:upsa/custom/auth/login_screen.dart';
-import 'package:upsa/custom/models/user.dart';
-import 'package:upsa/custom/utils/generadores.dart';
-import 'package:upsa/custom/utils/server.dart';
-import 'package:upsa/custom/utils/validaciones.dart';
-import 'package:upsa/custom/widgets/progressCustom.dart';
-import 'package:upsa/custom/widgets/verification_acount_noti.dart';
-import 'package:upsa/helpers/theme/app_notifier.dart';
-import 'package:upsa/helpers/theme/app_theme.dart';
-import 'package:upsa/helpers/widgets/my_button.dart';
-import 'package:upsa/helpers/widgets/my_container.dart';
-import 'package:upsa/helpers/widgets/my_spacing.dart';
-import 'package:upsa/helpers/widgets/my_text.dart';
-import 'package:upsa/helpers/widgets/my_text_style.dart';
+import 'package:flutkit/custom/auth/login_screen.dart';
+import 'package:flutkit/custom/models/user.dart';
+import 'package:flutkit/custom/utils/generadores.dart';
+import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/custom/utils/validaciones.dart';
+import 'package:flutkit/custom/widgets/progress_custom.dart';
+import 'package:flutkit/custom/widgets/verification_acount_noti.dart';
+import 'package:flutkit/helpers/theme/app_notifier.dart';
+import 'package:flutkit/helpers/theme/app_theme.dart';
+import 'package:flutkit/helpers/widgets/my_button.dart';
+import 'package:flutkit/helpers/widgets/my_container.dart';
+import 'package:flutkit/helpers/widgets/my_spacing.dart';
+import 'package:flutkit/helpers/widgets/my_text.dart';
+import 'package:flutkit/helpers/widgets/my_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -25,7 +25,7 @@ class Register2Screen extends StatefulWidget {
 }
 
 class _Register2ScreenState extends State<Register2Screen> {
-  bool _passwordVisible = false;
+  bool _passwordVisible = true;
   late CustomTheme customTheme;
   late ThemeData theme;
   Validacion validacion = Validacion();
@@ -33,7 +33,6 @@ class _Register2ScreenState extends State<Register2Screen> {
   String _username = "", _password ="", _email = "", _primerNombre = "", _token = "", _apellidoPaterno = "";
   String _error = "", _errorPassword ="", _errorEmail = "", _errorPrimerNombre = "", _errorApellidoPaterno = "";
   int _isInProgress = -1;
-  late Timer _timer;
   @override
   void initState() {
     super.initState();
@@ -120,10 +119,8 @@ class _Register2ScreenState extends State<Register2Screen> {
         // navigate to the dashboard.
         Provider.of<AppNotifier>(context, listen: false).login();
         Provider.of<AppNotifier>(context, listen: false).setUser(createduser);
-        setState(() {
-          _isInProgress = 1;
-          _error = "";
-        });
+        Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4)),(Route<dynamic> route) => false);
+        Navigator.push(context,MaterialPageRoute(builder: (context) => ValidarEmail(theme: theme, estado: 1)));
       }else{
         _error = "Ya existe una cuenta con el mismo correo electronico.";
       }
@@ -135,7 +132,7 @@ class _Register2ScreenState extends State<Register2Screen> {
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Scaffold (
       body: Stack(
         children: <Widget>[
           ClipPath(
@@ -281,8 +278,8 @@ class _Register2ScreenState extends State<Register2Screen> {
                                   : null,
                                   suffixIcon: IconButton(
                                     icon: Icon(_passwordVisible
-                                        ? LucideIcons.eye
-                                        : LucideIcons.eyeOff),
+                                        ? LucideIcons.eyeOff
+                                        : LucideIcons.eye),
                                     onPressed: () {
                                       setState(() {
                                         _passwordVisible = !_passwordVisible;

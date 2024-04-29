@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:upsa/helpers/localizations/language.dart';
+import 'package:flutkit/helpers/localizations/language.dart';
 import 'package:flutter/services.dart';
 
 class Translator {

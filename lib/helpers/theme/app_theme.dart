@@ -3,9 +3,9 @@
 * Version : 1.0.0
 * */
 
-import 'package:upsa/helpers/theme/custom_theme.dart';
-import 'package:upsa/helpers/theme/theme_type.dart';
-import 'package:upsa/helpers/widgets/my_text_style.dart';
+import 'package:flutkit/helpers/theme/custom_theme.dart';
+import 'package:flutkit/helpers/theme/theme_type.dart';
+import 'package:flutkit/helpers/widgets/my_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 

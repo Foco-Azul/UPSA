@@ -1,14 +1,15 @@
-import 'package:upsa/custom/auth/register_screen.dart';
-import 'package:upsa/custom/models/user.dart';
-import 'package:upsa/custom/utils/server.dart';
-import 'package:upsa/custom/utils/validaciones.dart';
-import 'package:upsa/helpers/theme/app_notifier.dart';
-import 'package:upsa/helpers/theme/app_theme.dart';
-import 'package:upsa/helpers/widgets/my_button.dart';
-import 'package:upsa/helpers/widgets/my_container.dart';
-import 'package:upsa/helpers/widgets/my_spacing.dart';
-import 'package:upsa/helpers/widgets/my_text.dart';
-import 'package:upsa/helpers/widgets/my_text_style.dart';
+import 'package:flutkit/custom/auth/register_screen.dart';
+import 'package:flutkit/custom/models/user.dart';
+import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/custom/utils/validaciones.dart';
+import 'package:flutkit/helpers/theme/app_notifier.dart';
+import 'package:flutkit/helpers/theme/app_theme.dart';
+import 'package:flutkit/helpers/widgets/my_button.dart';
+import 'package:flutkit/helpers/widgets/my_container.dart';
+import 'package:flutkit/helpers/widgets/my_spacing.dart';
+import 'package:flutkit/helpers/widgets/my_text.dart';
+import 'package:flutkit/helpers/widgets/my_text_style.dart';
+import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -20,7 +21,7 @@ class Login2Screen extends StatefulWidget {
 }
 
 class _Login2ScreenState extends State<Login2Screen> {
-  bool? _passwordVisible = false;
+  bool? _passwordVisible = true;
   late CustomTheme customTheme;
   late ThemeData theme;
 
@@ -43,7 +44,7 @@ class _Login2ScreenState extends State<Login2Screen> {
     if(_email.isEmpty){
       esValido = false;
       setState(() {
-        _errorEmail = "El correo es requerido";
+        _errorEmail = "El correo es requerido3";
       });
     }else{
       if(!validacion.validateEmail(_email)){
@@ -82,7 +83,7 @@ class _Login2ScreenState extends State<Login2Screen> {
       } else {
         Provider.of<AppNotifier>(context, listen: false).login();
         Provider.of<AppNotifier>(context, listen: false).setUser(user);
-        Navigator.popUntil(context, ModalRoute.withName('/'));
+        Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
       }
     } on Exception catch (e) {
       setState(() {
@@ -185,8 +186,8 @@ class _Login2ScreenState extends State<Login2Screen> {
                                   : null,
                                 suffixIcon: IconButton(
                                   icon: Icon(_passwordVisible!
-                                      ? LucideIcons.eye
-                                      : LucideIcons.eyeOff),
+                                      ? LucideIcons.eyeOff
+                                      : LucideIcons.eye),
                                   onPressed: () {
                                     setState(() {
                                       _passwordVisible = !_passwordVisible!;
@@ -225,10 +226,7 @@ class _Login2ScreenState extends State<Login2Screen> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Register2Screen()));
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Register2Screen()));
                   },
                   child: Container(
                     margin: EdgeInsets.only(top: 16),

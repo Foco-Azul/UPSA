@@ -1,4 +1,4 @@
-//SHA1: 7D:92:0E:11:C6:D5:71:9C:7D:D0:B8:FA:99:6E:41:3C:1E:B8:2A:13
+//SHA1: 15:34:34:42:19:74:7D:8C:3E:F4:1A:DE:AD:F7:57:98:D4:86:62:0D
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -20,7 +20,7 @@ class PushNotificationService{
   static Future initializeApp() async {
     await Firebase.initializeApp();
     token = await FirebaseMessaging.instance.getToken();
-    print(token);
+    print('TOKEN: ${token}');
 
     FirebaseMessaging.onBackgroundMessage(_backgroundHandler);
     FirebaseMessaging.onMessage.listen(_onMessageHandler);

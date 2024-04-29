@@ -1,4 +1,4 @@
-import 'package:upsa/helpers/theme/app_theme.dart';
+import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 extension IntUtil on int {

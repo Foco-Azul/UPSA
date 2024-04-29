@@ -1,5 +1,9 @@
+import 'package:flutkit/helpers/theme/app_notifier.dart';
+import 'package:flutkit/homes/homes_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:upsa/custom/auth/login_screen.dart';
+import 'package:flutkit/custom/auth/login_screen.dart';
+import 'package:provider/provider.dart';
 
 class LoginController extends GetxController {
   bool showLoading = true, uiLoading = true;
@@ -21,7 +25,9 @@ class LoginController extends GetxController {
     // Navigator.push(context, MaterialPageRoute(builder: (context) => FullApp()));
   }
 
-  void logout() {
+  void logout(BuildContext context) {
+    Provider.of<AppNotifier>(context, listen: false).limpiarValores();
+    Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
     //Get.back();
     // Navigator.pop(context);
   }
