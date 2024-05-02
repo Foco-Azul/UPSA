@@ -40,36 +40,11 @@ class _Login2ScreenState extends State<Login2Screen> {
      // Redirigir a AccountSettingScreen
   }
   void _validarCamposLogin(){
-    bool esValido = true;
-    if(_email.isEmpty){
-      esValido = false;
-      setState(() {
-        _errorEmail = "El correo es requerido3";
-      });
-    }else{
-      if(!validacion.validateEmail(_email)){
-        esValido = false;
-        setState(() {
-          _errorEmail = "El correo no es valido";
-        });
-      }else{
-        setState(() {
-          _errorEmail = "";
-        });
-      }
-    }
-    if(_password.isEmpty){
-      esValido = false;
-      setState(() {
-        _errorPassword = "La contraseña es requerida";
-      });
-    }else{
-        setState(() {
-          _errorPassword = "";
-        });
-    }
-
-    if(esValido == true){
+    setState(() {
+      _errorEmail = validacion.validarCorreo(_email, true);
+      _errorPassword = validacion.validarContrasenia(_password, true);
+    });
+    if(_errorEmail.isEmpty && _errorPassword.isEmpty){
       _login();
     }
   }

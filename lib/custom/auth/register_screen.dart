@@ -40,70 +40,13 @@ class _Register2ScreenState extends State<Register2Screen> {
     theme = AppTheme.theme;
   }
   void _validarCamposRegister(){
-    bool esValido = true;
-    if(_primerNombre.isEmpty){
-      esValido = false;
-      setState(() {
-        _errorPrimerNombre = "El primer nombre es requerido";
-      });
-    }else{
-      if(!validacion.validateOnlyLetters(_primerNombre)){
-        esValido = false;
-        setState(() {
-          _errorPrimerNombre = "El primer nombre no es valido";
-        });
-      }else{
-        setState(() {
-          _errorPrimerNombre = "";
-        });
-      }
-    }
-    if(_apellidoPaterno.isEmpty){
-      esValido = false;
-      setState(() {
-        _errorApellidoPaterno = "El apellido paterno es requerido";
-      });
-    }else{
-      if(!validacion.validateOnlyLetters(_apellidoPaterno)){
-        esValido = false;
-        setState(() {
-          _errorApellidoPaterno = "El apellido paterno no es valido";
-        });
-      }else{
-        setState(() {
-          _errorApellidoPaterno = "";
-        });
-      }
-    }
-    if(_email.isEmpty){
-      esValido = false;
-      setState(() {
-        _errorEmail = "El correo es requerido";
-      });
-    }else{
-      if(!validacion.validateEmail(_email)){
-        esValido = false;
-        setState(() {
-          _errorEmail = "El correo no es valido";
-        });
-      }else{
-        setState(() {
-          _errorEmail = "";
-        });
-      }
-    }
-    if(_password.isEmpty){
-      esValido = false;
-      setState(() {
-        _errorPassword = "La contraseña es requerida";
-      });
-    }else{
-        setState(() {
-          _errorPassword = "";
-        });
-    }
-
-    if(esValido == true){
+    setState(() {
+      _errorPrimerNombre = validacion.validarNombres(_primerNombre, true);
+      _errorApellidoPaterno = validacion.validarNombres(_apellidoPaterno, true);
+      _errorEmail = validacion.validarCorreo(_email, true);
+      _errorPassword = validacion.validarContrasenia(_password, true);
+    });
+    if(_errorPrimerNombre.isEmpty && _errorApellidoPaterno.isEmpty && _errorEmail.isEmpty && _errorPassword.isEmpty){
       _signup();
     }
   }

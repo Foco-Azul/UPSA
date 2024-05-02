@@ -23,7 +23,7 @@ Future<void> main() async {
       providers:[
         ChangeNotifierProvider<AppNotifier>(create: (context) => AppNotifier()),
       ],
-    child: MyApp(),
+      child: MyApp(),
     )
   );
 }

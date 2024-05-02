@@ -1,4 +1,5 @@
 import 'package:flutkit/custom/auth/registro_estudiante.dart';
+import 'package:flutkit/custom/auth/validar_email.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:provider/provider.dart';
 import 'package:flutkit/custom/controllers/login_controller.dart';
@@ -29,7 +30,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
   late LoginController loginController;
   
   String _botonText = "INICIAR SESIÓN";
-  bool _isLoggedIn = false, _estaCompletado = false;
+  bool _isLoggedIn = false, _estaCompletado = false, _confirmed = false;
   @override
   void initState() {
     super.initState();
@@ -42,6 +43,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
         _botonText = "CERRAR SESIÓN";
         _isLoggedIn = true;
         _estaCompletado = user.completada!;
+        _confirmed = user.confirmed!;
       });
     }
   }
@@ -87,31 +89,54 @@ class _PerfilScreenState extends State<PerfilScreen> {
       body: ListView(
         padding: MySpacing.fromLTRB(20, 10, 20, 20),
         children: [
-          GestureDetector(
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroEstudiante()));
-            },
-            child: _buildSingleRow('Completar cuenta', LucideIcons.user),
+          if(_isLoggedIn && !_confirmed)
+          Column(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => ValidarEmail(theme: theme)));
+                },
+                child: _buildSingleRow('Verificar correo', LucideIcons.lock),
+              ),
+              Divider(),
+            ]
           ),
-          Divider(),
-          if(_isLoggedIn && _estaCompletado || true)
-          GestureDetector(
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => AccountSettingScreen()));
-            },
-            child: _buildSingleRow('Información del estudiante', LucideIcons.user),
+          if(_isLoggedIn && !_estaCompletado && _confirmed)
+          Column(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroEstudiante()));
+                },
+                child: _buildSingleRow('Completa tu cuenta', LucideIcons.user),
+              ),
+              Divider(),
+            ]
           ),
-          if(_isLoggedIn && _estaCompletado || true)
-          Divider(),
+          if(_isLoggedIn && _estaCompletado && _confirmed)
+          Column(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => AccountSettingScreen()));
+                },
+                child: _buildSingleRow('Información del estudiante', LucideIcons.user),
+              ),
+              Divider(),
+            ],
+          ),
           if(_isLoggedIn)
-          GestureDetector(
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => PasswordSettingScreen()));
-            },
-            child: _buildSingleRow('Información de la cuenta', LucideIcons.lock),
+          Column(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => PasswordSettingScreen()));
+                },
+                child: _buildSingleRow('Información de la cuenta', LucideIcons.lock),
+              ),
+              Divider(),
+            ]
           ),
-          if(_isLoggedIn)
-          Divider(),
           GestureDetector(
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => AppSettingScreen()));

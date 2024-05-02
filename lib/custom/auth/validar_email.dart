@@ -73,9 +73,10 @@ class _ValidarEmailState extends State<ValidarEmail> {
       });
     }else{
       User user = Provider.of<AppNotifier>(context, listen: false).user;
-      //int userId=39;
       bool bandera = await ApiService().verificarCuenta(user.id!, _token);
       if(bandera){
+        user.confirmed = bandera;
+        Provider.of<AppNotifier>(context, listen: false).setUser(user);
         Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4)),(Route<dynamic> route) => false);
       }else{
         setState(() {

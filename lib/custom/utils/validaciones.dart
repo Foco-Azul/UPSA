@@ -18,18 +18,24 @@ class Validacion{
 
     return value!.isNotEmpty && !regex.hasMatch(value) ? false : true;
   }
-  bool validarTextos(String? value, bool? esObligatorio){
-    bool esValido = false;
+  String validarNombres(String? value, bool? esObligatorio){
+    String error = "";
     if(esObligatorio!){
-      esValido = value != null && value.isNotEmpty && RegExp(r'^[a-zA-Z]+$').hasMatch(value);
+      if(value != null && value.isNotEmpty){
+        if(!RegExp(r'^[a-zA-Z]+$').hasMatch(value)){
+          error = "Campo no valido, solo se permite letras";
+        }
+      }else{
+        error = "Este campo es requerido";
+      }
     }else{
       if(value != null && value.isNotEmpty){
-        esValido = RegExp(r'^[a-zA-Z]+$').hasMatch(value);
-      }else{
-        esValido = true;
+        if(!RegExp(r'^[a-zA-Z]+$').hasMatch(value)){
+          error = "Campo no valido, solo se permite letras";
+        }
       }
     }
-    return esValido;
+    return error;
   }
   bool validarNumeros(String? value, bool? esObligatorio, bool? esEntero){
     bool esValido = false;
@@ -52,34 +58,64 @@ class Validacion{
     }
     return esValido;
   }
-  bool validarNumerosPositivos(String? value, bool? esObligatorio, bool? esEntero){
-    bool esValido = false;
+  String validarNumerosPositivos(String? value, bool? esObligatorio, bool? esEntero){
+    String error = "";
     if(esObligatorio!){
       if(esEntero!){
-
+        if(value != null && value.isNotEmpty){
+          if(int.tryParse(value) == null ||  (int.tryParse(value)! < 0 || int.tryParse(value).toString() != value)){
+            error = "Campo no valido";
+          }
+        }else{
+          error = "Este campo es requerido";
+        }
       }else{
-
+        if(value != null && value.isNotEmpty){
+          if(int.tryParse(value) == null ||  !(int.tryParse(value)! < 0 && double.tryParse(value).toString() != value)){
+            error = "Campo no valido";
+          }
+        }else{
+          error = "Este campo es requerido";
+        }
       }
     }else{
       if(esEntero!){
-
+        if(value != null && value.isNotEmpty){
+          if(int.tryParse(value) == null ||  (int.tryParse(value)! < 0 || int.tryParse(value).toString() != value)){
+            error = "Campo no valido";
+          }
+        }
       }else{
-
+        if(value != null && value.isNotEmpty){
+          if(int.tryParse(value) == null ||  !(int.tryParse(value)! < 0 && double.tryParse(value).toString() != value)){
+            error = "Campo no valido";
+          }
+        }
       }
     }
-    return esValido;
+    return error;
   }
-  bool validarAlfanumericos(String? value, bool? esObligatorio){
-    bool esValido = false;
+  String validarAlfanumericos(String? value, bool? esObligatorio){
+    String error = "";
     if(esObligatorio!){
-
+      if(value != null && value.isNotEmpty){
+        if(!RegExp(r'^[a-zA-Z0-9\.\-_]+$').hasMatch(value)){
+          error = "Campo no valido";
+        }
+      }else{
+        error = "Este campo es requerido";
+      }
     }else{
-
+      if(value != null && value.isNotEmpty){
+        if(!RegExp(r'^[a-zA-Z]+$').hasMatch(value)){
+          error = "Campo no valido";
+        }
+      }
     }
-    return esValido;
+    return error;
   }
-  bool validarCorreo(String? value, bool? esObligatorio){
-    bool esValido = false;
+  String validarCorreo(String? value, bool? esObligatorio){
+    String error = "";
     if(esObligatorio!){
       if(value != null && value.isNotEmpty){
         const pattern = r"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'"
@@ -90,9 +126,11 @@ class Validacion{
         r'[0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\'
         r'x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])';
         final regex = RegExp(pattern);
-        esValido = regex.hasMatch(value);
+        if(!regex.hasMatch(value)){
+          error = "El correo no es valido";
+        }
       }else{
-        esValido = false;
+        error = "El correo es requerido";
       }
     }else{
       if(value != null && value.isNotEmpty){
@@ -103,12 +141,31 @@ class Validacion{
         r'[0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9]'
         r'[0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\'
         r'x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])';
-        final regex = RegExp(pattern);
-        esValido = regex.hasMatch(value);
-      }else{
-        esValido = true;
+         final regex = RegExp(pattern);
+        if(!regex.hasMatch(value)){
+          error = "El correo no es valido";
+        }
       }
     }
-    return esValido;
+    return error;
+  }
+  String validarContrasenia(String? value, bool? esObligatorio){
+    String error = "";
+    if(esObligatorio!){
+      if(value != null && value.isNotEmpty){
+        if(value.length < 6 || value.length > 16){
+          error = "La contraseña debe tener entre 6 a 16 caracteres";
+        }
+      }else{
+        error = "La contraseña es requerida";
+      }
+    }else{
+      if(value != null && value.isNotEmpty){
+        if(value.length < 6 || value.length > 12){
+          error = "La contraseña debe tener entre 6 a 16 caracteres";
+        }
+      }
+    }
+    return error;
   }
 }

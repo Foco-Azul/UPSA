@@ -197,7 +197,8 @@ class ApiService {
   Future<UserMeta> getUserMeta (int userId) async {
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse(dotenv.get('baseUrl') + '/users/'+userId.toString()+"?populate=*");
+      int idUserMeta = await _getIdUserMeta(userId) ;
+      var url = Uri.parse(dotenv.get('baseUrl') + '/user-metas/'+idUserMeta.toString()+"?populate=*");
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -221,6 +222,101 @@ class ApiService {
       if (response.statusCode == 200) {
         List<Categoria> _categorias = categoriaFromJson(response.body);
         return _categorias;
+      } else {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  Future<bool> registrarEstudiante(UserMeta datos, int id) async {
+    await dotenv.load(fileName: ".env");
+    try {
+      int idUserMeta = await _getIdUserMeta(id) ;
+      if(idUserMeta > 0){
+        var url = Uri.parse("${dotenv.get('baseUrl')}/user-metas/$idUserMeta");
+        var response = await http.put(url,
+          headers: {
+            'Content-Type': 'application/json',
+            "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          },
+          body: json.encode(
+            {"data":{
+              "segundoNombre": datos.segundoNombre,
+              "apellidoMaterno": datos.apellidoMaterno,
+              "cedulaDeIdentidad": datos.cedulaDeIdentidad,
+              "extension": datos.extension == "" ? null : datos.extension,
+              "sexo": datos.sexo == "" ? null : datos.sexo,
+              "fechaDeNacimiento": datos.fechaDeNacimiento == "" ? null : datos.fechaDeNacimiento,
+              "celular1": datos.celular1 == "" ? null : datos.celular1,
+              "celular2": datos.celular2 == "" ? null : datos.celular2,
+              "telfDomicilio": datos.telfDomicilio == "" ? null : datos.telfDomicilio,
+              "departamentoColegio": datos.departamentoColegio == "" ? null : datos.departamentoColegio,
+              "colegio": datos.colegio,
+              "cursoDeSecundaria": datos.cursoDeSecundaria == "" ? null : datos.cursoDeSecundaria,
+              "padreMadreTutor": {
+                "nombres": datos.tutorNombres,
+                "apellidoPaterno": datos.tutorApellidoPaterno,
+                "apellidoMaterno": datos.tutorApellidoMaterno,
+                "celular": datos.tutorCelular == "" ? null : datos.tutorCelular,
+                "email": datos.tutorEmail == "" ? null : datos.tutorEmail,
+              },
+              "hermano": datos.hermano,
+              "tieneHermano": datos.tieneHermano,
+            }}
+          )
+        );
+        print(response.body);
+        if (response.statusCode == 200) {
+          if(await actualizarCompletadoUser(id, true)){
+            return true;
+          }else{
+            return false;
+          }
+        } else {
+          String error = jsonDecode(response.body)['error']['message'];
+          throw Exception(error);
+        }
+      }else{
+        return false;
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  Future<bool> actualizarCompletadoUser(int id, bool estaCompletado) async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse(dotenv.get('baseUrl') + "/users/"+id.toString());
+      var response = await http.put(url,
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+        },
+        body: json.encode(
+          {"data":{
+            "completada": estaCompletado
+          }}
+        )
+      );
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        throw Exception(error);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  Future<int> _getIdUserMeta (int id) async{
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse(dotenv.get('baseUrl') + '/users/'+id.toString()+'?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body)["user_meta"]["id"];
       } else {
         throw Exception(jsonDecode(response.body)["error"]["message"]);
       }

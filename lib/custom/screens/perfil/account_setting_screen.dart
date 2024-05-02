@@ -25,7 +25,8 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
   late CustomTheme customTheme;
   late ThemeData theme;
   late ProfileController controller;
-
+  UserMeta _userMeta = UserMeta();
+  User _user = User();
   String _primerNombre = "", _apellidoPaterno = "", _email = "";
   String _segundoNombre = "", _apellidoMaterno = "", _telefono = "";
 
@@ -33,25 +34,18 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
   void initState() {
     super.initState();
     customTheme = AppTheme.customTheme;
-    theme = AppTheme.theme;
+    theme = AppTheme.theme; 
     controller = ProfileController();
 
     cargarDatos();
   }
 
   void cargarDatos() async{
-    User user = Provider.of<AppNotifier>(context, listen: false).user;
-    UserMeta userMeta = await ApiService().getUserMeta(user.id!);
+    _user = Provider.of<AppNotifier>(context, listen: false).user;
+    _userMeta = await ApiService().getUserMeta(_user.id!);
     setState(() {
-      _email = user.email!;
-      _primerNombre = userMeta.primerNombre!;
-      _segundoNombre = userMeta.segundoNombre!;
-      _apellidoPaterno = userMeta.apellidoPaterno!;
-      _apellidoMaterno = userMeta.apellidoMaterno!;
-      _telefono = userMeta.telefono!.toString();
       controller.uiLoading = false;
     });
-    print(userMeta.primerNombre);
   }
   
 
@@ -80,7 +74,7 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
             ),
           ),
           centerTitle: true,
-          title: MyText.titleMedium("Configuración de la cuenta", fontWeight: 600),
+          title: MyText.titleMedium("Datos del estudiante", fontWeight: 600),
         ),
         body: ListView(
           padding: MySpacing.nTop(20),
@@ -104,7 +98,7 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                             color: theme.colorScheme.onBackground,
                             fontWeight: 500,
                             fontSize: 14),
-                          initialValue: _primerNombre,
+                          initialValue: _userMeta.primerNombre,
                           decoration: InputDecoration(
                             labelText: "Primer nombre *",
                             enabled: false, 
@@ -131,9 +125,10 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                               color: theme.colorScheme.onBackground,
                               fontWeight: 500,
                               fontSize: 14),
-                            initialValue: _segundoNombre,
+                            initialValue: _userMeta.segundoNombre,
                             decoration: InputDecoration(
                               labelText: "Segundo nombre",
+                              enabled: false, 
                               border: theme.inputDecorationTheme.border,
                               enabledBorder: theme.inputDecorationTheme.border,
                               focusedBorder: theme.inputDecorationTheme.focusedBorder,
@@ -160,7 +155,7 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                             color: theme.colorScheme.onBackground,
                             fontWeight: 500,
                             fontSize: 14),
-                          initialValue: _apellidoPaterno,
+                          initialValue: _userMeta.apellidoPaterno,
                           decoration: InputDecoration(
                             enabled: false, 
                             labelText: "Apellido paterno *",
@@ -187,9 +182,10 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                               color: theme.colorScheme.onBackground,
                               fontWeight: 500,
                               fontSize: 14),
-                            initialValue: _apellidoMaterno,
+                            initialValue: _userMeta.apellidoMaterno,
                             decoration: InputDecoration(
                               labelText: "Apellido materno",
+                              enabled: false, 
                               border: theme.inputDecorationTheme.border,
                               enabledBorder: theme.inputDecorationTheme.border,
                               focusedBorder: theme.inputDecorationTheme.focusedBorder,
@@ -213,12 +209,13 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                       fontSize: 14),
                     decoration: InputDecoration(
                       labelText: "Correo electrónico",
+                      enabled: false, 
                       border: theme.inputDecorationTheme.border,
                       enabledBorder: theme.inputDecorationTheme.border,
                       focusedBorder: theme.inputDecorationTheme.focusedBorder,
                     ),
                     keyboardType: TextInputType.emailAddress,
-                    initialValue: _email,
+                    initialValue: _user.email,
                   ),
                 ),
                 Container(
@@ -235,7 +232,7 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                             color: theme.colorScheme.onBackground,
                             fontWeight: 500,
                             fontSize: 14),
-                          initialValue: _primerNombre,
+                          initialValue: _userMeta.celular1,
                           decoration: InputDecoration(
                             labelText: "Celular 1 *",
                             enabled: false, 
@@ -262,9 +259,10 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                               color: theme.colorScheme.onBackground,
                               fontWeight: 500,
                               fontSize: 14),
-                            initialValue: _segundoNombre,
+                            initialValue: _userMeta.celular2,
                             decoration: InputDecoration(
                               labelText: "Celular 2",
+                              enabled: false, 
                               border: theme.inputDecorationTheme.border,
                               enabledBorder: theme.inputDecorationTheme.border,
                               focusedBorder: theme.inputDecorationTheme.focusedBorder,
@@ -290,9 +288,10 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                       color: theme.colorScheme.onBackground,
                       fontWeight: 500,
                       fontSize: 14),
-                    initialValue: _telefono,
+                    initialValue: _userMeta.telfDomicilio,
                     decoration: InputDecoration(
                       labelText: "Telf Docimicilio",
+                      enabled: false, 
                       border: theme.inputDecorationTheme.border,
                       enabledBorder: theme.inputDecorationTheme.border,
                       focusedBorder: theme.inputDecorationTheme.focusedBorder,
@@ -314,7 +313,7 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                             color: theme.colorScheme.onBackground,
                             fontWeight: 500,
                             fontSize: 14),
-                          initialValue: _primerNombre,
+                          initialValue: _userMeta.cedulaDeIdentidad,
                           decoration: InputDecoration(
                             labelText: "Cédula de identidad *",
                             enabled: false, 
@@ -341,9 +340,10 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                               color: theme.colorScheme.onBackground,
                               fontWeight: 500,
                               fontSize: 14),
-                            initialValue: _segundoNombre,
+                            initialValue: _userMeta.extension,
                             decoration: InputDecoration(
                               labelText: "Extensión",
+                              enabled: false, 
                               border: theme.inputDecorationTheme.border,
                               enabledBorder: theme.inputDecorationTheme.border,
                               focusedBorder: theme.inputDecorationTheme.focusedBorder,
@@ -397,9 +397,10 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                               color: theme.colorScheme.onBackground,
                               fontWeight: 500,
                               fontSize: 14),
-                            initialValue: _segundoNombre,
+                            initialValue: _userMeta.fechaDeNacimiento,
                             decoration: InputDecoration(
                               labelText: "Fecha de nacimiento",
+                              enabled: false, 
                               border: theme.inputDecorationTheme.border,
                               enabledBorder: theme.inputDecorationTheme.border,
                               focusedBorder: theme.inputDecorationTheme.focusedBorder,
@@ -426,7 +427,7 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                             color: theme.colorScheme.onBackground,
                             fontWeight: 500,
                             fontSize: 14),
-                          initialValue: _primerNombre,
+                          initialValue: _userMeta.departamentoColegio,
                           decoration: InputDecoration(
                             labelText: "Departamento colegio",
                             enabled: false, 
@@ -453,9 +454,10 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                               color: theme.colorScheme.onBackground,
                               fontWeight: 500,
                               fontSize: 14),
-                            initialValue: _segundoNombre,
+                            initialValue: _userMeta.colegio,
                             decoration: InputDecoration(
                               labelText: "Colegio *",
+                              enabled: false, 
                               border: theme.inputDecorationTheme.border,
                               enabledBorder: theme.inputDecorationTheme.border,
                               focusedBorder: theme.inputDecorationTheme.focusedBorder,
@@ -481,9 +483,10 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                       color: theme.colorScheme.onBackground,
                       fontWeight: 500,
                       fontSize: 14),
-                    initialValue: _telefono,
+                    initialValue: _userMeta.cursoDeSecundaria,
                     decoration: InputDecoration(
                       labelText: "¿En qué curso de secundaria estás?",
+                      enabled: false, 
                       border: theme.inputDecorationTheme.border,
                       enabledBorder: theme.inputDecorationTheme.border,
                       focusedBorder: theme.inputDecorationTheme.focusedBorder,
@@ -509,9 +512,10 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                       color: theme.colorScheme.onBackground,
                       fontWeight: 500,
                       fontSize: 14),
-                    initialValue: _telefono,
+                    initialValue: _userMeta.tutorNombres,
                     decoration: InputDecoration(
                       labelText: "Nombres",
+                      enabled: false, 
                       border: theme.inputDecorationTheme.border,
                       enabledBorder: theme.inputDecorationTheme.border,
                       focusedBorder: theme.inputDecorationTheme.focusedBorder,
@@ -533,7 +537,7 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                             color: theme.colorScheme.onBackground,
                             fontWeight: 500,
                             fontSize: 14),
-                          initialValue: _primerNombre,
+                          initialValue: _userMeta.tutorApellidoPaterno,
                           decoration: InputDecoration(
                             labelText: "Apellido paterno",
                             enabled: false, 
@@ -560,9 +564,10 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                               color: theme.colorScheme.onBackground,
                               fontWeight: 500,
                               fontSize: 14),
-                            initialValue: _segundoNombre,
+                            initialValue: _userMeta.tutorApellidoMaterno,
                             decoration: InputDecoration(
                               labelText: "Apellido materno",
+                              enabled: false, 
                               border: theme.inputDecorationTheme.border,
                               enabledBorder: theme.inputDecorationTheme.border,
                               focusedBorder: theme.inputDecorationTheme.focusedBorder,
@@ -588,9 +593,10 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                       color: theme.colorScheme.onBackground,
                       fontWeight: 500,
                       fontSize: 14),
-                    initialValue: _telefono,
+                    initialValue: _userMeta.tutorCelular,
                     decoration: InputDecoration(
                       labelText: "Nº Celular",
+                      enabled: false, 
                       border: theme.inputDecorationTheme.border,
                       enabledBorder: theme.inputDecorationTheme.border,
                       focusedBorder: theme.inputDecorationTheme.focusedBorder,
@@ -611,9 +617,10 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                       color: theme.colorScheme.onBackground,
                       fontWeight: 500,
                       fontSize: 14),
-                    initialValue: _telefono,
+                    initialValue: _userMeta.tutorEmail,
                     decoration: InputDecoration(
                       labelText: "E-mail",
+                      enabled: false, 
                       border: theme.inputDecorationTheme.border,
                       enabledBorder: theme.inputDecorationTheme.border,
                       focusedBorder: theme.inputDecorationTheme.focusedBorder,
@@ -626,6 +633,7 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                   child: MyText.bodyLarge("Información adicional",
                       fontWeight: 600, letterSpacing: 0),
                 ),
+                if(_userMeta.tieneHermano! != "No")
                 Container(
                   margin: MySpacing.top(16),
                   child: TextFormField(
@@ -639,9 +647,10 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                       color: theme.colorScheme.onBackground,
                       fontWeight: 500,
                       fontSize: 14),
-                    initialValue: _telefono,
+                    initialValue: _userMeta.hermano,
                     decoration: InputDecoration(
-                      labelText: "¿Tienes Algún(a) Hermano(a) Que Esté Actualmente En La UPSA?",
+                      labelText: "Hermano",
+                      enabled: false, 
                       border: theme.inputDecorationTheme.border,
                       enabledBorder: theme.inputDecorationTheme.border,
                       focusedBorder: theme.inputDecorationTheme.focusedBorder,
@@ -662,32 +671,10 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                       color: theme.colorScheme.onBackground,
                       fontWeight: 500,
                       fontSize: 14),
-                    initialValue: _telefono,
-                    decoration: InputDecoration(
-                      labelText: "Si Respondiste Que Si ¿Cuál Es Su Nombre Completo?",
-                      border: theme.inputDecorationTheme.border,
-                      enabledBorder: theme.inputDecorationTheme.border,
-                      focusedBorder: theme.inputDecorationTheme.focusedBorder,
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                ),
-                Container(
-                  margin: MySpacing.top(16),
-                  child: TextFormField(
-                    onChanged: (value) {
-                      setState(() {
-                        _telefono = value;
-                      });
-                    },
-                    style: MyTextStyle.titleSmall(
-                      letterSpacing: 0,
-                      color: theme.colorScheme.onBackground,
-                      fontWeight: 500,
-                      fontSize: 14),
-                    initialValue: _telefono,
+                    initialValue: _userMeta.hijoDeGraduadoUpsa,
                     decoration: InputDecoration(
                       labelText: "¿Hijo/a de Graduado Upsa?",
+                      enabled: false, 
                       border: theme.inputDecorationTheme.border,
                       enabledBorder: theme.inputDecorationTheme.border,
                       focusedBorder: theme.inputDecorationTheme.focusedBorder,
