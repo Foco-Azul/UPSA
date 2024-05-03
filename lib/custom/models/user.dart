@@ -99,6 +99,7 @@ class UserMeta {
   String? hermano;
   String? tieneHermano;
   String? hijoDeGraduadoUpsa;
+  List<String>? intereses;
 
   UserMeta({
     this.primerNombre,
@@ -123,6 +124,7 @@ class UserMeta {
     this.hermano,
     this.tieneHermano,
     this.hijoDeGraduadoUpsa,
+    this.intereses,
   });
 
   factory UserMeta.fromJsonMeta(Map<String, dynamic> json) => UserMeta(
@@ -148,7 +150,19 @@ class UserMeta {
     hermano: json["hermano"] ?? "",
     tieneHermano: (json["hermano"] == null || json["hermano"] == "") ? "No" : "Sí",
     hijoDeGraduadoUpsa: (json["hijoDeGraduadoUpsa"] ?? false) ? "Sí" : "No",
+    intereses: _getIntereses(json["intereses"]),
   );
+  static List<String> _getIntereses(dynamic intereses) {
+    List<String> res = [];
+    if (intereses != null) {
+      intereses.forEach((interes) {
+        res.add(interes.toString());
+      });
+    }
+    return res;
+  }
+
+
   Map<String, dynamic> toJson() => {
     "primerNombre": primerNombre,
     "apellidoPaterno": apellidoPaterno,

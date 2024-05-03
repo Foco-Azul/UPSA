@@ -1,3 +1,4 @@
+import 'package:flutkit/custom/auth/registro_estudiante.dart';
 import 'package:flutkit/helpers/widgets/my_container.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutter/material.dart';
@@ -78,6 +79,7 @@ class _ValidarEmailState extends State<ValidarEmail> {
         user.confirmed = bandera;
         Provider.of<AppNotifier>(context, listen: false).setUser(user);
         Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4)),(Route<dynamic> route) => false);
+        Navigator.push(context,MaterialPageRoute(builder: (context) => RegistroEstudiante()));
       }else{
         setState(() {
           _errorVerificacion = true;

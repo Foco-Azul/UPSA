@@ -55,6 +55,7 @@ class _RegistroEstudianteState extends State<RegistroEstudiante> {
     "error": "",
     "hijoDeGraduadoUpsa": "",
   };
+  List<String> selectedChoices = [];
   final PageController _pageController = PageController();
   int _currentPage = 0;
   @override
@@ -1195,6 +1196,46 @@ class _RegistroEstudianteState extends State<RegistroEstudiante> {
                 ]
               )
             ),
+            Container(
+              child: ListView(
+                shrinkWrap: true,
+                children: <Widget>[
+                  MyContainer.bordered(
+                    padding: EdgeInsets.only(top: 16, bottom: 16),
+                    color: theme.scaffoldBackgroundColor,
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          margin: EdgeInsets.only(bottom: 12, top: 8),
+                          child: MyText.titleLarge("Seleccioná tus intereses", fontWeight: 700, fontSize: 20, textAlign: TextAlign.center),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(bottom: 12, top: 8),
+                          padding: MySpacing.only(left: 16, right: 16),
+                          child: MyText.bodyMedium("Así podremos mejorar nuestra oferta de actividades para todos nuestros bachilleres.", fontWeight: 500,
+                          fontSize: 14,
+                          textAlign: TextAlign.center
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(left: 16, right: 16),
+                          child: Column(
+                            children: <Widget>[
+                               Container(
+                                padding: MySpacing.all(24),
+                                child: Wrap(
+                                  children: _buildChoiceList(),
+                                ),
+                              )
+                            ]
+                          )
+                        )
+                      ]
+                    )
+                  )
+                ]
+              )
+            ),
           ],
             ),
             if (_isInProgress == 0)
@@ -1221,8 +1262,8 @@ class _RegistroEstudianteState extends State<RegistroEstudiante> {
             ),
             TextButton(
               onPressed: () {
-                if (_currentPage < 6) {
-                  if(_currentPage == 5){
+                if (_currentPage < 7) {
+                  if(_currentPage == 6){
                     _validarCampos();
                   }else{
                     _pageController.nextPage(
@@ -1232,11 +1273,64 @@ class _RegistroEstudianteState extends State<RegistroEstudiante> {
                   }
                 }
               },
-              child: Text(_currentPage < 5 ? 'Siguiente' : 'Enviar'),
+              child: Text(_currentPage < 6 ? 'Siguiente' : 'Enviar'),
             ),
           ],
         ),
       );
     } 
+  }
+  _buildChoiceList() {
+    List<String> categoryList = [
+      "Fútbol",
+      "Tenis",
+      "Idiomas",
+      "Voluntariado",
+      "Tecnologia",
+      "Música",
+      "Teatro",
+      "Natación",
+      "Esports",
+      "Literatura",
+      "Streaming",
+    ];
+
+    List<Widget> choices = [];
+    for (var item in categoryList) {
+      choices.add(Container(
+        padding: MySpacing.all(8),
+        child: ChoiceChip(
+          checkmarkColor: Colors.white,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          selectedColor: Color.fromRGBO(32, 104, 14, 1),
+          label: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              MyText.bodyMedium(item,
+                  color: _userMeta.intereses!.contains(item)
+                      ? theme.colorScheme.onPrimary
+                      : theme.colorScheme.onBackground),
+            ],
+          ),
+          selected: _userMeta.intereses!.contains(item),
+          onSelected: (selected) {
+            setState(() {
+              print(_userMeta.intereses!);
+              _userMeta.intereses!.contains(item)
+                  ? _userMeta.intereses!.remove(item)
+                  : _userMeta.intereses!.add(item);
+            });
+          },
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: Color.fromRGBO(32, 104, 14, 1), // Color del borde
+              width: 1.0, // Ancho del borde
+            ),
+            borderRadius: BorderRadius.circular(14), // Radio de borde
+          ),
+        ),
+      ));
+    }
+    return choices;
   }
 }

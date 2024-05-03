@@ -683,38 +683,74 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.only(top: 24),
-                  child: Center(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(4)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: theme.colorScheme.primary.withAlpha(28),
-                            blurRadius: 4,
-                            offset: Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        style: ButtonStyle(
-                            elevation: MaterialStatePropertyAll(0),
-                            padding:
-                                MaterialStateProperty.all(MySpacing.xy(20, 12))),
-                        child: MyText.bodyMedium("GUARDAR",
-                            fontWeight: 600, color: theme.colorScheme.onPrimary),
-                      ),
-                    ),
+                  margin: EdgeInsets.only(top: 24, bottom: 0),
+                  child: MyText.bodyLarge("Mis intereses",
+                      fontWeight: 600, letterSpacing: 0),
+                ),
+                Container(
+                  child: Column(
+                    children: <Widget>[
+                        Container(
+                        padding: EdgeInsets.only(top: 16, bottom: 16),
+                        child: Wrap(
+                          children: _buildChoiceList(),
+                        ),
+                      )
+                    ]
                   )
-                )
+                ),
               ]
             ),
           ],
         )
       );
     }
+  }
+  _buildChoiceList() {
+    List<String> categoryList = [
+      "Fútbol",
+      "Tenis",
+      "Idiomas",
+      "Voluntariado",
+      "Tecnologia",
+      "Música",
+      "Teatro",
+      "Natación",
+      "Esports",
+      "Literatura",
+      "Streaming",
+    ];
+
+    List<Widget> choices = [];
+    for (var item in categoryList) {
+      choices.add(Container(
+        padding: MySpacing.all(8),
+        child: ChoiceChip(
+          checkmarkColor: Colors.white,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          selectedColor: Color.fromRGBO(32, 104, 14, 1),
+          label: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              MyText.bodyMedium(item,
+                  color: _userMeta.intereses!.contains(item)
+                      ? theme.colorScheme.onPrimary
+                      : theme.colorScheme.onBackground),
+            ],
+          ),
+          selected: _userMeta.intereses!.contains(item),
+          onSelected: (selected) {
+          },
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: Color.fromRGBO(32, 104, 14, 1), // Color del borde
+              width: 1.0, // Ancho del borde
+            ),
+            borderRadius: BorderRadius.circular(14), // Radio de borde
+          ),
+        ),
+      ));
+    }
+    return choices;
   }
 }

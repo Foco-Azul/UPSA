@@ -1,5 +1,6 @@
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/screens/actividades/actividades_inicio.dart';
+import 'package:flutkit/custom/screens/bienvenida/bienvenida_screen.dart';
 import 'package:flutkit/custom/screens/campus/campus_screen.dart';
 import 'package:flutkit/custom/screens/inicio/inicio_screen.dart';
 import 'package:flutkit/custom/screens/noticias/noticias_dart.dart';
@@ -147,7 +148,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
                 FlashyTabBarItem(
                   icon: Icon(LucideIcons.info),
                   title: Text(
-                    'Info',
+                    'Mi perfil',
                   ),
                   activeColor: theme.colorScheme.primary,
                   inactiveColor: theme.colorScheme.primary,

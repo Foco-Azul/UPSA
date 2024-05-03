@@ -263,6 +263,7 @@ class ApiService {
               },
               "hermano": datos.hermano,
               "tieneHermano": datos.tieneHermano,
+              "intereses": datos.intereses
             }}
           )
         );
@@ -294,9 +295,9 @@ class ApiService {
           "Authorization": "Bearer ${dotenv.get('accesToken')}"
         },
         body: json.encode(
-          {"data":{
+          {
             "completada": estaCompletado
-          }}
+          }
         )
       );
       if (response.statusCode == 200) {

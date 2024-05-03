@@ -20,12 +20,13 @@ class AppNotifier extends ChangeNotifier {
   bool _isLoggedIn = false;
   User _user = User();
   UserMeta _userMeta = UserMeta();
+  bool _esNuevo = true;
 
   int get count => _count;
-
   bool get isLoggedIn => _isLoggedIn;
   User get user => _user;
   UserMeta get userMeta => _userMeta;
+  bool get esNuevo => _esNuevo;
 
   AppNotifier() {
     init();
@@ -43,6 +44,7 @@ class AppNotifier extends ChangeNotifier {
     _prefs = await SharedPreferences.getInstance();
     _count = _prefs.getInt('count') ?? 0;
     _isLoggedIn = _prefs.getBool('isLoggedIn') ?? false;
+    _esNuevo = _prefs.getBool('esNuevo') ?? true;
     String? userJson = _prefs.getString('user');
     if (userJson != null && _isLoggedIn) {
       Map<String, dynamic> userMap = json.decode(userJson);
@@ -104,10 +106,11 @@ class AppNotifier extends ChangeNotifier {
     AppTheme.resetThemeData();
   }
   void _saveToPrefs() {
-      _prefs.setInt('count', _count);
-      _prefs.setBool('isLoggedIn', _isLoggedIn);
-      _prefs.setString('user', json.encode(_user.toJson())); // Aquí convertimos el objeto User a JSON
-      _prefs.setString('userMeta', json.encode(_userMeta.toJson())); 
+    _prefs.setInt('count', _count);
+    _prefs.setBool('isLoggedIn', _isLoggedIn);
+    _prefs.setString('user', json.encode(_user.toJson())); // Aquí convertimos el objeto User a JSON
+    _prefs.setString('userMeta', json.encode(_userMeta.toJson())); 
+    _prefs.setBool('esNuevo', _esNuevo); 
   }
 
   void incrementCount() {
@@ -137,5 +140,13 @@ class AppNotifier extends ChangeNotifier {
     _userMeta = userMeta;
     _saveToPrefs();
     notifyListeners();
+  }
+  void setEsNuevo(bool estado){
+    _esNuevo = estado;
+    _saveToPrefs();
+    notifyListeners();
+  }
+  bool getEsNuevo(){
+    return _esNuevo;
   }
 }

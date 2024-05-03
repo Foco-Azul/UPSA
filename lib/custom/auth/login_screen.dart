@@ -1,4 +1,6 @@
 import 'package:flutkit/custom/auth/register_screen.dart';
+import 'package:flutkit/custom/auth/registro_estudiante.dart';
+import 'package:flutkit/custom/auth/validar_email.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
@@ -58,6 +60,14 @@ class _Login2ScreenState extends State<Login2Screen> {
       } else {
         Provider.of<AppNotifier>(context, listen: false).login();
         Provider.of<AppNotifier>(context, listen: false).setUser(user);
+        if(!user.confirmed!){
+          Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
+          Navigator.push(context,MaterialPageRoute(builder: (context) => ValidarEmail(theme: theme)));
+        }
+        if(!user.completada!){
+          Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
+          Navigator.push(context,MaterialPageRoute(builder: (context) => RegistroEstudiante()));
+        }
         Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
       }
     } on Exception catch (e) {

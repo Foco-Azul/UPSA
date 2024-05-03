@@ -1,3 +1,4 @@
+import 'package:flutkit/custom/screens/bienvenida/bienvenida_screen.dart';
 import 'package:flutkit/custom/utils/push_notifications_service.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:flutkit/helpers/localizations/app_localization_delegate.dart';
 import 'package:flutkit/helpers/localizations/language.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   //You will need to initialize AppThemeNotifier class for theme changes.
@@ -16,18 +18,23 @@ Future<void> main() async {
   await PushNotificationService.initializeApp();
   // MobileAds.instance.initialize();
   AppTheme.init();
-
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool? esNuevo = prefs.getBool('esNuevo');
+  Widget initialScreen = esNuevo == true ? WelcomeScreen() : HomesScreen();
   runApp(
     MultiProvider(
       providers:[
         ChangeNotifierProvider<AppNotifier>(create: (context) => AppNotifier()),
       ],
-      child: MyApp(),
+      child: MyApp(initialScreen: initialScreen),
     )
   );
 }
 class MyApp extends StatelessWidget {
+  final Widget initialScreen;
+
+  MyApp({required this.initialScreen});
   @override
   Widget build(BuildContext context) {
     return Consumer<AppNotifier>(
@@ -36,16 +43,7 @@ class MyApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             theme: AppTheme.theme,
             title: "UPSA",
-            home: HomesScreen(), // Ruta inicial
-            /*
-            routes: {
-              '/': (context) => HomesScreen(),
-              '/inicio-screen': (context) => InicioScreen(),
-              '/actividades-screen': (context) => ActividadesScreen(),
-              '/campus-screen': (context) => CampusScreen(), 
-              '/noticias-screen': (context) => NoticiasScreen(),
-              '/perfil-screen': (context) => PerfilScreen(),
-            },*/
+            home: initialScreen, // Ruta inicial
             builder: (context, child) {
               return Directionality(
                 textDirection: AppTheme.textDirection,
