@@ -17,6 +17,7 @@ import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutkit/helpers/widgets/my_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class Register2Screen extends StatefulWidget {
@@ -57,7 +58,9 @@ class _Register2ScreenState extends State<Register2Screen> {
       });
       _username = _email;
       _token = generador.generarToken();
-      User? createduser = await ApiService().addUser(context, _email, _username, _password, _primerNombre, _apellidoPaterno, _token);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String _tokenDispositivo = prefs.getString('tokenDispositivo') ?? "";
+      User? createduser = await ApiService().addUser(context, _email, _username, _password, _primerNombre, _apellidoPaterno, _token, _tokenDispositivo);
       if (createduser != null) {
         // navigate to the dashboard.
         Provider.of<AppNotifier>(context, listen: false).login();
@@ -292,7 +295,7 @@ class _Register2ScreenState extends State<Register2Screen> {
               ),
             ),
           ),
-          if (_isInProgress == 0)
+          if (_isInProgress == 0 && false)
           ProgressEspera(
             theme: theme, // Pasar el tema como argumento
           ),

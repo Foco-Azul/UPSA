@@ -99,7 +99,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
           data: theme,
           child: Scaffold(
             key: _drawerKey,
-            drawer: _buildDrawer(),
+            //drawer: _buildDrawer(),
             // backgroundColor: Colors.black,
             appBar: _buildAppBarContent(selectedIndex, theme),
             body: bottomBarPages[selectedIndex],
@@ -146,7 +146,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
                   inactiveColor: theme.colorScheme.primary,
                 ),
                 FlashyTabBarItem(
-                  icon: Icon(LucideIcons.info),
+                  icon: Icon(LucideIcons.user),
                   title: Text(
                     'Mi perfil',
                   ),

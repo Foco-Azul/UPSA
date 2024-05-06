@@ -19,6 +19,7 @@ class User {
     this.createdAt,
     this.updatedAt,
     this.completada,
+    this.eventosSeguidos,
     //required this.userMeta,
     //required this.role,
   });
@@ -32,6 +33,8 @@ class User {
   DateTime? createdAt;
   DateTime? updatedAt;
   bool? completada;
+  List<int>? eventosSeguidos;
+  Map<int,int> eventosInscritos = {};
   //UserMeta userMeta;
   //int role;
 

@@ -15,18 +15,18 @@ import 'package:flutkit/custom/models/user.dart';
 
 class AppNotifier extends ChangeNotifier {
   late SharedPreferences _prefs;
-  int _count = 0;
 
   bool _isLoggedIn = false;
   User _user = User();
   UserMeta _userMeta = UserMeta();
   bool _esNuevo = true;
+  String _tokenDispositivo = "";
 
-  int get count => _count;
   bool get isLoggedIn => _isLoggedIn;
   User get user => _user;
   UserMeta get userMeta => _userMeta;
   bool get esNuevo => _esNuevo;
+  String get tokenDispositivo => _tokenDispositivo;
 
   AppNotifier() {
     init();
@@ -42,9 +42,9 @@ class AppNotifier extends ChangeNotifier {
   }
   Future<void> _loadFromPrefs() async {
     _prefs = await SharedPreferences.getInstance();
-    _count = _prefs.getInt('count') ?? 0;
     _isLoggedIn = _prefs.getBool('isLoggedIn') ?? false;
     _esNuevo = _prefs.getBool('esNuevo') ?? true;
+    _tokenDispositivo = _prefs.getString('tokenDispositivo') ?? "";
     String? userJson = _prefs.getString('user');
     if (userJson != null && _isLoggedIn) {
       Map<String, dynamic> userMap = json.decode(userJson);
@@ -60,7 +60,6 @@ class AppNotifier extends ChangeNotifier {
     _prefs = await SharedPreferences.getInstance();
     await _prefs.clear(); // Esto eliminará todos los valores almacenados en SharedPreferences
     // Ahora puedes volver a cargar los valores predeterminados o dejarlos en su estado inicial
-    _count = 0;
     _isLoggedIn = false;
   }
   updateTheme(ThemeType themeType) {
@@ -106,17 +105,10 @@ class AppNotifier extends ChangeNotifier {
     AppTheme.resetThemeData();
   }
   void _saveToPrefs() {
-    _prefs.setInt('count', _count);
     _prefs.setBool('isLoggedIn', _isLoggedIn);
     _prefs.setString('user', json.encode(_user.toJson())); // Aquí convertimos el objeto User a JSON
     _prefs.setString('userMeta', json.encode(_userMeta.toJson())); 
     _prefs.setBool('esNuevo', _esNuevo); 
-  }
-
-  void incrementCount() {
-    _count++;
-    _saveToPrefs();
-    notifyListeners();
   }
   void login() {
     _isLoggedIn = true;

@@ -47,7 +47,7 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
       description2: 'Description 2',
     ),
     Item(
-      id: 1,
+      id: 2,
       imageUrl: 'https://upsa.focoazul.com/uploads/Captura_de_pantalla_2023_09_19_213839_84c8b91a78.png',
       title: 'Title 2',
       description1: 'Description 3',

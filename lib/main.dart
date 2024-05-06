@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutkit/custom/screens/bienvenida/bienvenida_screen.dart';
 import 'package:flutkit/custom/utils/push_notifications_service.dart';
 import 'package:flutkit/homes/homes_screen.dart';
@@ -20,7 +21,7 @@ Future<void> main() async {
   AppTheme.init();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  bool? esNuevo = prefs.getBool('esNuevo');
+  bool? esNuevo = prefs.getBool('esNuevo') ?? true;
   Widget initialScreen = esNuevo == true ? WelcomeScreen() : HomesScreen();
   runApp(
     MultiProvider(
