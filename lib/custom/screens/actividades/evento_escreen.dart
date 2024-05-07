@@ -7,6 +7,7 @@ import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/utils/generator.dart';
 import 'package:flutkit/helpers/widgets/my_button.dart';
 import 'package:flutkit/loading_effect.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutkit/custom/controllers/login_controller.dart';
@@ -36,6 +37,7 @@ class _EventoScreenState extends State<EventoScreen> {
   int _currentPage = 0;
   late Timer timerAnimation;
   int _numPages = 1;
+  int _inscritos = -1;
   
   String _backUrl = "";
   Evento _evento = new Evento();
@@ -76,21 +78,50 @@ class _EventoScreenState extends State<EventoScreen> {
     _backUrl = dotenv.get('backUrl');
     _evento.galeriaDeFotos!.insert(0, _evento.fotoPrincipal!);
     _numPages = _evento.galeriaDeFotos!.length;
+    _inscritos = _evento.inscritos!;
     setState(() {
       controller.uiLoading = false;
     });
   }
   void _seguirActividad() async {
-    _user.eventosSeguidos!.add(_idEvento);
     await ApiService().setEventosSeguidos(_user.id!, _user.eventosSeguidos!);
+    setState(() {
+      _user.eventosSeguidos!.add(_idEvento);
+    });
   }
   void _dejarDeSeguirActividad() async {
-    _user.eventosSeguidos!.remove(_idEvento);
     await ApiService().setEventosSeguidos(_user.id!, _user.eventosSeguidos!);
+    setState(() {
+      _user.eventosSeguidos!.remove(_idEvento);
+    });
   }
   void _inscribirseActividad() async {
-    int idInscripcion = await ApiService().crearInscripcionEvento(_user.id!, _idEvento);
-    _user.eventosInscritos[_idEvento] = idInscripcion;
+    _evento = await ApiService().getEvento(_idEvento);
+    if(_evento.capacidad! > -1){
+      if(_evento.inscritos! < _evento.capacidad!){
+        int idInscripcion = await ApiService().crearInscripcionEvento(_user.id!, _idEvento);
+        _user.eventosInscritos[_idEvento] = idInscripcion;
+        setState(() {
+          _inscritos++;
+          Navigator.pop(context);
+          showSnackBarWithFloating("Inscripción exitosa", Color.fromRGBO(32, 104, 14, 1));
+        });
+      }else{
+        setState(() {
+          _inscritos = _evento.inscritos!;
+          Navigator.pop(context);
+          showSnackBarWithFloating("Lo sentimos, cupos agotados", Color.fromRGBO(255, 0, 0, 1));
+        });
+      }
+    }else{
+      int idInscripcion = await ApiService().crearInscripcionEvento(_user.id!, _idEvento);
+      _user.eventosInscritos[_idEvento] = idInscripcion;
+      setState(() {
+        _inscritos++;
+        Navigator.pop(context);
+        showSnackBarWithFloating("Inscripción exitosa", Color.fromRGBO(32, 104, 14, 1));
+      });
+    }
   }
   @override
   void dispose() {
@@ -236,13 +267,30 @@ class _EventoScreenState extends State<EventoScreen> {
                   ),
                 ),
                 _crearEtiquetas(),
+                _evento.capacidad! > -1
+                ? ((_evento.capacidad! - _inscritos!) > 0
+                    ? MyText.titleLarge(
+                        "Cupos disponibles: " + (_evento.capacidad! - _inscritos).toString(),
+                        fontSize: 16,
+                        fontWeight: 600,
+                      )
+                    : MyText.titleLarge(
+                        "Cupos agotados",
+                        fontSize: 16,
+                        fontWeight: 600,
+                      ))
+                : MyText.titleLarge(
+                    "Cupos ilimitados",
+                    fontSize: 16,
+                    fontWeight: 600,
+                  ),
                 if(_isLoggedIn && _user.confirmed! && _user.completada!)
                 Container(
                   padding: EdgeInsets.only(top: 12, bottom: 16),
                   child: Wrap(
                     children: [
-                      _user.eventosInscritos.containsKey(_idEvento)
-                      ? Container(
+                        if(_user.eventosInscritos.containsKey(_idEvento))
+                        Container(
                           margin: const EdgeInsets.all(8.0),
                           child: MyButton.large(
                             padding: const EdgeInsets.fromLTRB(23, 23, 23, 23),
@@ -263,8 +311,9 @@ class _EventoScreenState extends State<EventoScreen> {
                               ],
                             ),
                           ),
-                        )
-                      : Container(
+                        ),
+                      if(!_user.eventosInscritos.containsKey(_idEvento) && ((_evento.capacidad!-_inscritos) > 0 || _evento.capacidad! == -1))
+                      Container(
                         margin: const EdgeInsets.all(8.0),
                         child: MyButton.medium(
                           buttonType: MyButtonType.outlined,
@@ -273,7 +322,7 @@ class _EventoScreenState extends State<EventoScreen> {
                           splashColor: Color.fromRGBO(32, 104, 14, 1).withAlpha(60),
                           onPressed: () {
                             if (!_user.eventosInscritos.containsKey(_idEvento)) {
-                              _inscribirseActividad();
+                              _showBottomSheet(context);
                             }
                           },
                           elevation: 0,
@@ -350,6 +399,73 @@ class _EventoScreenState extends State<EventoScreen> {
         ),
       );
     }
+  }
+  void showSnackBarWithFloating(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: MyText.titleSmall(message, color: theme.colorScheme.onPrimary),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+  void _showBottomSheet(context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext buildContext) {
+        return Container(
+          decoration: BoxDecoration(
+              color: theme.colorScheme.background,
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16))),
+          child: Padding(
+            padding: MySpacing.fromLTRB(24, 24, 24, 36),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    MyText.titleLarge(
+                      "Texto de confirmación",
+                      fontSize: 16,
+                      fontWeight: 600,
+                    ),
+                    Container(
+                      margin: const EdgeInsets.all(8.0),
+                      child: MyButton.medium(
+                        buttonType: MyButtonType.outlined,
+                        borderColor: Colors.black,
+                        borderRadiusAll: 16.0,
+                        splashColor: Color.fromRGBO(32, 104, 14, 1).withAlpha(60),
+                        onPressed: () {
+                          if (!_user.eventosInscritos.containsKey(_idEvento)) {
+                            _inscribirseActividad();
+                          }
+                        },
+                        elevation: 0,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(LucideIcons.logIn, color: Colors.black), // Icono antes del texto
+                            SizedBox(width: 8.0), // Espacio entre el icono y el texto
+                            MyText.bodyMedium(
+                              'Confirmar inscripción',
+                              color: Colors.black,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    );
   }
   Widget _crearCalendario() {
     return Container(

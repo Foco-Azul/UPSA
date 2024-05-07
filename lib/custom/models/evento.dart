@@ -32,6 +32,8 @@ class Evento {
     this.cuerpo,
     this.etiquetas,
     this.calendario,
+    this.capacidad,
+    this.inscritos,
   });
 
   String? id;
@@ -45,7 +47,8 @@ class Evento {
   String? cuerpo;
   List<String>? etiquetas;
   List<Map<String, String>>? calendario;
-
+  int? capacidad;
+  int? inscritos;
 
 
   factory Evento.fromJson(Map<String, dynamic> json) {
@@ -61,6 +64,8 @@ class Evento {
       cuerpo: json['attributes']["cuerpo"], 
       etiquetas: _convertirEtiquetas(json['attributes']["etiquetas"]['data']),
       calendario: _convertirCalendario(json['attributes']["calendarioEvento"]), 
+      capacidad: json['attributes']["capacidad"] != null ? json['attributes']["capacidad"] : -1,
+      inscritos: json['attributes']["inscripciones"]['data']?.length ?? 0,
     );
   }
   static List<Map<String, String>> _convertirCalendario(dynamic data) {
