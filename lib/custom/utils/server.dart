@@ -5,9 +5,11 @@ import 'package:flutkit/custom/models/evento.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
+import 'package:barcode_widget/barcode_widget.dart';
     
 class ApiService {
   //LOGIN
@@ -405,13 +407,21 @@ class ApiService {
   Future<int> crearInscripcionEvento(int idUser, int idEvento) async {
     await dotenv.load(fileName: ".env");
     try {
+      DateTime now = DateTime.now();
+      DateTime utcPlus4 = now.add(Duration(hours: 4));
+      String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(utcPlus4);
+
+      int hash = formattedDate.hashCode.abs(); // Convertir la fecha en un número
+      String code = hash.toRadixString(36).toUpperCase(); // Convertir el número en una cadena en base 36
       var url = Uri.parse(dotenv.get('baseUrl') + "/inscripcions");
       var response = await http.post(url,
           headers: {
             'Content-Type': 'application/json',
             "Authorization": "Bearer ${dotenv.get('accesToken')}"
           },
-          body: json.encode({"data":{"user": idUser, "evento": idEvento}}));
+          body: json.encode({
+            "data": {"user": idUser, "evento": idEvento, "fecha": formattedDate, "qr": "Evento-UPSA-"+code+idUser.toString()+idEvento.toString()}
+          }));
       if (response.statusCode == 200) {
         return jsonDecode(response.body)["data"]["id"];
       } else {
@@ -463,6 +473,66 @@ class ApiService {
       if (response.statusCode == 200) {
         List<int> eventos = _crearListaEnteros(response.body, "inscripciones");
         return eventos;
+      } else {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  Future<String> getQrEvento(int idInscripcion) async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse(dotenv.get('baseUrl') + '/inscripcions/'+idInscripcion.toString()+"?populate=*");
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        String qr = jsonDecode(response.body)["data"]["attributes"]["qr"];
+        return qr;
+      } else {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  Future<List<Evento>> getEventos() async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse(dotenv.get('baseUrl') + '/eventos/?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        List<Evento> _eventos = EventosFromJson(response.body);
+        print(_eventos);
+        return _eventos;
+      } else {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  Future<void> marcarAsistencia(int idInscripcion) async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse(dotenv.get('baseUrl') + '/inscripcions/'+idInscripcion.toString());
+      var response = await http.put(url,
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+        },
+        body: json.encode(
+          {
+            "data":{
+              "asistencia": true
+            }
+          }
+        )
+      );
+      if (response.statusCode == 200) {
+        print("exitoooooooo");
+        //return true;
       } else {
         throw Exception(jsonDecode(response.body)["error"]["message"]);
       }

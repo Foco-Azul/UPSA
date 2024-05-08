@@ -20,6 +20,7 @@ class User {
     this.updatedAt,
     this.completada,
     this.eventosSeguidos,
+    this.qr,
     //required this.userMeta,
     //required this.role,
   });
@@ -35,6 +36,7 @@ class User {
   bool? completada;
   List<int>? eventosSeguidos;
   Map<int,int> eventosInscritos = {};
+  String? qr;
   //UserMeta userMeta;
   //int role;
 

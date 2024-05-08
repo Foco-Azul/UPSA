@@ -1,6 +1,7 @@
 import 'package:flutkit/custom/auth/registro_estudiante.dart';
 import 'package:flutkit/custom/auth/validar_email.dart';
 import 'package:flutkit/custom/models/user.dart';
+import 'package:flutkit/custom/screens/admin/lector_qr.dart';
 import 'package:provider/provider.dart';
 import 'package:flutkit/custom/controllers/login_controller.dart';
 import 'package:flutkit/custom/screens/perfil/account_setting_screen.dart';
@@ -142,6 +143,13 @@ class _PerfilScreenState extends State<PerfilScreen> {
               Navigator.push(context, MaterialPageRoute(builder: (context) => AppSettingScreen()));
             },
             child: _buildSingleRow('Configuración de la App', LucideIcons.lock),
+          ),
+          Divider(),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => LectorQRScreen()));
+            },
+            child: _buildSingleRow('Lector de QR', LucideIcons.lock),
           ),
           Divider(),
           MySpacing.height(20),

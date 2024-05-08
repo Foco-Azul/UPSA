@@ -75,6 +75,9 @@ dependencies:
   http: ^0.13.6
   package_info: ^2.0.2
   cached_network_image: ^3.3.1
+  barcode_widget: ^2.0.4
+  qrscan: ^0.3.3
+  permission_handler: ^11.3.1
 #  flutx: ^0.2.0-rc.1
 #  flutx: ^0.1.2
 

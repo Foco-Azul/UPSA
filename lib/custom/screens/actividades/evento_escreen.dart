@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/evento.dart';
 import 'package:flutkit/custom/models/user.dart';
@@ -38,6 +39,7 @@ class _EventoScreenState extends State<EventoScreen> {
   late Timer timerAnimation;
   int _numPages = 1;
   int _inscritos = -1;
+  String _qr = "";
   
   String _backUrl = "";
   Evento _evento = new Evento();
@@ -70,8 +72,14 @@ class _EventoScreenState extends State<EventoScreen> {
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
     if(_isLoggedIn){
       _user = Provider.of<AppNotifier>(context, listen: false).user;
-      _user.eventosSeguidos = await ApiService().getEventosSeguidos(_user.id!);
       _user.eventosInscritos = await ApiService().getEventosInscritos(_user.id!);
+      _user.eventosSeguidos = await ApiService().getEventosSeguidos(_user.id!);
+      if(_user.eventosInscritos.containsKey(_idEvento)){
+        _user.qr = await ApiService().getQrEvento(_user.eventosInscritos[_idEvento]!);
+        setState(() {
+          _qr =_user.qr!;
+        });
+      }
     }
     _evento = await ApiService().getEvento(_idEvento);
     await dotenv.load(fileName: ".env");
@@ -79,8 +87,10 @@ class _EventoScreenState extends State<EventoScreen> {
     _evento.galeriaDeFotos!.insert(0, _evento.fotoPrincipal!);
     _numPages = _evento.galeriaDeFotos!.length;
     _inscritos = _evento.inscritos!;
-    setState(() {
-      controller.uiLoading = false;
+    Future.delayed(Duration(milliseconds: 1000), () {
+      setState(() {
+        controller.uiLoading = false;
+      });
     });
   }
   void _seguirActividad() async {
@@ -267,6 +277,30 @@ class _EventoScreenState extends State<EventoScreen> {
                   ),
                 ),
                 _crearEtiquetas(),
+                Visibility(
+                  visible: _qr.isNotEmpty,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Código QR: ',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 10),
+                        // Código QR con la frase "gian"
+                        BarcodeWidget(
+                          barcode: Barcode.qrCode(),
+                          data: _qr,
+                          width: 200,
+                          height: 200,
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 _evento.capacidad! > -1
                 ? ((_evento.capacidad! - _inscritos!) > 0
                     ? MyText.titleLarge(

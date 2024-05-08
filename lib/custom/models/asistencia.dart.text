@@ -3,23 +3,24 @@ import 'dart:convert';
 // getting a list of users from json
 List<Evento> EventosFromJson(String str) {
   final jsonData = json.decode(str);
-  final List<dynamic> data = jsonData['data'];
+  final Map<String, dynamic> data = jsonData['data'];
 
-  return data.map((item) => Evento.fromJson(item)).toList();
+  return [
+    Asistencia.fromJson(data),
+  ];
 }
 
-
-Evento EventoFromJson(String str) {
+Asistencia EventoFromJson(String str) {
   final jsonData = json.decode(str);
   final Map<String, dynamic> data = jsonData['data'];
 
-  return Evento.fromJson(data);
+  return Asistencia.fromJson(data);
 }
 
 
 // Evento class
-class Evento {
-  Evento({
+class Asistencia {
+  Asistencia({
     this.id,
     this.titulo,
     this.categoria,
@@ -33,7 +34,6 @@ class Evento {
     this.calendario,
     this.capacidad,
     this.inscritos,
-    this.inscripciones,
   });
 
   String? id;
@@ -49,9 +49,9 @@ class Evento {
   List<Map<String, String>>? calendario;
   int? capacidad;
   int? inscritos;
-  List<Map<String,int>>? inscripciones;
 
-  factory Evento.fromJson(Map<String, dynamic> json) {
+
+  factory Asistencia.fromJson(Map<String, dynamic> json) {
     return Evento(
       id: json["id"].toString(),
       titulo: json['attributes']["titulo"],
@@ -66,22 +66,7 @@ class Evento {
       calendario: _convertirCalendario(json['attributes']["calendarioEvento"]), 
       capacidad: json['attributes']["capacidad"] != null ? json['attributes']["capacidad"] : -1,
       inscritos: json['attributes']["inscripciones"]['data']?.length ?? 0,
-      inscripciones: _convertirInscripciones(json['attributes']['inscripciones']['data']),
     );
-  }
-  static List<Map<String,int>> _convertirInscripciones(dynamic data) {
-    List<Map<String,int>> res = [];
-    if (data != null) {
-      for (var item in data) {
-        if (item['id'] != null && item['attributes'] != null && item['attributes']['qr'] != null) {
-          Map<String, int> evento = {
-            item['attributes']['qr']:item['id']
-          };
-          res.add(evento);
-        }
-      }
-    }
-    return res;
   }
   static List<Map<String, String>> _convertirCalendario(dynamic data) {
     List<Map<String, String>> res = [];
