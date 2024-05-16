@@ -1,20 +1,14 @@
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/screens/actividades/actividades_inicio.dart';
-import 'package:flutkit/custom/screens/bienvenida/bienvenida_screen.dart';
-import 'package:flutkit/custom/screens/campus/campus_screen.dart';
+import 'package:flutkit/custom/screens/campus/campus_inicio.dart';
 import 'package:flutkit/custom/screens/inicio/inicio_screen.dart';
-import 'package:flutkit/custom/screens/noticias/noticias_dart.dart';
+import 'package:flutkit/custom/screens/noticias/noticias_inicio.dart';
 import 'package:flutkit/custom/screens/perfil/perfil_screen.dart';
-import 'package:flutkit/helpers/extensions/extensions.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/theme/theme_type.dart';
-import 'package:flutkit/helpers/widgets/my_button.dart';
-import 'package:flutkit/helpers/widgets/my_container.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
-import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutkit/homes/app_setting_screen.dart';
-import 'package:flutkit/homes/select_language_dialog.dart';
 import 'package:flutkit/images.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -123,7 +117,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
                   title: Text(
                     'Actividades',
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 11.1,
                     )
                   ),
                   activeColor: theme.colorScheme.primary,
@@ -193,7 +187,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
       );
     case 1:
       return AppBar(
-        title: Text('Actividades'),
+        title: Text('Actividades', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),),
         centerTitle: true,
         actions: [
           InkWell(
@@ -292,260 +286,6 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
         title: Text('Otro título'),
         // Otros elementos de la AppBar por defecto
       );
-  }
-}
-
-
-  Widget _buildDrawer() {
-    return MyContainer.none(
-      margin:
-          MySpacing.fromLTRB(16, MySpacing.safeAreaTop(context) + 16, 16, 16),
-      borderRadiusAll: 4,
-      clipBehavior: Clip.antiAliasWithSaveLayer,
-      color: theme.scaffoldBackgroundColor,
-      child: Drawer(
-          child: Container(
-        color: theme.scaffoldBackgroundColor,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Container(
-              padding: MySpacing.only(left: 20, bottom: 0, top: 24, right: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Image(
-                    image: AssetImage(Images.brandLogo),
-                    height: 102,
-                    width: 102,
-                  ),
-                  MySpacing.height(16),
-                  MyContainer(
-                    padding: MySpacing.fromLTRB(12, 4, 12, 4),
-                    borderRadiusAll: 4,
-                    color: theme.colorScheme.primary.withAlpha(40),
-                    child: MyText.bodyLarge("v15",
-                        color: theme.colorScheme.primary,
-                        fontWeight: 700,
-                        letterSpacing: 0.2),
-                  ),
-                  MySpacing.height(16),
-                  MyText.bodyMedium("Flutter 3.13 (Latest)",
-                      fontWeight: 600, letterSpacing: 0.2),
-                ],
-              ),
-            ),
-            MySpacing.height(32),
-            Container(
-              margin: MySpacing.x(20),
-              child: Column(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      changeTheme();
-                    },
-                    highlightColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    child: Row(
-                      children: [
-                        MyContainer(
-                          paddingAll: 12,
-                          borderRadiusAll: 4,
-                          color: CustomTheme.occur.withAlpha(20),
-                          child: Image(
-                            height: 20,
-                            width: 20,
-                            image: AssetImage(!isDark
-                                ? Images.darkModeOutline
-                                : Images.lightModeOutline),
-                            color: CustomTheme.occur,
-                          ),
-                        ),
-                        MySpacing.width(16),
-                        Expanded(
-                          child: MyText.bodyLarge(
-                            !isDark ? 'dark_mode'.tr() : 'light_mode'.tr(),
-                          ),
-                        ),
-                        MySpacing.width(16),
-                        Icon(
-                          LucideIcons.chevronRight,
-                          size: 18,
-                          color: theme.colorScheme.onBackground,
-                        ).autoDirection(),
-                      ],
-                    ),
-                  ),
-                  MySpacing.height(20),
-                  InkWell(
-                    onTap: () {
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) =>
-                              SelectLanguageDialog());
-                    },
-                    highlightColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    child: Row(
-                      children: [
-                        MyContainer(
-                          paddingAll: 12,
-                          borderRadiusAll: 4,
-                          color: CustomTheme.peach.withAlpha(20),
-                          child: Image(
-                            height: 20,
-                            width: 20,
-                            image: AssetImage(Images.languageOutline),
-                            color: CustomTheme.peach,
-                          ),
-                        ),
-                        MySpacing.width(16),
-                        Expanded(
-                          child: MyText.bodyLarge(
-                            'language'.tr(),
-                          ),
-                        ),
-                        MySpacing.width(16),
-                        Icon(
-                          LucideIcons.chevronRight,
-                          size: 18,
-                          color: theme.colorScheme.onBackground,
-                        ).autoDirection(),
-                      ],
-                    ),
-                  ),
-                  MySpacing.height(20),
-                  InkWell(
-                    onTap: () {
-                      changeDirection();
-                    },
-                    highlightColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    child: Row(
-                      children: [
-                        MyContainer(
-                          paddingAll: 12,
-                          borderRadiusAll: 4,
-                          color: CustomTheme.skyBlue.withAlpha(20),
-                          child: Image(
-                            height: 20,
-                            width: 20,
-                            image: AssetImage(
-                                AppTheme.textDirection == TextDirection.ltr
-                                    ? Images.paragraphRTLOutline
-                                    : Images.paragraphLTROutline),
-                            color: CustomTheme.skyBlue,
-                          ),
-                        ),
-                        MySpacing.width(16),
-                        Expanded(
-                          child: MyText.bodyLarge(
-                            AppTheme.textDirection == TextDirection.ltr
-                                ? "${'right_to_left'.tr()} (RTL)"
-                                : "${'left_to_right'.tr()} (LTR)",
-                          ),
-                        ),
-                        MySpacing.width(16),
-                        Icon(
-                          LucideIcons.chevronRight,
-                          size: 18,
-                          color: theme.colorScheme.onBackground,
-                        ).autoDirection(),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            MySpacing.height(20),
-            Divider(
-              thickness: 1,
-            ),
-            MySpacing.height(16),
-            Container(
-              margin: MySpacing.x(20),
-              child: Column(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      launchDocumentation();
-                    },
-                    highlightColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    child: Row(
-                      children: [
-                        MyContainer(
-                          paddingAll: 12,
-                          borderRadiusAll: 4,
-                          color: CustomTheme.skyBlue.withAlpha(20),
-                          child: Image(
-                            height: 20,
-                            width: 20,
-                            image: AssetImage(Images.documentationIcon),
-                            color: CustomTheme.skyBlue,
-                          ),
-                        ),
-                        MySpacing.width(16),
-                        Expanded(
-                          child: MyText.bodyLarge(
-                            'documentation'.tr(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  MySpacing.height(20),
-                  InkWell(
-                    onTap: () {
-                      launchChangeLog();
-                    },
-                    highlightColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    child: Row(
-                      children: [
-                        MyContainer(
-                          paddingAll: 12,
-                          borderRadiusAll: 4,
-                          color: CustomTheme.peach.withAlpha(20),
-                          child: Image(
-                            height: 20,
-                            width: 20,
-                            image: AssetImage(Images.changeLogIcon),
-                            color: CustomTheme.peach,
-                          ),
-                        ),
-                        MySpacing.width(16),
-                        Expanded(
-                          child: MyText.bodyLarge(
-                            'changelog'.tr(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            MySpacing.height(20),
-            Center(
-              child: MyButton(
-                borderRadiusAll: 4,
-                elevation: 0,
-                onPressed: () {
-                  launchCodecanyonURL();
-                },
-                splashColor: theme.colorScheme.onPrimary.withAlpha(40),
-                backgroundColor: theme.colorScheme.primary,
-                child: MyText(
-                  'buy_now'.tr(),
-                  color: theme.colorScheme.onPrimary,
-                ),
-              ),
-            )
-          ],
-        ),
-      )),
-    );
+    }
   }
 }

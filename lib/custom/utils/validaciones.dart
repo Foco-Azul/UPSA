@@ -42,7 +42,7 @@ class Validacion{
     if(esObligatorio!){
       if(value != null && value.isNotEmpty){
         if(esEntero!){
-          esValido = int.tryParse(value ?? '') != null;
+          esValido = int.tryParse(value) != null;
         }else{
           esValido = true;
         }

@@ -27,8 +27,7 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
   late ProfileController controller;
   UserMeta _userMeta = UserMeta();
   User _user = User();
-  String _primerNombre = "", _apellidoPaterno = "", _email = "";
-  String _segundoNombre = "", _apellidoMaterno = "", _telefono = "";
+  String _primerNombre = "";
 
   @override
   void initState() {
@@ -117,7 +116,6 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                           child: TextFormField(
                             onChanged: (value) {
                               setState(() {
-                                _segundoNombre = value;
                               });
                             },
                             style: MyTextStyle.titleSmall(
@@ -174,7 +172,6 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                           child: TextFormField(
                             onChanged: (value) {
                               setState(() {
-                                _apellidoMaterno = value;
                               });
                             },
                             style: MyTextStyle.titleSmall(
@@ -251,7 +248,6 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                           child: TextFormField(
                             onChanged: (value) {
                               setState(() {
-                                _segundoNombre = value;
                               });
                             },
                             style: MyTextStyle.titleSmall(
@@ -280,7 +276,6 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                   child: TextFormField(
                     onChanged: (value) {
                       setState(() {
-                        _telefono = value;
                       });
                     },
                     style: MyTextStyle.titleSmall(
@@ -332,7 +327,6 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                           child: TextFormField(
                             onChanged: (value) {
                               setState(() {
-                                _segundoNombre = value;
                               });
                             },
                             style: MyTextStyle.titleSmall(
@@ -389,7 +383,6 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                           child: TextFormField(
                             onChanged: (value) {
                               setState(() {
-                                _segundoNombre = value;
                               });
                             },
                             style: MyTextStyle.titleSmall(
@@ -446,7 +439,6 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                           child: TextFormField(
                             onChanged: (value) {
                               setState(() {
-                                _segundoNombre = value;
                               });
                             },
                             style: MyTextStyle.titleSmall(
@@ -475,7 +467,6 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                   child: TextFormField(
                     onChanged: (value) {
                       setState(() {
-                        _telefono = value;
                       });
                     },
                     style: MyTextStyle.titleSmall(
@@ -504,7 +495,6 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                   child: TextFormField(
                     onChanged: (value) {
                       setState(() {
-                        _telefono = value;
                       });
                     },
                     style: MyTextStyle.titleSmall(
@@ -556,7 +546,6 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                           child: TextFormField(
                             onChanged: (value) {
                               setState(() {
-                                _segundoNombre = value;
                               });
                             },
                             style: MyTextStyle.titleSmall(
@@ -585,7 +574,6 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                   child: TextFormField(
                     onChanged: (value) {
                       setState(() {
-                        _telefono = value;
                       });
                     },
                     style: MyTextStyle.titleSmall(
@@ -609,7 +597,6 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                   child: TextFormField(
                     onChanged: (value) {
                       setState(() {
-                        _telefono = value;
                       });
                     },
                     style: MyTextStyle.titleSmall(
@@ -639,7 +626,6 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                   child: TextFormField(
                     onChanged: (value) {
                       setState(() {
-                        _telefono = value;
                       });
                     },
                     style: MyTextStyle.titleSmall(
@@ -663,7 +649,6 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                   child: TextFormField(
                     onChanged: (value) {
                       setState(() {
-                        _telefono = value;
                       });
                     },
                     style: MyTextStyle.titleSmall(
@@ -687,17 +672,15 @@ class _AccountSettingScreenState extends State<AccountSettingScreen> {
                   child: MyText.bodyLarge("Mis intereses",
                       fontWeight: 600, letterSpacing: 0),
                 ),
-                Container(
-                  child: Column(
-                    children: <Widget>[
-                        Container(
-                        padding: EdgeInsets.only(top: 16, bottom: 16),
-                        child: Wrap(
-                          children: _buildChoiceList(),
-                        ),
-                      )
-                    ]
-                  )
+                Column(
+                  children: <Widget>[
+                      Container(
+                      padding: EdgeInsets.only(top: 16, bottom: 16),
+                      child: Wrap(
+                        children: _buildChoiceList(),
+                      ),
+                    )
+                  ]
                 ),
               ]
             ),

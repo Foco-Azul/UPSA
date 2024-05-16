@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:flutkit/custom/models/categoria.dart';
 import 'package:flutkit/custom/models/evento.dart';
+import 'package:flutkit/custom/models/noticia.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -9,7 +10,6 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
-import 'package:barcode_widget/barcode_widget.dart';
     
 class ApiService {
   //LOGIN
@@ -28,10 +28,9 @@ class ApiService {
           "password": pass 
           }),
       );
-      print('RESPUESTA: ${response.body}');
       if (response.statusCode == 200) {
-        User _model = singleUserFromJson(response.body);
-        return _model;
+        User model = singleUserFromJson(response.body);
+        return model;
       } else {
         if(response.statusCode == 400){
           return User();
@@ -62,10 +61,9 @@ class ApiService {
           }),
         //body: body,
       );
-      print(response.body);
       if (response.statusCode == 200) {
-        User _model = singleUserFromJson(response.body);
-        return _model;
+        User model = singleUserFromJson(response.body);
+        return model;
       } else {
         String error = jsonDecode(response.body)['error']['message'];
         throw Exception(error);
@@ -94,8 +92,8 @@ class ApiService {
         if(seCreoUserMeta){
           bool seEnvioCorreo = await enviarCorreo({"codigoDeVerificacion":token}, "Código de verificación", email);
           if(seEnvioCorreo){
-            User _model = singleUserFromJsonRegister(response.body);
-            return _model;
+            User model = singleUserFromJsonRegister(response.body);
+            return model;
           }
         }
       } else {
@@ -103,7 +101,6 @@ class ApiService {
         throw Exception(error);
       }
     } catch (e) {
-      print(e);
       throw Exception(e);
     }
     return null;
@@ -112,7 +109,7 @@ class ApiService {
   Future<bool> registrarMeta(BuildContext context, int idUser, String primerNombre, String apellidoPaterno) async {
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse(dotenv.get('baseUrl') + "/user-metas");
+      var url = Uri.parse("${dotenv.get('baseUrl')}/user-metas");
       var response = await http.post(url,
           headers: {
             'Content-Type': 'application/json',
@@ -120,8 +117,8 @@ class ApiService {
           },
           body:  json.encode({"data":{"primerNombre": primerNombre, "apellidoPaterno": apellidoPaterno, "user": idUser}}));
       if (response.statusCode == 200) {
-        UserMeta _model = singleUserMetaFromJson(response.body);
-        Provider.of<AppNotifier>(context, listen: false).setUserMeta(_model);
+        UserMeta model = singleUserMetaFromJson(response.body);
+        Provider.of<AppNotifier>(context, listen: false).setUserMeta(model);
         return true;
       } else {
         String error = jsonDecode(response.body)['error']['message'];
@@ -134,7 +131,7 @@ class ApiService {
   Future<bool> enviarCorreo(Object token, String motivo, String email) async {
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse(dotenv.get('baseUrl') + "/correos");
+      var url = Uri.parse("${dotenv.get('baseUrl')}/correos");
       var response = await http.post(url,
           headers: {
             'Content-Type': 'application/json',
@@ -158,12 +155,12 @@ class ApiService {
   Future<String> pedirTokenUser (int userId) async {
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse(dotenv.get('baseUrl') + '/users/'+userId.toString());
+      var url = Uri.parse('${dotenv.get('baseUrl')}/users/$userId');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
-        String _token = jsonDecode(response.body)['token'];
-        return _token;
+        String token = jsonDecode(response.body)['token'];
+        return token;
       } else {
         throw Exception(jsonDecode(response.body)["error"]["message"]);
       }
@@ -182,7 +179,7 @@ class ApiService {
   Future<bool> activarCuenta(bool estado, int userId) async {
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse(dotenv.get('baseUrl') + "/users/"+userId.toString());
+      var url = Uri.parse("${dotenv.get('baseUrl')}/users/$userId");
       var response = await http.put(url,
           headers: {
             'Content-Type': 'application/json',
@@ -203,7 +200,7 @@ class ApiService {
     await dotenv.load(fileName: ".env");
     try {
       int idUserMeta = await _getIdUserMeta(userId) ;
-      var url = Uri.parse(dotenv.get('baseUrl') + '/user-metas/'+idUserMeta.toString()+"?populate=*");
+      var url = Uri.parse("${dotenv.get('baseUrl')}/user-metas/+${idUserMeta.toString()}+?populate=*");
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -220,12 +217,11 @@ class ApiService {
   Future<List<Categoria>> getCategorias () async{
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse(dotenv.get('baseUrl') + '/categorias');
+      var url = Uri.parse(dotenv.get('baseUrl') + '/categorias/?populate=*');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      print('RESPONSE: ${response.body}');
       if (response.statusCode == 200) {
-        List<Categoria> _categorias = categoriaFromJson(response.body);
+        List<Categoria> _categorias = categoriasEventosFromJson(response.body);
         return _categorias;
       } else {
         throw Exception(jsonDecode(response.body)["error"]["message"]);
@@ -272,7 +268,6 @@ class ApiService {
             }}
           )
         );
-        print(response.body);
         if (response.statusCode == 200) {
           if(await actualizarCompletadoUser(id, true)){
             return true;
@@ -369,15 +364,13 @@ class ApiService {
     final jsonData = json.decode(dataString);
     List<dynamic> eventos = jsonData[key];
 
-    if (eventos != null) {
-      for (var item in eventos) {
-        if (item['id'] != null) {
-          int id = item['id'];
-          res.add(id);
-        }
+    for (var item in eventos) {
+      if (item['id'] != null) {
+        int id = item['id'];
+        res.add(id);
       }
     }
-
+  
     return res;
   }
   Future<bool> setEventosSeguidos(int idUser, List<int> eventosId) async {
@@ -438,10 +431,8 @@ class ApiService {
       List<int> inscripciones = await _getEventosInscritosId(userId);
       inscripciones.forEach((inscripcion) async {
         int? idEvento = await _getEventoId(inscripcion);
-        if (idEvento != null) {
-          res[idEvento] = inscripcion;
-        }
-      });
+        res[idEvento] = inscripcion;
+            });
       return res;
     } catch (e) {
       throw Exception(e);
@@ -504,7 +495,6 @@ class ApiService {
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
         List<Evento> _eventos = EventosFromJson(response.body);
-        print(_eventos);
         return _eventos;
       } else {
         throw Exception(jsonDecode(response.body)["error"]["message"]);
@@ -531,8 +521,99 @@ class ApiService {
         )
       );
       if (response.statusCode == 200) {
-        print("exitoooooooo");
         //return true;
+      } else {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  Future<List<Evento>> getEventosPorIds(List<int> idsEventos) async {
+    List<Evento> res = [];
+    for (var item in idsEventos) {
+        Evento evento =await getEvento(item);
+        res.add(evento);
+    }
+    return res;
+  }
+
+  //NOTICIAS
+  Future<List<Categoria>> getCategoriasNoticias () async{
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse(dotenv.get('baseUrl') + '/categoria-noticias/?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        List<Categoria> _categorias = categoriasNoticiasFromJson(response.body);
+        return _categorias;
+      } else {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+    Future<List<Noticia>> getNoticias() async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse(dotenv.get('baseUrl') + '/noticias/?populate=*&sort=id:desc');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        List<Noticia> noticias = NoticiasFromJson(response.body);
+        return noticias;
+      } else {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  Future<List<Noticia>> getNoticiasPorIdsCategorias(List<Categoria> categorias) async {
+    List<Noticia> res = [];
+    for (var categoria in categorias) {
+        for (var lista in categoria.idsContenido!) {
+          Noticia noticia =await getNoticia(lista);
+          res.add(noticia);
+        }
+    }
+    return res;
+  }
+  Future<List<Noticia>> getNoticiasPorIdsCategoria(List<int> idsNoticias) async {
+    List<Noticia> res = [];
+    for (var item in idsNoticias) {
+        Noticia noticia =await getNoticia(item);
+        res.add(noticia);
+    }
+    return res;
+  }
+  Future<Noticia> getNoticia(int noticiaId) async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse(dotenv.get('baseUrl') + '/noticias/'+noticiaId.toString()+"?populate=*");
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        Noticia noticia = NoticiaFromJson(response.body);
+        return noticia;
+      } else {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  Future<List<Noticia>> getOtrasNoticias(int idNoticia) async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse(dotenv.get('baseUrl') + '/noticias/?populate=*&filters[id][\$ne]='+idNoticia.toString()+'&sort=id:desc');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        List<Noticia> noticia = NoticiasFromJson(response.body);
+        return noticia;
       } else {
         throw Exception(jsonDecode(response.body)["error"]["message"]);
       }

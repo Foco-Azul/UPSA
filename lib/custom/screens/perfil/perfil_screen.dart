@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:flutkit/custom/controllers/login_controller.dart';
 import 'package:flutkit/custom/screens/perfil/account_setting_screen.dart';
 import 'package:flutkit/custom/screens/perfil/app_setting_screen.dart';
-import 'package:flutkit/custom/screens/perfil/configurar_contrase%C3%B1a.dart';
+import 'package:flutkit/custom/screens/perfil/configurar_contrasenia.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_button.dart';
@@ -32,6 +32,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
   
   String _botonText = "INICIAR SESIÓN";
   bool _isLoggedIn = false, _estaCompletado = false, _confirmed = false;
+  User _user = User();
   @override
   void initState() {
     super.initState();
@@ -39,12 +40,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
     customTheme = AppTheme.customTheme;
     loginController = LoginController();
     if(Provider.of<AppNotifier>(context, listen: false).isLoggedIn){
-      User user = Provider.of<AppNotifier>(context, listen: false).user;
+      _user = Provider.of<AppNotifier>(context, listen: false).user;
       setState(() {
         _botonText = "CERRAR SESIÓN";
         _isLoggedIn = true;
-        _estaCompletado = user.completada!;
-        _confirmed = user.confirmed!;
+        _estaCompletado = _user.completada!;
+        _confirmed = _user.confirmed!;
       });
     }
   }
@@ -145,17 +146,23 @@ class _PerfilScreenState extends State<PerfilScreen> {
             child: _buildSingleRow('Configuración de la App', LucideIcons.lock),
           ),
           Divider(),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => LectorQRScreen()));
-            },
-            child: _buildSingleRow('Lector de QR', LucideIcons.lock),
+          if(_isLoggedIn && _user.rolCustom! == "admin")
+          Column(
+            children: [
+            GestureDetector(
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => LectorQRScreen()));
+              },
+              child: _buildSingleRow('Lector de QR', LucideIcons.lock),
+            ),
+            Divider(),
+            ]
           ),
-          Divider(),
           MySpacing.height(20),
           MyButton.block(
             onPressed: () {
               if(_isLoggedIn){
+                showSnackBarWithFloating("Se cerró tu cuenta satisfactoriamente", Color.fromRGBO(32, 104, 14, 1));
                 loginController.logout(context);
               }else{
                 loginController.logIn();
@@ -182,6 +189,15 @@ class _PerfilScreenState extends State<PerfilScreen> {
             color: customTheme.muviPrimary,
           ),
         ],
+      ),
+    );
+  }
+  void showSnackBarWithFloating(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: MyText.titleSmall(message, color: theme.colorScheme.onPrimary),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }

@@ -1,16 +1,15 @@
+import 'dart:ui';
 import 'package:flutkit/custom/auth/validar_email.dart';
 import 'package:flutkit/homes/homes_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:flutkit/custom/auth/login_screen.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/utils/generadores.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
-import 'package:flutkit/custom/widgets/progress_custom.dart';
-import 'package:flutkit/custom/widgets/verification_acount_noti.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
-import 'package:flutkit/helpers/widgets/my_button.dart';
 import 'package:flutkit/helpers/widgets/my_container.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/helpers/widgets/my_text.dart';
@@ -33,7 +32,6 @@ class _Register2ScreenState extends State<Register2Screen> {
   Generador generador = Generador();
   String _username = "", _password ="", _email = "", _primerNombre = "", _token = "", _apellidoPaterno = "";
   String _error = "", _errorPassword ="", _errorEmail = "", _errorPrimerNombre = "", _errorApellidoPaterno = "";
-  int _isInProgress = -1;
   @override
   void initState() {
     super.initState();
@@ -53,14 +51,12 @@ class _Register2ScreenState extends State<Register2Screen> {
   }
   void _signup() async {
     try {
-      setState(() {
-        _isInProgress = 0;
-      });
+      showPopup(context);
       _username = _email;
       _token = generador.generarToken();
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      String _tokenDispositivo = prefs.getString('tokenDispositivo') ?? "";
-      User? createduser = await ApiService().addUser(context, _email, _username, _password, _primerNombre, _apellidoPaterno, _token, _tokenDispositivo);
+      String tokenDispositivo = prefs.getString('tokenDispositivo') ?? "";
+      User? createduser = await ApiService().addUser(context, _email, _username, _password, _primerNombre, _apellidoPaterno, _token, tokenDispositivo);
       if (createduser != null) {
         // navigate to the dashboard.
         Provider.of<AppNotifier>(context, listen: false).login();
@@ -69,243 +65,360 @@ class _Register2ScreenState extends State<Register2Screen> {
         Navigator.push(context,MaterialPageRoute(builder: (context) => ValidarEmail(theme: theme, estado: 1)));
       }else{
         _error = "Ya existe una cuenta con el mismo correo electronico.";
+        Navigator.of(context).pop();
       }
     } on Exception catch (e) {
       setState(() {
-        _error = e.toString().substring(11);
+        if(e.toString().substring(11) == "Exception: Email already taken"){
+          _error = "Ya existe una cuenta con el mismo correo electronico.";
+        }else{
+          _error = "Algo salio mal";
+        }
       });
+      Navigator.of(context).pop();
     }
   }
   @override
   Widget build(BuildContext context) {
     return Scaffold (
-      body: Stack(
-        children: <Widget>[
-          ClipPath(
-            clipper: _MyCustomClipper(context),
-            child: Container(
-              alignment: Alignment.center,
-              color: theme.colorScheme.background,
-            )
+      appBar: AppBar(
+        toolbarHeight: 40, // Altura del AppBar
+        leading: IconButton(
+          icon: Icon(
+            LucideIcons.chevronLeft,
+            color: theme.colorScheme.onBackground,
           ),
-          Positioned(
-            left: 30,
-            right: 30,
-            top: MediaQuery.of(context).size.height * 0.15,
-            child: Column(
-              children: <Widget>[
-                MyContainer.bordered(
-                  color: theme.scaffoldBackgroundColor,
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        margin: EdgeInsets.only(top: 8, bottom: 8),
-                        child: MyText.titleLarge("REGISTRARSE", fontWeight: 600),
-                      ),
-                      if (_error.isNotEmpty)
-                      Column(
-                        children: [
-                          Text(
-                            _error,
-                            style: const TextStyle(color: Colors.red),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          )
-                        ],
-                      ),
-                      Container(
-                        padding: EdgeInsets.only(left: 16, right: 16, top: 8),
-                        child: Column(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            MyContainer.bordered(
+              color: theme.scaffoldBackgroundColor,
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    margin: EdgeInsets.only(top: 8, bottom: 8),
+                    child: Row(
+                      children: const <Widget>[
+                        Icon(LucideIcons.atSign, size: 40, color: Color.fromRGBO(215, 215, 215, 1),), // Icono a la izquierda
+                      ],
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: 8, bottom: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Row(
                           children: <Widget>[
-                            Container(
-                              margin: EdgeInsets.only(top: 16),
-                              child: TextFormField(
-                                onChanged: (value) {
-                                  setState(() {
-                                    _primerNombre = value;
-                                  });
-                                },
-                                style: MyTextStyle.bodyLarge(
-                                    color: theme.colorScheme.onBackground,
-                                    fontWeight: 500),
-                                decoration: InputDecoration(
-                                  hintText: "Primer nombre",
-                                  hintStyle: MyTextStyle.bodyLarge(
-                                      color: theme.colorScheme.onBackground,
-                                      fontWeight: 500),
-                                  prefixIcon: Icon(LucideIcons.user),
-                                  error: _errorPrimerNombre.isNotEmpty
-                                  ? Text(
-                                      _errorPrimerNombre,
-                                      style: TextStyle(color: Colors.red),
-                                    )
-                                  : null,
-                                ),
-                                textCapitalization: TextCapitalization.sentences,
+                            Icon(LucideIcons.mail, size: 24), // Icono a la izquierda
+                            SizedBox(width: 8), // Espacio entre el icono y el texto
+                            MyText.titleLarge(
+                              "Registrate con tu email",
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
                               ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(top: 16),
-                              child: TextFormField(
-                                onChanged: (value) {
-                                  setState(() {
-                                    _apellidoPaterno = value;
-                                  });
-                                },
-                                style: MyTextStyle.bodyLarge(
-                                    color: theme.colorScheme.onBackground,
-                                    fontWeight: 500),
-                                decoration: InputDecoration(
-                                  hintText: "Apellido paterno",
-                                  hintStyle: MyTextStyle.bodyLarge(
-                                      color: theme.colorScheme.onBackground,
-                                      fontWeight: 500),
-                                  prefixIcon: Icon(LucideIcons.user),
-                                  error: _errorApellidoPaterno.isNotEmpty
-                                  ? Text(
-                                      _errorApellidoPaterno,
-                                      style: TextStyle(color: Colors.red),
-                                    )
-                                  : null,
-                                ),
-                                textCapitalization: TextCapitalization.sentences,
-                              ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(top: 16),
-                              child: TextFormField(
-                                onChanged: (value) {
-                                  setState(() {
-                                    _email = value;
-                                  });
-                                },
-                                style: MyTextStyle.bodyLarge(
-                                    color: theme.colorScheme.onBackground,
-                                    fontWeight: 500),
-                                decoration: InputDecoration(
-                                  hintText: "Correo electronico",
-                                  hintStyle: MyTextStyle.bodyLarge(
-                                      color: theme.colorScheme.onBackground,
-                                      fontWeight: 500),
-                                  prefixIcon: Icon(LucideIcons.mail),
-                                  error: _errorEmail.isNotEmpty
-                                  ? Text(
-                                      _errorEmail,
-                                      style: TextStyle(color: Colors.red),
-                                    )
-                                  : null,
-                                ),
-                                keyboardType: TextInputType.emailAddress,
-                              ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(top: 16),
-                              child: TextFormField(
-                                onChanged: (value) {
-                                  setState(() {
-                                    _password = value;
-                                  });
-                                },
-                                style: MyTextStyle.bodyLarge(
-                                    color: theme.colorScheme.onBackground,
-                                    fontWeight: 500),
-                                decoration: InputDecoration(
-                                  hintText: "Contraseña",
-                                  hintStyle: MyTextStyle.bodyLarge(
-                                      color: theme.colorScheme.onBackground,
-                                      fontWeight: 500),
-                                  prefixIcon: Icon(LucideIcons.lock),
-                                  error: _errorPassword.isNotEmpty
-                                  ? Text(
-                                      _errorPassword,
-                                      style: TextStyle(color: Colors.red),
-                                    )
-                                  : null,
-                                  suffixIcon: IconButton(
-                                    icon: Icon(_passwordVisible
-                                        ? LucideIcons.eyeOff
-                                        : LucideIcons.eye),
-                                    onPressed: () {
-                                      setState(() {
-                                        _passwordVisible = !_passwordVisible;
-                                      });
-                                    },
-                                  ),
-                                ),
-                                obscureText: _passwordVisible,
-                              ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(top: 16),
-                              child: MyButton.block(
-                                elevation: 0,
-                                borderRadiusAll: 4,
-                                onPressed: () => _validarCamposRegister(),
-                                padding: MySpacing.y(20),
-                                child: MyText.labelMedium(
-                                  "REGISTRARME",
-                                  fontSize: 12,
-                                  fontWeight: 600,
-                                  color: theme.colorScheme.onPrimary,
-                                  letterSpacing: 0.5,
-                                ),
-                              )
                             ),
                           ],
                         ),
+                        SizedBox(height: 8), // Espacio entre el título y el texto
+                        MyText.bodyMedium(
+                          'Posterior a tu registro podrás iniciar el llenado de tu perfil',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (_error.isNotEmpty)
+                  Column(
+                    children: [
+                      Text(
+                        _error,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                      const SizedBox(
+                        height: 10,
                       )
                     ],
                   ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) => Login2Screen()));
-                  },
-                  child: Container(
-                    padding: EdgeInsets.only(top: 16, bottom: 8),
-                    child: RichText(
-                      text: TextSpan(children: <TextSpan>[
-                        TextSpan(
-                            text: "¿Ya tienes una cuenta? ",
-                            style: MyTextStyle.bodyMedium(fontWeight: 500)),
-                        TextSpan(
-                            text: " Ingresar",
-                            style: MyTextStyle.bodyMedium(
-                                fontWeight: 600,
-                                color: theme.colorScheme.primary)),
-                      ]),
+                  Container(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          margin: EdgeInsets.only(top: 16, bottom: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: TextFormField(
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _primerNombre = value;
+                                    });
+                                  },
+                                  textCapitalization: TextCapitalization.sentences,
+                                  decoration: InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                                    border: InputBorder.none,
+                                    labelText: 'Primer nombre',
+                                    labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Color.fromRGBO(32, 104, 14, 1),
+                                        width: 2.0,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              if (_errorPrimerNombre.isNotEmpty)
+                                Padding(
+                                  padding: EdgeInsets.only(top: 8),
+                                  child: Text(
+                                    _errorPrimerNombre,
+                                    style: TextStyle(color: Colors.red),
+                                    textAlign: TextAlign.start,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 16, bottom: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: TextFormField(
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _apellidoPaterno = value;
+                                    });
+                                  },
+                                  textCapitalization: TextCapitalization.sentences,
+                                  decoration: InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                                    border: InputBorder.none,
+                                    labelText: 'Apellido paterno',
+                                    labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Color.fromRGBO(32, 104, 14, 1),
+                                        width: 2.0,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              if (_errorApellidoPaterno.isNotEmpty)
+                                Padding(
+                                  padding: EdgeInsets.only(top: 8),
+                                  child: Text(
+                                    _errorApellidoPaterno,
+                                    style: TextStyle(color: Colors.red),
+                                    textAlign: TextAlign.start,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 16, bottom: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: TextFormField(
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _email = value;
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                                    border: InputBorder.none,
+                                    labelText: 'Email',
+                                    labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Color.fromRGBO(32, 104, 14, 1),
+                                        width: 2.0,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              if (_errorEmail.isNotEmpty)
+                                Padding(
+                                  padding: EdgeInsets.only(top: 8),
+                                  child: Text(
+                                    _errorEmail,
+                                    style: TextStyle(color: Colors.red),
+                                    textAlign: TextAlign.start,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 16, bottom: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: TextFormField(
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _password = value;
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                                    border: InputBorder.none,
+                                    labelText: 'Contraseña',
+                                    labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Color.fromRGBO(32, 104, 14, 1),
+                                        width: 2.0,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(_passwordVisible
+                                          ? LucideIcons.eyeOff
+                                          : LucideIcons.eye),
+                                      onPressed: () {
+                                        setState(() {
+                                          _passwordVisible = !_passwordVisible;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  obscureText: _passwordVisible,
+                                ),
+                              ),
+                              if (_errorPassword.isNotEmpty)
+                                Padding(
+                                  padding: EdgeInsets.only(top: 8),
+                                  child: Text(
+                                    _errorPassword,
+                                    style: TextStyle(color: Colors.red),
+                                    textAlign: TextAlign.start,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          width: double.infinity,
+                          margin: EdgeInsets.only(top: 26),
+                          child: CupertinoButton(
+                            color: Color.fromRGBO(32, 104, 14, 1),
+                            onPressed: () {
+                              _validarCamposRegister();
+                            },
+                            borderRadius: BorderRadius.all(Radius.circular(14)),
+                            padding: MySpacing.xy(100, 16),
+                            pressedOpacity: 0.5,
+                            child: MyText.bodyMedium(
+                              "Continuar",
+                              color: theme.colorScheme.onSecondary,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                )
-              ],
-            ),
-          ),
-          Positioned(
-            top: MySpacing.safeAreaTop(context) + 12,
-            left: 16,
-            child: InkWell(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: Icon(
-                LucideIcons.chevronLeft,
-                color: theme.colorScheme.onBackground,
+                  )
+                ],
               ),
             ),
-          ),
-          if (_isInProgress == 0 && false)
-          ProgressEspera(
-            theme: theme, // Pasar el tema como argumento
-          ),
-          if (_isInProgress == 1)
-          VerificationDialog(
-            theme: theme,
-            estado: 1 // Pasar el tema como argumento
-          ),
-        ],
+            GestureDetector(
+              onTap: () {
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => Login2Screen()));
+              },
+              child: Container(
+                padding: EdgeInsets.only(top: 16, bottom: 8),
+                child: RichText(
+                  text: TextSpan(children: <TextSpan>[
+                    TextSpan(
+                        text: "¿Ya tienes una cuenta? ",
+                        style: MyTextStyle.bodyMedium(fontWeight: 500)),
+                    TextSpan(
+                        text: " Ingresar",
+                        style: MyTextStyle.bodyMedium(
+                            fontWeight: 600,
+                            color: theme.colorScheme.primary)),
+                  ]),
+                ),
+              ),
+            ),
+          ],
+        ),
       )
+    );
+  }
+  void showPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Stack(
+          children: [
+            BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(
+                color: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.5),
+              ),
+            ),
+            Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      theme.colorScheme.primary,
+                    ),
+                  ),
+                  MySpacing.width(20),
+                  MyText.bodyMedium("Espera por favor...",
+                      fontWeight: 600, letterSpacing: 0.3)
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -5,11 +5,8 @@ import 'package:flutkit/custom/models/evento.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
-import 'package:flutkit/helpers/utils/generator.dart';
 import 'package:flutkit/helpers/widgets/my_button.dart';
 import 'package:flutkit/loading_effect.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutkit/custom/controllers/login_controller.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
@@ -42,8 +39,8 @@ class _EventoScreenState extends State<EventoScreen> {
   String _qr = "";
   
   String _backUrl = "";
-  Evento _evento = new Evento();
-  User _user = new User();
+  Evento _evento = Evento();
+  User _user = User();
   bool _isLoggedIn = false;
 
   @override
@@ -53,19 +50,6 @@ class _EventoScreenState extends State<EventoScreen> {
     theme = AppTheme.theme;
     customTheme = AppTheme.customTheme;
     controller = ProfileController();
-    timerAnimation = Timer.periodic(Duration(seconds: 5), (Timer timer) {
-      if (_currentPage < _numPages - 1) {
-        _currentPage++;
-      } else {
-        _currentPage = 0;
-      }
-
-      _pageController.animateToPage(
-        _currentPage,
-        duration: Duration(milliseconds: 600),
-        curve: Curves.ease,
-      );
-    });
     _cargarDatos();
   }
   void _cargarDatos() async {
@@ -132,12 +116,6 @@ class _EventoScreenState extends State<EventoScreen> {
         showSnackBarWithFloating("Inscripción exitosa", Color.fromRGBO(32, 104, 14, 1));
       });
     }
-  }
-  @override
-  void dispose() {
-    super.dispose();
-    timerAnimation.cancel();
-    _pageController.dispose();
   }
   @override
   Widget build(BuildContext context) {
@@ -208,55 +186,53 @@ class _EventoScreenState extends State<EventoScreen> {
                       bottom: 10,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: _buildPageIndicatorAnimated(),
+                        children: _buildPageIndicatorStatic(),
                       ),
                     ),
                   ],
                 ),
                 if(_evento.fechaDeInicio!.isNotEmpty)
-                Container(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center, // Alinea los elementos del Row al centro
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            MyText(
-                              "Inicia",
-                              fontSize: 12,
-                              fontWeight: 500,
-                            ),
-                            MyText(
-                              _evento.fechaDeInicio!,
-                              fontSize: 14,
-                              fontWeight: 600,
-                            ),
-                          ],
-                        ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center, // Alinea los elementos del Row al centro
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          MyText(
+                            "Inicia",
+                            fontSize: 12,
+                            fontWeight: 500,
+                          ),
+                          MyText(
+                            _evento.fechaDeInicio!,
+                            fontSize: 14,
+                            fontWeight: 600,
+                          ),
+                        ],
                       ),
-                      if(_evento.fechaDeFin!.isNotEmpty)
-                      Container(
-                        padding: EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            MyText(
-                              "Finaliza",
-                              fontSize: 12,
-                              fontWeight: 500,
-                            ),
-                            MyText(
-                              _evento.fechaDeFin!,
-                              fontSize: 14,
-                              fontWeight: 600,
-                            ),
-                          ],
-                        ),
+                    ),
+                    if(_evento.fechaDeFin!.isNotEmpty)
+                    Container(
+                      padding: EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          MyText(
+                            "Finaliza",
+                            fontSize: 12,
+                            fontWeight: 500,
+                          ),
+                          MyText(
+                            _evento.fechaDeFin!,
+                            fontSize: 14,
+                            fontWeight: 600,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
                 Divider(),
                 Container(
@@ -302,9 +278,9 @@ class _EventoScreenState extends State<EventoScreen> {
                   ),
                 ),
                 _evento.capacidad! > -1
-                ? ((_evento.capacidad! - _inscritos!) > 0
+                ? ((_evento.capacidad! - _inscritos) > 0
                     ? MyText.titleLarge(
-                        "Cupos disponibles: " + (_evento.capacidad! - _inscritos).toString(),
+                        "Cupos disponibles: ${_evento.capacidad! - _inscritos}",
                         fontSize: 16,
                         fontWeight: 600,
                       )
@@ -423,9 +399,9 @@ class _EventoScreenState extends State<EventoScreen> {
                     ),
                 ),
                 Divider(),
-                if(_evento.calendario!.length > 0)
+                if(_evento.calendario!.isNotEmpty)
                 _crearCalendario(),
-                if(_evento.calendario!.length > 0)
+                if(_evento.calendario!.isNotEmpty)
                 Divider(),
               ],
             ),
@@ -447,12 +423,8 @@ class _EventoScreenState extends State<EventoScreen> {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext buildContext) {
-        return Container(
-          decoration: BoxDecoration(
-              color: theme.colorScheme.background,
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16))),
+        return SizedBox(
+          width: double.infinity,
           child: Padding(
             padding: MySpacing.fromLTRB(24, 24, 24, 36),
             child: Column(
@@ -466,6 +438,7 @@ class _EventoScreenState extends State<EventoScreen> {
                       fontSize: 16,
                       fontWeight: 600,
                     ),
+                    SizedBox(height: 16.0), 
                     Container(
                       margin: const EdgeInsets.all(8.0),
                       child: MyButton.medium(
@@ -496,7 +469,7 @@ class _EventoScreenState extends State<EventoScreen> {
                 ),
               ],
             ),
-          ),
+          )
         );
       }
     );
@@ -553,11 +526,9 @@ class _EventoScreenState extends State<EventoScreen> {
         children: List.generate(
           _evento.etiquetas!.length,
           (index) {
-            return Container(
-              child: Text(
-                "#"+_evento.etiquetas![index],
-                style: TextStyle(fontSize: 14.0),
-              ),
+            return Text(
+              "#${_evento.etiquetas![index]}",
+              style: TextStyle(fontSize: 14.0),
             );
           },
         ),
@@ -587,13 +558,14 @@ class _EventoScreenState extends State<EventoScreen> {
       );
     }).toList();
   }
-  List<Widget> _buildPageIndicatorAnimated() {
+  List<Widget> _buildPageIndicatorStatic() {
     List<Widget> list = [];
     for (int i = 0; i < _numPages; i++) {
       list.add(i == _currentPage ? _indicator(true) : _indicator(false));
     }
     return list;
   }
+
   Widget _indicator(bool isActive) {
     return AnimatedContainer(
       duration: Duration(milliseconds: 300),
@@ -609,35 +581,27 @@ class _EventoScreenState extends State<EventoScreen> {
   }
   Widget _breadcrumbs() {
     return Center(
-      child: Container(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center, // Alinea los elementos del Row al centro
-          children: [
-            Container(
-              child: MyText(
-                "Evento",
-                fontSize: 14,
-                fontWeight: 500,
-              ),
-            ),
-            Icon(LucideIcons.dot),
-            Container(
-              child: MyText(
-                _evento.categoria!,
-                fontSize: 14,
-                fontWeight: 500,
-              ),
-            ),
-            Icon(LucideIcons.dot),
-            Container(
-              child: MyText(
-                _evento.publicacion!,
-                fontSize: 14,
-                fontWeight: 500,
-              ),
-            ),
-          ],
-        ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center, // Alinea los elementos del Row al centro
+        children: [
+          MyText(
+            "Evento",
+            fontSize: 14,
+            fontWeight: 500,
+          ),
+          Icon(LucideIcons.dot),
+          MyText(
+            _evento.categoria!,
+            fontSize: 14,
+            fontWeight: 500,
+          ),
+          Icon(LucideIcons.dot),
+          MyText(
+            _evento.publicacion!,
+            fontSize: 14,
+            fontWeight: 500,
+          ),
+        ],
       ),
     );
   }

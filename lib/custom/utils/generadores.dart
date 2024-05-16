@@ -17,11 +17,11 @@ class Generador{
   }
 
   String generarToken() {
-    // Generar un número aleatorio de 6 dígitos
+    // Generar un número aleatorio de 5 dígitos
     Random random = new Random();
-    int randomNumber = random.nextInt(999999 - 100000) + 100000;
+    int randomNumber = random.nextInt(99999 - 10000) + 10000;
 
-    // Convertir el número en una cadena de 6 dígitos
+    // Convertir el número en una cadena de 5 dígitos
     String token = randomNumber.toString();
 
     return token;

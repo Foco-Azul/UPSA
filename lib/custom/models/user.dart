@@ -21,6 +21,7 @@ class User {
     this.completada,
     this.eventosSeguidos,
     this.qr,
+    this.rolCustom,
     //required this.userMeta,
     //required this.role,
   });
@@ -37,6 +38,7 @@ class User {
   List<int>? eventosSeguidos;
   Map<int,int> eventosInscritos = {};
   String? qr;
+  String? rolCustom;
   //UserMeta userMeta;
   //int role;
 
@@ -50,6 +52,7 @@ class User {
     createdAt: DateTime.parse(json["createdAt"]),
     updatedAt: DateTime.parse(json["updatedAt"]),
     completada: json["completada"],
+    rolCustom: json["rolCustom"],
     //userMeta: json["userMeta"],
     //role: json["role"]["id"],
   );
@@ -64,12 +67,13 @@ class User {
     "createdAt": createdAt?.toIso8601String(),
     "updatedAt": updatedAt?.toIso8601String(),
     "completada": completada,
+    "rolCustom": rolCustom,
     //"userMeta": userMeta,
     //"role": role,
   };
   @override
   String toString() {
-    return 'User{id: $id, username: $username, email: $email, provider: $provider, confirmed: $confirmed, blocked: $blocked, createdAt: $createdAt, updatedAt: $updatedAt, completada: $completada}';
+    return 'User{id: $id, username: $username, email: $email, provider: $provider, confirmed: $confirmed, blocked: $blocked, createdAt: $createdAt, updatedAt: $updatedAt, completada: $completada, rolCustom: $rolCustom}';
   }
   
 }

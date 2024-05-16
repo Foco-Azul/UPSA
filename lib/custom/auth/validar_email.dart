@@ -1,6 +1,8 @@
 import 'package:flutkit/custom/auth/registro_estudiante.dart';
+import 'package:flutkit/custom/widgets/efectoCarga.dart';
 import 'package:flutkit/helpers/widgets/my_container.dart';
 import 'package:flutkit/homes/homes_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -9,7 +11,6 @@ import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
-import 'package:flutkit/helpers/widgets/my_button.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutkit/helpers/widgets/my_text_style.dart';
@@ -21,32 +22,26 @@ class ValidarEmail extends StatefulWidget {
   const ValidarEmail({Key? key, required this.theme, this.estado = 0}) : super(key: key);
 
   @override
-  _ValidarEmailState createState() => _ValidarEmailState(estado: this.estado);
+  _ValidarEmailState createState() => _ValidarEmailState(estado: estado);
 }
 class _ValidarEmailState extends State<ValidarEmail> {
   final int estado;
   _ValidarEmailState({required this.estado});
 
-  String _titulo = "", _texto1 = "", _texto2 = "", _token = "";
+  String _titulo = "", _texto1 = "", _token = "";
   String _errorToken = "";
-
+  User _user = User();
   bool _seReenvio = false;
   bool _errorVerificacion = false;
   @override
   void initState() {
     super.initState();
+    _user = Provider.of<AppNotifier>(context, listen: false).user;
     armarInformacion();
   }
   void armarInformacion(){
-    if(estado == 1){
-      _titulo = "¡Gracias!";
-      _texto1 = "Tu cuenta se ha creado satisfactoriamente.";
-      _texto2 = "Por favor, revisa tu bandeja de entrada, se ha enviado un código de verificación a tu correo electrónico.";
-    }else{
-      _titulo = "¡Hola!";
-      _texto1 = "Tu cuenta no esta verificada.";
-      _texto2 = "Ingresa el código de verificación que enviamos a tu correo electronico.";
-    }
+      _titulo = "Verifiquemos que no sos un robot";
+      _texto1 = "Verifica tu correo ingresando el código enviado a: ";
   }
   
   void verificarCodigo(String verificationCode){
@@ -59,10 +54,9 @@ class _ValidarEmailState extends State<ValidarEmail> {
     }
   }
   void reenviarToken() async{  
-    User user = Provider.of<AppNotifier>(context, listen: false).user;
     //int userId=39;
     //String email = "carlosvargasbazoalto@gmail.com";
-    bool bandera = await ApiService().reenviarToken(user.id!, user.email!);
+    bool bandera = await ApiService().reenviarToken(_user.id!, _user.email!);
     setState(() {
       _seReenvio = bandera;
     });
@@ -73,6 +67,7 @@ class _ValidarEmailState extends State<ValidarEmail> {
         _errorToken = "El código es requerido.";
       });
     }else{
+      EfectoCarga.showPopup(context);
       User user = Provider.of<AppNotifier>(context, listen: false).user;
       bool bandera = await ApiService().verificarCuenta(user.id!, _token);
       if(bandera){
@@ -81,9 +76,10 @@ class _ValidarEmailState extends State<ValidarEmail> {
         Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4)),(Route<dynamic> route) => false);
         Navigator.push(context,MaterialPageRoute(builder: (context) => RegistroEstudiante()));
       }else{
+        Navigator.of(context).pop();
         setState(() {
           _errorVerificacion = true;
-          _errorToken = "Algo salio mal, intentalo más tarde.";
+          _errorToken = "Codigo incorrecto.";
         });
       }
     }
@@ -107,14 +103,21 @@ class _ValidarEmailState extends State<ValidarEmail> {
                     children: <Widget>[
                       Center(
                         child: Icon(
-                          Icons.person_outline,
+                          LucideIcons.shieldCheck,
                           size: 40,
                           color: theme.colorScheme.onBackground.withAlpha(220),
                         ),
                       ),
                       Container(
-                        margin: EdgeInsets.only(bottom: 24, top: 8),
-                        child: MyText.titleLarge(_titulo, fontWeight: 600),
+                        margin: EdgeInsets.symmetric(horizontal: 24),
+                        child: Center(
+                          child: MyText.titleLarge(
+                            _titulo,
+                            fontWeight: 700,
+                            fontSize: 20,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                       ),
                       Container(
                         padding: EdgeInsets.only(left: 16, right: 16),
@@ -125,18 +128,17 @@ class _ValidarEmailState extends State<ValidarEmail> {
                               child: Center(
                                 child: MyText.bodySmall(
                                   _texto1,
-                                  fontWeight: 600,
+                                  fontWeight: 400,
                                   letterSpacing: 0,
                                 ),
                               ),
                             ),
                             Container(
-                              margin: MySpacing.top(16),
+                              margin: MySpacing.top(8),
                               child: Center(
                                 child: MyText.bodySmall(
-                                  _texto2,
-                                  fontWeight: 500,
-                                  height: 1.15,
+                                  _user.email!,
+                                  fontWeight: 700,
                                   textAlign: TextAlign.center,
                                 ),
                               ),
@@ -157,28 +159,34 @@ class _ValidarEmailState extends State<ValidarEmail> {
                             Container(
                               margin: MySpacing.top(16),
                               child: OtpTextField(
-                                numberOfFields: 6,
-                                borderColor: Color(0xFF512DA8),
+                                numberOfFields: 5,
                                 showFieldAsBox: true,
+                                fieldWidth: 50.0,
+                                borderRadius: BorderRadius.circular(14), // Ajusta el radio de borde para que sea más cuadrado
                                 keyboardType: TextInputType.number,
+                                focusedBorderColor: Color.fromRGBO(32, 104, 14, 1), 
                                 onSubmit: (String verificationCode) {
                                   verificarCodigo(verificationCode);
                                 },
                               ),
                             ),
                             Container(
-                              margin: EdgeInsets.only(top: 16),
-                              child: MyButton.block(
-                                  elevation: 0,
-                                  borderRadiusAll: 4,
-                                  padding: MySpacing.y(20),
-                                  onPressed: () => verificarCuenta(),
-                                  child: MyText.labelMedium(
-                                      "VERIFICAR CUENTA",
-                                      fontSize: 12,
-                                      fontWeight: 600,
-                                      color: theme.colorScheme.onPrimary,
-                                      letterSpacing: 0.5)),
+                              width: double.infinity,
+                              margin: EdgeInsets.only(top: 26),
+                              child: CupertinoButton(
+                                color: Color.fromRGBO(32, 104, 14, 1),
+                                onPressed: () {
+                                  verificarCuenta();
+                                },
+                                borderRadius: BorderRadius.all(Radius.circular(14)),
+                                padding: MySpacing.xy(100, 16),
+                                pressedOpacity: 0.5,
+                                child: MyText.bodyMedium(
+                                  "Continuar",
+                                  color: theme.colorScheme.onSecondary,
+                                  fontSize: 16,
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -205,9 +213,13 @@ class _ValidarEmailState extends State<ValidarEmail> {
                       child: RichText(
                         text: TextSpan(children: <TextSpan>[
                           TextSpan(
-                              text: "Reenviar código de verificación",
+                              text: "¿No recibiste un código? ",
+                              style: MyTextStyle.bodyMedium(fontWeight: 400, fontSize: 14)),
+                          TextSpan(
+                              text: " Envialo de nuevo",
                               style: MyTextStyle.bodyMedium(
                                   fontWeight: 600,
+                                  fontSize: 14,
                                   color: theme.colorScheme.primary)),
                         ]),
                       ),

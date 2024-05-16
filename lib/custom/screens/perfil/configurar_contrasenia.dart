@@ -1,8 +1,3 @@
-/*
-* File : Account Setting
-* Version : 1.0.0
-* */
-
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/utils/server.dart';
@@ -22,12 +17,10 @@ class PasswordSettingScreen extends StatefulWidget {
 }
 
 class _PasswordSettingScreenState extends State<PasswordSettingScreen> {
-  bool _passwordVisible = false;
   late CustomTheme customTheme;
   late ThemeData theme;
   late ProfileController controller;
   String _primerNombre = "", _apellidoPaterno = "", _email = "";
-  String _segundoNombre = "", _apellidoMaterno = "", _telefono = "";
   @override
   void initState() {
     super.initState();
@@ -43,10 +36,7 @@ class _PasswordSettingScreenState extends State<PasswordSettingScreen> {
     setState(() {
       _email = user.email!;
       _primerNombre = userMeta.primerNombre!;
-      _segundoNombre = userMeta.segundoNombre!;
       _apellidoPaterno = userMeta.apellidoPaterno!;
-      _apellidoMaterno = userMeta.apellidoMaterno!;
-      _telefono = userMeta.celular1!;
       controller.uiLoading = false;
     });
   }
@@ -119,7 +109,6 @@ class _PasswordSettingScreenState extends State<PasswordSettingScreen> {
                       child: TextFormField(
                         onChanged: (value) {
                           setState(() {
-                            _segundoNombre = value;
                           });
                         },
                         style: MyTextStyle.titleSmall(

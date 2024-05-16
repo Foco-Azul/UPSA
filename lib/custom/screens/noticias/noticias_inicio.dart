@@ -1,7 +1,7 @@
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/categoria.dart';
-import 'package:flutkit/custom/models/evento.dart';
-import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
+import 'package:flutkit/custom/models/noticia.dart';
+import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
@@ -10,20 +10,20 @@ import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-class ActividadesScreen extends StatefulWidget {
-  const ActividadesScreen({Key? key}) : super(key: key);
+class NoticiasScreen extends StatefulWidget {
+  const NoticiasScreen({Key? key}) : super(key: key);
 
   @override
-  _ActividadesScreenState createState() => _ActividadesScreenState();
+  _NoticiasScreenState createState() => _NoticiasScreenState();
 }
 
-class _ActividadesScreenState extends State<ActividadesScreen> {
+class _NoticiasScreenState extends State<NoticiasScreen> {
   late ThemeData theme;
   late CustomTheme customTheme;
   List<Categoria> _categorias = [];
   late ProfileController controller;
   int _selectedChoiceIndex = -1;
-  List<Evento> _eventos =  [];
+  List<Noticia> _noticias =  [];
   String _backUrl = "";
   bool _cargando = false;
   @override
@@ -37,19 +37,22 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
   void _cargarCategorias() async{
     await dotenv.load(fileName: ".env");
     _backUrl = dotenv.get('backUrl');
-    List<Categoria> _categoriasActual = await ApiService().getCategorias();
-    _eventos = await ApiService().getEventosPorIds(_categoriasActual[0].idsContenido!);
+    List<Categoria> categoriasActual = await ApiService().getCategoriasNoticias();
+    _noticias = await ApiService().getNoticias();
     setState(() {
-      _categorias = _categoriasActual;
-      _selectedChoiceIndex = 0;
+      _categorias = categoriasActual;
       controller.uiLoading = false;
     });
   }  
-  void _cargarEventosCategoria() async{
+  void _cargarNoticiasCategoria() async{
     setState(() {
       _cargando = true;
     });
-    _eventos = await ApiService().getEventosPorIds(_categorias[_selectedChoiceIndex].idsContenido!);
+    if(_selectedChoiceIndex == -1){
+      _noticias = await ApiService().getNoticias();
+    }else{
+      _noticias = await ApiService().getNoticiasPorIdsCategoria(_categorias[_selectedChoiceIndex].idsContenido!);
+    }
     setState(() {
       _cargando = false;
     });
@@ -67,94 +70,40 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
       );
     } else {
       return Scaffold(
-      body: DefaultTabController(
-        length: 4,
-        initialIndex: 0,
-        child: Scaffold(
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            flexibleSpace: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                /*-------------- Build Tabs here ------------------*/
-                TabBar(
-                  isScrollable: true,
-                  tabs: [
-                    Tab(child: MyText.titleMedium("Eventos", fontWeight: 600, fontSize: 14,)),
-                    Tab(child: MyText.titleMedium("Clubes", fontWeight: 600, fontSize: 14,)),
-                    Tab(child: MyText.titleMedium("Concursos", fontWeight: 600, fontSize: 14,)),
-                    Tab(child: MyText.titleMedium("Quiz", fontWeight: 600, fontSize: 14,)),
-                  ],
-                  tabAlignment: TabAlignment.start,
-                  indicator: UnderlineTabIndicator(
-                    borderSide: BorderSide(color: Color.fromRGBO(32, 104, 14, 1), width: 2.0),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  Column(
+                    children: <Widget>[
+                        Container(
+                        padding: MySpacing.only(top: 12, bottom: 12),
+                        child: Wrap(
+                          children: _buildChoiceList(),
+                        ),
+                      )
+                    ]
                   ),
-                )
-              ],
+                ],
+              ),
             ),
-          ),
-
-          /*--------------- Build Tab body here -------------------*/
-          body: TabBarView(
-            children: <Widget>[
-              getTabContent('Eventos'),
-              getTabContent('Clubes'),
-              getTabContent('Concursos'),
-              getTabContent('Quiz'),
-            ],
-          ),
+            _cargando
+            ? Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(32, 104, 14, 1)),
+              ),
+            )
+              // Muestra el indicador de carga si `_cargando` es true
+            : generarContenido(_noticias), // Muestra el contenido generado si `_cargando` es false
+          ],
         ),
-      ),
-    );
+      );
     }
   }
-
-Widget getTabContent(String text) {
-  if(text != "Eventos"){
-    return Scaffold(
-      backgroundColor: theme.colorScheme.background,
-      body: Center(
-        child: MyText.titleMedium(text, fontWeight: 600),
-      ),
-    );
-  }else{
-    return Scaffold(
-    body: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              Container(
-                child: Column(
-                  children: <Widget>[
-                      Container(
-                      padding: MySpacing.only(top: 12, bottom: 12),
-                      child: Wrap(
-                        children: _buildChoiceList(),
-                      ),
-                    )
-                  ]
-                )
-              ),
-            ],
-          ),
-        ),
-        _cargando
-        ? Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(32, 104, 14, 1)),
-          ),
-        )
-          // Muestra el indicador de carga si `_cargando` es true
-        : generarContenido(_eventos), // Muestra el contenido generado si `_cargando` es false
-      ],
-    ),
-  );
-  }
-}
-  Widget generarContenido(List<Evento> data) {
+  Widget generarContenido(List<Noticia> data) {
     return Expanded(
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -165,14 +114,19 @@ Widget getTabContent(String text) {
             child: GestureDetector(
               onTap: () {
                 // Acción al hacer clic en el elemento
-                Navigator.push(context, MaterialPageRoute(builder: (context) => EventoScreen(idEvento: int.parse(data[index].id!,))));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => NoticiaScreen(idNoticia: data[index].id!,)));
               },
               child: Row(
                 children: [
-                  // Imagen a la izquierda
                   Container(
-                    width: MediaQuery.of(context).size.width * 0.25,
-                    child: Image.network(_backUrl+data[index].fotoPrincipal!),
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: NetworkImage(_backUrl+data[index].foto!),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    height: MediaQuery.of(context).size.height * 0.10,
+                    width: MediaQuery.of(context).size.width * 0.25, // 60% del ancho de la pantalla
                   ),
                   // Espaciador
                   SizedBox(width: 16),
@@ -181,10 +135,10 @@ Widget getTabContent(String text) {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        MyText.bodyLarge(data[index].titulo!, fontSize: 14, fontWeight: 600,),
+                        MyText.bodyLarge(data[index].titular!, fontSize: 14, fontWeight: 600,),
                         SizedBox(height: 8), // Espacio de 8 de alto entre los textos
                         Text(
-                          data[index].cuerpo!.replaceAll('\n', ''),
+                          data[index].descripcion!.replaceAll('\n', ''),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -228,7 +182,10 @@ Widget getTabContent(String text) {
             setState(() {
               if (_selectedChoiceIndex != index) {
                 _selectedChoiceIndex = selected ? index : -1; // Actualiza el índice seleccionado solo si es diferente
-                _cargarEventosCategoria();
+                _cargarNoticiasCategoria();
+              } else {
+                _selectedChoiceIndex = -1; // Deselecciona si se pulsa el mismo item
+                _cargarNoticiasCategoria();
               }
             });
           },

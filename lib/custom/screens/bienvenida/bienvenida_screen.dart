@@ -1,15 +1,12 @@
-import 'package:flutkit/custom/auth/login_screen.dart';
 import 'package:flutkit/custom/screens/bienvenida/postbienvenida_screen.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/theme/theme_type.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/helpers/widgets/my_text.dart';
-import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class WelcomeScreen extends StatefulWidget {
   WelcomeScreen({Key? key}) : super(key: key);
@@ -162,40 +159,38 @@ class _SingleNewsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: <Widget>[
-          Container(
-            padding: MySpacing.fromLTRB(0, 24, 0, 24),
-            child: Column(
-              children: <Widget>[
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Container(
-                      height: MediaQuery.of(context).size.height * 0.50, // 60% de la altura de la pantalla
-                      width: MediaQuery.of(context).size.height * 1,
-                      child: Image.network(
-                        imagen,
-                        fit: BoxFit.cover, // Ajusta la imagen para cubrir todo el espacio
-                      ),
+    return Column(
+      children: <Widget>[
+        Container(
+          padding: MySpacing.fromLTRB(0, 24, 0, 24),
+          child: Column(
+            children: <Widget>[
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.50, // 60% de la altura de la pantalla
+                    width: MediaQuery.of(context).size.height * 1,
+                    child: Image.network(
+                      imagen,
+                      fit: BoxFit.cover, // Ajusta la imagen para cubrir todo el espacio
                     ),
-                    Container(
-                      padding: MySpacing.fromLTRB(0, 24, 0, 0),
-                      margin: MySpacing.only(top: 16),
-                      child: MyText.titleLarge(title, fontWeight: 700, fontSize: 24,),
-                    ),
-                    Container(
-                      margin: MySpacing.top(16),
-                      child: MyText.bodyMedium(description, fontWeight: 500, height: 1.2, textAlign: TextAlign.center, fontSize: 15,),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          )
-        ],
-      ),
+                  ),
+                  Container(
+                    padding: MySpacing.fromLTRB(0, 24, 0, 0),
+                    margin: MySpacing.only(top: 16),
+                    child: MyText.titleLarge(title, fontWeight: 700, fontSize: 24,),
+                  ),
+                  Container(
+                    margin: MySpacing.top(16),
+                    child: MyText.bodyMedium(description, fontWeight: 500, height: 1.2, textAlign: TextAlign.center, fontSize: 15,),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        )
+      ],
     );
   }
 }

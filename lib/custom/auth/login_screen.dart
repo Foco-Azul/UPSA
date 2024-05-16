@@ -6,12 +6,12 @@ import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
-import 'package:flutkit/helpers/widgets/my_button.dart';
 import 'package:flutkit/helpers/widgets/my_container.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutkit/helpers/widgets/my_text_style.dart';
 import 'package:flutkit/homes/homes_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -55,20 +55,23 @@ class _Login2ScreenState extends State<Login2Screen> {
       User user = (await ApiService().login(_email, _password))!;
       if (user.id == null) {
         setState(() {
-          _error = "Correo o contraseña incorrecta";
+          _error = "Email o contraseña incorrecta";
         });
       } else {
         Provider.of<AppNotifier>(context, listen: false).login();
         Provider.of<AppNotifier>(context, listen: false).setUser(user);
+        showSnackBarWithFloating("Ingreso exitoso", Color.fromRGBO(32, 104, 14, 1));
         if(!user.confirmed!){
           Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
           Navigator.push(context,MaterialPageRoute(builder: (context) => ValidarEmail(theme: theme)));
+        }else{
+          if(!user.completada!){
+            Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
+            Navigator.push(context,MaterialPageRoute(builder: (context) => RegistroEstudiante()));
+          }else{
+            Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
+          }
         }
-        if(!user.completada!){
-          Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
-          Navigator.push(context,MaterialPageRoute(builder: (context) => RegistroEstudiante()));
-        }
-        Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
       }
     } on Exception catch (e) {
       setState(() {
@@ -76,10 +79,30 @@ class _Login2ScreenState extends State<Login2Screen> {
       });
     }
   }
-
+  void showSnackBarWithFloating(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: MyText.titleSmall(message, color: theme.colorScheme.onPrimary),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 40, // Altura del AppBar
+        leading: IconButton(
+          icon: Icon(
+            LucideIcons.chevronLeft,
+            color: theme.colorScheme.onBackground,
+          ),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
       body: Stack(
         children: <Widget>[
           ClipPath(
@@ -91,7 +114,7 @@ class _Login2ScreenState extends State<Login2Screen> {
           Positioned(
             left: 30,
             right: 30,
-            top: MediaQuery.of(context).size.height * 0.2,
+            top: MediaQuery.of(context).size.height * 0.13,
             child: ListView(
               shrinkWrap: true,
               children: <Widget>[
@@ -101,86 +124,141 @@ class _Login2ScreenState extends State<Login2Screen> {
                   child: Column(
                     children: <Widget>[
                       Container(
-                        margin: EdgeInsets.only(bottom: 24, top: 8),
-                        child: MyText.titleLarge("ACCEDER", fontWeight: 600),
+                        margin: EdgeInsets.only(top: 8, bottom: 8),
+                        child: Row(
+                          children: const <Widget>[
+                            Icon(LucideIcons.atSign, size: 40, color: Color.fromRGBO(215, 215, 215, 1),), // Icono a la izquierda
+                          ],
+                        ),
+                      ),
+                      Row(
+                        children: <Widget>[
+                          Icon(LucideIcons.mail, size: 24), // Icono a la izquierda
+                          SizedBox(width: 8), // Espacio entre el icono y el texto
+                          MyText.titleLarge(
+                            "Ingresa con tu email",
+                            style: TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                       if (_error.isNotEmpty)
-                        Column(
-                          children: [
-                            Text(
-                              _error,
-                              style: const TextStyle(color: Colors.red),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            )
-                          ],
+                        Container(
+                          margin: EdgeInsets.only(top: 10),
+                          child: Column(
+                            children: [
+                              Text(
+                                _error,
+                                style: const TextStyle(color: Colors.red),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              )
+                            ],
+                          ),
                         ),
                       Container(
                         padding: EdgeInsets.only(left: 16, right: 16),
                         child: Column(
                           children: <Widget>[
-                            TextFormField(
-                              onChanged: (value) {
-                                setState(() {
-                                  _email = value;
-                                });
-                              },
-                              style: MyTextStyle.bodyLarge(
-                                  letterSpacing: 0.1,
-                                  color: theme.colorScheme.onBackground,
-                                  fontWeight: 500),
-                              decoration: InputDecoration(
-                                hintText: "Correo electronico",
-                                hintStyle: MyTextStyle.titleSmall(
-                                    letterSpacing: 0.1,
-                                    color: theme.colorScheme.onBackground,
-                                    fontWeight: 500),
-                                prefixIcon: Icon(LucideIcons.mail),
-                                error: _errorEmail.isNotEmpty
-                                  ? Text(
-                                      _errorEmail,
-                                      style: TextStyle(color: Colors.red),
-                                    )
-                                  : null,
+                            Container(
+                              margin: EdgeInsets.only(top: 16, bottom: 8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[200],
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: TextFormField(
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _email = value;
+                                        });
+                                      },
+                                      decoration: InputDecoration(
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                                        border: InputBorder.none,
+                                        labelText: 'Email',
+                                        labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Color.fromRGBO(32, 104, 14, 1),
+                                            width: 2.0,
+                                          ),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  if (_errorEmail.isNotEmpty)
+                                    Padding(
+                                      padding: EdgeInsets.only(top: 8),
+                                      child: Text(
+                                        _errorEmail,
+                                        style: TextStyle(color: Colors.red),
+                                        textAlign: TextAlign.start,
+                                      ),
+                                    ),
+                                ],
                               ),
                             ),
-                            TextFormField(
-                              onChanged: (value) {
-                                setState(() {
-                                  _password = value;
-                                });
-                              },
-                              style: MyTextStyle.bodyLarge(
-                                  letterSpacing: 0.1,
-                                  color: theme.colorScheme.onBackground,
-                                  fontWeight: 500),
-                              decoration: InputDecoration(
-                                hintText: "Contraseña",
-                                hintStyle: MyTextStyle.titleSmall(
-                                    letterSpacing: 0.1,
-                                    color: theme.colorScheme.onBackground,
-                                    fontWeight: 500),
-                                prefixIcon: Icon(LucideIcons.lock),
-                                //errorText: "Ingresa una contraseña",
-                                error: _errorPassword.isNotEmpty
-                                  ? Text(
-                                      _errorPassword,
-                                      style: TextStyle(color: Colors.red),
-                                    )
-                                  : null,
-                                suffixIcon: IconButton(
-                                  icon: Icon(_passwordVisible!
-                                      ? LucideIcons.eyeOff
-                                      : LucideIcons.eye),
-                                  onPressed: () {
-                                    setState(() {
-                                      _passwordVisible = !_passwordVisible!;
-                                    });
-                                  },
-                                ),
+                            Container(
+                              margin: EdgeInsets.only(top: 16, bottom: 8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[200],
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: TextFormField(
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _password = value;
+                                        });
+                                      },
+                                      decoration: InputDecoration(
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                                        border: InputBorder.none,
+                                        labelText: 'Contraseña',
+                                        labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Color.fromRGBO(32, 104, 14, 1),
+                                            width: 2.0,
+                                          ),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        suffixIcon: IconButton(
+                                          icon: Icon(_passwordVisible!
+                                              ? LucideIcons.eyeOff
+                                              : LucideIcons.eye),
+                                          onPressed: () {
+                                            setState(() {
+                                              _passwordVisible = !_passwordVisible!;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                      obscureText: _passwordVisible!,
+                                    ),
+                                  ),
+                                  if (_errorPassword.isNotEmpty)
+                                    Padding(
+                                      padding: EdgeInsets.only(top: 8),
+                                      child: Text(
+                                        _errorPassword,
+                                        style: TextStyle(color: Colors.red),
+                                        textAlign: TextAlign.start,
+                                      ),
+                                    ),
+                                ],
                               ),
-                              obscureText: _passwordVisible!,
                             ),
                             /*
                             Container(
@@ -190,18 +268,22 @@ class _Login2ScreenState extends State<Login2Screen> {
                                   fontWeight: 500),
                             ),*/
                             Container(
-                              margin: EdgeInsets.only(top: 16),
-                              child: MyButton.block(
-                                  elevation: 0,
-                                  borderRadiusAll: 4,
-                                  padding: MySpacing.y(20),
-                                  onPressed: () => _validarCamposLogin(),
-                                  child: MyText.labelMedium(
-                                      "INGRESAR",
-                                      fontSize: 12,
-                                      fontWeight: 600,
-                                      color: theme.colorScheme.onPrimary,
-                                      letterSpacing: 0.5)),
+                              width: double.infinity,
+                              margin: EdgeInsets.only(top: 26),
+                              child: CupertinoButton(
+                                color: Color.fromRGBO(32, 104, 14, 1),
+                                onPressed: () {
+                                  _validarCamposLogin();
+                                },
+                                borderRadius: BorderRadius.all(Radius.circular(14)),
+                                padding: MySpacing.xy(100, 16),
+                                pressedOpacity: 0.5,
+                                child: MyText.bodyMedium(
+                                  "Ingresar",
+                                  color: theme.colorScheme.onSecondary,
+                                  fontSize: 16,
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -234,19 +316,6 @@ class _Login2ScreenState extends State<Login2Screen> {
               ],
             ),
           ),
-          Positioned(
-            top: MySpacing.safeAreaTop(context) + 12,
-            left: 16,
-            child: InkWell(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: Icon(
-                LucideIcons.chevronLeft,
-                color: theme.colorScheme.onBackground,
-              ),
-            ),
-          )
         ],
       )
     );

@@ -46,13 +46,13 @@ class _HistorySearchScreenState extends State<HistorySearchScreen> {
     const oneSec = Duration(milliseconds: 2500);
     _timer = Timer.periodic(
         oneSec,
-        (Timer timer) => {
-              _timer!.cancel(),
+        (Timer timer) {
+              _timer!.cancel();
               setState(
                 () {
                   _isInProgress = false;
                 },
-              )
+              );
             });
   }
 
