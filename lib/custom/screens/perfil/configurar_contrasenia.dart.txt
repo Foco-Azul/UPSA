@@ -35,8 +35,6 @@ class _PasswordSettingScreenState extends State<PasswordSettingScreen> {
     UserMeta userMeta = await ApiService().getUserMeta(user.id!);
     setState(() {
       _email = user.email!;
-      _primerNombre = userMeta.primerNombre!;
-      _apellidoPaterno = userMeta.apellidoPaterno!;
       controller.uiLoading = false;
     });
   }
@@ -75,62 +73,6 @@ class _PasswordSettingScreenState extends State<PasswordSettingScreen> {
               margin: EdgeInsets.only(top: 24, bottom: 0),
               child: MyText.bodyLarge("Datos del usuario",
               fontWeight: 600, letterSpacing: 0),
-            ),
-            Container(
-              width: MediaQuery.of(context).size.width,
-              margin: MySpacing.top(16),
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Expanded(
-                    flex: 1,
-                    child: TextFormField(
-                      style: MyTextStyle.titleSmall(
-                        letterSpacing: 0,
-                        color: theme.colorScheme.onBackground,
-                        fontWeight: 500,
-                        fontSize: 14),
-                      initialValue: _primerNombre,
-                      decoration: InputDecoration(
-                        labelText: "Primer nombre",
-                        enabled: false, 
-                        border: theme.inputDecorationTheme.border,
-                        enabledBorder: theme.inputDecorationTheme.border,
-                        focusedBorder: theme.inputDecorationTheme.focusedBorder,
-                      ),
-                      keyboardType: TextInputType.name,
-                      textCapitalization: TextCapitalization.sentences,
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Padding(
-                      padding: MySpacing.left(8),
-                      child: TextFormField(
-                        onChanged: (value) {
-                          setState(() {
-                          });
-                        },
-                        style: MyTextStyle.titleSmall(
-                          letterSpacing: 0,
-                          color: theme.colorScheme.onBackground,
-                          fontWeight: 500,
-                          fontSize: 14),
-                        initialValue: _apellidoPaterno,
-                        decoration: InputDecoration(
-                          enabled: false, 
-                          labelText: "Apellido paterno",
-                          border: theme.inputDecorationTheme.border,
-                          enabledBorder: theme.inputDecorationTheme.border,
-                          focusedBorder: theme.inputDecorationTheme.focusedBorder,
-                        ),
-                        keyboardType: TextInputType.name,
-                        textCapitalization: TextCapitalization.sentences,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
             ),
             Container(
               margin: MySpacing.top(16),

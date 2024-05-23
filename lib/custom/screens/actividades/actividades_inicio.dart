@@ -37,11 +37,10 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
   void _cargarCategorias() async{
     await dotenv.load(fileName: ".env");
     _backUrl = dotenv.get('backUrl');
-    List<Categoria> _categoriasActual = await ApiService().getCategorias();
-    _eventos = await ApiService().getEventosPorIds(_categoriasActual[0].idsContenido!);
+    List<Categoria> categoriasActual = await ApiService().getCategorias();
+    _eventos = await ApiService().getEventos();
     setState(() {
-      _categorias = _categoriasActual;
-      _selectedChoiceIndex = 0;
+      _categorias = categoriasActual;
       controller.uiLoading = false;
     });
   }  
@@ -49,7 +48,11 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
     setState(() {
       _cargando = true;
     });
-    _eventos = await ApiService().getEventosPorIds(_categorias[_selectedChoiceIndex].idsContenido!);
+    if(_selectedChoiceIndex == -1){
+      _eventos = await ApiService().getEventos();
+    }else{
+      _eventos = await ApiService().getEventosPorIds(_categorias[_selectedChoiceIndex].idsContenido!);
+    }
     setState(() {
       _cargando = false;
     });
@@ -170,7 +173,7 @@ Widget getTabContent(String text) {
               child: Row(
                 children: [
                   // Imagen a la izquierda
-                  Container(
+                  SizedBox(
                     width: MediaQuery.of(context).size.width * 0.25,
                     child: Image.network(_backUrl+data[index].fotoPrincipal!),
                   ),
@@ -228,6 +231,9 @@ Widget getTabContent(String text) {
             setState(() {
               if (_selectedChoiceIndex != index) {
                 _selectedChoiceIndex = selected ? index : -1; // Actualiza el índice seleccionado solo si es diferente
+                _cargarEventosCategoria();
+              } else {
+                _selectedChoiceIndex = -1; // Deselecciona si se pulsa el mismo item
                 _cargarEventosCategoria();
               }
             });

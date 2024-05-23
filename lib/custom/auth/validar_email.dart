@@ -1,4 +1,5 @@
-import 'package:flutkit/custom/auth/registro_estudiante.dart';
+//import 'package:flutkit/custom/auth/registro_estudiante.dart';
+import 'package:flutkit/custom/auth/registro_perfil.dart';
 import 'package:flutkit/custom/widgets/efectoCarga.dart';
 import 'package:flutkit/helpers/widgets/my_container.dart';
 import 'package:flutkit/homes/homes_screen.dart';
@@ -72,9 +73,10 @@ class _ValidarEmailState extends State<ValidarEmail> {
       bool bandera = await ApiService().verificarCuenta(user.id!, _token);
       if(bandera){
         user.confirmed = bandera;
+        user.estado = "Verificado";
         Provider.of<AppNotifier>(context, listen: false).setUser(user);
         Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4)),(Route<dynamic> route) => false);
-        Navigator.push(context,MaterialPageRoute(builder: (context) => RegistroEstudiante()));
+        Navigator.push(context,MaterialPageRoute(builder: (context) => RegistroPerfil()));
       }else{
         Navigator.of(context).pop();
         setState(() {

@@ -40,6 +40,7 @@ class Evento {
     this.inscritos,
     this.inscripciones,
     this.inscripciones2,
+    this.noticiasRelacionadas,
   });
 
   String? id;
@@ -57,6 +58,7 @@ class Evento {
   int? inscritos;
   List<Map<String,int>>? inscripciones;
   List<Map<String, String>>? inscripciones2;
+  List<int>? noticiasRelacionadas;
   factory Evento.fromJson(Map<String, dynamic> json) {
     return Evento(
       id: json["id"].toString(),
@@ -74,7 +76,16 @@ class Evento {
       inscritos: json['attributes']?["inscripciones"]?['data']?.length ?? 0,
       inscripciones: _convertirInscripciones(json['attributes']?['inscripciones']?['data']),
       inscripciones2: _convertirInscripciones2(json['attributes']?['inscripciones']?['data']),
+      noticiasRelacionadas: json['attributes']['noticias']["data"] != null ? _convertirNoticiasRelacionadas(json['attributes']['noticias']["data"]) : [],
     );
+  }
+  static List<int> _convertirNoticiasRelacionadas(dynamic data) {
+    List<int> res = [];
+    for (var item in data) {
+      int idNoticia = item["id"];
+      res.add(idNoticia);
+    }
+    return res;
   }
   static List<Map<String,int>> _convertirInscripciones(dynamic data) {
     List<Map<String,int>> res = [];

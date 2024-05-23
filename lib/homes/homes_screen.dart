@@ -1,9 +1,12 @@
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
+import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/screens/actividades/actividades_inicio.dart';
 import 'package:flutkit/custom/screens/campus/campus_inicio.dart';
 import 'package:flutkit/custom/screens/inicio/inicio_screen.dart';
 import 'package:flutkit/custom/screens/noticias/noticias_inicio.dart';
 import 'package:flutkit/custom/screens/perfil/perfil_screen.dart';
+import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/theme/theme_type.dart';
@@ -36,6 +39,8 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
   late ThemeData theme;
   late CustomTheme customTheme;
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
+  bool _isLoggedIn = false;
+  User? _user = User();
 
   bool isDark = false;
   TextDirection textDirection = TextDirection.ltr;
@@ -43,44 +48,19 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
   void initState() {
     super.initState();
     selectedIndex = widget.indice;
+    _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
   }
-  void changeDirection() {
-    if (AppTheme.textDirection == TextDirection.ltr) {
-      Provider.of<AppNotifier>(context, listen: false)
-          .changeDirectionality(TextDirection.rtl);
-    } else {
-      Provider.of<AppNotifier>(context, listen: false)
-          .changeDirectionality(TextDirection.ltr);
+  void _actualizarDatosUser() async{
+    if(_isLoggedIn){
+      _user = Provider.of<AppNotifier>(context, listen: false).user;
+      _user = await ApiService().getUserForId(_user!.id!);
+      Provider.of<AppNotifier>(context, listen: false).setUser(_user!);
+      MensajeTemporalInferior().mostrarMensaje(context,"Se sincronizó tus datos con exito.",Color.fromRGBO(32, 104, 14, 1), Color.fromRGBO(255, 255, 255, 1));
+      Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
+    }else{
+      MensajeTemporalInferior().mostrarMensaje(context,"Inicia sesión para sincronizar tus datos.",Color.fromRGBO(255, 0, 0, 1), Color.fromRGBO(255, 255, 255, 1));
     }
-    setState(() {});
   }
-
-  void changeTheme() {
-    if (AppTheme.themeType == ThemeType.light) {
-      Provider.of<AppNotifier>(context, listen: false)
-          .updateTheme(ThemeType.dark);
-    } else {
-      Provider.of<AppNotifier>(context, listen: false)
-          .updateTheme(ThemeType.light);
-    }
-    setState(() {});
-  }
-
-  void launchCodecanyonURL() async {
-    String url = "https://codecanyon.net/item/flutkit-flutter-ui-kit/27510289";
-    await launchUrl(Uri.parse(url));
-  }
-
-  void launchDocumentation() async {
-    String url = "https://flutkit.coderthemes.com/index.html";
-    await launchUrl(Uri.parse(url));
-  }
-
-  void launchChangeLog() async {
-    String url = "https://flutkit.coderthemes.com/changelogs.html";
-    await launchUrl(Uri.parse(url));
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<AppNotifier>(
@@ -259,26 +239,15 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
       );
     case 4:
       return AppBar(
-        title: Text('Perfil'),
+        title: Text('Mi perfil'),
         centerTitle: true,
         actions: [
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AppSettingScreen()),
-              );
-            },
-            child: Container(
-              padding: MySpacing.x(20),
-              child: Image(
-                image: AssetImage(Images.settingIcon),
-                color: theme.colorScheme.onBackground,
-                width: 24,
-                height: 24,
-              ),
+            IconButton(
+              icon: Icon(LucideIcons.refreshCcw),
+              onPressed: () {
+                _actualizarDatosUser();
+              },
             ),
-          ),
         ],
       );
     default:

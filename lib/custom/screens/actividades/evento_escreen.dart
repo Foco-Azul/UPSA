@@ -2,10 +2,14 @@ import 'dart:async';
 import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/evento.dart';
+import 'package:flutkit/custom/models/noticia.dart';
 import 'package:flutkit/custom/models/user.dart';
+import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
 import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/widgets/my_button.dart';
+import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutkit/custom/controllers/login_controller.dart';
@@ -37,7 +41,7 @@ class _EventoScreenState extends State<EventoScreen> {
   int _numPages = 1;
   int _inscritos = -1;
   String _qr = "";
-  
+  List<Noticia> _noticiasRelacionadas = [];
   String _backUrl = "";
   Evento _evento = Evento();
   User _user = User();
@@ -50,43 +54,51 @@ class _EventoScreenState extends State<EventoScreen> {
     theme = AppTheme.theme;
     customTheme = AppTheme.customTheme;
     controller = ProfileController();
-    _cargarDatos();
+    _inicializarDatos();
   }
-  void _cargarDatos() async {
+
+  void _inicializarDatos() {
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
-    if(_isLoggedIn){
+    if (_isLoggedIn) {
       _user = Provider.of<AppNotifier>(context, listen: false).user;
+    }
+    _cargarDatosAsincronos();
+  }
+
+  Future<void> _cargarDatosAsincronos() async { 
+    if (_isLoggedIn) {
       _user.eventosInscritos = await ApiService().getEventosInscritos(_user.id!);
       _user.eventosSeguidos = await ApiService().getEventosSeguidos(_user.id!);
-      if(_user.eventosInscritos.containsKey(_idEvento)){
+      if (_user.eventosInscritos.containsKey(_idEvento)) {
         _user.qr = await ApiService().getQrEvento(_user.eventosInscritos[_idEvento]!);
-        setState(() {
-          _qr =_user.qr!;
-        });
+        _qr = _user.qr!;
       }
     }
     _evento = await ApiService().getEvento(_idEvento);
+    _noticiasRelacionadas = await ApiService().getNoticiasRelacionadasConEvento(_evento.noticiasRelacionadas!);
     await dotenv.load(fileName: ".env");
+    Timer(Duration(milliseconds: 1000), () {});
     _backUrl = dotenv.get('backUrl');
     _evento.galeriaDeFotos!.insert(0, _evento.fotoPrincipal!);
     _numPages = _evento.galeriaDeFotos!.length;
     _inscritos = _evento.inscritos!;
-    Future.delayed(Duration(milliseconds: 1000), () {
+    Timer(Duration(seconds: 1), () {
       setState(() {
         controller.uiLoading = false;
       });
-    });
+     });
   }
+
   void _seguirActividad() async {
+    _user.eventosSeguidos!.add(_idEvento);
     await ApiService().setEventosSeguidos(_user.id!, _user.eventosSeguidos!);
-    setState(() {
-      _user.eventosSeguidos!.add(_idEvento);
+    setState(() {    
     });
   }
   void _dejarDeSeguirActividad() async {
+    _user.eventosSeguidos!.remove(_idEvento);
     await ApiService().setEventosSeguidos(_user.id!, _user.eventosSeguidos!);
     setState(() {
-      _user.eventosSeguidos!.remove(_idEvento);
     });
   }
   void _inscribirseActividad() async {
@@ -98,13 +110,13 @@ class _EventoScreenState extends State<EventoScreen> {
         setState(() {
           _inscritos++;
           Navigator.pop(context);
-          showSnackBarWithFloating("Inscripción exitosa", Color.fromRGBO(32, 104, 14, 1));
+          MensajeTemporalInferior().mostrarMensaje(context,"Inscripción exitosa.",Color.fromRGBO(32, 104, 14, 1), Color.fromRGBO(255, 255, 255, 1));
         });
       }else{
         setState(() {
           _inscritos = _evento.inscritos!;
           Navigator.pop(context);
-          showSnackBarWithFloating("Lo sentimos, cupos agotados", Color.fromRGBO(255, 0, 0, 1));
+          MensajeTemporalInferior().mostrarMensaje(context,"Lo sentimos, cupos agotados.",Color.fromRGBO(255, 0, 0, 1), Color.fromRGBO(255, 255, 255, 1));
         });
       }
     }else{
@@ -113,7 +125,7 @@ class _EventoScreenState extends State<EventoScreen> {
       setState(() {
         _inscritos++;
         Navigator.pop(context);
-        showSnackBarWithFloating("Inscripción exitosa", Color.fromRGBO(32, 104, 14, 1));
+        MensajeTemporalInferior().mostrarMensaje(context,"Inscripción exitosa.",Color.fromRGBO(32, 104, 14, 1), Color.fromRGBO(255, 255, 255, 1));
       });
     }
   }
@@ -149,7 +161,7 @@ class _EventoScreenState extends State<EventoScreen> {
               },
             ),
           ],
-        ),
+        ), 
         body: SingleChildScrollView(
           child: Padding(
             padding: MySpacing.only(left: 24, right: 24),
@@ -294,7 +306,7 @@ class _EventoScreenState extends State<EventoScreen> {
                     fontSize: 16,
                     fontWeight: 600,
                   ),
-                if(_isLoggedIn && _user.confirmed! && _user.completada!)
+                if(_isLoggedIn && _user.estado! == "Completado")
                 Container(
                   padding: EdgeInsets.only(top: 12, bottom: 16),
                   child: Wrap(
@@ -403,6 +415,35 @@ class _EventoScreenState extends State<EventoScreen> {
                 _crearCalendario(),
                 if(_evento.calendario!.isNotEmpty)
                 Divider(),
+                if(_evento.noticiasRelacionadas!.isNotEmpty && _noticiasRelacionadas.isNotEmpty)
+                Container(
+                  margin: EdgeInsets.only(top: 16.0),
+                  child: Text(
+                    "Seguimiento",
+                    style: TextStyle(
+                      fontSize: 18, 
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                if(_evento.noticiasRelacionadas!.isNotEmpty && _noticiasRelacionadas.isNotEmpty)
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      Column(
+                        children: <Widget>[
+                            Container(
+                            padding: MySpacing.only(top: 12, bottom: 12),
+                            child: Wrap(
+                              children: _buildMasNoticias(),
+                            ),
+                          )
+                        ]
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -410,14 +451,50 @@ class _EventoScreenState extends State<EventoScreen> {
       );
     }
   }
-  void showSnackBarWithFloating(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: MyText.titleSmall(message, color: theme.colorScheme.onPrimary),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+  
+  
+  _buildMasNoticias() {
+    List<Widget> masNoticias = [];
+    for (int index = 0; index < _noticiasRelacionadas.length; index++) {
+      Noticia noticia = _noticiasRelacionadas[index];
+      masNoticias.add(InkWell(
+        onTap: () {
+          Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 3,)),(Route<dynamic> route) => false);
+          Navigator.push(context, MaterialPageRoute(builder: (context) => NoticiaScreen(idNoticia: noticia.id!,)));
+        },
+        child: Container(
+          margin: EdgeInsets.only(top: 8.0, bottom: 8, right: 16),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.65, // 65% del ancho de la pantalla
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16.0),
+                    image: DecorationImage(
+                      image: NetworkImage(_backUrl + noticia.foto!),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  height: 150,
+                  width: MediaQuery.of(context).size.width * 0.65, // 65% del ancho de la pantalla
+                ),
+                SizedBox(height: 16),
+                Text(
+                  noticia.titular!,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ));
+    }
+    return masNoticias;
   }
   void _showBottomSheet(context) {
     showModalBottomSheet(

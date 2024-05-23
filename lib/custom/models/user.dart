@@ -5,6 +5,7 @@ List<User> UserFromJson(String str) =>
     List<User>.from(json.decode(str).map((x) => User.fromJson(x)));
 // getting a single user from json
 User singleUserFromJson(String str) => User.fromJson(json.decode(str)["user"]);
+User singleUserFromJsonUsers(String str) => User.fromJson(json.decode(str));
 User singleUserFromJsonRegister(String str) => User.fromJson(json.decode(str));
 
 // user class
@@ -22,6 +23,7 @@ class User {
     this.eventosSeguidos,
     this.qr,
     this.rolCustom,
+    this.estado,
     //required this.userMeta,
     //required this.role,
   });
@@ -37,8 +39,11 @@ class User {
   bool? completada;
   List<int>? eventosSeguidos;
   Map<int,int> eventosInscritos = {};
-  String? qr;
-  String? rolCustom;
+  String? qr;  
+  String? rolCustom; 
+  String? estado;
+  List<Map<String, dynamic>>? eventosSeguidos2;
+  List<Map<String, dynamic>>? eventosInscritos2;
   //UserMeta userMeta;
   //int role;
 
@@ -53,6 +58,7 @@ class User {
     updatedAt: DateTime.parse(json["updatedAt"]),
     completada: json["completada"],
     rolCustom: json["rolCustom"],
+    estado: json["estado"],
     //userMeta: json["userMeta"],
     //role: json["role"]["id"],
   );
@@ -68,12 +74,13 @@ class User {
     "updatedAt": updatedAt?.toIso8601String(),
     "completada": completada,
     "rolCustom": rolCustom,
+    "estado": estado,
     //"userMeta": userMeta,
     //"role": role,
   };
   @override
   String toString() {
-    return 'User{id: $id, username: $username, email: $email, provider: $provider, confirmed: $confirmed, blocked: $blocked, createdAt: $createdAt, updatedAt: $updatedAt, completada: $completada, rolCustom: $rolCustom}';
+    return 'User{id: $id, username: $username, email: $email, provider: $provider, confirmed: $confirmed, blocked: $blocked, createdAt: $createdAt, updatedAt: $updatedAt, completada: $completada, rolCustom: $rolCustom, estado: $estado,}';
   }
   
 }
@@ -86,114 +93,80 @@ UserMeta getSingleUserMetaFronJson(String str) => UserMeta.fromJsonMeta(json.dec
 // user class
 class UserMeta {
 
-  String? primerNombre;
-  String? segundoNombre;
-  String? apellidoPaterno;
-  String? apellidoMaterno;
+  String? nombres;
+  String? apellidos;
   String? cedulaDeIdentidad;
-  String? extension;
-  String? sexo;
   String? fechaDeNacimiento;
   String? celular1;
-  String? celular2;
-  String? telfDomicilio;
-  String? departamentoColegio;
-  String? colegio;
-  String? cursoDeSecundaria;
-  String? tutorNombres;
-  String? tutorApellidoPaterno;
-  String? tutorApellidoMaterno;
-  String? tutorCelular;
-  String? tutorEmail;
-  String? hermano;
-  String? tieneHermano;
-  String? hijoDeGraduadoUpsa;
-  List<String>? intereses;
+  bool? testVocacional;
+  bool? estudiarBolivia;
+  String? infoCar;
+  String? departamentoEstudiar;
+  String? aplicacionTest;
+  List<String>? recibirInfo;
+  Map<String, dynamic>? promocion;
+  List<int>? intereses;
+  List<int>? carreras;
+  List<String>? universidades;
+  String? fotoPerfil;
+  Map<String, String>? carreraSugerida;
 
   UserMeta({
-    this.primerNombre,
-    this.segundoNombre,
-    this.apellidoPaterno,
-    this.apellidoMaterno,
+    this.nombres,
+    this.apellidos,
     this.cedulaDeIdentidad,
-    this.extension,
-    this.sexo,
     this.fechaDeNacimiento,
     this.celular1,
-    this.celular2,
-    this.telfDomicilio,
-    this.departamentoColegio,
-    this.colegio,
-    this.cursoDeSecundaria,
-    this.tutorNombres,
-    this.tutorApellidoPaterno,
-    this.tutorApellidoMaterno,
-    this.tutorCelular,
-    this.tutorEmail,
-    this.hermano,
-    this.tieneHermano,
-    this.hijoDeGraduadoUpsa,
+    this.testVocacional = false,
+    this. estudiarBolivia = true,
+    this.infoCar,
+    this.departamentoEstudiar = "",
+    this.recibirInfo,
     this.intereses,
+    this.promocion,
+    this.carreras,
+    this.universidades,
+    this.aplicacionTest,
+    this.fotoPerfil,
+    this.carreraSugerida,
   });
 
   factory UserMeta.fromJsonMeta(Map<String, dynamic> json) => UserMeta(
-    primerNombre: json["primerNombre"] ?? "",
-    segundoNombre: json["segundoNombre"] ?? "",
-    apellidoPaterno: json["apellidoPaterno"] ?? "",
-    apellidoMaterno: json["apellidoMaterno"] ?? "",
+    nombres: json["nombres"] ?? "",
+    apellidos: json["apellidos"] ?? "",
     cedulaDeIdentidad: json["cedulaDeIdentidad"] ?? "",
-    extension: json["extension"] ?? "",
-    sexo: json["sexo"] ?? "",
     fechaDeNacimiento: json["fechaDeNacimiento"] ?? "",
     celular1: json["celular1"] != null ? json["celular1"].toString() : "",
-    celular2: json["celular2"] != null ? json["celular2"].toString() : "",
-    telfDomicilio: json["telfDomicilio"] != null ? json["telfDomicilio"].toString() : "",
-    departamentoColegio: json["departamentoColegio"] ?? "",
-    colegio: json["colegio"] ?? "",
-    cursoDeSecundaria: json["cursoDeSecundaria"] ?? "",
-    tutorNombres: (json["padreMadreTutor"] != null && json["padreMadreTutor"]!['nombres'] != null) ? json["padreMadreTutor"]!['nombres'] : "",
-    tutorApellidoPaterno: (json["padreMadreTutor"] != null && json["padreMadreTutor"]!['apellidoPaterno'] != null) ? json["padreMadreTutor"]!['apellidoPaterno'] : "",
-    tutorApellidoMaterno: (json["padreMadreTutor"] != null && json["padreMadreTutor"]!['apellidoMaterno'] != null) ? json["padreMadreTutor"]!['apellidoMaterno'] : "",
-    tutorCelular: (json["padreMadreTutor"] != null && json["padreMadreTutor"]!['celular'] != null) ? (json["padreMadreTutor"]!)['celular'].toString() : "",
-    tutorEmail: (json["padreMadreTutor"] != null && json["padreMadreTutor"]!['email'] != null) ? json["padreMadreTutor"]!['email'] : "",
-    hermano: json["hermano"] ?? "",
-    tieneHermano: (json["hermano"] == null || json["hermano"] == "") ? "No" : "Sí",
-    hijoDeGraduadoUpsa: (json["hijoDeGraduadoUpsa"] ?? false) ? "Sí" : "No",
-    intereses: _getIntereses(json["intereses"]),
+    promocion: _armarPromocion(json["promocion"]),
+    aplicacionTest: json["aplicacionTest"] ?? "",
+    fotoPerfil: json["fotoPerfil"]?['data']?['attributes']?['url'] ?? "/uploads/avatar_89f34d0255.png", 
+    carreraSugerida: json["carreraSugerida"] != null ? _carreraSugerida(json["carreraSugerida"]) : {},
   );
-  static List<String> _getIntereses(dynamic intereses) {
-    List<String> res = [];
-    if (intereses != null) {
-      intereses.forEach((interes) {
-        res.add(interes.toString());
-      });
+  static Map<String, String> _carreraSugerida(Map<String, dynamic> data){
+    Map<String, String> res = {};
+    if(data["carrera"] != null){
+      if(data["facultad"] != null){
+        res = {"carrera": data["carrera"]!, "facultad": data["facultad"]!};
+      }else{
+        res = {"carrera": data["carrera"]!, "facultad": ""};
+      }
+    }else{
+      return res;
     }
     return res;
   }
-
-
+  static Map<String, dynamic> _armarPromocion(Map<String, dynamic> data){
+    Map<String, dynamic> res = {};
+    if(data["data"] != null){
+      res = {"id": data["data"]["id"], "nombre": data["data"]["attributes"]["nombre"]};
+    }
+    return res;
+  }
   Map<String, dynamic> toJson() => {
-    "primerNombre": primerNombre,
-    "apellidoPaterno": apellidoPaterno,
-    "segundoNombre": segundoNombre,
-    "apellidoMaterno": apellidoMaterno,
+    "nombres": nombres,
+    "apellidos": apellidos,
     "cedulaDeIdentidad": cedulaDeIdentidad,
-    "extension": extension,
-    "sexo": sexo,
     "fechaDeNacimiento": fechaDeNacimiento,
     "celular1": celular1,
-    "celular2": celular2,
-    "telfDomicilio": telfDomicilio,
-    "departamentoColegio": departamentoColegio,
-    "colegio": colegio,
-    "cursoDeSecundaria": cursoDeSecundaria,
-    "tutorNombres": tutorNombres,
-    "tutorApellidoPaterno": tutorApellidoPaterno,
-    "tutorApellidoMaterno": tutorApellidoMaterno,
-    "tutorCelular": tutorCelular,
-    "tutorEmail": tutorEmail,
-    "hermano": hermano,
-    "tieneHermano": tieneHermano,
-    "hijoDeGraduadoUpsa": hijoDeGraduadoUpsa,
   };
 }

@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/noticia.dart';
-import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/helpers/widgets/my_button.dart';
+import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutkit/custom/controllers/login_controller.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
@@ -175,7 +174,7 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
                               Uri.parse(_noticia.notaCompleta!),
                               mode: LaunchMode.externalApplication,
                             )) {
-                              throw Exception('Could not launch '+_noticia.notaCompleta!);
+                              throw Exception('Could not launch ${_noticia.notaCompleta!}');
                             }
                         },
                         child: Row(
@@ -197,12 +196,12 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
                     ],
                   ),
                 ),
-                if(_otrasNoticias.length > 0)
+                if(_otrasNoticias.isNotEmpty)
                 Divider(
                   thickness: 2, // Grosor de la línea en píxeles
                   color: Colors.black, // Color de la línea
                 ),
-                if(_otrasNoticias.length > 0)
+                if(_otrasNoticias.isNotEmpty)
                 Container(
                   margin: EdgeInsets.only(top: 16.0),
                   child: Text(
@@ -213,7 +212,7 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
                     ),
                   ),
                 ),
-                if(_otrasNoticias.length > 0)
+                if(_otrasNoticias.isNotEmpty)
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
@@ -237,40 +236,46 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
         ),
       );
     }
-  }
+  } 
   _buildMasNoticias() {
     List<Widget> masNoticias = [];
     for (int index = 0; index < _otrasNoticias.length; index++) {
       Noticia noticia = _otrasNoticias[index];
-      masNoticias.add(Container(
-        margin: EdgeInsets.only(top: 8.0, bottom: 8, right: 16),
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.65, // 75% del ancho de la pantalla
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16.0),
-                  image: DecorationImage(
-                    image: NetworkImage(_backUrl + noticia.foto!),
-                    fit: BoxFit.cover,
+      masNoticias.add(InkWell(
+        onTap: () {
+          Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 3,)),(Route<dynamic> route) => false);
+          Navigator.push(context, MaterialPageRoute(builder: (context) => NoticiaScreen(idNoticia: noticia.id!,)));
+        },
+        child: Container(
+          margin: EdgeInsets.only(top: 8.0, bottom: 8, right: 16),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.65, // 65% del ancho de la pantalla
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16.0),
+                    image: DecorationImage(
+                      image: NetworkImage(_backUrl + noticia.foto!),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  height: 150,
+                  width: MediaQuery.of(context).size.width * 0.65, // 65% del ancho de la pantalla
+                ),
+                SizedBox(height: 16),
+                Text(
+                  noticia.titular!,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                height: 150,
-                width: MediaQuery.of(context).size.width * 0.65, // 60% del ancho de la pantalla
-              ),
-              SizedBox(height: 16),
-              Text(
-                noticia.titular!,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        )
+        ),
       ));
     }
     return masNoticias;
@@ -280,12 +285,7 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
       text: TextSpan(text: text, style: style),
       textDirection: TextDirection.ltr,
     )..layout(maxWidth: containerWidth);
-
-    int lines = 0;
-    for (final line in textPainter.computeLineMetrics()) {
-      lines++;
-    }
-    return lines;
+    return textPainter.computeLineMetrics().length;
   }
   Widget _expandableText(String text) {
 
@@ -304,56 +304,42 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
           fontSize: 14,
         ),
         if(_isExpanded == 0)
-        Container(
-          child: TextButton(
-            onPressed: () {
-              setState(() {
-                _isExpanded = 1;
-              });
-            },
-            style: ButtonStyle(
-              padding: MaterialStateProperty.all<EdgeInsetsGeometry>(EdgeInsets.zero),
-            ),
-            child: Text(
-              'Leer màs',
-              style: TextStyle(
-                color: Color.fromRGBO(32, 104, 14, 1),
-                decoration: TextDecoration.underline, // Agrega subrayado al texto
-              ),
-            )
+        TextButton(
+          onPressed: () {
+            setState(() {
+              _isExpanded = 1;
+            });
+          },
+          style: ButtonStyle(
+            padding: MaterialStateProperty.all<EdgeInsetsGeometry>(EdgeInsets.zero),
           ),
+          child: Text(
+            'Leer màs',
+            style: TextStyle(
+              color: Color.fromRGBO(32, 104, 14, 1),
+              decoration: TextDecoration.underline, // Agrega subrayado al texto
+            ),
+          )
         ),
         if(_isExpanded == 1)
-        Container(
-          child: TextButton(
-            onPressed: () {
-              setState(() {
-                _isExpanded = 0;
-              });
-            },
-            style: ButtonStyle(
-              padding: MaterialStateProperty.all<EdgeInsetsGeometry>(EdgeInsets.zero),
-            ),
-            child: Text(
-              'Ver menos',
-              style: TextStyle(
-                color: Color.fromRGBO(32, 104, 14, 1),
-                decoration: TextDecoration.underline, // Agrega subrayado al texto
-              ),
-            )
+        TextButton(
+          onPressed: () {
+            setState(() {
+              _isExpanded = 0;
+            });
+          },
+          style: ButtonStyle(
+            padding: MaterialStateProperty.all<EdgeInsetsGeometry>(EdgeInsets.zero),
           ),
+          child: Text(
+            'Ver menos',
+            style: TextStyle(
+              color: Color.fromRGBO(32, 104, 14, 1),
+              decoration: TextDecoration.underline, // Agrega subrayado al texto
+            ),
+          )
         ),
       ],
-    );
-  }
-
-  void showSnackBarWithFloating(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: MyText.titleSmall(message, color: theme.colorScheme.onPrimary),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-      ),
     );
   }
   List<Widget> _crearGaleria() {

@@ -109,9 +109,14 @@ class AppNotifier extends ChangeNotifier {
     _prefs.setString('user', json.encode(_user.toJson())); // Aquí convertimos el objeto User a JSON
     _prefs.setString('userMeta', json.encode(_userMeta.toJson())); 
     _prefs.setBool('esNuevo', _esNuevo); 
+    _prefs.setString('tokenDispositivo', _tokenDispositivo); 
   }
   void login() {
     _isLoggedIn = true;
+    _saveToPrefs();
+    notifyListeners();
+  }
+  void iniciar() {
     _saveToPrefs();
     notifyListeners();
   }

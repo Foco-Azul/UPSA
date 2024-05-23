@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:provider/provider.dart';
 import 'package:flutkit/custom/models/user.dart';
-import 'package:flutkit/custom/screens/perfil/account_setting_screen.dart';
+//import 'package:flutkit/custom/screens/perfil/account_setting_screen.dart.txt';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
@@ -76,7 +76,7 @@ class _VerificationDialogState extends State<VerificationDialog> with SingleTick
       bool bandera = await ApiService().verificarCuenta(user.id!, _token);
       if(bandera){
         Navigator.popUntil(context, ModalRoute.withName('/'));
-        Navigator.push(context, MaterialPageRoute(builder: (context) => AccountSettingScreen()));
+        //Navigator.push(context, MaterialPageRoute(builder: (context) => AccountSettingScreen()));
         //Navigator.pop(context);
       }else{
         setState(() {

@@ -1,9 +1,13 @@
 import 'package:flutkit/custom/auth/register_screen.dart';
-import 'package:flutkit/custom/auth/registro_estudiante.dart';
+import 'package:flutkit/custom/auth/registro_carrera.dart';
+import 'package:flutkit/custom/auth/registro_intereses.dart';
+import 'package:flutkit/custom/auth/registro_perfil.dart';
+//import 'package:flutkit/custom/auth/registro_estudiante.dart';
 import 'package:flutkit/custom/auth/validar_email.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
+import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_container.dart';
@@ -60,17 +64,30 @@ class _Login2ScreenState extends State<Login2Screen> {
       } else {
         Provider.of<AppNotifier>(context, listen: false).login();
         Provider.of<AppNotifier>(context, listen: false).setUser(user);
-        showSnackBarWithFloating("Ingreso exitoso", Color.fromRGBO(32, 104, 14, 1));
-        if(!user.confirmed!){
-          Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
-          Navigator.push(context,MaterialPageRoute(builder: (context) => ValidarEmail(theme: theme)));
-        }else{
-          if(!user.completada!){
+        MensajeTemporalInferior().mostrarMensaje(context,"Ingreso exitoso.",Color.fromRGBO(32, 104, 14, 1), Color.fromRGBO(255, 255, 255, 1));
+        switch (user.estado) {
+          case "Nuevo":
             Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
-            Navigator.push(context,MaterialPageRoute(builder: (context) => RegistroEstudiante()));
-          }else{
+            Navigator.push(context,MaterialPageRoute(builder: (context) => ValidarEmail(theme: theme)));
+            break;
+          case "Verificado":
+            Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
+            Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroPerfil()));
+            break;
+          case "Perfil parte 1":
+            Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
+            Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroCarrera()));
+            break;
+          case "Perfil parte 2":
+            Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
+            Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroIntereses()));
+            break;
+          case "Completado":
             Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
-          }
+            break;
+          default:
+            Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
+            break;
         }
       }
     } on Exception catch (e) {
@@ -78,15 +95,6 @@ class _Login2ScreenState extends State<Login2Screen> {
         _error = e.toString().substring(11);
       });
     }
-  }
-  void showSnackBarWithFloating(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: MyText.titleSmall(message, color: theme.colorScheme.onPrimary),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
   }
   @override
   Widget build(BuildContext context) {
@@ -103,221 +111,208 @@ class _Login2ScreenState extends State<Login2Screen> {
           },
         ),
       ),
-      body: Stack(
-        children: <Widget>[
-          ClipPath(
-              clipper: _MyCustomClipper(context),
-              child: Container(
-                alignment: Alignment.center,
-                color: theme.colorScheme.background,
-              )),
-          Positioned(
-            left: 30,
-            right: 30,
-            top: MediaQuery.of(context).size.height * 0.13,
-            child: ListView(
-              shrinkWrap: true,
-              children: <Widget>[
-                MyContainer.bordered(
-                  padding: EdgeInsets.only(top: 16, bottom: 16),
-                  color: theme.scaffoldBackgroundColor,
-                  child: Column(
+      body:SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            MyContainer.bordered(
+              padding: EdgeInsets.symmetric(vertical: 16, horizontal: 10),
+              margin: EdgeInsets.only(top: 100,),
+              color: theme.scaffoldBackgroundColor,
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    margin: EdgeInsets.only(top: 8, bottom: 8),
+                    child: Row(
+                      children: const <Widget>[
+                        Icon(LucideIcons.atSign, size: 40, color: Color.fromRGBO(215, 215, 215, 1),), // Icono a la izquierda
+                      ],
+                    ),
+                  ),
+                  Row(
                     children: <Widget>[
-                      Container(
-                        margin: EdgeInsets.only(top: 8, bottom: 8),
-                        child: Row(
-                          children: const <Widget>[
-                            Icon(LucideIcons.atSign, size: 40, color: Color.fromRGBO(215, 215, 215, 1),), // Icono a la izquierda
-                          ],
+                      Icon(LucideIcons.mail, size: 24), // Icono a la izquierda
+                      SizedBox(width: 8), // Espacio entre el icono y el texto
+                      MyText.titleLarge(
+                        "Ingresa con tu email",
+                        style: TextStyle(
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Row(
-                        children: <Widget>[
-                          Icon(LucideIcons.mail, size: 24), // Icono a la izquierda
-                          SizedBox(width: 8), // Espacio entre el icono y el texto
-                          MyText.titleLarge(
-                            "Ingresa con tu email",
-                            style: TextStyle(
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (_error.isNotEmpty)
+                    ],
+                  ),
+                  if (_error.isNotEmpty)
+                  Container(
+                    margin: EdgeInsets.only(top: 10),
+                    child: Column(
+                      children: [
+                        Text(
+                          _error,
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        )
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(),
+                    child: Column(
+                      children: <Widget>[
                         Container(
-                          margin: EdgeInsets.only(top: 10),
+                          margin: EdgeInsets.only(top: 16, bottom: 8),
                           child: Column(
-                            children: [
-                              Text(
-                                _error,
-                                style: const TextStyle(color: Colors.red),
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: TextFormField(
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _email = value;
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                                    border: InputBorder.none,
+                                    labelText: 'Email',
+                                    labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Color.fromRGBO(32, 104, 14, 1),
+                                        width: 2.0,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
                               ),
-                              const SizedBox(
-                                height: 10,
-                              )
+                              if (_errorEmail.isNotEmpty)
+                              Padding(
+                                padding: EdgeInsets.only(top: 8),
+                                child: Text(
+                                  _errorEmail,
+                                  style: TextStyle(color: Colors.red),
+                                  textAlign: TextAlign.start,
+                                ),
+                              ),
                             ],
                           ),
                         ),
-                      Container(
-                        padding: EdgeInsets.only(left: 16, right: 16),
-                        child: Column(
-                          children: <Widget>[
-                            Container(
-                              margin: EdgeInsets.only(top: 16, bottom: 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[200],
+                        Container(
+                          margin: EdgeInsets.only(top: 16, bottom: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: TextFormField(
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _password = value;
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                                    border: InputBorder.none,
+                                    labelText: 'Contraseña',
+                                    labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Color.fromRGBO(32, 104, 14, 1),
+                                        width: 2.0,
+                                      ),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: TextFormField(
-                                      onChanged: (value) {
+                                    suffixIcon: IconButton(
+                                      icon: Icon(_passwordVisible!
+                                          ? LucideIcons.eyeOff
+                                          : LucideIcons.eye),
+                                      onPressed: () {
                                         setState(() {
-                                          _email = value;
+                                          _passwordVisible = !_passwordVisible!;
                                         });
                                       },
-                                      decoration: InputDecoration(
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                                        border: InputBorder.none,
-                                        labelText: 'Email',
-                                        labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Color.fromRGBO(32, 104, 14, 1),
-                                            width: 2.0,
-                                          ),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                      ),
                                     ),
                                   ),
-                                  if (_errorEmail.isNotEmpty)
-                                    Padding(
-                                      padding: EdgeInsets.only(top: 8),
-                                      child: Text(
-                                        _errorEmail,
-                                        style: TextStyle(color: Colors.red),
-                                        textAlign: TextAlign.start,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(top: 16, bottom: 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[200],
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: TextFormField(
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _password = value;
-                                        });
-                                      },
-                                      decoration: InputDecoration(
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                                        border: InputBorder.none,
-                                        labelText: 'Contraseña',
-                                        labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Color.fromRGBO(32, 104, 14, 1),
-                                            width: 2.0,
-                                          ),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        suffixIcon: IconButton(
-                                          icon: Icon(_passwordVisible!
-                                              ? LucideIcons.eyeOff
-                                              : LucideIcons.eye),
-                                          onPressed: () {
-                                            setState(() {
-                                              _passwordVisible = !_passwordVisible!;
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                      obscureText: _passwordVisible!,
-                                    ),
-                                  ),
-                                  if (_errorPassword.isNotEmpty)
-                                    Padding(
-                                      padding: EdgeInsets.only(top: 8),
-                                      child: Text(
-                                        _errorPassword,
-                                        style: TextStyle(color: Colors.red),
-                                        textAlign: TextAlign.start,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                            /*
-                            Container(
-                              margin: EdgeInsets.only(top: 16),
-                              alignment: Alignment.centerRight,
-                              child: MyText.bodyMedium("¿Olvidaste tu contraseña?",
-                                  fontWeight: 500),
-                            ),*/
-                            Container(
-                              width: double.infinity,
-                              margin: EdgeInsets.only(top: 26),
-                              child: CupertinoButton(
-                                color: Color.fromRGBO(32, 104, 14, 1),
-                                onPressed: () {
-                                  _validarCamposLogin();
-                                },
-                                borderRadius: BorderRadius.all(Radius.circular(14)),
-                                padding: MySpacing.xy(100, 16),
-                                pressedOpacity: 0.5,
-                                child: MyText.bodyMedium(
-                                  "Ingresar",
-                                  color: theme.colorScheme.onSecondary,
-                                  fontSize: 16,
+                                  obscureText: _passwordVisible!,
                                 ),
                               ),
-                            ),
-                          ],
+                              if (_errorPassword.isNotEmpty)
+                                Padding(
+                                  padding: EdgeInsets.only(top: 8),
+                                  child: Text(
+                                    _errorPassword,
+                                    style: TextStyle(color: Colors.red),
+                                    textAlign: TextAlign.start,
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
-                      )
-                    ],
+                        /*
+                        Container(
+                          margin: EdgeInsets.only(top: 16),
+                          alignment: Alignment.centerRight,
+                          child: MyText.bodyMedium("¿Olvidaste tu contraseña?",
+                              fontWeight: 500),
+                        ),*/
+                        Container(
+                          width: double.infinity,
+                          margin: EdgeInsets.only(top: 26),
+                          child: CupertinoButton(
+                            color: Color.fromRGBO(32, 104, 14, 1),
+                            onPressed: () {
+                              _validarCamposLogin();
+                            },
+                            borderRadius: BorderRadius.all(Radius.circular(14)),
+                            padding: MySpacing.xy(100, 16),
+                            pressedOpacity: 0.5,
+                            child: MyText.bodyMedium(
+                              "Ingresar",
+                              color: theme.colorScheme.onSecondary,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Register2Screen()));
+              },
+              child: Container(
+                margin: EdgeInsets.only(top: 16),
+                child: Center(
+                  child: RichText(
+                    text: TextSpan(children: <TextSpan>[
+                      TextSpan(
+                          text: "¿No tienes una cuenta? ",
+                          style: MyTextStyle.bodyMedium(fontWeight: 500)),
+                      TextSpan(
+                          text: " Registrarse",
+                          style: MyTextStyle.bodyMedium(
+                              fontWeight: 600,
+                              color: theme.colorScheme.primary)),
+                    ]),
                   ),
                 ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Register2Screen()));
-                  },
-                  child: Container(
-                    margin: EdgeInsets.only(top: 16),
-                    child: Center(
-                      child: RichText(
-                        text: TextSpan(children: <TextSpan>[
-                          TextSpan(
-                              text: "¿No tienes una cuenta? ",
-                              style: MyTextStyle.bodyMedium(fontWeight: 500)),
-                          TextSpan(
-                              text: " Registrarse",
-                              style: MyTextStyle.bodyMedium(
-                                  fontWeight: 600,
-                                  color: theme.colorScheme.primary)),
-                        ]),
-                      ),
-                    ),
-                  ),
-                )
-              ],
-            ),
-          ),
-        ],
-      )
+              ),
+            )
+          ],
+        ),
+      ),
     );
   }
 }

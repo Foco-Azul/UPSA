@@ -30,22 +30,26 @@ class _Register2ScreenState extends State<Register2Screen> {
   late ThemeData theme;
   Validacion validacion = Validacion();
   Generador generador = Generador();
-  String _username = "", _password ="", _email = "", _primerNombre = "", _token = "", _apellidoPaterno = "";
-  String _error = "", _errorPassword ="", _errorEmail = "", _errorPrimerNombre = "", _errorApellidoPaterno = "";
+  String _username = "", _password ="", _email = "", _token = "";
+  String _error = "", _errorPassword ="", _errorEmail = "";
+  late SharedPreferences _prefs;
   @override
   void initState() {
     super.initState();
     customTheme = AppTheme.customTheme;
     theme = AppTheme.theme;
+    Provider.of<AppNotifier>(context, listen: false).iniciar();
+    _cargarDatos();
+  }
+  void _cargarDatos() async{
+    _prefs = await SharedPreferences.getInstance();
   }
   void _validarCamposRegister(){
     setState(() {
-      _errorPrimerNombre = validacion.validarNombres(_primerNombre, true);
-      _errorApellidoPaterno = validacion.validarNombres(_apellidoPaterno, true);
       _errorEmail = validacion.validarCorreo(_email, true);
       _errorPassword = validacion.validarContrasenia(_password, true);
     });
-    if(_errorPrimerNombre.isEmpty && _errorApellidoPaterno.isEmpty && _errorEmail.isEmpty && _errorPassword.isEmpty){
+    if(_errorEmail.isEmpty && _errorPassword.isEmpty){
       _signup();
     }
   }
@@ -54,9 +58,8 @@ class _Register2ScreenState extends State<Register2Screen> {
       showPopup(context);
       _username = _email;
       _token = generador.generarToken();
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String tokenDispositivo = prefs.getString('tokenDispositivo') ?? "";
-      User? createduser = await ApiService().addUser(context, _email, _username, _password, _primerNombre, _apellidoPaterno, _token, tokenDispositivo);
+      String tokenDispositivo = _prefs.getString('tokenDispositivo')!;
+      User? createduser = await ApiService().addUser(_email, _username, _password, _token, tokenDispositivo);
       if (createduser != null) {
         // navigate to the dashboard.
         Provider.of<AppNotifier>(context, listen: false).login();
@@ -96,7 +99,7 @@ class _Register2ScreenState extends State<Register2Screen> {
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            MyContainer.bordered(
+            MyContainer.bordered( 
               color: theme.scaffoldBackgroundColor,
               child: Column(
                 children: <Widget>[
@@ -154,94 +157,6 @@ class _Register2ScreenState extends State<Register2Screen> {
                     padding: EdgeInsets.only(top: 8),
                     child: Column(
                       children: <Widget>[
-                        Container(
-                          margin: EdgeInsets.only(top: 16, bottom: 8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[200],
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: TextFormField(
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _primerNombre = value;
-                                    });
-                                  },
-                                  textCapitalization: TextCapitalization.sentences,
-                                  decoration: InputDecoration(
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                                    border: InputBorder.none,
-                                    labelText: 'Primer nombre',
-                                    labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Color.fromRGBO(32, 104, 14, 1),
-                                        width: 2.0,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              if (_errorPrimerNombre.isNotEmpty)
-                                Padding(
-                                  padding: EdgeInsets.only(top: 8),
-                                  child: Text(
-                                    _errorPrimerNombre,
-                                    style: TextStyle(color: Colors.red),
-                                    textAlign: TextAlign.start,
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          margin: EdgeInsets.only(top: 16, bottom: 8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[200],
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: TextFormField(
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _apellidoPaterno = value;
-                                    });
-                                  },
-                                  textCapitalization: TextCapitalization.sentences,
-                                  decoration: InputDecoration(
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                                    border: InputBorder.none,
-                                    labelText: 'Apellido paterno',
-                                    labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Color.fromRGBO(32, 104, 14, 1),
-                                        width: 2.0,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              if (_errorApellidoPaterno.isNotEmpty)
-                                Padding(
-                                  padding: EdgeInsets.only(top: 8),
-                                  child: Text(
-                                    _errorApellidoPaterno,
-                                    style: TextStyle(color: Colors.red),
-                                    textAlign: TextAlign.start,
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
                         Container(
                           margin: EdgeInsets.only(top: 16, bottom: 8),
                           child: Column(

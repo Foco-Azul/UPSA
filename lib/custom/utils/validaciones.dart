@@ -22,7 +22,7 @@ class Validacion{
     String error = "";
     if(esObligatorio!){
       if(value != null && value.isNotEmpty){
-        if(!RegExp(r'^[a-zA-Z]+$').hasMatch(value)){
+        if(!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value)){
           error = "Campo no valido, solo se permite letras";
         }
       }else{
