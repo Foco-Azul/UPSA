@@ -1,6 +1,9 @@
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/screens/actividades/actividades_inicio.dart';
+import 'package:flutkit/custom/screens/actividades/calenadrio_screen.dart';
+import 'package:flutkit/custom/screens/bienvenida/bienvenida_screen.dart';
+import 'package:flutkit/custom/screens/bienvenida/postbienvenida_screen.dart';
 import 'package:flutkit/custom/screens/campus/campus_inicio.dart';
 import 'package:flutkit/custom/screens/inicio/inicio_screen.dart';
 import 'package:flutkit/custom/screens/noticias/noticias_inicio.dart';
@@ -72,6 +75,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
         return Theme(
           data: theme,
           child: Scaffold(
+            backgroundColor: Color.fromRGBO(244, 251, 249, 1),
             key: _drawerKey,
             //drawer: _buildDrawer(),
             // backgroundColor: Colors.black,
@@ -85,14 +89,16 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
               showElevation: true,
               items: [
                 FlashyTabBarItem(
+                  inactiveColor: Color.fromRGBO(5, 50, 12, 1),
+                  activeColor: Color.fromRGBO(5, 50, 12, 1),
                   icon: Icon(LucideIcons.home),
                   title: Text(
                     'Inicio',
                   ),
-                  activeColor: theme.colorScheme.primary,
-                  inactiveColor: theme.colorScheme.primary,
                 ),
                 FlashyTabBarItem(
+                  inactiveColor: Color.fromRGBO(5, 50, 12, 1),
+                  activeColor: Color.fromRGBO(5, 50, 12, 1),
                   icon: Icon(LucideIcons.trophy),
                   title: Text(
                     'Actividades',
@@ -100,32 +106,30 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
                       fontSize: 11.1,
                     )
                   ),
-                  activeColor: theme.colorScheme.primary,
-                  inactiveColor: theme.colorScheme.primary,
                 ),
                 FlashyTabBarItem(
+                  inactiveColor: Color.fromRGBO(5, 50, 12, 1),
+                  activeColor: Color.fromRGBO(5, 50, 12, 1),
                   icon: Icon(LucideIcons.bookOpen),
                   title: Text(
                     'Campus',
                   ),
-                  activeColor: theme.colorScheme.primary,
-                  inactiveColor: theme.colorScheme.primary,
                 ),
                 FlashyTabBarItem(
+                  inactiveColor: Color.fromRGBO(5, 50, 12, 1),
+                  activeColor: Color.fromRGBO(5, 50, 12, 1),
                   icon: Icon(LucideIcons.pin),
                   title: Text(
                     'Noticias',
                   ),
-                  activeColor: theme.colorScheme.primary,
-                  inactiveColor: theme.colorScheme.primary,
                 ),
                 FlashyTabBarItem(
+                  inactiveColor: Color.fromRGBO(5, 50, 12, 1),
+                  activeColor: Color.fromRGBO(5, 50, 12, 1),
                   icon: Icon(LucideIcons.user),
                   title: Text(
                     'Mi perfil',
                   ),
-                  activeColor: theme.colorScheme.primary,
-                  inactiveColor: theme.colorScheme.primary,
                 ),
               ],
               onItemSelected: (index) {
@@ -143,20 +147,15 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
   switch (selectedIndex) {
     case 0:
       return AppBar(
-        title: Text('Inicio'),
-        centerTitle: true,
         actions: [
           InkWell(
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AppSettingScreen()),
-              );
+              Navigator.push(context,MaterialPageRoute(builder: (context) => CalendarioScreen()),);
             },
             child: Container(
               padding: MySpacing.x(20),
               child: Image(
-                image: AssetImage(Images.settingIcon),
+                image: AssetImage(Images.calendarIcon),
                 color: theme.colorScheme.onBackground,
                 width: 24,
                 height: 24,
@@ -172,15 +171,12 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
         actions: [
           InkWell(
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AppSettingScreen()),
-              );
+              Navigator.push(context,MaterialPageRoute(builder: (context) => CalendarioScreen()),);
             },
             child: Container(
               padding: MySpacing.x(20),
               child: Image(
-                image: AssetImage(Images.settingIcon),
+                image: AssetImage(Images.calendarIcon),
                 color: theme.colorScheme.onBackground,
                 width: 24,
                 height: 24,

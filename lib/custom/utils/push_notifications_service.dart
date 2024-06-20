@@ -2,6 +2,9 @@
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutkit/homes/homes_screen.dart';
+import 'package:flutkit/main.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PushNotificationService{
@@ -10,12 +13,18 @@ class PushNotificationService{
 
   static Future _backgroundHandler(RemoteMessage message) async {
     print('background Handler ${message.messageId}');
+    print(message.toMap());
+    navigatorKey.currentState!.push(MaterialPageRoute(builder: (context) => HomesScreen()));
   }
   static Future _onMessageHandler(RemoteMessage message) async {
     print('onMessage Handler ${message.messageId}');
+    print(message.toMap());
+    navigatorKey.currentState!.push(MaterialPageRoute(builder: (context) => HomesScreen()));
   }
   static Future _onMessageOpenApp(RemoteMessage message) async {
     print('onMessageOpenApp Handler ${message.messageId}');
+    print(message.toMap());
+    navigatorKey.currentState!.push(MaterialPageRoute(builder: (context) => HomesScreen()));
   }
 
   static Future initializeApp() async {

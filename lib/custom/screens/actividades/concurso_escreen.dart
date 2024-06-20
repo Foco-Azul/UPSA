@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
-import 'package:flutkit/custom/models/evento.dart';
+import 'package:flutkit/custom/models/concurso.dart';
 import 'package:flutkit/custom/models/noticia.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
@@ -21,15 +21,15 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 
-class EventoScreen extends StatefulWidget {
-  const EventoScreen({Key? key, this.idEvento=-1}) : super(key: key);
-  final int idEvento;
+class ConcursoScreen extends StatefulWidget {
+  const ConcursoScreen({Key? key, this.idConcurso=-1}) : super(key: key);
+  final int idConcurso;
   @override
-  _EventoScreenState createState() => _EventoScreenState();
+  _ConcursoScreenState createState() => _ConcursoScreenState();
 }
 
-class _EventoScreenState extends State<EventoScreen> {
-  int _idEvento = -1;
+class _ConcursoScreenState extends State<ConcursoScreen> {
+  int _idConcurso = -1;
   late ThemeData theme;
   late CustomTheme customTheme;
   late ProfileController controller;
@@ -42,14 +42,14 @@ class _EventoScreenState extends State<EventoScreen> {
   String _qr = "";
   List<Noticia> _noticiasRelacionadas = [];
   String _backUrl = "";
-  Evento _evento = Evento();
+  Concurso _concurso = Concurso();
   User _user = User();
   bool _isLoggedIn = false;
   bool _ingresoMostrado = false;
   @override
   void initState() {
     super.initState();
-    _idEvento = widget.idEvento;
+    _idConcurso = widget.idConcurso;
     theme = AppTheme.theme;
     customTheme = AppTheme.customTheme;
     controller = ProfileController();
@@ -66,21 +66,22 @@ class _EventoScreenState extends State<EventoScreen> {
 
   Future<void> _cargarDatosAsincronos() async { 
     if (_isLoggedIn) {
-      _user.eventosInscritos = await ApiService().getEventosInscritos(_user.id!);
-      _user.eventosSeguidos = await ApiService().getEventosSeguidos(_user.id!);
-      if (_user.eventosInscritos.containsKey(_idEvento)) {
-        _user.qr = await ApiService().getQrEvento(_user.eventosInscritos[_idEvento]!);
-        _qr = _user.qr!;
+      _user.concursosInscritos = await ApiService().getConcursosInscritos(_user.id!);
+      _user.concursosSeguidos = await ApiService().getConcursosSeguidos(_user.id!);
+      if(_user.concursosInscritos!.isNotEmpty){
+        for (var inscripcion in _user.concursosInscritos!) {
+          _qr = inscripcion["qr"]!;
+        }
       }
     }
-    _evento = await ApiService().getEvento(_idEvento);
-    _noticiasRelacionadas = await ApiService().getNoticiasRelacionadasConActividad(_evento.noticiasRelacionadas!);
+    _concurso = await ApiService().getConcurso(_idConcurso);
+    _noticiasRelacionadas = await ApiService().getNoticiasRelacionadasConActividad(_concurso.noticiasRelacionadas!);
     await dotenv.load(fileName: ".env");
     Timer(Duration(milliseconds: 1000), () {});
     _backUrl = dotenv.get('backUrl');
-    _evento.galeriaDeFotos!.insert(0, _evento.fotoPrincipal!);
-    _numPages = _evento.galeriaDeFotos!.length;
-    _inscritos = _evento.inscritos!;
+    _concurso.galeriaDeFotos!.insert(0, _concurso.fotoPrincipal!);
+    _numPages = _concurso.galeriaDeFotos!.length;
+    _inscritos = _concurso.inscritos!;
     Timer(Duration(seconds: 1), () {
       setState(() {
         controller.uiLoading = false;
@@ -89,22 +90,23 @@ class _EventoScreenState extends State<EventoScreen> {
   }
 
   void _seguirActividad() async {
-    _user.eventosSeguidos!.add(_idEvento);
-    await ApiService().setEventosSeguidos(_user.id!, _user.eventosSeguidos!);
+    _user.concursosSeguidos!.add({"idActividad":_idConcurso});
+    await ApiService().setActividadesSeguidos(_user.id!, _user.concursosSeguidos!, "concursos");
     setState(() {    
     });
   }
   void _dejarDeSeguirActividad() async {
-    _user.eventosSeguidos!.remove(_idEvento);
-    await ApiService().setEventosSeguidos(_user.id!, _user.eventosSeguidos!);
+    _user.concursosSeguidos!.removeWhere((actividad) => actividad["idActividad"] == _idConcurso);
+    await ApiService().setActividadesSeguidos(_user.id!, _user.concursosSeguidos!, "concursos");
     setState(() {
+      // Actualiza la interfaz de usuario si es necesario
     });
   }
   void _inscribirseActividad() async {
-    _evento = await ApiService().getEvento(_idEvento);
-    if(_evento.capacidad! > -1){
-      if(_evento.inscritos! < _evento.capacidad!){
-        int idInscripcion = await ApiService().crearInscripcionEvento(_user.id!, _idEvento);
+    _concurso = await ApiService().getConcurso(_idConcurso);
+    if(_concurso.capacidad! > -1){
+      if(_concurso.inscritos! < _concurso.capacidad!){
+        int idInscripcion = await ApiService().crearInscripcionConcurso(_user.id!, _idConcurso);
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => super.widget));
         setState(() {
           _inscritos++;
@@ -112,16 +114,16 @@ class _EventoScreenState extends State<EventoScreen> {
         });
       }else{
         setState(() {
-          _inscritos = _evento.inscritos!;
+          _inscritos = _concurso.inscritos!;
           MensajeTemporalInferior().mostrarMensaje(context,"Lo sentimos, cupos agotados.",Color.fromRGBO(255, 0, 0, 1), Color.fromRGBO(255, 255, 255, 1));
         });
       }
     }else{
-      int idInscripcion = await ApiService().crearInscripcionEvento(_user.id!, _idEvento);
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => super.widget));
+      int idInscripcion = await ApiService().crearInscripcionConcurso(_user.id!, _idConcurso);
       setState(() {
         _inscritos++;
-        MensajeTemporalInferior().mostrarMensaje(context,"Inscripción exitosa.",Color.fromRGBO(5, 50, 12, 1), Color.fromRGBO(255, 255, 255, 1));
+        MensajeTemporalInferior().mostrarMensaje(context,"¡Inscrito! Presenta el código QR para ingresar al evento. Tus inscripciones las podrás ver en sus mismos eventos y en tu perfil.",Color.fromRGBO(5, 50, 12, 1), Color.fromRGBO(255, 255, 255, 1));
       });
     }
   }
@@ -145,7 +147,7 @@ class _EventoScreenState extends State<EventoScreen> {
               padding: const EdgeInsets.only(right: 50.0), // Margen a la derecha
               child: RichText(
                 text: TextSpan(
-                  text: _evento.titulo!,
+                  text: _concurso.titulo!,
                   style: TextStyle(
                     fontSize: 18, // Tamaño del texto
                     fontWeight: FontWeight.w600, // Peso del texto
@@ -157,7 +159,7 @@ class _EventoScreenState extends State<EventoScreen> {
               ),
             ),
           ),
-        ), 
+        ),
         body: SingleChildScrollView(
           child: Padding(
             padding: MySpacing.only(left: 24, right: 24),
@@ -199,7 +201,7 @@ class _EventoScreenState extends State<EventoScreen> {
                     ),
                   ],
                 ),
-                if(_evento.fechaDeInicio!.isNotEmpty)
+                if(_concurso.fechaInicio!.isNotEmpty)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center, // Alinea los elementos del Row al centro
                   children: [
@@ -214,14 +216,14 @@ class _EventoScreenState extends State<EventoScreen> {
                             fontWeight: 500,
                           ),
                           MyText(
-                            _evento.fechaDeInicio!,
+                            _concurso.fechaInicio!,
                             fontSize: 14,
                             fontWeight: 600,
                           ),
                         ],
                       ),
                     ),
-                    if(_evento.fechaDeFin!.isNotEmpty)
+                    if(_concurso.fechaFin!.isNotEmpty)
                     Container(
                       padding: EdgeInsets.all(16.0),
                       child: Column(
@@ -233,7 +235,7 @@ class _EventoScreenState extends State<EventoScreen> {
                             fontWeight: 500,
                           ),
                           MyText(
-                            _evento.fechaDeFin!,
+                            _concurso.fechaFin!,
                             fontSize: 14,
                             fontWeight: 600,
                           ),
@@ -246,15 +248,15 @@ class _EventoScreenState extends State<EventoScreen> {
                 Container(
                   margin: MySpacing.top(12),
                   child: MyText(
-                    _evento.cuerpo!,
+                    _concurso.descripcion!,
                     fontSize: 14,
                   ),
                 ),
                 _crearEtiquetas(),
-                _evento.capacidad! > -1
-                ? ((_evento.capacidad! - _inscritos) > 0
+                _concurso.capacidad! > -1
+                ? ((_concurso.capacidad! - _inscritos) > 0
                     ? MyText.titleLarge(
-                        "Cupos disponibles: ${_evento.capacidad! - _inscritos}",
+                        "Cupos disponibles: ${_concurso.capacidad! - _inscritos}",
                         fontSize: 16,
                         fontWeight: 600,
                       )
@@ -273,7 +275,7 @@ class _EventoScreenState extends State<EventoScreen> {
                   padding: EdgeInsets.only(top: 12, bottom: 16),
                   child: Wrap(
                     children: [
-                        if(_user.eventosInscritos.containsKey(_idEvento))
+                        if (_user.concursosInscritos!.any((concurso) => concurso['idActividad'] == _idConcurso))
                         Container(
                           margin: const EdgeInsets.all(8.0),
                           child: MyButton.large(
@@ -296,7 +298,7 @@ class _EventoScreenState extends State<EventoScreen> {
                             ),
                           ),
                         ),
-                      if(!_user.eventosInscritos.containsKey(_idEvento) && ((_evento.capacidad!-_inscritos) > 0 || _evento.capacidad! == -1))
+                      if(!(_user.concursosInscritos!.any((concurso) => concurso['idActividad'] == _idConcurso)) && ((_concurso.capacidad!-_inscritos) > 0 || _concurso.capacidad! == -1))
                       Container(
                         margin: const EdgeInsets.all(8.0),
                         child: MyButton.medium(
@@ -305,7 +307,7 @@ class _EventoScreenState extends State<EventoScreen> {
                           borderRadiusAll: 16.0,
                           splashColor: Color.fromRGBO(32, 104, 14, 1).withAlpha(60),
                           onPressed: () {
-                            if (!_user.eventosInscritos.containsKey(_idEvento)) {
+                            if (!(_user.concursosInscritos!.any((concurso) => concurso['idActividad'] == _idConcurso))) {
                               _showBottomSheet(context);
                             }
                           },
@@ -323,7 +325,7 @@ class _EventoScreenState extends State<EventoScreen> {
                           ),
                         ),
                       ),
-                      _user.eventosSeguidos!.contains(_idEvento)
+                      _user.concursosSeguidos!.any((actividad) => actividad["idActividad"] == _idConcurso)
                         ? Container(
                           margin: const EdgeInsets.all(8.0),
                           child: MyButton.large(
@@ -373,11 +375,11 @@ class _EventoScreenState extends State<EventoScreen> {
                     ),
                 ),
                 Divider(),
-                if(_evento.calendario!.isNotEmpty)
+                if( _concurso.calendario!.isNotEmpty)
                 _crearCalendario(),
-                if(_evento.calendario!.isNotEmpty)
+                if(_concurso.calendario!.isNotEmpty)
                 Divider(),
-                if(_user.eventosInscritos.containsKey(_idEvento))
+                if (_user.concursosInscritos!.any((concurso) => concurso['idActividad'] == _idConcurso))
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -418,7 +420,7 @@ class _EventoScreenState extends State<EventoScreen> {
                     )
                   ],
                 ),
-                if(_evento.noticiasRelacionadas!.isNotEmpty && _noticiasRelacionadas.isNotEmpty)
+                if(_concurso.noticiasRelacionadas!.isNotEmpty && _noticiasRelacionadas.isNotEmpty)
                 Container(
                   margin: EdgeInsets.only(top: 16.0),
                   child: Text(
@@ -429,7 +431,7 @@ class _EventoScreenState extends State<EventoScreen> {
                     ),
                   ),
                 ),
-                if(_evento.noticiasRelacionadas!.isNotEmpty && _noticiasRelacionadas.isNotEmpty)
+                if(_concurso.noticiasRelacionadas!.isNotEmpty && _noticiasRelacionadas.isNotEmpty)
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
@@ -454,24 +456,8 @@ class _EventoScreenState extends State<EventoScreen> {
       );
     }
   }
-  Widget _mostrarIngreso(){
-    return
-      Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, // Alinea el Column en el centro verticalmente
-          crossAxisAlignment: CrossAxisAlignment.center, // Alinea el BarcodeWidget en el centro horizontalmente
-          children: [
-            BarcodeWidget(
-              barcode: Barcode.qrCode(),
-              data: _qr,
-              width: 200,
-              height: 200,
-              style: TextStyle(fontSize: 16),
-            ),
-          ],
-        ),
-      );
-  }
+  
+  
   _buildMasNoticias() {
     List<Widget> masNoticias = [];
     for (int index = 0; index < _noticiasRelacionadas.length; index++) {
@@ -543,7 +529,7 @@ class _EventoScreenState extends State<EventoScreen> {
                         borderRadiusAll: 16.0,
                         splashColor: Color.fromRGBO(32, 104, 14, 1).withAlpha(60),
                         onPressed: () {
-                          if (!_user.eventosInscritos.containsKey(_idEvento)) {
+                          if (!(_user.concursosInscritos!.any((concurso) => concurso['idActividad'] == _idConcurso))) {
                             _inscribirseActividad();
                             _seguirActividad();
                           }
@@ -586,7 +572,7 @@ class _EventoScreenState extends State<EventoScreen> {
           ListView.builder(
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
-            itemCount: _evento.calendario!.length,
+            itemCount: _concurso.calendario!.length,
             itemBuilder: (BuildContext context, int index) {
               return Container(
                 padding: EdgeInsets.only(top: 12, bottom: 12),
@@ -594,12 +580,12 @@ class _EventoScreenState extends State<EventoScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _evento.calendario![index]["titulo"]!,
+                      _concurso.calendario![index]["titulo"],
                       style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 4.0),
                     Text(
-                      _evento.calendario![index]["inicio"]!+_evento.calendario![index]["fin"]!,
+                      _concurso.calendario![index]["inicio"]+_concurso.calendario![index]["fin"],
                       style: TextStyle(fontSize: 14.0),
                     ),
                   ],
@@ -611,8 +597,24 @@ class _EventoScreenState extends State<EventoScreen> {
       ),
     );
   }
-
-
+  Widget _mostrarIngreso(){
+    return
+      Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center, // Alinea el Column en el centro verticalmente
+          crossAxisAlignment: CrossAxisAlignment.center, // Alinea el BarcodeWidget en el centro horizontalmente
+          children: [
+            BarcodeWidget(
+              barcode: Barcode.qrCode(),
+              data: _qr,
+              width: 200,
+              height: 200,
+              style: TextStyle(fontSize: 16),
+            ),
+          ],
+        ),
+      );
+  }
   Widget _crearEtiquetas() {
     return Container(
       padding: EdgeInsets.only(top: 16, bottom: 12),
@@ -620,10 +622,10 @@ class _EventoScreenState extends State<EventoScreen> {
         spacing: 8.0, // Espacio entre elementos en el eje principal
         runSpacing: 8.0, // Espacio entre elementos en el eje transversal
         children: List.generate(
-          _evento.etiquetas!.length,
+          _concurso.etiquetas!.length,
           (index) {
             return Text(
-              "#${_evento.etiquetas![index]}",
+              "#${_concurso.etiquetas![index]}",
               style: TextStyle(fontSize: 14.0),
             );
           },
@@ -632,7 +634,7 @@ class _EventoScreenState extends State<EventoScreen> {
     );
   }
   List<Widget> _crearGaleria() {
-    return _evento.galeriaDeFotos!.map((url) {
+    return _concurso.galeriaDeFotos!.map((url) {
       return Container(
         decoration: BoxDecoration(
           color: customTheme.card,
@@ -645,12 +647,15 @@ class _EventoScreenState extends State<EventoScreen> {
           ]),
         child: Padding(
           padding: EdgeInsets.all(0.0),
-          child: Image.network(
-            _backUrl + url,
-            height: 240.0,
-            fit: BoxFit.fill,
+          child: ClipRRect(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+            child: Image.network(
+              _backUrl + url,
+              height: 240.0,
+              fit: BoxFit.fill,
+            ),
           ),
-        ),
+        )
       );
     }).toList();
   }
@@ -661,7 +666,6 @@ class _EventoScreenState extends State<EventoScreen> {
     }
     return list;
   }
-
   Widget _indicator(bool isActive) {
     return AnimatedContainer(
       duration: Duration(milliseconds: 300),
@@ -687,13 +691,13 @@ class _EventoScreenState extends State<EventoScreen> {
           ),
           Icon(LucideIcons.dot),
           MyText(
-            _evento.categoria!,
+            _concurso.categoria!,
             fontSize: 14,
             fontWeight: 500,
           ),
           Icon(LucideIcons.dot),
           MyText(
-            _evento.publicacion!,
+            _concurso.publicacion!,
             fontSize: 14,
             fontWeight: 500,
           ),

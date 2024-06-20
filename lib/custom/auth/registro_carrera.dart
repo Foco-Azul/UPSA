@@ -39,8 +39,9 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
     "infoCar": "",
     "aplicacionTest": "",
     "universidades": "",
+    "universidadExtranjera": "",
+    "departamento": "",
   };
-  List<String> selectedChoices = [];
   List<Carrera> _carreras = [];
   List<Universidad> _universidades = [];
   @override
@@ -60,17 +61,30 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
     });
   }
   void _validarCampos(){
-    if(!_userMeta.testVocacional!){
-      _errores["carreras"] =(_userMeta.carreras == null || _userMeta.carreras!.isEmpty || _userMeta.carreras!.length > 3) ? "Selecciona de 1 a 3 carreras" : "";
-      _errores["infoCar"] = _userMeta.infoCar == null || _userMeta.infoCar!.isEmpty ? "Este campo es requerido" : "";
-      _errores["universidades"] = (_userMeta.universidades == null || _userMeta.universidades!.isEmpty || _userMeta.universidades!.length > 3) ? "Selecciona de 1 a 3 universidades" : "";
-      _errores["aplicacionTest"] = "";
-    }else{
+    if(_userMeta.testVocacional!){
       _errores["aplicacionTest"] = _userMeta.aplicacionTest == null || _userMeta.aplicacionTest!.isEmpty ? "Este campo es requerido" : "";
-       _errores["carreras"] = "";
-      _errores["infoCar"] = "";
-      _errores["universidades"] = "";
+    }else{
+      _errores["aplicacionTest"] = "";
+      _userMeta.aplicacionTest = "";
     }
+    if(_userMeta.estudiarBolivia!){
+      _errores["departamento"] = _userMeta.departamentoEstudiar == null || _userMeta.departamentoEstudiar!.isEmpty ? "Este campo es requerido" : "";
+      _errores["universidadExtranjera"] = "";
+      _userMeta.universidadExtranjera = "";
+    }else{
+      _errores["universidadExtranjera"] = _userMeta.universidadExtranjera == null || _userMeta.universidadExtranjera!.isEmpty ? "Este campo es requerido" : "";
+      _errores["departamento"] = "";
+      _userMeta.departamentoEstudiar = "";
+    }
+    if(_userMeta.departamentoEstudiar!.isNotEmpty){
+      _errores["universidades"] = (_userMeta.universidades == null || _userMeta.universidades!.isEmpty || _userMeta.universidades!.length > 3) ? "Selecciona de 1 a 3 universidades" : "";
+    }else{
+      _errores["universidades"] = "";
+      _userMeta.universidades = [];
+    }
+    _errores["carreras"] =(_userMeta.carreras == null || _userMeta.carreras!.isEmpty || _userMeta.carreras!.length > 3) ? "Selecciona de 1 a 3 carreras" : "";
+    _errores["infoCar"] = _userMeta.infoCar == null || _userMeta.infoCar!.isEmpty ? "Este campo es requerido" : "";
+
     setState(() {
 
     });
@@ -182,6 +196,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
       );
     } else {
       return Scaffold(
+        backgroundColor: Color.fromRGBO(244, 251, 249, 1),
         appBar: AppBar(
           leading: InkWell(
             onTap: () {
@@ -199,24 +214,15 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
             children: <Widget>[
               Column(
                 children: <Widget>[
-                  MyContainer.bordered(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    //margin: EdgeInsets.only(top: 100,),
-                    color: theme.scaffoldBackgroundColor,
+                  Container(
+                    padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+                    color: Color.fromRGBO(244, 251, 249, 1),
                     child: Column(     
                       children: <Widget>[
-                        Container(
-                          margin: EdgeInsets.only(top: 8, bottom: 8),
-                          child: Row(
-                            children: const <Widget>[
-                              Icon(FontAwesomeIcons.addressCard, size: 40, color: Color.fromRGBO(215, 215, 215, 1),), // Icono a la izquierda
-                            ],
-                          ),
-                        ),
                         Row(
                           children: <Widget>[// Espacio entre el icono y el texto
                             MyText.titleLarge(
-                              "📚 Tus preferencias de carrera",
+                              "Tus preferencias de carrera",
                               style: TextStyle(
                                 fontSize: 20.0,
                                 fontWeight: FontWeight.bold,
@@ -255,9 +261,10 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                                     mainAxisAlignment: MainAxisAlignment.start, // Alinea los hijos a la izquierda
                                     children: [
                                       ChoiceChip(
+                                        avatar: _userMeta.testVocacional! ? Icon(Icons.check_circle_outline) : Icon(Icons.circle_outlined),
                                         checkmarkColor: Colors.white,
                                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                        selectedColor: Color.fromRGBO(32, 104, 14, 1),
+                                        selectedColor: Color.fromRGBO(5, 50, 12, 1),
                                         label: MyText.bodyMedium(
                                           "Si",
                                           color: _userMeta.testVocacional!
@@ -272,7 +279,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                                         },
                                         shape: RoundedRectangleBorder(
                                           side: BorderSide(
-                                            color: Color.fromRGBO(32, 104, 14, 1), // Color del borde
+                                            color: Color.fromRGBO(5, 50, 12, 1), // Color del borde
                                             width: 1.0, // Ancho del borde
                                           ),
                                           borderRadius: BorderRadius.circular(14), // Radio de borde
@@ -280,9 +287,10 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                                       ),
                                       SizedBox(width: 8.0),
                                       ChoiceChip(
+                                        avatar: _userMeta.testVocacional! ? Icon(Icons.circle_outlined) : Icon(Icons.check_circle_outline),
                                         checkmarkColor: Colors.white,
                                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                        selectedColor: Color.fromRGBO(32, 104, 14, 1),
+                                        selectedColor: Color.fromRGBO(5, 50, 12, 1),
                                         label: MyText.bodyMedium(
                                           "No",
                                           color: !_userMeta.testVocacional!
@@ -297,7 +305,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                                         },
                                         shape: RoundedRectangleBorder(
                                           side: BorderSide(
-                                            color: Color.fromRGBO(32, 104, 14, 1), // Color del borde
+                                            color: Color.fromRGBO(5, 50, 12, 1), // Color del borde
                                             width: 1.0, // Ancho del borde
                                           ),
                                           borderRadius: BorderRadius.circular(14), // Radio de borde
@@ -308,48 +316,71 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                                 ],
                               ),
                             ),
-                            if(_userMeta.testVocacional!)
-                            Container(
-                              margin: EdgeInsets.only(top: 16, bottom: 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  MyText.bodyMedium(
-                                    '¿Dónde de aplicarón el test?',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 12.0,
-                                      fontWeight: FontWeight.w400,
+                            Visibility(
+                              visible: _userMeta.testVocacional ?? false,
+                              child: Container(
+                                margin: EdgeInsets.only(top: 16, bottom: 8),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Container(
+                                      margin: EdgeInsets.only(top: 16, bottom: 8),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          MyText.bodyMedium(
+                                            '¿Dónde de aplicarón el test?',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 12.0,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                          SizedBox(height: 16.0),
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius: BorderRadius.circular(5),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
+                                                  spreadRadius: 2, // Radio de propagación
+                                                  blurRadius: 5, // Radio de desenfoque
+                                                  offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
+                                                ),
+                                              ],
+                                            ),
+                                            child: MultiSelectDropDown(
+                                              onOptionSelected: _onOptionSelectedDonde,
+                                              options: const <ValueItem>[
+                                                ValueItem(label: 'En el colegio', value: '1'),
+                                                ValueItem(label: 'En la UPSA', value: '2'),
+                                                ValueItem(label: 'Servicio Privado', value: '3'),
+                                                ValueItem(label: 'En otra Universidad', value: '4'),
+                                              ],
+                                              hint: "- Seleccionar -",
+                                              selectionType: SelectionType.single,
+                                              chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
+                                              optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+                                              selectedOptionIcon: const Icon(Icons.check_circle),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(height: 16.0),
-                                  MultiSelectDropDown(
-                                    onOptionSelected: _onOptionSelectedDonde,
-                                    options: const <ValueItem>[
-                                      ValueItem(label: 'En el colegio', value: '1'),
-                                      ValueItem(label: 'En la UPSA', value: '2'),
-                                      ValueItem(label: 'Servicio Privado', value: '3'),
-                                      ValueItem(label: 'En otra Universidad', value: '4'),
-                                    ],
-                                    hint: "- Seleccionar -",
-                                    selectionType: SelectionType.single,
-                                    chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
-                                    optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
-                                    selectedOptionIcon: const Icon(Icons.check_circle),
-                                  ),
-                                  if (_errores["aplicacionTest"]!.isNotEmpty)
-                                  Padding(
-                                    padding: EdgeInsets.only(top: 8),
-                                    child: Text(
-                                      _errores["aplicacionTest"]!,
-                                      style: TextStyle(color: Colors.red),
-                                      textAlign: TextAlign.start,
-                                    ),
-                                  ),
-                                ],
+                                    if (_errores["aplicacionTest"]!.isNotEmpty)
+                                      Padding(
+                                        padding: EdgeInsets.only(top: 8),
+                                        child: Text(
+                                          _errores["aplicacionTest"]!,
+                                          style: TextStyle(color: Colors.red),
+                                          textAlign: TextAlign.start,
+                                        ),
+                                      ),
+                                  ],
+                                ),
                               ),
                             ),
-                            if(!_userMeta.testVocacional!)
                             Container(
                               margin: EdgeInsets.only(top: 16, bottom: 8),
                               child: Column(
@@ -364,14 +395,28 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                                     ),
                                   ),
                                   SizedBox(height: 16.0),
-                                  MultiSelectDropDown(
-                                    onOptionSelected: _onOptionSelectedCarrera,
-                                    options: _buildValueItems("carreras"),
-                                    hint: "- Seleccionar -",
-                                    selectionType: SelectionType.multi,
-                                    chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
-                                    optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
-                                    selectedOptionIcon: const Icon(Icons.check_circle),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(5),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
+                                          spreadRadius: 2, // Radio de propagación
+                                          blurRadius: 5, // Radio de desenfoque
+                                          offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
+                                        ),
+                                      ],
+                                    ),
+                                    child: MultiSelectDropDown(
+                                      onOptionSelected: _onOptionSelectedCarrera,
+                                      options: _buildValueItems("carreras"),
+                                      hint: "- Seleccionar -",
+                                      selectionType: SelectionType.multi,
+                                      chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
+                                      optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+                                      selectedOptionIcon: const Icon(Icons.check_circle),
+                                    ),
                                   ),
                                   if (_errores["carreras"]!.isNotEmpty)
                                   Padding(
@@ -385,7 +430,6 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                                 ],
                               ),
                             ),
-                            if(!_userMeta.testVocacional!)
                             Container(
                               margin: EdgeInsets.only(top: 16, bottom: 8),
                               child: Column(
@@ -400,19 +444,33 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                                     ),
                                   ),
                                   SizedBox(height: 16.0),
-                                  MultiSelectDropDown(
-                                    onOptionSelected: _onOptionSelectedInfoCar,
-                                    options: const <ValueItem>[
-                                      ValueItem(label: 'Poco informado', value: '1'),
-                                      ValueItem(label: 'Medianamente informado', value: '2'),
-                                      ValueItem(label: 'Muy informado', value: '3'),
-                                      ValueItem(label: 'Ninguna de las anteriores', value: '4'),
-                                    ],
-                                    hint: "- Seleccionar -",
-                                    selectionType: SelectionType.single,
-                                    chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
-                                    optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
-                                    selectedOptionIcon: const Icon(Icons.check_circle),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(5),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
+                                          spreadRadius: 2, // Radio de propagación
+                                          blurRadius: 5, // Radio de desenfoque
+                                          offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
+                                        ),
+                                      ],
+                                    ),
+                                    child: MultiSelectDropDown(
+                                      onOptionSelected: _onOptionSelectedInfoCar,
+                                      options: const <ValueItem>[
+                                        ValueItem(label: 'Poco informado', value: '1'),
+                                        ValueItem(label: 'Medianamente informado', value: '2'),
+                                        ValueItem(label: 'Muy informado', value: '3'),
+                                        ValueItem(label: 'Ninguna de las anteriores', value: '4'),
+                                      ],
+                                      hint: "- Seleccionar -",
+                                      selectionType: SelectionType.single,
+                                      chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
+                                      optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+                                      selectedOptionIcon: const Icon(Icons.check_circle),
+                                    ),
                                   ),
                                   if (_errores["infoCar"]!.isNotEmpty)
                                   Padding(
@@ -426,7 +484,6 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                                 ],
                               ),
                             ),
-                            if(!_userMeta.testVocacional!)
                             Container(
                               margin: EdgeInsets.only(top: 16, bottom: 8),
                               child: Column(
@@ -445,9 +502,10 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                                     mainAxisAlignment: MainAxisAlignment.start, // Alinea los hijos a la izquierda
                                     children: [
                                       ChoiceChip(
+                                        avatar: _userMeta.estudiarBolivia! ? Icon(Icons.check_circle_outline) : Icon(Icons.circle_outlined),
                                         checkmarkColor: Colors.white,
                                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                        selectedColor: Color.fromRGBO(32, 104, 14, 1),
+                                        selectedColor: Color.fromRGBO(5, 50, 12, 1),
                                         label: MyText.bodyMedium(
                                           "Bolivia",
                                         color: _userMeta.estudiarBolivia!
@@ -462,7 +520,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                                         },
                                         shape: RoundedRectangleBorder(
                                           side: BorderSide(
-                                            color: Color.fromRGBO(32, 104, 14, 1), // Color del borde
+                                            color: Color.fromRGBO(5, 50, 12, 1), // Color del borde
                                             width: 1.0, // Ancho del borde
                                           ),
                                           borderRadius: BorderRadius.circular(14), // Radio de borde
@@ -470,9 +528,10 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                                       ),
                                       SizedBox(width: 8.0),
                                       ChoiceChip(
+                                        avatar: !_userMeta.estudiarBolivia! ? Icon(Icons.check_circle_outline) : Icon(Icons.circle_outlined),
                                         checkmarkColor: Colors.white,
                                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                        selectedColor: Color.fromRGBO(32, 104, 14, 1),
+                                        selectedColor: Color.fromRGBO(5, 50, 12, 1),
                                         label: MyText.bodyMedium(
                                           "Extranjero",
                                         color: !_userMeta.estudiarBolivia!
@@ -487,7 +546,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                                         },
                                         shape: RoundedRectangleBorder(
                                           side: BorderSide(
-                                            color: Color.fromRGBO(32, 104, 14, 1), // Color del borde
+                                            color: Color.fromRGBO(5, 50, 12, 1), // Color del borde
                                             width: 1.0, // Ancho del borde
                                           ),
                                           borderRadius: BorderRadius.circular(14), // Radio de borde
@@ -498,72 +557,51 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                                 ],
                               ),
                             ),
-                            if(!_userMeta.testVocacional! && _userMeta.estudiarBolivia!)
+                            if(!_userMeta.estudiarBolivia!)
                             Container(
                               margin: EdgeInsets.only(top: 16, bottom: 8),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
-                                  MyText.bodyMedium(
-                                    '¿En qué departamento piensas estudiar?',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 12.0,
-                                      fontWeight: FontWeight.w400,
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(5),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
+                                          spreadRadius: 2, // Radio de propagación
+                                          blurRadius: 5, // Radio de desenfoque
+                                          offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
+                                        ),
+                                      ],
+                                    ),
+                                    child: TextFormField(
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _userMeta.universidadExtranjera = value;
+                                        });
+                                      },
+                                      decoration: InputDecoration(
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                                        border: InputBorder.none,
+                                        labelText: 'Nombre de la Universidad',
+                                        labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Color.fromRGBO(5, 50, 12, 1),
+                                            width: 2.0,
+                                          ),
+                                          borderRadius: BorderRadius.circular(5),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                  SizedBox(height: 16.0),
-                                  MultiSelectDropDown(
-                                    onOptionSelected: _onOptionSelectedDepartamento,
-                                    options: const <ValueItem>[
-                                      ValueItem(label: 'CHUQUISACA', value: '1'),
-                                      ValueItem(label: 'LA PAZ', value: '2'),
-                                      ValueItem(label: 'ORURO', value: '4'),
-                                      ValueItem(label: 'TARIJA', value: '6'),
-                                      ValueItem(label: 'SANTA CRUZ', value: '7'),
-                                      ValueItem(label: 'PANDO', value: '9'),
-                                      ValueItem(label: 'COCHABAMBA', value: '11'),
-                                      ValueItem(label: 'POTOSÍ', value: '12'),
-                                      ValueItem(label: 'BENI', value: '13'),
-                                    ],
-                                    hint: "- Seleccionar -",
-                                    selectionType: SelectionType.single,
-                                    chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
-                                    optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
-                                    selectedOptionIcon: const Icon(Icons.check_circle),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if(!_userMeta.testVocacional! && _userMeta.departamentoEstudiar!.isNotEmpty)
-                            Container(
-                              margin: EdgeInsets.only(top: 16, bottom: 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  MyText.bodyMedium(
-                                    'Selecciona hasta tres universidades dónde te gustaría estudiar (en orden de importancia)',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 12.0,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                  SizedBox(height: 16.0),
-                                  MultiSelectDropDown(
-                                    onOptionSelected: _onOptionSelectedUniversidad,
-                                    options: _buildValueItems("universidades"),
-                                    hint: "- Seleccionar -",
-                                    selectionType: SelectionType.multi,
-                                    chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
-                                    optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
-                                    selectedOptionIcon: const Icon(Icons.check_circle),
-                                  ),
-                                  if (_errores["universidades"]!.isNotEmpty)
+                                  if (_errores["universidadExtranjera"]!.isNotEmpty)
                                   Padding(
                                     padding: EdgeInsets.only(top: 8),
                                     child: Text(
-                                      _errores["universidades"]!,
+                                      _errores["universidadExtranjera"]!,
                                       style: TextStyle(color: Colors.red),
                                       textAlign: TextAlign.start,
                                     ),
@@ -571,7 +609,133 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                                 ],
                               ),
                             ),
-                            if(!_userMeta.testVocacional!)
+                            Visibility(
+                              visible: _userMeta.estudiarBolivia!,
+                              child: Container(
+                                margin: EdgeInsets.only(top: 16, bottom: 8),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Container(
+                                      margin: EdgeInsets.only(top: 16, bottom: 8),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          MyText.bodyMedium(
+                                            '¿En qué departamento piensas estudiar?',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 12.0,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                          SizedBox(height: 16.0),
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius: BorderRadius.circular(5),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
+                                                  spreadRadius: 2, // Radio de propagación
+                                                  blurRadius: 5, // Radio de desenfoque
+                                                  offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
+                                                ),
+                                              ],
+                                            ),
+                                            child: MultiSelectDropDown(
+                                              onOptionSelected: _onOptionSelectedDepartamento,
+                                              options: const <ValueItem>[
+                                                ValueItem(label: 'CHUQUISACA', value: '1'),
+                                                ValueItem(label: 'LA PAZ', value: '2'),
+                                                ValueItem(label: 'ORURO', value: '4'),
+                                                ValueItem(label: 'TARIJA', value: '6'),
+                                                ValueItem(label: 'SANTA CRUZ', value: '7'),
+                                                ValueItem(label: 'PANDO', value: '9'),
+                                                ValueItem(label: 'COCHABAMBA', value: '11'),
+                                                ValueItem(label: 'POTOSÍ', value: '12'),
+                                                ValueItem(label: 'BENI', value: '13'),
+                                              ],
+                                              hint: "- Seleccionar -",
+                                              selectionType: SelectionType.single,
+                                              chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
+                                              optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+                                              selectedOptionIcon: const Icon(Icons.check_circle),
+                                            ),
+                                          ),
+                                          if (_errores["departamento"]!.isNotEmpty)
+                                          Padding(
+                                            padding: EdgeInsets.only(top: 8),
+                                            child: Text(
+                                              _errores["departamento"]!,
+                                              style: TextStyle(color: Colors.red),
+                                              textAlign: TextAlign.start,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ]
+                                ),
+                              )
+                            ),
+                            Visibility(
+                              visible: _userMeta.estudiarBolivia! && _userMeta.departamentoEstudiar!.isNotEmpty,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Container(
+                                    margin: EdgeInsets.only(top: 16, bottom: 8),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        MyText.bodyMedium(
+                                          'Selecciona hasta tres universidades dónde te gustaría estudiar (en orden de importancia)',
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 12.0,
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ),
+                                        SizedBox(height: 16.0),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(5),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
+                                                spreadRadius: 2, // Radio de propagación
+                                                blurRadius: 5, // Radio de desenfoque
+                                                offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
+                                              ),
+                                            ],
+                                          ),
+                                          child: MultiSelectDropDown(
+                                            onOptionSelected: _onOptionSelectedUniversidad,
+                                            options: _buildValueItems("universidades"),
+                                            hint: "- Seleccionar -",
+                                            selectionType: SelectionType.multi,
+                                            chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
+                                            optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+                                            selectedOptionIcon: const Icon(Icons.check_circle),
+                                          ),
+                                        ),
+                                        if (_errores["universidades"]!.isNotEmpty)
+                                        Padding(
+                                          padding: EdgeInsets.only(top: 8),
+                                          child: Text(
+                                            _errores["universidades"]!,
+                                            style: TextStyle(color: Colors.red),
+                                            textAlign: TextAlign.start,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ]
+                              )
+                            ),
                             Container(
                               margin: EdgeInsets.only(top: 16, bottom: 8),
                               child: Column(
@@ -586,24 +750,38 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                                     ),
                                   ),
                                   SizedBox(height: 16.0),
-                                  MultiSelectDropDown(
-                                    onOptionSelected: _onOptionSelectedInfo,
-                                    options: const <ValueItem>[
-                                      ValueItem(label: 'Orientación Vocacional', value: '1'),
-                                      ValueItem(label: 'Carreras (planes de estudio)', value: '2'),
-                                      ValueItem(label: 'Concursos académicos', value: '3'),
-                                      ValueItem(label: 'Doble titulación', value: '4'),
-                                      ValueItem(label: 'Intercambio estudiantil', value: '5'),
-                                      ValueItem(label: 'Ferias cientificas y/o emprendiemiento', value: '6'),
-                                      ValueItem(label: 'Actividades deportivas y culturales de la U', value: '7'),
-                                      ValueItem(label: 'Financiamiento/créditos/becas', value: '8'),
-                                      ValueItem(label: 'Programas de Postgrado', value: '9'),
-                                    ],
-                                    hint: "- Seleccionar -",
-                                    selectionType: SelectionType.multi,
-                                    chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
-                                    optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
-                                    selectedOptionIcon: const Icon(Icons.check_circle),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(5),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
+                                          spreadRadius: 2, // Radio de propagación
+                                          blurRadius: 5, // Radio de desenfoque
+                                          offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
+                                        ),
+                                      ],
+                                    ),
+                                    child: MultiSelectDropDown(
+                                      onOptionSelected: _onOptionSelectedInfo,
+                                      options: const <ValueItem>[
+                                        ValueItem(label: 'Orientación Vocacional', value: '1'),
+                                        ValueItem(label: 'Carreras (planes de estudio)', value: '2'),
+                                        ValueItem(label: 'Concursos académicos', value: '3'),
+                                        ValueItem(label: 'Doble titulación', value: '4'),
+                                        ValueItem(label: 'Intercambio estudiantil', value: '5'),
+                                        ValueItem(label: 'Ferias cientificas y/o emprendiemiento', value: '6'),
+                                        ValueItem(label: 'Actividades deportivas y culturales de la U', value: '7'),
+                                        ValueItem(label: 'Financiamiento/créditos/becas', value: '8'),
+                                        ValueItem(label: 'Programas de Postgrado', value: '9'),
+                                      ],
+                                      hint: "- Seleccionar -",
+                                      selectionType: SelectionType.multi,
+                                      chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
+                                      optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+                                      selectedOptionIcon: const Icon(Icons.check_circle),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -612,17 +790,19 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                             SizedBox(
                               width: double.infinity,
                               child: CupertinoButton(
-                                color: Color.fromRGBO(32, 104, 14, 1),
+                                color: Color.fromRGBO(5, 50, 12, 1),
                                 onPressed: () {
                                   _validarCampos();
                                 },
-                                borderRadius: BorderRadius.all(Radius.circular(14)),
+                                borderRadius: BorderRadius.all(Radius.circular(5)),
                                 padding: MySpacing.xy(100, 16),
                                 pressedOpacity: 0.5,
                                 child: MyText.bodyMedium(
                                   "Continuar",
-                                  color: theme.colorScheme.onSecondary,
-                                  fontSize: 16,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ),

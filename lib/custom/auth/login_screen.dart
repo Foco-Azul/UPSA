@@ -99,6 +99,7 @@ class _Login2ScreenState extends State<Login2Screen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromRGBO(244, 251, 249, 1),
       appBar: AppBar(
         toolbarHeight: 40, // Altura del AppBar
         leading: IconButton(
@@ -114,28 +115,17 @@ class _Login2ScreenState extends State<Login2Screen> {
       body:SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            MyContainer.bordered(
-              padding: EdgeInsets.symmetric(vertical: 16, horizontal: 10),
-              margin: EdgeInsets.only(top: 100,),
-              color: theme.scaffoldBackgroundColor,
+            Container(
+              padding: EdgeInsets.fromLTRB(20, 40, 20, 20),
+              color: Color.fromRGBO(244, 251, 249, 1),
               child: Column(
                 children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.only(top: 8, bottom: 8),
-                    child: Row(
-                      children: const <Widget>[
-                        Icon(LucideIcons.atSign, size: 40, color: Color.fromRGBO(215, 215, 215, 1),), // Icono a la izquierda
-                      ],
-                    ),
-                  ),
                   Row(
-                    children: <Widget>[
-                      Icon(LucideIcons.mail, size: 24), // Icono a la izquierda
-                      SizedBox(width: 8), // Espacio entre el icono y el texto
+                    children: <Widget>[ // Espacio entre el icono y el texto
                       MyText.titleLarge(
                         "Ingresa con tu email",
                         style: TextStyle(
-                          fontSize: 20.0,
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -167,8 +157,16 @@ class _Login2ScreenState extends State<Login2Screen> {
                             children: <Widget>[
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.grey[200],
-                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(5),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
+                                      spreadRadius: 2, // Radio de propagación
+                                      blurRadius: 5, // Radio de desenfoque
+                                      offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
+                                    ),
+                                  ],
                                 ),
                                 child: TextFormField(
                                   onChanged: (value) {
@@ -183,10 +181,10 @@ class _Login2ScreenState extends State<Login2Screen> {
                                     labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
                                     focusedBorder: OutlineInputBorder(
                                       borderSide: BorderSide(
-                                        color: Color.fromRGBO(32, 104, 14, 1),
+                                        color: Color.fromRGBO(5, 50, 12, 1),
                                         width: 2.0,
                                       ),
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(5),
                                     ),
                                   ),
                                 ),
@@ -210,8 +208,16 @@ class _Login2ScreenState extends State<Login2Screen> {
                             children: <Widget>[
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.grey[200],
-                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(5),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
+                                      spreadRadius: 2, // Radio de propagación
+                                      blurRadius: 5, // Radio de desenfoque
+                                      offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
+                                    ),
+                                  ],
                                 ),
                                 child: TextFormField(
                                   onChanged: (value) {
@@ -226,10 +232,10 @@ class _Login2ScreenState extends State<Login2Screen> {
                                     labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
                                     focusedBorder: OutlineInputBorder(
                                       borderSide: BorderSide(
-                                        color: Color.fromRGBO(32, 104, 14, 1),
+                                        color: Color.fromRGBO(5, 50, 12, 1),
                                         width: 2.0,
                                       ),
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(5),
                                     ),
                                     suffixIcon: IconButton(
                                       icon: Icon(_passwordVisible!
@@ -268,17 +274,19 @@ class _Login2ScreenState extends State<Login2Screen> {
                           width: double.infinity,
                           margin: EdgeInsets.only(top: 26),
                           child: CupertinoButton(
-                            color: Color.fromRGBO(32, 104, 14, 1),
+                            color: Color.fromRGBO(5, 50, 12, 1),
                             onPressed: () {
                               _validarCamposLogin();
                             },
-                            borderRadius: BorderRadius.all(Radius.circular(14)),
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
                             padding: MySpacing.xy(100, 16),
                             pressedOpacity: 0.5,
                             child: MyText.bodyMedium(
                               "Ingresar",
-                              color: theme.colorScheme.onSecondary,
-                              fontSize: 16,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ),

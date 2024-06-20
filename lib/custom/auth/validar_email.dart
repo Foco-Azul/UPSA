@@ -89,6 +89,7 @@ class _ValidarEmailState extends State<ValidarEmail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromRGBO(244, 251, 249, 1),
       body: Stack(
         children: <Widget>[
           Positioned(
@@ -98,9 +99,9 @@ class _ValidarEmailState extends State<ValidarEmail> {
             child: ListView(
               shrinkWrap: true,
               children: <Widget>[
-                MyContainer.bordered(
-                  padding: EdgeInsets.only(top: 16, bottom: 16),
-                  color: theme.scaffoldBackgroundColor,
+                Container(
+                  //padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  color: Color.fromRGBO(244, 251, 249, 1),
                   child: Column(
                     children: <Widget>[
                       Center(
@@ -115,8 +116,11 @@ class _ValidarEmailState extends State<ValidarEmail> {
                         child: Center(
                           child: MyText.titleLarge(
                             _titulo,
-                            fontWeight: 700,
-                            fontSize: 20,
+                            style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w700,
+                                
+                            ),
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -130,8 +134,12 @@ class _ValidarEmailState extends State<ValidarEmail> {
                               child: Center(
                                 child: MyText.bodySmall(
                                   _texto1,
-                                  fontWeight: 400,
-                                  letterSpacing: 0,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w400,
+                                    letterSpacing: 0,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
                             ),
@@ -140,7 +148,10 @@ class _ValidarEmailState extends State<ValidarEmail> {
                               child: Center(
                                 child: MyText.bodySmall(
                                   _user.email!,
-                                  fontWeight: 700,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
@@ -176,17 +187,19 @@ class _ValidarEmailState extends State<ValidarEmail> {
                               width: double.infinity,
                               margin: EdgeInsets.only(top: 26),
                               child: CupertinoButton(
-                                color: Color.fromRGBO(32, 104, 14, 1),
+                                color: Color.fromRGBO(5, 50, 12, 1),
                                 onPressed: () {
                                   verificarCuenta();
                                 },
-                                borderRadius: BorderRadius.all(Radius.circular(14)),
+                                borderRadius: BorderRadius.all(Radius.circular(5)),
                                 padding: MySpacing.xy(100, 16),
                                 pressedOpacity: 0.5,
                                 child: MyText.bodyMedium(
                                   "Continuar",
-                                  color: theme.colorScheme.onSecondary,
-                                  fontSize: 16,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ),

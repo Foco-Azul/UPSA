@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:flutkit/images.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class AppSettingScreen extends StatefulWidget {
   const AppSettingScreen({Key? key}) : super(key: key);
@@ -20,6 +21,7 @@ class AppSettingScreen extends StatefulWidget {
 class _AppSettingScreenState extends State<AppSettingScreen> {
   late ThemeData theme;
   late CustomTheme customTheme;
+  late YoutubePlayerController _controller;
 
   bool isDark = false;
 
@@ -28,6 +30,14 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
     super.initState();
     theme = AppTheme.theme;
     customTheme = AppTheme.customTheme;
+
+    _controller = YoutubePlayerController(
+      initialVideoId: YoutubePlayer.convertUrlToId('https://www.youtube.com/watch?v=YMx8Bbev6T4')!,
+      flags: const YoutubePlayerFlags(
+        autoPlay: false,
+        mute: false,
+      ),
+    );
   }
 
   void changeDirection() {
@@ -51,6 +61,7 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
     }
     setState(() {});
   }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AppNotifier>(
@@ -89,84 +100,24 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
               child: ListView(
                 padding: MySpacing.fromLTRB(20, 8, 20, 20),
                 children: [
-                  InkWell(
-                    onTap: () {
-                      changeDirection();
-                    },
-                    highlightColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    child: Row(
-                      children: [
-                        MyContainer(
-                          paddingAll: 12,
-                          borderRadiusAll: 4,
-                          color: CustomTheme.skyBlue.withAlpha(20),
-                          child: Image(
-                            height: 20,
-                            width: 20,
-                            image: AssetImage(
-                                AppTheme.textDirection == TextDirection.ltr
-                                    ? Images.paragraphRTLOutline
-                                    : Images.paragraphLTROutline),
-                            color: CustomTheme.skyBlue,
-                          ),
-                        ),
-                        MySpacing.width(16),
-                        Expanded(
-                          child: MyText.bodyLarge(
-                            AppTheme.textDirection == TextDirection.ltr
-                                ? "${'right_to_left'.tr()} (RTL)"
-                                : "${'left_to_right'.tr()} (LTR)",
-                          ),
-                        ),
-                        MySpacing.width(16),
-                        Icon(
-                          LucideIcons.chevronRight,
-                          size: 18,
-                          color: theme.colorScheme.onBackground,
-                        ).autoDirection(),
-                      ],
-                    ),
-                  ),
+
+                 
+
                   MySpacing.height(20),
-                  InkWell(
-                    onTap: () {
-                      changeTheme();
-                    },
-                    highlightColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    child: Row(
-                      children: [
-                        MyContainer(
-                          paddingAll: 12,
-                          borderRadiusAll: 4,
-                          color: CustomTheme.occur.withAlpha(28),
-                          child: Image(
-                            height: 20,
-                            width: 20,
-                            image: AssetImage(!isDark
-                                ? Images.darkModeOutline
-                                : Images.lightModeOutline),
-                            color: CustomTheme.occur,
-                          ),
-                        ),
-                        MySpacing.width(16),
-                        Expanded(
-                          child: MyText.bodyLarge(
-                            !isDark ? 'dark_mode'.tr() : 'light_mode'.tr(),
-                          ),
-                        ),
-                        MySpacing.width(16),
-                        Icon(
-                          LucideIcons.chevronRight,
-                          size: 18,
-                          color: theme.colorScheme.onBackground,
-                        ).autoDirection(),
-                      ],
+                  YoutubePlayerBuilder(
+                    player: YoutubePlayer(
+                      controller: _controller,
+                      showVideoProgressIndicator: true,
+                      progressIndicatorColor: Colors.blueAccent,
                     ),
+                    builder: (context, player) {
+                      return Column(
+                        children: [
+                          player,
+                        ],
+                      );
+                    },
                   ),
-                  MySpacing.height(20),
-                  Divider(),
                 ],
               ),
             ),
@@ -174,5 +125,11 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }

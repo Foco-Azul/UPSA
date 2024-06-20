@@ -21,6 +21,20 @@ List<Categoria> categoriasEventosFromJson(String str) {
     return Categoria.fromJsonEvento(x['attributes']);
   }).where((element) => element != null)); // Filtrar elementos nulos
 }
+//CONCURSOS
+List<Categoria> categoriasConcursosFromJson(String str) {
+  final jsonData = json.decode(str);
+  final List<dynamic> data = jsonData['data'];
+
+  return List<Categoria>.from(data.map((x) {
+    final concursosData = x['attributes']['concursos']?['data'];
+    if (concursosData == null || concursosData!.length <= 0) {
+      // O puedes devolver una lista vacía si prefieres
+      return null; // O algún valor que indique que no hay datos
+    }
+    return Categoria.fromJsonConcurso(x['attributes']);
+  }).where((element) => element != null)); // Filtrar elementos nulos
+}
 //NOTICIAS
 List<Categoria> categoriasNoticiasFromJson(String str) {
   final jsonData = json.decode(str);
@@ -51,6 +65,12 @@ class Categoria {
     id: json["id"],
     nombre: json["nombre"],
     idsContenido: _armarListaIds(json["eventos"]["data"]),
+  );
+  //EVENTOS
+  factory Categoria.fromJsonConcurso(Map<String, dynamic> json) => Categoria(
+    id: json["id"],
+    nombre: json["nombre"],
+    idsContenido: _armarListaIds(json["concursos"]["data"]),
   );
   //NOTICIAS
   factory Categoria.fromJsonNoticia(Map<String, dynamic> json) => Categoria(

@@ -1,13 +1,21 @@
 import 'dart:async';
 
+import 'package:flutkit/custom/controllers/profile_controller.dart';
+import 'package:flutkit/custom/models/campus.dart';
+import 'package:flutkit/custom/screens/campus/cursillos_clase_screen.dart';
+import 'package:flutkit/custom/screens/campus/sobre_nosotros_escreen.dart';
+import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/helpers/widgets/my_text.dart';
+import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CampusScreen extends StatefulWidget {
   const CampusScreen({Key? key}) : super(key: key);
@@ -22,124 +30,153 @@ class _CampusScreenState extends State<CampusScreen> {
   int _currentPage = 0;
   late CustomTheme customTheme;
   int _numPages = 2;
+  Campus _campus = Campus();
+  String _backUrl= "";
+  late ProfileController controller;
   @override
   void initState() {
     super.initState();
     theme = AppTheme.theme;
     customTheme = AppTheme.customTheme;
+    controller = ProfileController();
     _cargarDatos();
+    /*
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _cargarDatos();
+    });
+    */
   }
   void _cargarDatos() async{
-    Provider.of<AppNotifier>(context, listen: false).iniciar();
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    print(prefs.getString('tokenDispositivo'));
+    _campus = await ApiService().getDatosCampus();
+    await dotenv.load(fileName: ".env");
+    _backUrl = dotenv.get('backUrl');
+    controller.uiLoading = false;
+    setState(() {
+      
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: MySpacing.only(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Stack(
-              alignment: AlignmentDirectional.center,
-              children: <Widget>[
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.3,
-                  child: PageView(
-                    pageSnapping: true,
-                    physics: ClampingScrollPhysics(),
-                    controller: _pageController,
-                    onPageChanged: (int page) {
-                      setState(() {
-                        _currentPage = page;
-                      });
-                    },
-                    children: _crearGaleria().map((widget) {
-                      return Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 0),
-                        child: widget,
-                      );
-                    }).toList(),
+    if (controller.uiLoading) {
+      return Scaffold(
+        body: Container(
+          margin: MySpacing.top(MySpacing.safeAreaTop(context) + 20),
+          child: LoadingEffect.getSearchLoadingScreen(
+            context,
+          ),
+        ),
+      );
+    } else {
+      return SingleChildScrollView(
+        child: Padding(
+          padding: MySpacing.only(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Stack(
+                alignment: AlignmentDirectional.center,
+                children: <Widget>[
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.3,
+                    child: PageView(
+                      pageSnapping: true,
+                      physics: ClampingScrollPhysics(),
+                      controller: _pageController,
+                      onPageChanged: (int page) {
+                        setState(() {
+                          _currentPage = page;
+                        });
+                      },
+                      children: _crearGaleria().map((widget) {
+                        return Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 0),
+                          child: widget,
+                        );
+                      }).toList(),
+                    ),
                   ),
-                ),
-                Positioned(
-                  bottom: 10,
-                  left: 10, // Añade esta línea para alinear a la izquierda
-                  child: _buildPageIndicatorStatic(),
-                ),
-              ],
-            ),
-            Container(
-              margin: MySpacing.symmetric(horizontal: 16, vertical: 16),
-              child: MyText(
-                "Formamos talentos humanos competitivos, con visión globalizada, espíritu emprendedor y sentido ético; preparados para crear, gestionar y liderar actividades productivas e innovadoras.",
-                fontSize: 14,
-                fontWeight: 400,
+                  Positioned(
+                    bottom: 10,
+                    left: 10, // Añade esta línea para alinear a la izquierda
+                    child: _buildPageIndicatorStatic(),
+                  ),
+                ],
               ),
-            ),
-            Column(
-              children: [
-                _buildPulsableContainer(context,
-                  'Carreras',
-                  Icons.library_books_outlined,
-                  () {
+              Container(
+                margin: MySpacing.symmetric(horizontal: 16, vertical: 16),
+                child: MyText(
+                  "Formamos talentos humanos competitivos, con visión globalizada, espíritu emprendedor y sentido ético; preparados para crear, gestionar y liderar actividades productivas e innovadoras.",
+                  fontSize: 14,
+                  fontWeight: 400,
+                ),
+              ),
+              Column(
+                children: [
+                  _buildPulsableContainer(context,
+                    'Carreras',
+                    Icons.library_books_outlined,
+                    () {
 
-                  },
-                ),
-                _buildPulsableContainer(
-                  context,
-                  'Cursillos',
-                  LucideIcons.playCircle,
-                  () {
-                    
-                  },
-                ),
-                _buildPulsableContainer(context,
-                  'Convenios',
-                  LucideIcons.heartHandshake,
-                  () {
+                    },
+                  ),
+                  _buildPulsableContainer(
+                    context,
+                    'Cursillos',
+                    LucideIcons.playCircle,
+                    () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => CursillosClaseScreen()));
+                    },
+                  ),
+                  _buildPulsableContainer(context,
+                    'Convenios',
+                    LucideIcons.heartHandshake,
+                    () {
 
-                  },
-                ),
-                _buildPulsableContainer(
-                  context,
-                  'Tour',
-                  Icons.nordic_walking_outlined,
-                  () {
-                    
-                  },
-                ),
-                _buildPulsableContainer(context,
-                  'Matriculate',
-                  Icons.assignment_turned_in_outlined,
-                  () {
+                    },
+                  ),
+                  _buildPulsableContainer(
+                    context,
+                    'Tour',
+                    Icons.nordic_walking_outlined,
+                    () async {
+                      if (!await launchUrl(
+                        Uri.parse("https://maps.upsa.edu.bo/"),
+                        mode: LaunchMode.inAppWebView,
+                      )) {
+                        throw Exception('Could not launch');
+                      }
+                    },
+                  ),
+                  _buildPulsableContainer(context,
+                    'Matriculate',
+                    Icons.assignment_turned_in_outlined,
+                    () {
 
-                  },
-                ),
-                _buildPulsableContainer(
-                  context,
-                  'Contacto',
-                  LucideIcons.mail,
-                  () {
-                    
-                  },
-                ),
-                _buildPulsableContainer(context,
-                  'Sobre nosotros',
-                  Icons.school_outlined,
-                  () {
-
-                  },
-                ),
-              ],
-            ),
-          ]
+                    },
+                  ),
+                  _buildPulsableContainer(
+                    context,
+                    'Contacto',
+                    LucideIcons.mail,
+                    () {
+                      
+                    },
+                  ),
+                  _buildPulsableContainer(context,
+                    'Sobre nosotros',
+                    Icons.school_outlined,
+                    () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => SobreNosotrosScreen()));
+                    },
+                  ),
+                ],
+              ),
+            ]
+          )
         )
-      )
-    );
+      );
+    }
   }
   Widget _buildPulsableContainer(BuildContext context, String texto, IconData icono, VoidCallback onTap) {
     return GestureDetector(
@@ -193,7 +230,7 @@ class _CampusScreenState extends State<CampusScreen> {
     );
   }
   List<Widget> _crearGaleria() {
-    return ["https://upsa.focoazul.com/uploads/welcome_ae39f62406.png", "https://upsa.focoazul.com/uploads/noticia_a72dc1b321.png"].map((url) {
+    return _campus.imagenes!.map((url) {
       return Container(
         decoration: BoxDecoration(
           color: customTheme.card,
@@ -207,7 +244,7 @@ class _CampusScreenState extends State<CampusScreen> {
         child: Padding(
           padding: EdgeInsets.all(0.0),
           child: Image.network(
-            url,
+            _backUrl+url,
             height: 240.0,
             fit: BoxFit.fill,
           ),

@@ -1,82 +1,80 @@
 import 'dart:convert';
     
 // getting a list of users from json
-List<Evento> EventosFromJson(String str) {
+List<Concurso> ConcursosFromJson(String str) {
   final jsonData = json.decode(str);
   final List<dynamic> data = jsonData['data'];
 
-  return data.map((item) => Evento.fromJson(item)).toList();
+  return data.map((item) => Concurso.fromJson(item)).toList();
 }
-List<Evento> EventosFromJsonCategoria(String str) {
+List<Concurso> ConcursosFromJsonCategoria(String str) {
   final jsonData = json.decode(str);
-  final List<dynamic> data = jsonData["data"][0]["attributes"]["eventos"]["data"];
-  return data.map((item) => Evento.fromJson(item)).toList();
+  final List<dynamic> data = jsonData["data"][0]["attributes"]["concursos"]["data"];
+  return data.map((item) => Concurso.fromJson(item)).toList();
 }
 
 
-Evento EventoFromJson(String str) {
+Concurso ConcursoFromJson(String str) {
   final jsonData = json.decode(str);
   final Map<String, dynamic> data = jsonData['data'];
 
-  return Evento.fromJson(data);
+  return Concurso.fromJson(data);
 }
 
 
-// Evento class
-class Evento {
-  Evento({
+// Concurso class
+class Concurso {
+  Concurso({
     this.id,
     this.titulo,
     this.categoria,
     this.publicacion,
     this.fotoPrincipal,
     this.galeriaDeFotos,
-    this.fechaDeInicio,
-    this.fechaDeFin,
-    this.cuerpo,
+    this.fechaInicio,
+    this.fechaFin,
+    this.descripcion,
     this.etiquetas,
     this.calendario,
     this.capacidad,
     this.inscritos,
     this.inscripciones,
-    this.inscripciones2,
     this.noticiasRelacionadas,
   });
 
-  String? id;
+  int? id;
   String? titulo;
   String? categoria;
   String? publicacion;
   String? fotoPrincipal;
   List<String>? galeriaDeFotos;
-  String? fechaDeInicio;
-  String? fechaDeFin;
-  String? cuerpo;
+  String? fechaInicio;
+  String? fechaFin;
+  String? descripcion;
   List<String>? etiquetas;
-  List<Map<String, String>>? calendario;
+  List<Map<String, dynamic>>? calendario;
   int? capacidad;
   int? inscritos;
-  List<Map<String,int>>? inscripciones;
-  List<Map<String, String>>? inscripciones2;
+  List<Map<String, dynamic>>? inscripciones;
   List<int>? noticiasRelacionadas;
-  factory Evento.fromJson(Map<String, dynamic> json) {
-    return Evento(
-      id: json["id"].toString(),
+  
+  factory Concurso.fromJson(Map<String, dynamic> json) {
+    return Concurso(
+      id: json["id"],
       titulo: json['attributes']["titulo"],
       categoria: json['attributes']["categoria"]?['data']?['attributes']?['nombre'] ?? "Sin categoría",
       publicacion: _convertirFechaPublicacion(json['attributes']["publishedAt"]), 
       fotoPrincipal: json['attributes']["fotoPrincipal"]?['data']?['attributes']?['url'] ?? "/uploads/default_02263f0f89.png", 
       galeriaDeFotos: _convertirGaleria(json['attributes']["galeriaDeFotos"]?['data']), 
-      fechaDeInicio: json['attributes']["fechaDeInicio"], 
-      fechaDeFin: json['attributes']["fechaDeFin"],
-      cuerpo: json['attributes']["cuerpo"], 
-      etiquetas: _convertirEtiquetas(json['attributes']["etiquetas"]?['data']),
-      calendario: _convertirCalendario(json['attributes']?["calendarioEvento"]), 
+      fechaInicio: json['attributes']["fechaInicio"], 
+      fechaFin: json['attributes']["fechaFin"],
+      descripcion: json['attributes']["descripcion"], 
+      etiquetas: _convertirEtiquetas(json['attributes']["etiquetas"]?['data']), 
       capacidad: json['attributes']["capacidad"] ?? -1,
       inscritos: json['attributes']?["inscripciones"]?['data']?.length ?? 0,
       inscripciones: _convertirInscripciones(json['attributes']?['inscripciones']?['data']),
-      inscripciones2: _convertirInscripciones2(json['attributes']?['inscripciones']?['data']),
       noticiasRelacionadas: json['attributes']['noticias']["data"] != null ? _convertirNoticiasRelacionadas(json['attributes']['noticias']["data"]) : [],
+      calendario: _convertirCalendario(json['attributes']?["calendario"]), 
     );
   }
   static String _convertirFecha(String fecha) {
@@ -107,21 +105,7 @@ class Evento {
     }
     return res;
   }
-  static List<Map<String,int>> _convertirInscripciones(dynamic data) {
-    List<Map<String,int>> res = [];
-    if (data != null) {
-      for (var item in data) {
-        if (item['id'] != null && item['attributes'] != null && item['attributes']['qr'] != null) {
-          Map<String, int> evento = {
-            item['attributes']['qr']:item['id']
-          };
-          res.add(evento);
-        }
-      }
-    }
-    return res;
-  }
-  static List<Map<String, String>> _convertirInscripciones2(dynamic data) {
+  static List<Map<String, String>> _convertirInscripciones(dynamic data) {
     List<Map<String, String>> res = [];
     if (data != null) {
       for (var item in data) {
@@ -142,12 +126,12 @@ class Evento {
     if (data != null) {
       for (var item in data) {
         if (item['calendarioTitulo'] != null && item['calendarioFecha'] != null) {
-          Map<String, String> evento = {
+          Map<String, String> concurso = {
             "titulo":item['calendarioTitulo'],
-            "inicio":_convertirFecha(item['calendarioFecha']),
-            "fin":item["calendarioFechaFin"] != null ? " - "+ _convertirFecha(item['calendarioFechaFin']) : "",
+            "inicio":item['calendarioFecha'],
+            "fin":item['calendarioFechaFin'] != null ? " - "+ _convertirFecha(item['calendarioFechaFin']) : "",
           };
-          res.add(evento);
+          res.add(concurso);
         }
       }
     }
@@ -200,7 +184,7 @@ class Evento {
   };
   @override
   String toString() {
-    return 'Evento{id: $id, titulo: $titulo}';
+    return 'Concurso{id: $id, titulo: $titulo}';
   }
   
 }

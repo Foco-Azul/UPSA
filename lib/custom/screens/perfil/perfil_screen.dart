@@ -5,7 +5,11 @@ import 'package:flutkit/custom/auth/registro_perfil.dart';
 import 'package:flutkit/custom/auth/validar_email.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/user.dart';
+import 'package:flutkit/custom/screens/actividades/actividades_inicio.dart';
+import 'package:flutkit/custom/screens/actividades/concurso_escreen.dart';
 import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
+import 'package:flutkit/custom/screens/admin/lector_qr.dart';
+import 'package:flutkit/custom/screens/perfil/app_setting_screen.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/homes/homes_screen.dart';
@@ -57,8 +61,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
     if(_isLoggedIn){
       _user = Provider.of<AppNotifier>(context, listen: false).user;
-      _user.eventosInscritos2 = await ApiService().getEventosInscritosForUserNotPopulate(_user.id!);
-      _user.eventosSeguidos2 = await ApiService().getEventosSeguidosForUserNotPopulate(_user.id!);
+      _user.actividadesInscritas = await ApiService().getActividadesInscritosForUserNotPopulate(_user.id!);
+      _user.actividadesSeguidas = await ApiService().getActividadesSeguidosForUserNotPopulate(_user.id!);
       if(_user.estado != "Nuevo" && _user.estado != "Verificado"){
         _userMeta = await ApiService().getUserMeta(_user.id!);
       }
@@ -121,9 +125,9 @@ class _PerfilScreenState extends State<PerfilScreen> {
             if((_user.estado != "Nuevo" && _user.estado != "Verificado") && _userMeta.carreraSugerida!.isNotEmpty)
             _carreraSugerida(),
             Divider(),
-            if(_user.eventosInscritos2!.isNotEmpty || _user.eventosSeguidos2!.isNotEmpty)
+            if(_user.actividadesInscritas!.isNotEmpty || _user.actividadesSeguidas!.isNotEmpty)
             _misActividades(),
-            if(_user.eventosInscritos2!.isNotEmpty || _user.eventosSeguidos2!.isNotEmpty)
+            if(_user.actividadesInscritas!.isNotEmpty || _user.actividadesSeguidas!.isNotEmpty)
             Divider(),
             _miPromo(),
             Divider(),
@@ -263,6 +267,21 @@ class _PerfilScreenState extends State<PerfilScreen> {
               ),
             ],
           ),
+          if(_user.rolCustom == "admin")
+          SizedBox(height: 8),
+          if(_user.rolCustom == "admin")
+          GestureDetector(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => LectorQRScreen()));
+            },
+            child: Text(
+              "Escanear QR",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w400
+              ),
+            ),
+          ),
           SizedBox(height: 8),
           GestureDetector(
             onTap: () {
@@ -302,7 +321,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               ),
             ),
           ),
-          if(_user.estado != "Completado")
+          if(_user.estado != "Completado" && _user.estado != "Nuevo")
           SizedBox(height: 8),
           if(_user.estado != "Completado" && _user.estado != "Nuevo")
           GestureDetector(
@@ -382,13 +401,13 @@ class _PerfilScreenState extends State<PerfilScreen> {
               ),
             ],
           ),
-          if(_user.eventosInscritos2!.isNotEmpty)
+          if(_user.actividadesInscritas!.isNotEmpty)
           SizedBox(height: 8),
-          if(_user.eventosInscritos2!.isNotEmpty)
+          if(_user.actividadesInscritas!.isNotEmpty)
           _actividadesInscritas(),
-          if(_user.eventosSeguidos2!.isNotEmpty)
+          if(_user.actividadesSeguidas!.isNotEmpty)
           SizedBox(height: 8),
-          if(_user.eventosSeguidos2!.isNotEmpty)
+          if(_user.actividadesSeguidas!.isNotEmpty)
           _actividadesSeguidas(),
         ],
       ),
@@ -397,7 +416,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
   Widget _actividadesSeguidas() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: _user.eventosSeguidos2!.map((actividad) {
+      children: _user.actividadesSeguidas!.map((actividad) {
         return Container(
           padding: EdgeInsets.symmetric(vertical: 10),
           child: Column(
@@ -407,8 +426,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
               Text(
                 actividad["titulo"],
                 style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               SizedBox(height: 8),
@@ -416,8 +435,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
               Text(
                 "Siguiendo",
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               SizedBox(height: 8),
@@ -425,8 +444,10 @@ class _PerfilScreenState extends State<PerfilScreen> {
               InkWell(
                 onTap: () {
                   if(actividad["actividad"] == "evento"){
-                    Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 1,)),(Route<dynamic> route) => false);
                     Navigator.push(context, MaterialPageRoute(builder: (context) => EventoScreen(idEvento: actividad["id"])));
+                  }
+                  if(actividad["actividad"] == "concurso"){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => ConcursoScreen(idConcurso: actividad["id"])));
                   }
                 },
                 child: Row(
@@ -457,7 +478,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
   Widget _actividadesInscritas() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: _user.eventosInscritos2!.map((actividad) {
+      children: _user.actividadesInscritas!.map((actividad) {
         return Container(
           padding: EdgeInsets.symmetric(vertical: 10),
           child: Column(
@@ -467,7 +488,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               Text(
                 actividad["titulo"],
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -476,7 +497,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               Text(
                 "Inscrito",
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: FontWeight.w400,
                 ),
               ),
@@ -487,8 +508,10 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   InkWell(
                     onTap: () {
                       if(actividad["actividad"] == "evento"){
-                        Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 1,)),(Route<dynamic> route) => false);
                         Navigator.push(context, MaterialPageRoute(builder: (context) => EventoScreen(idEvento: actividad["id"])));
+                      }
+                     if(actividad["actividad"] == "concurso"){
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => ConcursoScreen(idConcurso: actividad["id"])));
                       }
                     },
                     child: Row(
@@ -606,13 +629,13 @@ class _PerfilScreenState extends State<PerfilScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               MyText.bodyLarge(
-                _userMeta.nombres! + _userMeta.apellidos!,
+                _userMeta.nombres! +' '+ _userMeta.apellidos!,
                 fontSize: 18,
                 fontWeight: 600, // Corregido de 600 a FontWeight.w600
               ),
               SizedBox(height: 8), // Espacio de 8 de alto entre los textos
               Text(
-                _userMeta.promocion!["nombre"],
+                "Colegio "+_userMeta.colegio!["nombre"],
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,

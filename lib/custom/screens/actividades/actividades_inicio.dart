@@ -1,6 +1,8 @@
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/categoria.dart';
+import 'package:flutkit/custom/models/concurso.dart';
 import 'package:flutkit/custom/models/evento.dart';
+import 'package:flutkit/custom/screens/actividades/concurso_escreen.dart';
 import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
@@ -21,9 +23,12 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
   late ThemeData theme;
   late CustomTheme customTheme;
   List<Categoria> _categorias = [];
+  List<Categoria> _categoriasConcurso = [];
   late ProfileController controller;
   int _selectedChoiceIndex = -1;
+  int _selectedChoiceIndexConcurso = -1;
   List<Evento> _eventos =  [];
+  List<Concurso> _concursos =  [];
   String _backUrl = "";
   bool _cargando = false;
   @override
@@ -38,7 +43,9 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
     await dotenv.load(fileName: ".env");
     _backUrl = dotenv.get('backUrl');
     List<Categoria> categoriasActual = await ApiService().getCategorias();
+    _categoriasConcurso = await ApiService().getCategoriasConcurso();
     _eventos = await ApiService().getEventos();
+    _concursos = await ApiService().getConcursos();
     setState(() {
       _categorias = categoriasActual;
       controller.uiLoading = false;
@@ -52,6 +59,19 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
       _eventos = await ApiService().getEventos();
     }else{
       _eventos = await ApiService().getEventosPorIds(_categorias[_selectedChoiceIndex].idsContenido!);
+    }
+    setState(() {
+      _cargando = false;
+    });
+  }
+    void _cargarConcursosCategoria() async{
+    setState(() {
+      _cargando = true;
+    });
+    if(_selectedChoiceIndexConcurso == -1){
+      _concursos = await ApiService().getConcursos();
+    }else{
+      _concursos = await ApiService().getConcursosPorIds(_categoriasConcurso[_selectedChoiceIndexConcurso].idsContenido!);
     }
     setState(() {
       _cargando = false;
@@ -112,51 +132,132 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
     }
   }
 
-Widget getTabContent(String text) {
-  if(text != "Eventos"){
-    return Scaffold(
-      backgroundColor: theme.colorScheme.background,
-      body: Center(
-        child: MyText.titleMedium(text, fontWeight: 600),
-      ),
-    );
-  }else{
-    return Scaffold(
-    body: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
+  Widget getTabContent(String text) {
+    switch (text) {
+      case "Eventos":
+        return Scaffold(
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                child: Column(
-                  children: <Widget>[
-                      Container(
-                      padding: MySpacing.only(top: 12, bottom: 12),
-                      child: Wrap(
-                        children: _buildChoiceList(),
-                      ),
-                    )
-                  ]
-                )
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    Column(
+                      children: <Widget>[
+                          Container(
+                          padding: MySpacing.only(top: 12, bottom: 12),
+                          child: Wrap(
+                            children: _buildChoiceList(),
+                          ),
+                        )
+                      ]
+                    ),
+                  ],
+                ),
               ),
+              _cargando
+              ? Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(32, 104, 14, 1)),
+                ),
+              )
+                // Muestra el indicador de carga si `_cargando` es true
+              : generarContenido(_eventos), // Muestra el contenido generado si `_cargando` es false
             ],
           ),
-        ),
-        _cargando
-        ? Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(32, 104, 14, 1)),
+        );
+      case "Concursos":
+        return Scaffold(
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    Column(
+                      children: <Widget>[
+                          Container(
+                          padding: MySpacing.only(top: 12, bottom: 12),
+                          child: Wrap(
+                            children: _buildChoiceListConcurso(),
+                          ),
+                        )
+                      ]
+                    ),
+                  ],
+                ),
+              ),
+              _cargando
+              ? Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(32, 104, 14, 1)),
+                ),
+              )
+                // Muestra el indicador de carga si `_cargando` es true
+              : generarContenidoConcurso(_concursos), // Muestra el contenido generado si `_cargando` es false
+            ],
           ),
-        )
-          // Muestra el indicador de carga si `_cargando` es true
-        : generarContenido(_eventos), // Muestra el contenido generado si `_cargando` es false
-      ],
-    ),
-  );
+        );
+      default:
+        return Scaffold(
+          backgroundColor: theme.colorScheme.background,
+          body: Center(
+            child: MyText.titleMedium(text, fontWeight: 600),
+          ),
+        );
+    }
   }
-}
+  Widget generarContenidoConcurso(List<Concurso> data) {
+    return Expanded(
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        itemCount: data.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: GestureDetector(
+              onTap: () {
+                // Acción al hacer clic en el elemento
+                Navigator.push(context, MaterialPageRoute(builder: (context) => ConcursoScreen(idConcurso: data[index].id!,)));
+              },
+              child: Row(
+                children: [
+                  // Imagen a la izquierda
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.25,
+                    child: Image.network(_backUrl+data[index].fotoPrincipal!),
+                  ),
+                  // Espaciador
+                  SizedBox(width: 16),
+                  // Columna con el texto
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        MyText.bodyLarge(data[index].titulo!, fontSize: 14, fontWeight: 600,),
+                        SizedBox(height: 8), // Espacio de 8 de alto entre los textos
+                        Text(
+                          data[index].descripcion!.replaceAll('\n', ''),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
   Widget generarContenido(List<Evento> data) {
     return Expanded(
       child: ListView.builder(
@@ -235,6 +336,50 @@ Widget getTabContent(String text) {
               } else {
                 _selectedChoiceIndex = -1; // Deselecciona si se pulsa el mismo item
                 _cargarEventosCategoria();
+              }
+            });
+          },
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: Color.fromRGBO(32, 104, 14, 1), // Color del borde
+              width: 1.0, // Ancho del borde
+            ),
+            borderRadius: BorderRadius.circular(4), // Radio de borde
+          ),
+        ),
+      ));
+    }
+    return choices;
+  }
+  _buildChoiceListConcurso() {
+    List<Widget> choices = [];
+    for (int index = 0; index < _categoriasConcurso.length; index++) {
+      var item = _categoriasConcurso[index];
+      choices.add(Container(
+        padding: MySpacing.all(8),
+        child: ChoiceChip(
+          checkmarkColor: Colors.white,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          selectedColor: Color.fromRGBO(32, 104, 14, 1),
+          label: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              MyText.bodyMedium(item.nombre!,
+                fontSize: 8,
+                color: _selectedChoiceIndexConcurso == index
+                    ? theme.colorScheme.onPrimary
+                    : theme.colorScheme.onBackground),
+            ],
+          ),
+          selected: _selectedChoiceIndexConcurso == index, // Verifica si este chip está seleccionado
+          onSelected: (selected) {
+            setState(() {
+              if (_selectedChoiceIndexConcurso != index) {
+                _selectedChoiceIndexConcurso = selected ? index : -1; // Actualiza el índice seleccionado solo si es diferente
+                _cargarConcursosCategoria();
+              } else {
+                _selectedChoiceIndexConcurso = -1; // Deselecciona si se pulsa el mismo item
+                _cargarConcursosCategoria();
               }
             });
           },

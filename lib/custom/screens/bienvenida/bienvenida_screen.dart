@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutkit/custom/screens/bienvenida/postbienvenida_screen.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
@@ -6,6 +8,7 @@ import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -26,7 +29,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   int _currentPage = 0;
   final int _numPages = 3;
   bool isDark = false;
-  
+  String _backUrl = "";
   List<Widget> _buildPageIndicatorStatic() {
     List<Widget> list = [];
     for (int i = 0; i < _numPages; i++) {
@@ -55,6 +58,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   void initState() {
     super.initState();
+    cargarDatos();
+  }
+  void cargarDatos() async{
+    await dotenv.load(fileName: ".env");
+    _backUrl = dotenv.get('backUrl');
+    setState(() {});
   }
   @override
   Widget build(BuildContext context) {
@@ -67,6 +76,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         return Theme(
           data: theme,
           child: Scaffold(
+            backgroundColor: Color.fromRGBO(244, 251, 249, 1),
             body: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -92,21 +102,21 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             _currentPage = page;
                           });
                         },
-                        children: const <Widget>[
+                        children: <Widget>[
                           _SingleNewsPage(
-                            title: "App para bachilleres",
-                            description: "Encuentra las últimas novedades, becas y eventos para bachilleres como vos",
-                            imagen: 'https://upsa.focoazul.com/uploads/welcome_ae39f62406.png',
+                            title: "Conéctate con tu nueva vida universitaria",
+                            description: "Encuentra las últimas novedades, becas y eventos para bachilleres como vos.",
+                            imagen: '$_backUrl/uploads/bienvenida_1_6b71364bfe.png',
                           ),
                           _SingleNewsPage(
-                            title: "App para bachilleres",
-                            description: "Encuentra las últimas novedades, becas y eventos para bachilleres como vos",
-                            imagen: 'https://upsa.focoazul.com/uploads/welcome_ae39f62406.png',
+                            title: "Participa junto a tu promo",
+                            description: "Sus memorias aparecerán en tu perfil, junto a tus actividades a participar.",
+                            imagen: '$_backUrl/uploads/bienvenida_2_5c423ed23b.png',
                           ),
                           _SingleNewsPage(
-                            title: "App para bachilleres",
-                            description: "Encuentra las últimas novedades, becas y eventos para bachilleres como vos",
-                            imagen: 'https://upsa.focoazul.com/uploads/welcome_ae39f62406.png',
+                            title: "Prepárate para tu futuro",
+                            description: "Junto a nuestros cursillos, quizzes e info de carreras, podrás estar mejor preparado en tu formación académica.",
+                            imagen: '$_backUrl/uploads/bienvenida_3_74cd77fbda.png',
                           ),
                         ],
                       ),
@@ -123,12 +133,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 Container(
                   margin: EdgeInsets.only(top: 26), // Ajusta el valor según sea necesario
                   child: CupertinoButton(
-                    color: Color.fromRGBO(32, 104, 14, 1),
+                    color: Color.fromRGBO(0, 51, 5, 1),
                     onPressed: () {
                       Provider.of<AppNotifier>(context, listen: false).setEsNuevo(false);
                       Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => PostBienvenidaScreen()),(Route<dynamic> route) => false);
                     },
-                    borderRadius: BorderRadius.all(Radius.circular(14)),
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
                     padding: MySpacing.xy(100, 16),
                     pressedOpacity: 0.5,
                     child: MyText.bodyMedium(
@@ -162,14 +172,13 @@ class _SingleNewsPage extends StatelessWidget {
     return Column(
       children: <Widget>[
         Container(
-          padding: MySpacing.fromLTRB(0, 24, 0, 24),
+          padding: MySpacing.fromLTRB(0, 100, 0, 24),
           child: Column(
             children: <Widget>[
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.50, // 60% de la altura de la pantalla
                     width: MediaQuery.of(context).size.height * 1,
                     child: Image.network(
                       imagen,
@@ -178,8 +187,8 @@ class _SingleNewsPage extends StatelessWidget {
                   ),
                   Container(
                     padding: MySpacing.fromLTRB(0, 24, 0, 0),
-                    margin: MySpacing.only(top: 16),
-                    child: MyText.titleLarge(title, fontWeight: 700, fontSize: 24,),
+                    margin: MySpacing.only(top: 16, left: 16, right: 16),
+                    child: MyText(title, fontWeight: 700, fontSize: 24, textAlign: TextAlign.center,),
                   ),
                   Container(
                     margin: MySpacing.top(16),

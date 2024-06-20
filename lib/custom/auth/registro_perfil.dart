@@ -1,14 +1,12 @@
 import 'package:flutkit/custom/auth/registro_carrera.dart';
-import 'package:flutkit/custom/models/promocion.dart';
+import 'package:flutkit/custom/models/colegio.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
 import 'package:flutkit/custom/widgets/progress_custom.dart';
 import 'package:flutkit/helpers/extensions/extensions.dart';
 import 'package:flutkit/helpers/widgets/my_button.dart';
-import 'package:flutkit/helpers/widgets/my_container.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
 import 'package:provider/provider.dart';
@@ -42,9 +40,9 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
     "cedulaDeIdentidad": "",
     "fechaDeNacimiento": "",
     "celular1": "",
-    "promocion": "",
+    "colegio": "",
   };
-  List<Promocion> _promociones = [];
+  List<Colegio> _colegios = [];
 
   @override
   void initState() {
@@ -56,8 +54,8 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
     cargarDatos();
   }
   void cargarDatos() async{
-     _user = Provider.of<AppNotifier>(context, listen: false).user;
-    _promociones = await ApiService().getPromociones();
+    _user = Provider.of<AppNotifier>(context, listen: false).user;
+    _colegios = await ApiService().getColegios();
     setState(() {
       controller.uiLoading = false;
     });
@@ -68,10 +66,10 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       _errores["apellidos"] = validacion.validarNombres(_userMeta.apellidos, true);
       _errores["cedulaDeIdentidad"] = validacion.validarNumerosPositivos(_userMeta.cedulaDeIdentidad, true, true);
       _errores["celular1"] = validacion.validarNumerosPositivos(_userMeta.celular1, true, true);
-      if (_userMeta.promocion == null || _userMeta.promocion!.isEmpty) {
-        _errores["promocion"] = "Selecciona una opción";
+      if (_userMeta.colegio == null || _userMeta.colegio!.isEmpty) {
+        _errores["colegio"] = "Selecciona una opción";
       }else{
-        _errores["promocion"] = "";
+        _errores["colegio"] = "";
       }
       if(_userMeta.fechaDeNacimiento == null){
         _errores["fechaDeNacimiento"] = "Este campo es requerido";
@@ -80,7 +78,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       }
     });
 
-    if (_errores["nombres"]!.isEmpty && _errores["apellidos"]!.isEmpty && _errores["cedulaDeIdentidad"]!.isEmpty && _errores["celular1"]!.isEmpty && _errores["promocion"]!.isEmpty) {
+    if (_errores["nombres"]!.isEmpty && _errores["apellidos"]!.isEmpty && _errores["cedulaDeIdentidad"]!.isEmpty && _errores["celular1"]!.isEmpty && _errores["colegio"]!.isEmpty) {
       _registrarEstudiante();
     }
   }
@@ -115,9 +113,10 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
   DateTime selectedDate = DateTime.now();
   _pickDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
+        locale: const Locale("es"),
         context: context,
         initialDate: selectedDate,
-        firstDate: DateTime(1900),
+        firstDate: DateTime(2005),
         lastDate: DateTime.now(),);
     if (picked != null && picked != selectedDate) {
       setState(() {
@@ -128,9 +127,9 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
   }
   void _onOptionSelected(List<ValueItem> selectedOptions) {
     if(selectedOptions.isNotEmpty){
-      _userMeta.promocion = {"id":int.parse(selectedOptions[0].value!)};
+      _userMeta.colegio = {"id":int.parse(selectedOptions[0].value!)};
     }else{
-      _userMeta.promocion = {};
+      _userMeta.colegio = {};
     }
     setState(() {
     });
@@ -165,24 +164,15 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
             children: <Widget>[
               Column(
                 children: <Widget>[
-                  MyContainer.bordered(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    //margin: EdgeInsets.only(top: 100,),
-                    color: theme.scaffoldBackgroundColor,
+                  Container(
+                    padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    color: Color.fromRGBO(244, 251, 249, 1),
                     child: Column(     
                       children: <Widget>[
-                        Container(
-                          margin: EdgeInsets.only(top: 8, bottom: 8),
-                          child: Row(
-                            children: const <Widget>[
-                              Icon(FontAwesomeIcons.addressCard, size: 40, color: Color.fromRGBO(215, 215, 215, 1),), // Icono a la izquierda
-                            ],
-                          ),
-                        ),
                         Row(
                           children: <Widget>[// Espacio entre el icono y el texto
                             MyText.titleLarge(
-                              "📝 Llenemos tu perfil",
+                              "Llenemos tu perfil",
                               style: TextStyle(
                                 fontSize: 20.0,
                                 fontWeight: FontWeight.bold,
@@ -208,8 +198,16 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
                                 children: <Widget>[
                                   Container(
                                     decoration: BoxDecoration(
-                                      color: Colors.grey[200],
-                                      borderRadius: BorderRadius.circular(8),
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(5),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
+                                          spreadRadius: 2, // Radio de propagación
+                                          blurRadius: 5, // Radio de desenfoque
+                                          offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
+                                        ),
+                                      ],
                                     ),
                                     child: TextFormField(
                                       onChanged: (value) {
@@ -224,10 +222,10 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
                                         labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
                                         focusedBorder: OutlineInputBorder(
                                           borderSide: BorderSide(
-                                            color: Color.fromRGBO(32, 104, 14, 1),
+                                            color: Color.fromRGBO(5, 50, 12, 1),
                                             width: 2.0,
                                           ),
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(5),
                                         ),
                                       ),
                                     ),
@@ -251,8 +249,16 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
                                 children: <Widget>[
                                   Container(
                                     decoration: BoxDecoration(
-                                      color: Colors.grey[200],
-                                      borderRadius: BorderRadius.circular(8),
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(5),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
+                                          spreadRadius: 2, // Radio de propagación
+                                          blurRadius: 5, // Radio de desenfoque
+                                          offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
+                                        ),
+                                      ],
                                     ),
                                     child: TextFormField(
                                       onChanged: (value) {
@@ -267,10 +273,10 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
                                         labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
                                         focusedBorder: OutlineInputBorder(
                                           borderSide: BorderSide(
-                                            color: Color.fromRGBO(32, 104, 14, 1),
+                                            color: Color.fromRGBO(5, 50, 12, 1),
                                             width: 2.0,
                                           ),
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(5),
                                         ),
                                       ),
                                     ),
@@ -297,8 +303,16 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
                                       Expanded(
                                         child: Container(
                                           decoration: BoxDecoration(
-                                            color: Colors.grey[200],
-                                            borderRadius: BorderRadius.circular(8),
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(5),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
+                                                spreadRadius: 2, // Radio de propagación
+                                                blurRadius: 5, // Radio de desenfoque
+                                                offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
+                                              ),
+                                            ],
                                           ),
                                           child: TextFormField(
                                             readOnly: true,
@@ -310,10 +324,10 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
                                               labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
                                               focusedBorder: OutlineInputBorder(
                                                 borderSide: BorderSide(
-                                                  color: Color.fromRGBO(32, 104, 14, 1),
+                                                  color: Color.fromRGBO(5, 50, 12, 1),
                                                   width: 2.0,
                                                 ),
-                                                borderRadius: BorderRadius.circular(8),
+                                                borderRadius: BorderRadius.circular(5),
                                               ),
                                             ),
                                           ),
@@ -328,7 +342,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
                                           },
                                           elevation: 0,
                                           borderRadiusAll: 4,
-                                          backgroundColor: Color.fromRGBO(32, 104, 14, 1),
+                                          backgroundColor: Color.fromRGBO(5, 50, 12, 1),
                                           child: Icon(
                                             LucideIcons.calendar,
                                             size: 20,
@@ -357,8 +371,16 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
                                 children: <Widget>[
                                   Container(
                                     decoration: BoxDecoration(
-                                      color: Colors.grey[200],
-                                      borderRadius: BorderRadius.circular(8),
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(5),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
+                                          spreadRadius: 2, // Radio de propagación
+                                          blurRadius: 5, // Radio de desenfoque
+                                          offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
+                                        ),
+                                      ],
                                     ),
                                     child: TextFormField(
                                       onChanged: (value) {
@@ -373,10 +395,10 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
                                         labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
                                         focusedBorder: OutlineInputBorder(
                                           borderSide: BorderSide(
-                                            color: Color.fromRGBO(32, 104, 14, 1),
+                                            color: Color.fromRGBO(5, 50, 12, 1),
                                             width: 2.0,
                                           ),
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(5),
                                         ),
                                       ),
                                       keyboardType: TextInputType.number,
@@ -402,8 +424,16 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
                                 children: <Widget>[
                                   Container(
                                     decoration: BoxDecoration(
-                                      color: Colors.grey[200],
-                                      borderRadius: BorderRadius.circular(8),
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(5),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
+                                          spreadRadius: 2, // Radio de propagación
+                                          blurRadius: 5, // Radio de desenfoque
+                                          offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
+                                        ),
+                                      ],
                                     ),
                                     child: TextFormField(
                                       onChanged: (value) {
@@ -418,10 +448,10 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
                                         labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
                                         focusedBorder: OutlineInputBorder(
                                           borderSide: BorderSide(
-                                            color: Color.fromRGBO(32, 104, 14, 1),
+                                            color: Color.fromRGBO(5, 50, 12, 1),
                                             width: 2.0,
                                           ),
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(5),
                                         ),
                                       ),
                                       keyboardType: TextInputType.number,
@@ -439,57 +469,69 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
                                   ),
                                 ],
                               ),
-                            ),
+                            ),   
                             Container(
                               margin: EdgeInsets.only(top: 16, bottom: 8),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  MyText.bodyMedium(
-                                    'Nombre de promoción',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 12.0,
-                                      fontWeight: FontWeight.w400,
+                                children: <Widget>[                                                             
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(5),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
+                                          spreadRadius: 2, // Radio de propagación
+                                          blurRadius: 5, // Radio de desenfoque
+                                          offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        MultiSelectDropDown(
+                                          onOptionSelected: _onOptionSelected,
+                                          options: _buildValueItems(),
+                                          hint: "- Colegio -",
+                                          selectionType: SelectionType.single,
+                                          chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
+                                          optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+                                          selectedOptionIcon: const Icon(Icons.check_circle),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  SizedBox(height: 16.0),
-                                  MultiSelectDropDown(
-                                    onOptionSelected: _onOptionSelected,
-                                    options: _buildValueItems(),
-                                    hint: "- Seleccionar -",
-                                    selectionType: SelectionType.single,
-                                    chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
-                                    optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
-                                    selectedOptionIcon: const Icon(Icons.check_circle),
-                                  ),
-                                  if (_errores["promocion"]!.isNotEmpty)     
+                                  if (_errores["colegio"]!.isNotEmpty)     
                                   Padding(
                                     padding: EdgeInsets.only(top: 8),
                                     child: Text(
-                                      _errores["promocion"]!,
+                                      _errores["colegio"]!,
                                       style: TextStyle(color: Colors.red),
                                       textAlign: TextAlign.start,
                                     ),
                                   ),
-                                ],
-                              ),
+                                ]
+                              )
                             ),
                             MySpacing.height(20),
                             SizedBox(
                               width: double.infinity,
                               child: CupertinoButton(
-                                color: Color.fromRGBO(32, 104, 14, 1),
+                                color: Color.fromRGBO(5, 50, 12, 1),
                                 onPressed: () {
                                   _validarCampos();
                                 },
-                                borderRadius: BorderRadius.all(Radius.circular(14)),
+                                borderRadius: BorderRadius.all(Radius.circular(5)),
                                 padding: MySpacing.xy(100, 16),
                                 pressedOpacity: 0.5,
                                 child: MyText.bodyMedium(
                                   "Continuar",
-                                  color: theme.colorScheme.onSecondary,
-                                  fontSize: 16,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ),
@@ -514,10 +556,10 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
     } 
   }
   List<ValueItem> _buildValueItems() {
-    return _promociones.map((promocion) {
+    return _colegios.map((colegio) {
       return ValueItem(
-        label: promocion.nombre!,
-        value: promocion.id.toString(),
+        label: colegio.nombre!,
+        value: colegio.id.toString(),
       );
     }).toList();
   }

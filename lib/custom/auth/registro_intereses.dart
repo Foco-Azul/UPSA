@@ -3,14 +3,11 @@ import 'package:flutkit/custom/utils/validaciones.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/custom/widgets/progress_custom.dart';
 import 'package:flutkit/helpers/extensions/extensions.dart';
-import 'package:flutkit/helpers/widgets/my_button.dart';
 import 'package:flutkit/helpers/widgets/my_container.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:intl/intl.dart';
-import 'package:multi_dropdown/multiselect_dropdown.dart';
 import 'package:provider/provider.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/user.dart';
@@ -19,7 +16,6 @@ import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/helpers/widgets/my_text.dart';
-import 'package:flutkit/helpers/widgets/my_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutkit/loading_effect.dart';
@@ -83,7 +79,7 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
         setState(() {
           _isInProgress = -1;
         });
-        MensajeTemporalInferior().mostrarMensaje(context,"Completaste tu cuenta con exito.",Color.fromRGBO(32, 104, 14, 1), Color.fromRGBO(255, 255, 255, 1));
+        MensajeTemporalInferior().mostrarMensaje(context,"Completaste tu cuenta con exito.",Color.fromRGBO(5, 50, 12, 1), Color.fromRGBO(255, 255, 255, 1));
         Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
       }
     } on Exception catch (e) {
@@ -122,20 +118,12 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
             children: <Widget>[
               Column(
                 children: <Widget>[
-                  MyContainer.bordered(
+                  Container(
                     padding: EdgeInsets.symmetric(horizontal: 20),
                     //margin: EdgeInsets.only(top: 100,),
                     color: theme.scaffoldBackgroundColor,
                     child: Column(     
                       children: <Widget>[
-                        Container(
-                          margin: EdgeInsets.only(top: 8, bottom: 8),
-                          child: Row(
-                            children: const <Widget>[
-                              Icon(FontAwesomeIcons.addressCard, size: 40, color: Color.fromRGBO(215, 215, 215, 1),), // Icono a la izquierda
-                            ],
-                          ),
-                        ),
                         Row(
                           children: <Widget>[// Espacio entre el icono y el texto
                             MyText.titleLarge(
@@ -165,11 +153,11 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
                           SizedBox(
                             width: double.infinity,
                             child: CupertinoButton(
-                              color: Color.fromRGBO(32, 104, 14, 1),
+                              color: Color.fromRGBO(5, 50, 12, 1),
                               onPressed: () {
                                 _validarCampos();
                               },
-                              borderRadius: BorderRadius.all(Radius.circular(14)),
+                              borderRadius: BorderRadius.all(Radius.circular(5)),
                               padding: MySpacing.xy(100, 16),
                               pressedOpacity: 0.5,
                               child: MyText.bodyMedium(
@@ -203,9 +191,10 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
       choices.add(Container(
         padding: MySpacing.only(left: 0, right: 8, bottom: 16),
         child: ChoiceChip(
+          avatar: _userMeta.intereses!.contains(item.id!) ? Icon(Icons.check_circle_outline) : Icon(Icons.circle_outlined),
           checkmarkColor: Colors.white,
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          selectedColor: Color.fromRGBO(32, 104, 14, 1),
+          selectedColor: Color.fromRGBO(5, 50, 12, 1),
           label: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -225,7 +214,7 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
           },
           shape: RoundedRectangleBorder(
             side: BorderSide(
-              color: Color.fromRGBO(32, 104, 14, 1), // Color del borde
+              color: Color.fromRGBO(5, 50, 12, 1), // Color del borde
               width: 1.0, // Ancho del borde
             ),
             borderRadius: BorderRadius.circular(14), // Radio de borde

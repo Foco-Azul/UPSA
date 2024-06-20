@@ -24,6 +24,7 @@ class User {
     this.qr,
     this.rolCustom,
     this.estado,
+    this.actividadesInscritas,
     //required this.userMeta,
     //required this.role,
   });
@@ -44,6 +45,10 @@ class User {
   String? estado;
   List<Map<String, dynamic>>? eventosSeguidos2;
   List<Map<String, dynamic>>? eventosInscritos2;
+  List<Map<String, dynamic>>? concursosSeguidos;
+  List<Map<String, dynamic>>? concursosInscritos;
+  List<Map<String, dynamic>>? actividadesInscritas;
+  List<Map<String, dynamic>>? actividadesSeguidas;
   //UserMeta userMeta;
   //int role;
 
@@ -105,11 +110,13 @@ class UserMeta {
   String? aplicacionTest;
   List<String>? recibirInfo;
   Map<String, dynamic>? promocion;
+  Map<String, dynamic>? colegio;
   List<int>? intereses;
   List<int>? carreras;
   List<String>? universidades;
   String? fotoPerfil;
   Map<String, String>? carreraSugerida;
+  String? universidadExtranjera;
 
   UserMeta({
     this.nombres,
@@ -118,7 +125,7 @@ class UserMeta {
     this.fechaDeNacimiento,
     this.celular1,
     this.testVocacional = false,
-    this. estudiarBolivia = true,
+    this.estudiarBolivia = true,
     this.infoCar,
     this.departamentoEstudiar = "",
     this.recibirInfo,
@@ -129,6 +136,8 @@ class UserMeta {
     this.aplicacionTest,
     this.fotoPerfil,
     this.carreraSugerida,
+    this.colegio,
+    this.universidadExtranjera
   });
 
   factory UserMeta.fromJsonMeta(Map<String, dynamic> json) => UserMeta(
@@ -138,9 +147,11 @@ class UserMeta {
     fechaDeNacimiento: json["fechaDeNacimiento"] ?? "",
     celular1: json["celular1"] != null ? json["celular1"].toString() : "",
     promocion: _armarPromocion(json["promocion"]),
+    colegio: _armarColegio(json["colegio"]),
     aplicacionTest: json["aplicacionTest"] ?? "",
     fotoPerfil: json["fotoPerfil"]?['data']?['attributes']?['url'] ?? "/uploads/avatar_89f34d0255.png", 
     carreraSugerida: json["carreraSugerida"] != null ? _carreraSugerida(json["carreraSugerida"]) : {},
+    universidadExtranjera: json["universidadExtranjera"] ?? "",
   );
   static Map<String, String> _carreraSugerida(Map<String, dynamic> data){
     Map<String, String> res = {};
@@ -156,6 +167,13 @@ class UserMeta {
     return res;
   }
   static Map<String, dynamic> _armarPromocion(Map<String, dynamic> data){
+    Map<String, dynamic> res = {};
+    if(data["data"] != null){
+      res = {"id": data["data"]["id"], "nombre": data["data"]["attributes"]["nombre"]};
+    }
+    return res;
+  }
+    static Map<String, dynamic> _armarColegio(Map<String, dynamic> data){
     Map<String, dynamic> res = {};
     if(data["data"] != null){
       res = {"id": data["data"]["id"], "nombre": data["data"]["attributes"]["nombre"]};

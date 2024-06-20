@@ -9,6 +9,7 @@ class Language {
   final String languageName;
 
   static List<Language> languages = [
+    Language(Locale('es'), "Espanish"),
     Language(Locale('en'), "English"),
     Language(Locale('hi'), "Hindi"),
     Language(
