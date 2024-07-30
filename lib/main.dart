@@ -15,10 +15,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
-  //You will need to initialize AppThemeNotifier class for theme changes.
   WidgetsFlutterBinding.ensureInitialized();
   await PushNotificationService.initializeApp();
-  // MobileAds.instance.initialize();
   AppTheme.init();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -31,7 +29,7 @@ Future<void> main() async {
       ],
       child: MyApp(initialScreen: initialScreen),
     )
-  );
+  ); 
 }
 class MyApp extends StatelessWidget {
   final Widget initialScreen;
@@ -55,14 +53,11 @@ class MyApp extends StatelessWidget {
           },
           localizationsDelegates: [
             AppLocalizationsDelegate(context),
-            // Add this line
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: Language.getLocales(),
-          // home: IntroScreen(),
-          // home: CookifyShowcaseScreen(),
         );
       }
     );

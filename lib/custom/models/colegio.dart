@@ -19,8 +19,8 @@ Colegio ColegioFromJson(String str) {
 // Colegio class
 class Colegio {
   Colegio({
-    this.id,
-    this.nombre,
+    this.id = -1,
+    this.nombre = "",
   });
 
   int? id;

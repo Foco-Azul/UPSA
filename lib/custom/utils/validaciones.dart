@@ -23,7 +23,7 @@ class Validacion{
     if(esObligatorio!){
       if(value != null && value.isNotEmpty){
         if(!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value)){
-          error = "Campo no valido, solo se permite letras";
+          error = "Solo se permiten letras";
         }
       }else{
         error = "Este campo es requerido";
@@ -31,7 +31,7 @@ class Validacion{
     }else{
       if(value != null && value.isNotEmpty){
         if(!RegExp(r'^[a-zA-Z]+$').hasMatch(value)){
-          error = "Campo no valido, solo se permite letras";
+          error = "Solo se permiten letras";
         }
       }
     }

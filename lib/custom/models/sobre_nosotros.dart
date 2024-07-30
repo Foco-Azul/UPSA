@@ -14,7 +14,7 @@ class SobreNosotros {
   SobreNosotros({
     this.id,
     this.titulo,
-    this.galeriaDeFotos,
+    this.imagenes,
     this.descripcion,
     this.mision,
     this.vision,
@@ -26,7 +26,7 @@ class SobreNosotros {
 
   int? id;
   String? titulo;
-  List<String>? galeriaDeFotos;
+  List<String>? imagenes;
   String? descripcion;
   String? mision;
   String? vision;
@@ -46,7 +46,7 @@ class SobreNosotros {
       comunidad: json['attributes']["comunidad"], 
       objetivo: json['attributes']["objetivo"], 
       respaldoLegal: json['attributes']["respaldoLegal"], 
-      galeriaDeFotos: _convertirGaleria(json['attributes']["galeriaFotos"]?['data']), 
+      imagenes: _convertirGaleria(json['attributes']["imagenes"]?['data']), 
     );
   }
 

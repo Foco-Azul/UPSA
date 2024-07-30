@@ -16,9 +16,9 @@ class Generador{
     return username;
   }
 
-  String generarToken() {
+  String generarCodigoDeVerificacion() {
     // Generar un número aleatorio de 5 dígitos
-    Random random = new Random();
+    Random random = Random();
     int randomNumber = random.nextInt(99999 - 10000) + 10000;
 
     // Convertir el número en una cadena de 5 dígitos

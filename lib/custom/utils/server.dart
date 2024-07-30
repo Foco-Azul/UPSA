@@ -1,5 +1,23 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
+import 'package:dio/dio.dart' as dio;
+import 'package:dio/dio.dart';
+import 'package:flutkit/custom/models/avatar.dart';
+import 'package:flutkit/custom/models/carrera_upsa.dart';
+import 'package:flutkit/custom/models/club.dart';
+import 'package:flutkit/custom/models/contacto.dart';
+import 'package:flutkit/custom/models/convenio.dart';
+import 'package:flutkit/custom/models/cursillo.dart';
+import 'package:flutkit/custom/models/facultad.dart';
+import 'package:flutkit/custom/models/matriculate.dart';
+import 'package:flutkit/custom/models/resultado.dart';
+import 'package:flutkit/custom/models/sobre_nosotros.dart';
+import 'package:flutkit/custom/models/user_meta.dart';
+import 'package:flutkit/custom/utils/funciones.dart';
+import 'package:path/path.dart' as path;
 import 'package:flutkit/custom/models/campus.dart';
 import 'package:flutkit/custom/models/carrera.dart';
 import 'package:flutkit/custom/models/categoria.dart';
@@ -14,13 +32,12 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:flutkit/custom/models/user.dart';
-import 'package:flutkit/helpers/theme/app_notifier.dart';
     
 class ApiService {
-  //USER
-  Future<User?> login(String email, String pass) async {
+  //USER INICIO
+  Future<User> login(String email, String pass) async {
+    User res = User();
     await dotenv.load(fileName: ".env");
     try {
       var url = Uri.parse(dotenv.get('baseUrl') + dotenv.get('usersEndpoint'));
@@ -36,25 +53,52 @@ class ApiService {
           }),
       );
       if (response.statusCode == 200) {
-        User model = singleUserFromJson(response.body);
-        return model;
+        res = User.armarUsuarioParaLogin(response.body);
+        return res;
       } else {
-        if(response.statusCode == 400){
-          return User();
-        }else{
-          String error = jsonDecode(response.body)['error']['message'];
-          throw Exception(error);
-        }
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  login: $error');
+        return res;
       }
     } catch (e) {
-      log(e.toString());
-      return null; // Opcional: devuelve null en caso de error
+      print('Error en login: $e');
+      return res;
     }
   }
-  Future<User?> getUserForId(int idUser) async {
+  Future<List<User>> getUsers(String email, String pass) async {
+    List<User> res = [];
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse("${dotenv.get('baseUrl')}${dotenv.get('usersRegisterEndpoint')}/$idUser?populate=*");
+      var url = Uri.parse(dotenv.get('baseUrl') + dotenv.get('usersEndpoint'));
+      var response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          }, 
+        body: json.encode({ 
+          "identifier": email, 
+          "password": pass 
+          }),
+      );
+      if (response.statusCode == 200) {
+        res = User.armarUsuarios(response.body);
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  getUsers: $error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getUsers: $e');
+      return res;
+    }
+  }
+  Future<User> getUser(int id) async {
+    User res = User();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}${dotenv.get('usersRegisterEndpoint')}/$id/");
       var response = await http.get(
         url,
         headers: {
@@ -62,78 +106,44 @@ class ApiService {
           }, 
       );
       if (response.statusCode == 200) {
-        User model = singleUserFromJsonUsers(response.body);
-        return model;
+        res = User.armarUsuario(response.body);
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  getUser: $error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getUser: $e');
+      return res;
+    }
+  }
+  Future<User?> addUser(Map<String,String> data) async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse(dotenv.get('baseUrl') + dotenv.get('usersRegisterEndpoint'));
+      var response = await http.post(url,
+          headers: {
+            'Content-Type': 'application/json',
+            "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          },
+          body: json.encode({"email": data["email"], "username": data["username"], "password": data["password"], "role": "1", "codigoDeVerificacion": data["codigoDeVerificacion"], "dispositivos": [{"token": data["tokenDispositivo"]}]}));
+      if (response.statusCode == 201) {
+        bool seEnvioCorreo = await enviarCorreo({"codigoDeVerificacion":data["codigoDeVerificacion"]}, "Código de verificación", data["email"]!);
+        if(seEnvioCorreo){
+          User model = User.armarUsuario(response.body);
+          crearUserMeta(model.id!, data);
+          return model;
+        }
       } else {
         String error = jsonDecode(response.body)['error']['message'];
         throw Exception(error);
       }
     } catch (e) {
-      log(e.toString());
-      return null; // Opcional: devuelve null en caso de error
-    }
-  }
-  Future<List<Map<String, dynamic>>> getActividadesInscritosForUserNotPopulate(int idUser) async {
-    List<Map<String, dynamic>> res = [];
-    try {
-      List<int> idInscripciones = await _getActividadesInscritosId(idUser);
-      idInscripciones.forEach((idInscripcion) async {
-        var inscripcion = await _getInscripcionForId(idInscripcion);
-        if(inscripcion["evento"]["data"] !=  null){
-           Map<String, dynamic> aux = {
-            "id": inscripcion["evento"]["data"]["id"], 
-            "titulo": inscripcion["evento"]["data"]["attributes"]["titulo"], 
-            "actividad": "evento"
-            };
-            res.add(aux);
-        }
-        if(inscripcion["concurso"]["data"] !=  null){
-           Map<String, dynamic> aux = {
-            "id": inscripcion["concurso"]["data"]["id"], 
-            "titulo": inscripcion["concurso"]["data"]["attributes"]["titulo"], 
-            "actividad": "concurso"
-            };
-            res.add(aux);
-        }
-      });
-      return res;
-    } catch (e) {
-      return res;
-    }
-  }
-  Future<Map<String, dynamic>> _getInscripcionForId(int idInscripcion) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/inscripcions/$idInscripcion?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        Map<String, dynamic> inscripcion = (json.decode(response.body))["data"]["attributes"];
-        return inscripcion;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
       throw Exception(e);
     }
+    return null;
   }
-  Future<Map<String, dynamic>> _getEventoForId(int idInscripcion) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/inscripcions/$idInscripcion?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        Map<String, dynamic> inscripcion = (json.decode(response.body))["data"]["attributes"]["evento"]["data"];
-        return inscripcion;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-
   Future<List<Map<String, dynamic>>> getActividadesSeguidosForUserNotPopulate(int userId) async {
     List<Map<String, dynamic>> res = [];
     await dotenv.load(fileName: ".env");
@@ -175,87 +185,29 @@ class ApiService {
       return res;
     }
   }
-    
-  // Getting users
-  Future<User?> getUsers(String email, String pass) async {
+  Future<bool> setActividadesSeguidos(int idUser, List<Map<String, dynamic>> actividadesSeguidos, String actividad) async {
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse(dotenv.get('baseUrl') + dotenv.get('usersEndpoint'));
-      var response = await http.post(
-        url,
+      var url = Uri.parse('${dotenv.get('baseUrl')}/users/$idUser');
+      var response = await http.put(url,
         headers: {
           'Content-Type': 'application/json',
           "Authorization": "Bearer ${dotenv.get('accesToken')}"
-          }, 
-        body: json.encode({ 
-          "identifier": email, 
-          "password": pass 
-          }),
-        //body: body,
-      );
-      if (response.statusCode == 200) {
-        User model = singleUserFromJson(response.body);
-        return model;
-      } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        throw Exception(error);
-      }
-    } catch (e) {
-      log(e.toString());
-      return null; // Opcional: devuelve null en caso de error
-    }
-  }
-
-    
-  // Adding user
-  Future<User?> addUser(String email, String username, String password, String token, String tokenDispositivo) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse(dotenv.get('baseUrl') + dotenv.get('usersRegisterEndpoint'));
-      var response = await http.post(url,
-          headers: {
-            'Content-Type': 'application/json',
-            "Authorization": "Bearer ${dotenv.get('accesToken')}"
-          },
-          body: json.encode({"email": email, "username": username, "password": password, "role": "1", "token": token, "dispositivos": [{"token": tokenDispositivo}]}));
-      if (response.statusCode == 201) {
-        bool seEnvioCorreo = await enviarCorreo({"codigoDeVerificacion":token}, "Código de verificación", email);
-        if(seEnvioCorreo){
-          User model = singleUserFromJsonRegister(response.body);
-          return model;
+        },
+        body: json.encode(
+        {
+          actividad: actividadesSeguidos.map((actividad) => actividad["id"]).toList()
         }
-      } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        throw Exception(error);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-    return null;
-  }
-  Future<bool> enviarCorreo(Object token, String motivo, String email) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse("${dotenv.get('baseUrl')}/correos");
-      var response = await http.post(url,
-          headers: {
-            'Content-Type': 'application/json',
-            "Authorization": "Bearer ${dotenv.get('accesToken')}"
-          },
-          body: json.encode({"data":{"destino": email, "motivo": motivo, "contenidoJson": token}}));
+      )
+      );
       if (response.statusCode == 200) {
         return true;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        throw Exception(error);
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
       }
     } catch (e) {
       throw Exception(e);
     }
-  }
-  Future<bool> reenviarToken(int userId, String email) async {
-    String token = await pedirTokenUser(userId);
-    return await enviarCorreo({"codigoDeVerificacion":token}, "Código de verificación", email);
   }
   Future<String> pedirTokenUser (int userId) async {
     await dotenv.load(fileName: ".env");
@@ -264,21 +216,13 @@ class ApiService {
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
-        String token = jsonDecode(response.body)['token'];
+        String token = jsonDecode(response.body)['codigoDeVerificacion'];
         return token;
       } else {
         throw Exception(jsonDecode(response.body)["error"]["message"]);
       }
     } catch (e) {
       throw Exception(e);
-    }
-  }
-  Future<bool> verificarCuenta(int userId, String tokenIngresado) async {
-    String token = await pedirTokenUser(userId);
-    if(tokenIngresado == token){
-      return await activarCuenta(true, userId);
-    }else{
-      return false;
     }
   }
   Future<bool> activarCuenta(bool estado, int userId) async {
@@ -293,91 +237,6 @@ class ApiService {
           body: json.encode({"confirmed":true, "estado": "Verificado"}));
       if (response.statusCode == 200) {
         return true;
-      } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        throw Exception(error);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<UserMeta> getUserMeta (int userId) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      int idUserMeta = await _getIdUserMeta(userId) ;
-      var url = Uri.parse("${dotenv.get('baseUrl')}/user-metas/+${idUserMeta.toString()}+?populate=*");
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        UserMeta userMeta = getSingleUserMetaFronJson(response.body);
-        return userMeta;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-
-  Future<List<Categoria>> getCategorias () async{
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/categorias/?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        List<Categoria> categorias = categoriasEventosFromJson(response.body);
-        return categorias;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<List<Categoria>> getCategoriasConcurso () async{
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/categoria-concursos/?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        List<Categoria> categoriasConcurso = categoriasConcursosFromJson(response.body);
-        return categoriasConcurso;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<bool> registrarPerfil(UserMeta datos, int idUser) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse("${dotenv.get('baseUrl')}/user-metas/");
-      var response = await http.post(url,
-        headers: {
-          'Content-Type': 'application/json',
-          "Authorization": "Bearer ${dotenv.get('accesToken')}"
-        },
-        body: json.encode(
-          {"data":{
-            "user": idUser,
-            "nombres": capitalizeEachWord(datos.nombres!),
-            "apellidos":capitalizeEachWord(datos.apellidos!),
-            "cedulaDeIdentidad": datos.cedulaDeIdentidad,
-            "fechaDeNacimiento": datos.fechaDeNacimiento == "" ? null : datos.fechaDeNacimiento,
-            "celular1": datos.celular1 == "" ? null : datos.celular1,
-            "colegio": datos.colegio!["id"],
-          }}
-        )
-      );
-      if (response.statusCode == 200) {
-        if(await setEstadoUser(idUser, "Perfil parte 1")){
-          return true;
-        }else{
-          return false;
-        }
       } else {
         String error = jsonDecode(response.body)['error']['message'];
         throw Exception(error);
@@ -411,86 +270,10 @@ class ApiService {
       throw Exception(e);
     }
   }
-  Future<bool> registrarCarrera(UserMeta datos, int id) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      int idUserMeta = await _getIdUserMeta(id) ;
-      if(idUserMeta > 0){
-        var url = Uri.parse("${dotenv.get('baseUrl')}/user-metas/$idUserMeta");
-        var response = await http.put(url,
-          headers: {
-            'Content-Type': 'application/json',
-            "Authorization": "Bearer ${dotenv.get('accesToken')}"
-          },
-          body: json.encode(
-            {"data":{
-              "testVocacional": datos.testVocacional,
-              "estudiarBolivia": datos.estudiarBolivia,
-              "infoCar": datos.infoCar,
-              "departamentoEstudiar": datos.departamentoEstudiar,
-              "recibirInfo": datos.recibirInfo,
-              "carreras": datos.carreras,
-              "aplicacionTest": datos.aplicacionTest,
-              "universidades": datos.universidades != null ? datos.universidades!.map((nombre) => {'nombre': nombre}).toList() : [],
-              "universidadExtranjera": datos.universidadExtranjera,
-            }}
-          )
-        );
-        if (response.statusCode == 200) {
-          if(await setEstadoUser(id, "Perfil parte 2")){
-            return true;
-          }else{
-            return false;
-          }
-        } else {
-          String error = jsonDecode(response.body)['error']['message'];
-          throw Exception(error);
-        }
-      }else{
-        return false;
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<bool> registrarIntereses(UserMeta datos, int id) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      int idUserMeta = await _getIdUserMeta(id) ;
-      if(idUserMeta > 0){
-        var url = Uri.parse("${dotenv.get('baseUrl')}/user-metas/$idUserMeta");
-        var response = await http.put(url,
-          headers: {
-            'Content-Type': 'application/json',
-            "Authorization": "Bearer ${dotenv.get('accesToken')}"
-          },
-          body: json.encode(
-            {"data":{
-              "intereses": datos.intereses,
-            }}
-          )
-        );
-        if (response.statusCode == 200) {
-          if(await setEstadoUser(id, "Completado")){
-            return true;
-          }else{
-            return false;
-          }
-        } else {
-          String error = jsonDecode(response.body)['error']['message'];
-          throw Exception(error);
-        }
-      }else{
-        return false;
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
   Future<bool> actualizarCompletadoUser(int id, bool estaCompletado) async {
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse(dotenv.get('baseUrl') + "/users/"+id.toString());
+      var url = Uri.parse("${dotenv.get('baseUrl')}/users/$id");
       var response = await http.put(url,
         headers: {
           'Content-Type': 'application/json',
@@ -519,25 +302,7 @@ class ApiService {
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
-        return jsonDecode(response.body)["user_meta"]["id"];
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-
-  //EVENTOS
-  Future<Evento> getEvento(int eventoId) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/$eventoId?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        Evento _evento = EventoFromJson(response.body);
-        return _evento;
+        return jsonDecode(response.body)["userMeta"]["id"];
       } else {
         throw Exception(jsonDecode(response.body)["error"]["message"]);
       }
@@ -562,51 +327,28 @@ class ApiService {
     }
   }
   Future<List<Map<String,dynamic>>> getConcursosSeguidos(int userId) async {
+    List<Map<String,dynamic>> res = [];
     await dotenv.load(fileName: ".env");
     try {
       var url = Uri.parse('${dotenv.get('baseUrl')}/users/$userId?populate=*');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
-        List<Map<String,dynamic>> concursosSeguidos = _crearActividadesSeguidos(response.body, "concursos");
-        return concursosSeguidos;
+        res = _crearActividadesSeguidos(response.body, "concursos");
+        return res;
       } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
+        print('Error en getConcursosSeguidos: '+jsonDecode(response.body)['error']['message']);
+        return res;
       }
     } catch (e) {
-      throw Exception(e);
+      print('Error en getConcursosSeguidos: $e');
+      return res;
     }
-  }
-  List<Map<String,dynamic>> _crearActividadesSeguidos(String dataString, String key) {
-    List<Map<String,dynamic>> res = [];
-    final jsonData = json.decode(dataString);
-    List<dynamic> actividades = jsonData[key];
-    for (var item in actividades) {
-      if (item['id'] != null) {
-        Map<String, dynamic> aux = {"idActividad": item['id']};
-        res.add(aux);
-      }
-    }
-    return res;
-  }
-  List<int> _crearListaEnteros(String dataString, String key) {
-    List<int> res = [];
-    final jsonData = json.decode(dataString);
-    List<dynamic> actividades = jsonData[key];
-
-    for (var item in actividades) {
-      if (item['id'] != null) {
-        int id = item['id'];
-        res.add(id);
-      }
-    }
-  
-    return res;
   }
   Future<bool> setEventosSeguidos(int idUser, List<int> eventosId) async {
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse(dotenv.get('baseUrl') + '/users/'+idUser.toString());
+      var url = Uri.parse('${dotenv.get('baseUrl')}/users/$idUser');
       var response = await http.put(url,
         headers: {
           'Content-Type': 'application/json',
@@ -623,67 +365,6 @@ class ApiService {
       } else {
         throw Exception(jsonDecode(response.body)["error"]["message"]);
       }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<int> crearInscripcionEvento(int idUser, int idEvento) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      DateTime now = DateTime.now();
-      DateTime utcPlus4 = now.add(Duration(hours: 4));
-      String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(utcPlus4);
-
-      int hash = formattedDate.hashCode.abs(); // Convertir la fecha en un número
-      String code = hash.toRadixString(36).toUpperCase(); // Convertir el número en una cadena en base 36
-      var url = Uri.parse(dotenv.get('baseUrl') + "/inscripcions");
-      var response = await http.post(url,
-          headers: {
-            'Content-Type': 'application/json',
-            "Authorization": "Bearer ${dotenv.get('accesToken')}"
-          },
-          body: json.encode({
-            "data": {"user": idUser, "evento": idEvento, "fecha": formattedDate, "qr": "Evento-UPSA-"+code+idUser.toString()+idEvento.toString()}
-          }));
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body)["data"]["id"];
-      } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        throw Exception(error);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<Map<int, int>> getEventosInscritos(int userId) async {
-    Map<int, int> res = {};
-    try {
-      List<int> inscripciones = await _getActividadesInscritosId(userId);
-      inscripciones.forEach((inscripcion) async {
-        int? idEvento = await _getEventoId(inscripcion);
-        res[idEvento] = inscripcion;
-            });
-      return res;
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<List<Map<String, dynamic>>> getConcursosInscritos(int userId) async {
-    List<Map<String, dynamic>> res = [];
-    try {
-      List<Map<String, dynamic>> inscripciones = await _getActividadesInscritosId2(userId);
-      inscripciones.forEach((inscripcion) async {
-        if (inscripcion["qr"].contains("Concurso-")) {
-          int? idEvento = await _getActividadId(inscripcion["id"], "concurso");
-          var aux = {
-            "idInscripcion": inscripcion["id"],
-            "qr": inscripcion["qr"],
-            "idActividad":idEvento
-          };
-          res.add(aux);
-        }
-      });
-      return res;
     } catch (e) {
       throw Exception(e);
     }
@@ -730,22 +411,6 @@ class ApiService {
       throw Exception(e);
     }
   }
-  Future<int> _getEventoId(int idInscripcion) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/inscripcions/$idInscripcion?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        int evento = jsonDecode(response.body)["data"]["attributes"]["evento"]?["data"]?["id"];
-        return evento;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
   Future<List<int>> _getActividadesInscritosId(int userId) async {
     await dotenv.load(fileName: ".env");
     try {
@@ -762,15 +427,15 @@ class ApiService {
       throw Exception(e);
     }
   }
-  Future<String> getQrEvento(int idInscripcion) async {
+  Future<List<Map<String,dynamic>>> getClubesSeguidos(int userId) async {
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse(dotenv.get('baseUrl') + '/inscripcions/'+idInscripcion.toString()+"?populate=*");
+      var url = Uri.parse('${dotenv.get('baseUrl')}/users/$userId?populate=*');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
-        String qr = jsonDecode(response.body)["data"]["attributes"]["qr"];
-        return qr;
+        List<Map<String,dynamic>> concursosSeguidos = _crearActividadesSeguidos(response.body, "clubes");
+        return concursosSeguidos;
       } else {
         throw Exception(jsonDecode(response.body)["error"]["message"]);
       }
@@ -778,26 +443,249 @@ class ApiService {
       throw Exception(e);
     }
   }
-  Future<List<Evento>> getEventos() async {
+  Future<User> getUserPopulateConMetasActividades(int id) async {
+    User res = User();
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse(dotenv.get('baseUrl') + '/eventos/?populate=*');
+      var url = Uri.parse("${dotenv.get('baseUrl')}${dotenv.get('usersRegisterEndpoint')}/$id/?populate[inscripciones][populate][0]=evento&populate[inscripciones][populate][1]=concurso&populate[inscripciones][populate][2]=club&populate[eventos][populate][0]=eventos&populate[concursos][populate][0]=concursos&populate[clubes][populate][0]=clubes&populate[userMeta][populate][0]=carreraSugerida&populate[userMeta][populate][1]=colegio&populate[userMeta][populate][2]=avatar.imagen");
+      var response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          }, 
+      );
+      if (response.statusCode == 200) {
+        res = User.armarUsuarioPopulateConMetasActividades(response.body);
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  getUserPopulateConMetasActividades: $error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getUserPopulateConMetasActividades: $e');
+      return res;
+    }
+  }
+  Future<User> getUserPopulateConMetasParaFormularioCarrera(int id) async {
+    User res = User();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}${dotenv.get('usersRegisterEndpoint')}/$id/?populate[userMeta][populate][0]=carreras&populate[userMeta][populate][1]=universidades&populate[userMeta][populate][2]=recibirInformacion");
+      var response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          }, 
+      );
+      if (response.statusCode == 200) {
+        res = User.armarUsuarioPopulateConMetasParaFormularioCarrera(response.body);
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  getUserPopulateConMetasEActividades: $error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getUserPopulateConMetasEActividades: $e');
+      return res;
+    }
+  }
+  Future<User> getUserPopulateConMetasParaFormularioPerfil(int id) async {
+    User res = User();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}${dotenv.get('usersRegisterEndpoint')}/$id/?populate[userMeta][populate][0]=colegio");
+      var response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          }, 
+      );
+      if (response.statusCode == 200) {
+        res = User.armarUsuarioPopulateConMetasParaFormularioPerfil(response.body);
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  getUserPopulateConMetasEActividades: $error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getUserPopulateConMetasEActividades: $e');
+      return res;
+    }
+  }
+  Future<User> getUserPopulateConActividadesPasadas(int id) async {
+    User res = User();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}${dotenv.get('usersRegisterEndpoint')}/$id/?populate[inscripciones][populate][0]=evento&populate[inscripciones][populate][1]=concurso&populate[inscripciones][populate][2]=club&populate[eventos][populate][0]=eventos&populate[concursos][populate][0]=concursos&populate[clubes][populate][0]=clubes");
+      var response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          }, 
+      );
+      if (response.statusCode == 200) {
+        res = User.armarUsuarioPopulateConActividadesPasadas(response.body);
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  getUserPopulateConActividadesPasadas: $error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getUserPopulateConActividadesPasadas: $e');
+      return res;
+    }
+  }
+  //USER FIN
+
+  //ACTIVIDADES INICIO
+  Future<int> crearInscripcionActividad(int idUser, int id, String actividad) async {
+    int res = -1;
+    String aux = "";
+    if(actividad == "evento"){
+      aux = "Evento-UPSA-";
+    }
+    if(actividad == "club"){
+      aux = "Club-UPSA-";
+    }
+    if(actividad == "concurso"){
+      aux = "Concurso-UPSA-";
+    }
+    await dotenv.load(fileName: ".env");
+    try {
+      DateTime now = DateTime.now();
+      DateTime utcPlus4 = now.add(Duration(hours: 4));
+      String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(utcPlus4);
+
+      int hash = formattedDate.hashCode.abs(); // Convertir la fecha en un número
+      String code = hash.toRadixString(36).toUpperCase(); // Convertir el número en una cadena en base 36
+
+      var url = Uri.parse('${dotenv.get('baseUrl')}/inscripcions');
+      var response = await http.post(url,
+          headers: {
+            'Content-Type': 'application/json',
+            "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          },
+          body: json.encode({
+            "data": {"user": idUser, actividad: id, "qr": aux+code+idUser.toString()+id.toString()}
+          }));
+      if (response.statusCode == 200) {
+        res = jsonDecode(response.body)["data"]["id"];
+        return res;
+      } else {
+        print(jsonDecode(response.body)['error']['message']);
+        return res;
+      }
+    } catch (e) {
+      print(e.toString());
+      return res;
+    }
+  }
+  //ACTIVIDADES FIN
+
+  //INSCRIPCIONES INICIO
+  Future<Map<String, dynamic>> _getInscripcionForId(int idInscripcion) async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/inscripcions/$idInscripcion?populate=*');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
-        List<Evento> _eventos = EventosFromJson(response.body);
-        return _eventos;
+        Map<String, dynamic> inscripcion = (json.decode(response.body))["data"]["attributes"];
+        return inscripcion;
       } else {
         throw Exception(jsonDecode(response.body)["error"]["message"]);
       }
     } catch (e) {
       throw Exception(e);
+    }
+  }
+  Future<Map<String, dynamic>> _getEventoForId(int idInscripcion) async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/inscripcions/$idInscripcion?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        Map<String, dynamic> inscripcion = (json.decode(response.body))["data"]["attributes"]["evento"]["data"];
+        return inscripcion;
+      } else {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  Future<int> crearInscripcionEvento(int idUser, int idEvento) async {
+    await dotenv.load(fileName: ".env");
+    try {
+      DateTime now = DateTime.now();
+      DateTime utcPlus4 = now.add(Duration(hours: 4));
+      String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(utcPlus4);
+
+      int hash = formattedDate.hashCode.abs(); // Convertir la fecha en un número
+      String code = hash.toRadixString(36).toUpperCase(); // Convertir el número en una cadena en base 36
+      var url = Uri.parse(dotenv.get('baseUrl') + "/inscripcions");
+      var response = await http.post(url,
+          headers: {
+            'Content-Type': 'application/json',
+            "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          },
+          body: json.encode({
+            "data": {"user": idUser, "evento": idEvento, "fecha": formattedDate, "qr": "Evento-UPSA-$code$idUser$idEvento"}
+          }));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body)["data"]["id"];
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        throw Exception(error);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  Future<int> _getEventoId(int idInscripcion) async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/inscripcions/$idInscripcion?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        int evento = jsonDecode(response.body)["data"]["attributes"]["evento"]?["data"]?["id"];
+        return evento;
+      } else {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    } 
+  }
+  Future<String> getQrEvento(int idInscripcion) async {
+    String res = "";
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/inscripcions/$idInscripcion?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = jsonDecode(response.body)["data"]["attributes"]["qr"];
+        return res;
+      } else {
+        print('Error en getQrEvento: '+jsonDecode(response.body)['error']['message']);
+        return res;
+      }
+    } catch (e) {
+      print('Error en getQrEvento: $e');
+      return res;
     }
   }
   Future<void> marcarAsistencia(int idInscripcion) async {
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse(dotenv.get('baseUrl') + '/inscripcions/'+idInscripcion.toString());
+      var url = Uri.parse('${dotenv.get('baseUrl')}/inscripcions/$idInscripcion');
       var response = await http.put(url,
         headers: {
           'Content-Type': 'application/json',
@@ -820,6 +708,1338 @@ class ApiService {
       throw Exception(e);
     }
   }
+  Future<int> crearInscripcionConcurso(int idUser, int id) async {
+    await dotenv.load(fileName: ".env");
+    try {
+      DateTime now = DateTime.now();
+      DateTime utcPlus4 = now.add(Duration(hours: 4));
+      String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(utcPlus4);
+
+      int hash = formattedDate.hashCode.abs(); // Convertir la fecha en un número
+      String code = hash.toRadixString(36).toUpperCase(); // Convertir el número en una cadena en base 36
+      var url = Uri.parse('${dotenv.get('baseUrl')}/inscripcions');
+      var response = await http.post(url,
+          headers: {
+            'Content-Type': 'application/json',
+            "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          },
+          body: json.encode({
+            "data": {"user": idUser, "concurso": id, "fecha": formattedDate, "qr": "Concurso-UPSA-$code$idUser$id"}
+          }));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body)["data"]["id"];
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        throw Exception(error);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  //INSCRIPCIONES FIN
+
+  //USER META INICIO
+  Future<bool> crearUserMeta(int idUser, data) async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}/user-metas");
+      var response = await http.post(url,
+          headers: {
+            'Content-Type': 'application/json',
+            "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          },
+          body: json.encode({"data":{"user": idUser, "nombres": data["nombres"], "apellidos": data["apellidos"]}}));
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        throw Exception(error);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  Future<UserMeta> getUserMeta (int userId) async {
+    UserMeta userMeta = UserMeta();
+    await dotenv.load(fileName: ".env");
+    try {
+      int idUserMeta = await _getIdUserMeta(userId) ;
+      var url = Uri.parse("${dotenv.get('baseUrl')}/user-metas/${idUserMeta.toString()}?populate=*");
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        UserMeta userMeta = getSingleUserMetaFronJson(response.body);
+        return userMeta;
+      } else {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      print(e);
+      return userMeta;
+    }
+  }
+  Future<bool> registrarPerfil(UserMeta datos, int idUser) async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}/user-metas/${datos.id}");
+      var response = await http.put(url,
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+        },
+        body: json.encode(
+          {"data":{
+            "nombres": capitalizeEachWord(datos.nombres!),
+            "apellidos":capitalizeEachWord(datos.apellidos!),
+            "cedulaDeIdentidad": datos.cedulaDeIdentidad,
+            "fechaDeNacimiento": datos.fechaDeNacimiento == "" ? null : datos.fechaDeNacimiento,
+            "celular1": datos.celular1 == "" ? null : datos.celular1,
+            "colegio": datos.colegio!.id,
+          }}
+        )
+      );
+      if (response.statusCode == 200) {
+        if(await setEstadoUser(idUser, "Perfil parte 1")){
+          return true;
+        }else{
+          return false;
+        }
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        throw Exception(error);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  Future<bool> registrarCarrera(UserMeta data, User user) async {
+    List<Map<String, dynamic>> recibirInformacion = [];
+    List<int> carreras = [];
+    List<Map<String, dynamic>> universidades = [];
+    for (var item in data.recibirInformacion!) {
+      recibirInformacion.add(
+        {
+          "titulo" : item["titulo"],
+        }
+      );
+    }
+    for (var item in data.carreras!) {
+      carreras.add(item.id!);
+    }
+    for (var item in data.universidades!) {
+      universidades.add(
+        {
+          "nombre" : item.nombre,
+          "idDepartamento" : item.idDepartamento
+        }
+      );
+    }
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}/user-metas/${data.id.toString()}");
+      var response = await http.put(url,
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+        },
+        body: json.encode(
+          {"data":{
+            "testVocacional": data.testVocacional,
+            "estudiarEnBolivia": data.estudiarEnBolivia,
+            "informacionCarrera": data.informacionCarrera,
+            "departamentoUniversidad": data.departamentoUniversidad,
+            "recibirInformacion": recibirInformacion,
+            "carreras": carreras,
+            "aplicacionTest": data.aplicacionTest,
+            "universidades": universidades,
+            "universidadExtranjera": data.universidadExtranjera,
+            "carreraSugerida": {"facultad": "", "nombre": "Ninguna", "idCarreraUpsa": -1}
+          }}
+        )
+      );
+      if (response.statusCode == 200) {
+        if(user.estado == "Completado"){
+          return true;
+        }else{
+          if(await setEstadoUser(user.id!, "Perfil parte 2")){
+            return true;
+          }else{
+            return false;
+          }
+        }
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        throw Exception(error);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  Future<bool> registrarIntereses(UserMeta datos, int id) async {
+    await dotenv.load(fileName: ".env");
+    try {
+      int idUserMeta = await _getIdUserMeta(id) ;
+      if(idUserMeta > 0){
+        var url = Uri.parse("${dotenv.get('baseUrl')}/user-metas/$idUserMeta");
+        var response = await http.put(url,
+          headers: {
+            'Content-Type': 'application/json',
+            "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          },
+          body: json.encode(
+            {"data":{
+              "intereses": datos.intereses,
+            }}
+          )
+        );
+        if (response.statusCode == 200) {
+          if(await setEstadoUser(id, "Completado")){
+            return true;
+          }else{
+            return false;
+          }
+        } else {
+          String error = jsonDecode(response.body)['error']['message'];
+          throw Exception(error);
+        }
+      }else{
+        return false;
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  Future<bool> setUserMetaAvatar(int userMetaId, int avatarId) async {
+    bool res = false;
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}/user-metas/$userMetaId");
+      var response = await http.put(url,
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+        },
+        body: json.encode(
+          {"data":{
+            "avatar": avatarId,
+          }}
+        )
+      );
+      if (response.statusCode == 200) {
+        res = true;
+        return res;
+      }  else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en setUserMetaAvatar: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en setUserMetaAvatar: $e');
+      return res;
+    }
+  }
+  //USER META FIN
+
+  //CORREOS INICIO
+  Future<bool> enviarCorreo(Object token, String motivo, String email) async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}/correos");
+      var response = await http.post(url,
+          headers: {
+            'Content-Type': 'application/json',
+            "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          },
+          body: json.encode({"data":{"destino": email, "motivo": motivo, "contenidoJson": token}}));
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        throw Exception(error);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  //CORREOS FIN
+
+  //EVENTOS INICIO
+  Future<Evento> getEvento(int id) async {
+    Evento res = Evento();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/$id?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = Evento.armarEventoPopulate(response.body);
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getEvento: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getEvento: $e');
+      return res;
+    }
+  }
+  Future<Evento> getEventoPopulateConInscripcionesSeguidores(int id) async {
+    Evento res = Evento();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/$id/?populate[categoria][populate][0]=categoria&populate[etiquetas][populate][0]=etiquetas&populate[calendario][populate][0]=calendario&populate[imagen][populate][0]=imagen&populate[imagenes][populate][0]=imagenes&populate[inscripciones][populate][0]=user&populate[usuarios][populate][0]=usuarios&populate[noticias][populate][0]=imagen');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = Evento.armarEventoPopulateConInscripcionesSeguidores(response.body);
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getEventoPopulateConInscripcionesSeguidores: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getEventoPopulateConInscripcionesSeguidores: $e');
+      return res;
+    }
+  }
+  Future<List<Evento>> getEventos() async {
+    List<Evento> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = Evento.armarEventosPopulate(response.body);
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getEventos: $e');
+        return  res;
+      }
+    } catch (e) {
+      print('Error en getEventos: $e');
+      return res;
+    }
+  }
+  Future<List<Map<String,dynamic>>> getEventosDesde(String fechaActual) async {
+    List<Map<String,dynamic>> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/?populate=*&filters[\$and][0][activo][\$eq]=true&filters[\$and][1][fechaDeInicio][\$gte]=$fechaActual&sort=id:desc&pagination[pageSize]=200');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        List<Evento> eventos = Evento.armarEventosPopulateFechaOriginal(response.body);
+        for (var evento in eventos) {
+          Map<String,dynamic> aux = {
+            "id": evento.id!,
+            "titulo": evento.titulo,
+            "tipo": "Evento",
+            "fecha": evento.fechaDeInicio,
+            "categoria": evento.categoria,
+            "color": Color.fromRGBO(91, 119, 245, 0.9),
+          };
+          res.add(aux);
+        }
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getEventosDesde: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getEventosDesde: $e');
+      return res;
+    }
+  }
+  Future<List<Map<String,dynamic>>> getEventosUltimas(int cantidad) async {
+    List<Map<String,dynamic>> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=$cantidad');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        final List<dynamic> data = jsonData['data'];
+        for (var item in data) {
+          Map<String,dynamic> aux = {
+            "tipo":"Eventos",
+            "id":  item['id'],
+            "titulo": item['attributes']['titulo'],
+            "descripcion": item['attributes']['descripcion'],
+            "categoria": item['attributes']['categoria']['data'] != null ? item['attributes']['categoria']['data']['attributes']['nombre'] : "Sin categoria", 
+            "imagen": item['attributes']['imagen']['data'] != null ? item['attributes']['imagen']['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",
+          };
+          res.add(aux);
+        }
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getEventosUltimas: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getEventosUltimas: $e');
+      return res;
+    }
+  }
+  Future<bool> setEventoSeguidores(int id, List<int> data) async {
+    bool res =  false;
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/$id');
+      var response = await http.put(url,
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+        },
+        body: json.encode(
+          {"data":
+            {
+              "usuarios": data
+            }
+          }
+        )
+      );
+      if (response.statusCode == 200) {
+        res = true;
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en setEventoSeguidores: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en setEventoSeguidores: $e');
+      return res;
+    }
+  }
+  //EVENTOS FIN
+
+  //NOTICIAS INICIO
+  Future<List<Noticia>> getNoticias() async {
+    List<Noticia> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/noticias/?populate=*&filters[activo][\$eq]=true&sort=id:desc');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = Noticia.armarNoticiasPopulate(response.body);
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getNoticias: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getNoticias: $e');
+      return res;
+    }
+  }
+  Future<Noticia> getNoticia(int noticiaId) async {
+    Noticia res =  Noticia();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/noticias/$noticiaId?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = Noticia.armarNoticiaPopulate(response.body);
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getNoticia: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getNoticia: $e');
+      return res;
+    }
+  }
+  Future<List<Noticia>> getOtrasNoticias(int idNoticia) async {
+    List<Noticia> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/noticias/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200&filters[id][\$ne]=$idNoticia');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = Noticia.armarNoticiasPopulate(response.body);
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getOtrasNoticias: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getOtrasNoticias: $e');
+      return res;
+    }
+  }
+  Future<List<Map<String,dynamic>>> getNoticiasUltimas(int cantidad) async {
+    List<Map<String,dynamic>> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/noticias/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=$cantidad');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        final List<dynamic> data = jsonData['data'];
+        for (var item in data) {
+          Map<String,dynamic> aux = {
+            "tipo":"Noticias",
+            "id":  item['id'],
+            "titulo": item['attributes']['titulo'],
+            "descripcion": item['attributes']['descripcion'],
+            "categoria": item['attributes']['categoria']['data'] != null ? item['attributes']['categoria']['data']['attributes']['nombre'] : "Sin categoria", 
+            "imagen": item['attributes']['imagen']['data'] != null ? item['attributes']['imagen']['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",
+          };
+          res.add(aux);
+        }
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getNoticiasUltimas: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getNoticiasUltimas: $e');
+      return res;
+    }
+  }
+  //NOTICIAS FIN
+
+  //CLUBES INICIO
+  Future<List<Club>> getClubes() async {
+    List<Club> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/clubes/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = Club.armarClubesPopulate(response.body);
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getClubes: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getClubes: $e');
+      return res;
+    }
+  }
+  Future<Club> getClub(int eventoId) async {
+    Club res = Club();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/clubes/$eventoId?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = Club.armarClubPopulate(response.body);
+        return res;
+      } else {
+        print('Error en getClub: '+jsonDecode(response.body)['error']['message']);
+        return res;
+      }
+    } catch (e) {
+      print('Error en getClub: $e');
+      return res;
+    }
+  }
+  Future<List<Map<String,dynamic>>> getClubesUltimas(int cantidad) async {
+    List<Map<String,dynamic>> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/clubes/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=$cantidad');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        final List<dynamic> data = jsonData['data'];
+        for (var item in data) {
+          Map<String,dynamic> aux = {
+            "tipo":"Clubes",
+            "id":  item['id'],
+            "titulo": item['attributes']['titulo'],
+            "descripcion": item['attributes']['descripcion'],
+            "categoria": item['attributes']['categoria']['data'] != null ? item['attributes']['categoria']['data']['attributes']['nombre'] : "Sin categoria", 
+            "imagen": item['attributes']['imagen']['data'] != null ? item['attributes']['imagen']['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",
+          };
+          res.add(aux);
+        }
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getClubesUltimas: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getClubesUltimas: $e');
+      return res;
+    }
+  }
+  Future<Club> getClubPopulateConInscripcionesSeguidores(int id) async {
+    Club res = Club();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/clubes/$id/?populate[categoria][populate][0]=categoria&populate[etiquetas][populate][0]=etiquetas&populate[calendario][populate][0]=calendario&populate[imagen][populate][0]=imagen&populate[imagenes][populate][0]=imagenes&populate[inscripciones][populate][0]=user&populate[usuarios][populate][0]=usuarios&populate[noticias][populate][0]=imagen');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = Club.armarClubPopulateConInscripcionesSeguidores(response.body);
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getClubPopulateConInscripcionesSeguidores: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getClubPopulateConInscripcionesSeguidores: $e');
+      return res;
+    }
+  }
+  Future<bool> setClubSeguidores(int id, List<int> data) async {
+    bool res =  false;
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/clubes/$id');
+      var response = await http.put(url,
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+        },
+        body: json.encode(
+          {"data":
+            {
+              "usuarios": data
+            }
+          }
+        )
+      );
+      if (response.statusCode == 200) {
+        res = true;
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en setClubSeguidores: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en setClubSeguidores: $e');
+      return res;
+    }
+  }
+  Future<List<Map<String,dynamic>>> getClubesDesde(String fechaActual) async {
+    List<Map<String,dynamic>> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/clubes/?populate=*&filters[\$and][0][activo][\$eq]=true&filters[\$and][1][fechaDeInicio][\$gte]=$fechaActual&sort=id:desc&pagination[pageSize]=200');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        List<Club> clubes = Club.armarClubesPopulateFechaOriginal(response.body);
+        for (var item in clubes) {
+          Map<String,dynamic> aux = {
+            "id": item.id!,
+            "titulo": item.titulo,
+            "tipo": "Club",
+            "fecha": item.fechaDeInicio,
+            "categoria": item.categoria,
+            "color": Color.fromRGBO(32, 104, 14, 1),
+          };
+          res.add(aux);
+        }
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getClubesDesde: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getClubesDesde: $e');
+      return res;
+    }
+  }
+  //CLUBES FIN
+  
+  //MATRICULATE  INICIO
+  Future<Matriculate> getMatriculate() async {
+    Matriculate res = Matriculate();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/matriculate/?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = MatriculateFromJson(response.body);
+        return res;
+      } else {
+        print('Error en getClub: '+jsonDecode(response.body)['error']['message']);
+        return res;
+      }
+    } catch (e) {
+      print('Error en getClub: $e');
+      return res;
+    }
+  }
+  //MATRICULATE  FIN
+
+  //CONVENIO  INICIO
+  Future<Convenio> getConvenioPopulateConEnlacesDePaises() async {
+    Convenio res = Convenio();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/convenio/?populate[paises][populate][0]=enlaces&populate[contactos][populate][0]=contactos');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = Convenio.armarConvenioPopulate(response.body);
+        return res;
+      }else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getConvenioPopulate: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getConvenioPopulate: $e');
+      return res;
+    }
+  }
+  //CONVENIO  FIN
+
+  //PROMOCION  INICIO
+  Future<List<Promocion>> getPromociones() async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/promociones/?populate=*&sort=id:desc');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        List<Promocion> promociones = PromocionesFromJson(response.body);
+        return promociones;
+      } else {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  //PROMOCION FIN
+
+  //COLEGIO INICIO
+  Future<List<Colegio>> getColegios() async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/colegios/?populate=*&sort=id:desc');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        List<Colegio> colegios = ColegiosFromJson(response.body);
+        return colegios;
+      } else {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  //COLEGIO FIN
+
+  //CARRERA INICIO 
+  Future<List<Carrera>> getCarreras() async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/carreras/?populate=*&pagination[pageSize]=200');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        List<Carrera> carreras = CarrerasFromJson(response.body);
+        return carreras;
+      } else {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  //CARRERA FIN
+
+  //CARRERA UPSA INICIO 
+  Future<CarreraUpsa> getCarreraUpsa(int carreraUpsaId) async {
+    CarreraUpsa res = CarreraUpsa();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/carreras-upsa/$carreraUpsaId?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = CarreraUpsa.armarCarreraUpsaPopulate(response.body);
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getCarreraUpsa: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getCarreraUpsa: $e');
+      return res;
+    }
+  }
+  Future<List<CarreraUpsa>> getCarrerasUpsaPopulate() async {
+    List<CarreraUpsa> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/carreras-upsa/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = CarreraUpsa.armarCarrerasUpsaPopulate(response.body);
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getCarrerasUpsaPopulate: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getCarrerasUpsaPopulate: $e');
+      return res;
+    }
+  }
+  //CARRERA UPSA FIN
+
+  //INTERESES INICIO 
+  Future<List<Interes>> getIntereses() async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/intereses/?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        List<Interes> intereses = InteresesFromJson(response.body);
+        return intereses;
+      } else {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  //INTERESES FIN
+
+  //eventos.upsa.edu.bo INICIO 
+  Future<List<Universidad>> getUnivesidadeForId(int idUniversidad) async {
+    try {
+      var url = Uri.parse('https://eventos.upsa.edu.bo/universidad-depto/${idUniversidad.toString()}');
+      var response = await http.get(url);
+      if (response.statusCode == 200) {
+        List<Universidad> universidades = UniversidadesFromJson(response.body);
+        return universidades;
+      } else {
+        throw Exception("Algo salio mal");
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  //eventos.upsa.edu.bo FIN
+
+  //CAMPUS INICIO 
+  Future<Campus> getDatosCampus() async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/campus/?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        Campus campus = CampusFromJson(response.body);
+        return campus;
+      } else {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  //CAMPUS FIN
+
+  //CONCURSO INICIO 
+  Future<List<Map<String,dynamic>>> getConcursosDesde(String fechaActual) async {
+    List<Map<String,dynamic>> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/?populate=*&filters[\$and][0][activo][\$eq]=true&filters[\$and][1][fechaDeInicio][\$gte]=$fechaActual&sort=id:desc&pagination[pageSize]=200');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        List<Concurso> concursos = Concurso.armarConcursosPopulateFechaOriginal(response.body);
+        for (var concurso in concursos) {
+          Map<String,dynamic> aux = {
+            "id": concurso.id!,
+            "titulo": concurso.titulo,
+            "tipo": "Concurso",
+            "fecha": concurso.fechaDeInicio,
+            "categoria": concurso.categoria,
+            "color": Color.fromRGBO(243, 148, 61, 0.9),
+          };
+          res.add(aux);
+        }
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getConcursosDesde: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getConcursosDesde: $e');
+      return res;
+    }
+  }
+  Future<Concurso> getConcursoPopulateConInscripcionesSeguidores(int id) async {
+    Concurso res = Concurso();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/$id/?populate[categoria][populate][0]=categoria&populate[etiquetas][populate][0]=etiquetas&populate[calendario][populate][0]=calendario&populate[imagen][populate][0]=imagen&populate[imagenes][populate][0]=imagenes&populate[inscripciones][populate][0]=user&populate[usuarios][populate][0]=usuarios&populate[noticias][populate][0]=imagen');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = Concurso.armarConcursoPopulateConInscripcionesSeguidores(response.body);
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getConcursoPopulateConInscripcionesSeguidores: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getConcursoPopulateConInscripcionesSeguidores: $e');
+      return res;
+    }
+  }
+  Future<List<Concurso>> getConcursos() async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        List<Concurso> concursos = Concurso.armarConcursosPopulate(response.body);
+        return concursos;
+      } else {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  Future<Concurso> getConcurso(int id) async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/$id?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        Concurso concurso = Concurso.armarConcursoPopulate(response.body);
+        return concurso;
+      } else {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  Future<List<Map<String,dynamic>>> getConcursosUltimas(int cantidad) async {
+    List<Map<String,dynamic>> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=$cantidad');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        final List<dynamic> data = jsonData['data'];
+        for (var item in data) {
+          Map<String,dynamic> aux = {
+            "tipo":"Concursos",
+            "id":  item['id'],
+            "titulo": item['attributes']['titulo'],
+            "descripcion": item['attributes']['descripcion'],
+            "categoria": item['attributes']['categoria']['data'] != null ? item['attributes']['categoria']['data']['attributes']['nombre'] : "Sin categoria", 
+            "imagen": item['attributes']['imagen']['data'] != null ? item['attributes']['imagen']['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",
+          };
+          res.add(aux);
+        }
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getConcursosUltimas: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getConcursosUltimas: $e');
+      return res;
+    }
+  }
+  Future<bool> setConcursoSeguidores(int id, List<int> data) async {
+    bool res =  false;
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/$id');
+      var response = await http.put(url,
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+        },
+        body: json.encode(
+          {"data":
+            {
+              "usuarios": data
+            }
+          }
+        )
+      );
+      if (response.statusCode == 200) {
+        res = true;
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en setConcursoSeguidores: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en setConcursoSeguidores: $e');
+      return res;
+    }
+  }
+  //CONCURSO FIN
+
+  //SOBRE NOSOTROS INICIO 
+  Future<SobreNosotros> getSobreNosotros() async {
+    SobreNosotros res = SobreNosotros();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/sobre-nosotro/?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = SobreNosotroFromJson(response.body);
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getSobreNosotros: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getSobreNosotros: $e');
+      return res;
+    }
+  }
+  //SOBRE NOSOTROS FIN
+
+  //FACULTADES INICIO 
+  Future<List<Facultad>> getFacultades() async {
+    List<Facultad> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/facultades/?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = FacultadesFromJson(response.body);
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getFacultades: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getFacultades: $e');
+      return res;
+    }
+  }
+  //FACULTADES FIN
+
+  //CURSILLO INICIO 
+  Future<List<Cursillo>> getCursillosPopulate() async {
+    List<Cursillo> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/cursillos/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = Cursillo.armarCursillosPopulate(response.body);
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getCursillosPopulate: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getCursillosPopulate: $e');
+      return res;
+    }
+  }
+  Future<Cursillo> getCursilloPopulate(int id) async {
+    Cursillo res = Cursillo();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/cursillos/$id?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = Cursillo.armarCursilloPopulate(response.body);
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getCursilloPopulate: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getCursilloPopulate: $e');
+      return res;
+    }
+  }
+  //CURSILLO FIN
+
+  //CONTACTO INICIO 
+  Future<Contacto> getContacto() async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/contacto/?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        Contacto res = ContactoFromJson(response.body);
+        return res;
+      } else {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  //CONTACTO FIN
+
+  //FORMULARIO DE CONTACTO INICIO
+  Future<String> crearContacto(Map<String, String> data) async {
+    String res = "fallo";
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}/formulario-de-contactos");
+      var response = await http.post(url,
+          headers: {
+            'Content-Type': 'application/json',
+            "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          },
+          body: json.encode({"data":{"correo": data["email"], "asunto": data["asunto"], "mensaje": data["mensaje"]}}));
+      if (response.statusCode == 200) {
+        res = "exito";
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  crearContacto$error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en  crearContacto$e');
+      return res;
+    }
+  }
+  //FORMULARIO DE CONTACTO FIN
+
+  //BUSCADOR INICIO 
+  Future<List<Resultado>> getBusquedas(String query) async {
+    List<Resultado> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/busquedas').replace(queryParameters: {
+        'pagination[pageSize]': '200',
+        'filters[\$or][0][titulo][\$contains]': query,
+        'filters[\$or][1][descripcion][\$contains]': query,
+        'filters[\$or][2][categoria][\$contains]': query,
+        'filters[\$or][3][etiquetas][\$contains]': query,
+        'filters[\$or][4][palabrasClaves][\$contains]': query,
+        'filters[\$or][5][descripcionClave][\$contains]': query,
+      });
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = ResultadosFromJson(response.body);
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  crearContacto$error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en  crearContacto$e');
+      return res;
+    }
+  }
+  //BUSCADOR FIN
+
+  //ETIQUETA INICIO 
+  Future<List<Map<String, dynamic>>> getContenidosPorEtiquetas(String etiqueta) async {
+    List<Map<String, dynamic>> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/etiquetas/?populate[eventos][populate][0]=eventos&populate[concursos][populate][0]=concursos&populate[clubes][populate][0]=clubes&populate[noticias][populate][0]=noticias&populate[eventos][populate][1]=categoria&populate[concursos][populate][1]=categoria&populate[clubes][populate][1]=categoria&populate[noticias][populate][1]=categoria&filters[nombre][\$eq]=$etiqueta');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = FuncionUpsa.armarContenidoPorEtiquetas(response.body);
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getEventoConInscripciones: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getEventoConInscripciones: $e');
+      return res;
+    }
+  }
+  //ETIQUETA FIN
+
+  //BORRAME INICIO 
+
+  //BORRAME FIN
+
+  //AVATAR INICIO 
+  Future<List<Avatar>> getAvataresPopulate(int id) async {
+    List<Avatar> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}/avatares/?populate=*");
+      var response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          }, 
+      );
+      if (response.statusCode == 200) {
+        res = Avatar.armarAvataresPopulate(response.body);
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  getAvataresPopulate: $error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getAvataresPopulate: $e');
+      return res;
+    }
+  }
+  //AVATAR FIN
+
+  //EXTRAS INICIO
+  Future<List<Map<String, dynamic>>> getActividadesInscritosForUserNotPopulate(int idUser) async {
+    List<Map<String, dynamic>> res = [];
+    try {
+      List<int> idInscripciones = await _getActividadesInscritosId(idUser);
+      idInscripciones.forEach((idInscripcion) async {
+        var inscripcion = await _getInscripcionForId(idInscripcion);
+        if(inscripcion["evento"]["data"] !=  null){
+           Map<String, dynamic> aux = {
+            "id": inscripcion["evento"]["data"]["id"], 
+            "titulo": inscripcion["evento"]["data"]["attributes"]["titulo"], 
+            "actividad": "evento"
+            };
+            res.add(aux);
+        }
+        if(inscripcion["concurso"]["data"] !=  null){
+           Map<String, dynamic> aux = {
+            "id": inscripcion["concurso"]["data"]["id"], 
+            "titulo": inscripcion["concurso"]["data"]["attributes"]["titulo"], 
+            "actividad": "concurso"
+            };
+            res.add(aux);
+        }
+      });
+      return res;
+    } catch (e) {
+      return res;
+    }
+  }
+  Future<bool> reenviarToken(int userId, String email) async {
+    String token = await pedirTokenUser(userId);
+    return await enviarCorreo({"codigoDeVerificacion":token}, "Código de verificación", email);
+  }
+  Future<bool> verificarCuenta(int userId, String tokenIngresado) async {
+    String token = await pedirTokenUser(userId);
+    if(tokenIngresado == token){
+      return await activarCuenta(true, userId);
+    }else{
+      return false;
+    }
+  }
+  List<Map<String,dynamic>> _crearActividadesSeguidos(String dataString, String key) {
+    List<Map<String,dynamic>> res = [];
+    final jsonData = json.decode(dataString);
+    List<dynamic> actividades = jsonData[key];
+    for (var item in actividades) {
+      if (item['id'] != null) {
+        Map<String, dynamic> aux = {"id": item['id']};
+        res.add(aux);
+      }
+    }
+    return res;
+  }
+  List<int> _crearListaEnteros(String dataString, String key) {
+    List<int> res = [];
+    final jsonData = json.decode(dataString);
+    List<dynamic> actividades = jsonData[key];
+
+    for (var item in actividades) {
+      if (item['id'] != null) {
+        int id = item['id'];
+        res.add(id);
+      }
+    }
+  
+    return res;
+  }
+  Future<Map<int, int>> getEventosInscritos(int userId) async {
+    Map<int, int> res = {};
+    try {
+      List<int> inscripciones = await _getActividadesInscritosId(userId);
+      inscripciones.forEach((inscripcion) async {
+        int? idEvento = await _getEventoId(inscripcion);
+        res[idEvento] = inscripcion;
+            });
+      return res;
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  Future<List<Map<String, dynamic>>> getConcursosInscritos(int userId) async {
+    List<Map<String, dynamic>> res = [];
+    try {
+      List<Map<String, dynamic>> inscripciones = await _getActividadesInscritosId2(userId);
+      inscripciones.forEach((inscripcion) async {
+        if (inscripcion["qr"].contains("Concurso-")) {
+          int? idEvento = await _getActividadId(inscripcion["id"], "concurso");
+          var aux = {
+            "idInscripcion": inscripcion["id"],
+            "qr": inscripcion["qr"],
+            "id":idEvento
+          };
+          res.add(aux);
+        }
+      });
+      return res;
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
   Future<List<Evento>> getEventosPorIds(List<int> idsEventos) async {
     List<Evento> res = [];
     for (var item in idsEventos) {
@@ -828,24 +2048,6 @@ class ApiService {
     }
     return res;
   }
-
-  //NOTICIAS
-  Future<List<Categoria>> getCategoriasNoticias () async{
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse(dotenv.get('baseUrl') + '/categoria-noticias/?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        List<Categoria> _categorias = categoriasNoticiasFromJson(response.body);
-        return _categorias;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
   Future<List<Noticia>> getNoticiasRelacionadasConActividad(List<int> idsNoticias) async {
     List<Noticia> res = [];
     idsNoticias.forEach((idNoticia) async {
@@ -853,22 +2055,6 @@ class ApiService {
       res.add(noticia);
     });
     return res;
-  }
-  Future<List<Noticia>> getNoticias() async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/noticias/?populate=*&sort=id:desc');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        List<Noticia> noticias = NoticiasFromJson(response.body);
-        return noticias;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
   }
   Future<List<Noticia>> getNoticiasPorIdsCategorias(List<Categoria> categorias) async {
     List<Noticia> res = [];
@@ -888,145 +2074,10 @@ class ApiService {
     }
     return res;
   }
-  Future<Noticia> getNoticia(int noticiaId) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse(dotenv.get('baseUrl') + '/noticias/'+noticiaId.toString()+"?populate=*");
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        Noticia noticia = NoticiaFromJson(response.body);
-        return noticia;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<List<Noticia>> getOtrasNoticias(int idNoticia) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse(dotenv.get('baseUrl') + '/noticias/?populate=*&filters[id][\$ne]='+idNoticia.toString()+'&sort=id:desc');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        List<Noticia> noticia = NoticiasFromJson(response.body);
-        return noticia;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  //PROMOCIONES
-  Future<List<Promocion>> getPromociones() async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/promociones/?populate=*&sort=id:desc');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        List<Promocion> promociones = PromocionesFromJson(response.body);
-        return promociones;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  //COLEGIOS
-  Future<List<Colegio>> getColegios() async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/colegios/?populate=*&sort=id:desc');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        List<Colegio> colegios = ColegiosFromJson(response.body);
-        return colegios;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  //CARRERAS
-  Future<List<Carrera>> getCarreras() async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse(dotenv.get('baseUrl') + '/carreras/?populate=*&pagination[pageSize]=200');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        List<Carrera> carreras = CarrerasFromJson(response.body);
-        return carreras;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  //INTERESES
-  Future<List<Interes>> getIntereses() async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/intereses/?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        List<Interes> intereses = InteresesFromJson(response.body);
-        return intereses;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  //UNIVERSIDAD
-  Future<List<Universidad>> getUnivesidadeForId(int idUniversidad) async {
-    try {
-      var url = Uri.parse('https://eventos.upsa.edu.bo/universidad-depto/${idUniversidad.toString()}');
-      var response = await http.get(url);
-      if (response.statusCode == 200) {
-        List<Universidad> universidades = UniversidadesFromJson(response.body);
-        return universidades;
-      } else {
-        throw Exception("Algo salio mal");
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  //EXTRAS
   String capitalizeEachWord(String s) {
     if (s.isEmpty) return s;
     return s.split(' ').map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase()).join(' ');
   }
-
-  //CAMPUS
-  Future<Campus> getDatosCampus() async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/campus/?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        Campus campus = CampusFromJson(response.body);
-        return campus;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  //ACTIVIDADES
   Future<List<Map<String,dynamic>>> getActividades() async {
     List<Map<String,dynamic>> res = [];
     List<Map<String,dynamic>> aux = [];
@@ -1035,85 +2086,14 @@ class ApiService {
     res.addAll(aux);
     aux = await getConcursosDesde(fechaActual);
     res.addAll(aux);
+    aux = await getClubesDesde(fechaActual);
+    res.addAll(aux);
     return res;
   }
   String obtenerFechaActual() {
     DateTime ahora = DateTime.now();
     DateFormat formato = DateFormat('yyyy-MM-dd');
     return formato.format(ahora);
-  }
-  Future<List<Map<String,dynamic>>> getEventosDesde(String fechaActual) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/?populate=*&filters[fechaDeInicio][\$gte]=$fechaActual');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        List<Evento> eventos = EventosFromJson(response.body);
-        List<Map<String,dynamic>> actividad = [];
-        for (var evento in eventos) {
-          Map<String,dynamic> aux = {
-            "id": int.parse(evento.id!),
-            "titulo": evento.titulo,
-            "tipo": "Evento",
-            "fecha": evento.fechaDeInicio,
-            "categoria": evento.categoria,
-            "color": Color.fromRGBO(91, 119, 245, 0.9),
-          };
-          actividad.add(aux);
-        }
-        return actividad;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<List<Map<String,dynamic>>> getConcursosDesde(String fechaActual) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/?populate=*&filters[fechaInicio][\$gte]=$fechaActual');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        List<Concurso> concursos = ConcursosFromJson(response.body);
-        List<Map<String,dynamic>> actividad = [];
-        for (var concurso in concursos) {
-          Map<String,dynamic> aux = {
-            "id": concurso.id!,
-            "titulo": concurso.titulo,
-            "tipo": "Concurso",
-            "fecha": concurso.fechaInicio,
-            "categoria": concurso.categoria,
-            "color": Color.fromRGBO(243, 148, 61, 0.9),
-          };
-          actividad.add(aux);
-        }
-        return actividad;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  //CONCURSOS
-  Future<List<Concurso>> getConcursos() async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        List<Concurso> concursos = ConcursosFromJson(response.body);
-        return concursos;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
   }
   Future<List<Concurso>> getConcursosPorIds(List<int> idsConcursos) async {
     List<Concurso> res = [];
@@ -1123,133 +2103,100 @@ class ApiService {
     }
     return res;
   }
-  Future<Concurso> getConcurso(int idConcurso) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/$idConcurso?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        Concurso concurso = ConcursoFromJson(response.body);
-        return concurso;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<int> crearInscripcionConcurso(int idUser, int idConcurso) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      DateTime now = DateTime.now();
-      DateTime utcPlus4 = now.add(Duration(hours: 4));
-      String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(utcPlus4);
-
-      int hash = formattedDate.hashCode.abs(); // Convertir la fecha en un número
-      String code = hash.toRadixString(36).toUpperCase(); // Convertir el número en una cadena en base 36
-      var url = Uri.parse('${dotenv.get('baseUrl')}/inscripcions');
-      var response = await http.post(url,
-          headers: {
-            'Content-Type': 'application/json',
-            "Authorization": "Bearer ${dotenv.get('accesToken')}"
-          },
-          body: json.encode({
-            "data": {"user": idUser, "concurso": idConcurso, "fecha": formattedDate, "qr": "Concurso-UPSA-$code$idUser$idConcurso"}
-          }));
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body)["data"]["id"];
-      } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        throw Exception(error);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<bool> setActividadesSeguidos(int idUser, List<Map<String, dynamic>> actividadesSeguidos, String actividad) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/users/$idUser');
-      var response = await http.put(url,
-        headers: {
-          'Content-Type': 'application/json',
-          "Authorization": "Bearer ${dotenv.get('accesToken')}"
-        },
-        body: json.encode(
-        {
-          actividad: actividadesSeguidos.map((actividad) => actividad["idActividad"]).toList()
-        }
-      )
-      );
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  //SOBRE NOSOTROS
-  Future<Noticia> getSobreNosotros() async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/sobre-nosotro/?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        Noticia noticia = NoticiaFromJson(response.body);
-        return noticia;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  //HOME - INICIO
   Future<List<Map<String, dynamic>>> getContenido() async {
     List<Map<String, dynamic>> res = [];
     List<Map<String, dynamic>> aux = [];
-    
-    // Obtener las últimas noticias
-    aux = await getNoticiasUltimas(5);
-    
-    // Agregar los elementos de aux a res
+    aux = await getEventosUltimas(5);
     res.addAll(aux);
-    
+    aux = await getConcursosUltimas(5);
+    res.addAll(aux);
+    aux = await getClubesUltimas(5);
+    res.addAll(aux);
+    aux = await getNoticiasUltimas(5);
+    res.addAll(aux);
     return res;
   }
-  Future<List<Map<String,dynamic>>> getNoticiasUltimas(int cantidad) async {
-    List<Map<String,dynamic>> res = [];
-    await dotenv.load(fileName: ".env");
+  Future<List<Map<String, dynamic>>> getClubesInscritos(int userId) async {
+    List<Map<String, dynamic>> res = [];
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/noticias/?populate=*&sort=id:desc&pagination[pageSize]=$cantidad');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-        final List<dynamic> data = jsonData['data'];
-        for (var item in data) {
-          Map<String,dynamic> aux = {
-            "tipo":"Noticias",
-            "id":  item['id'],
-            "titulo": item['attributes']['titular'],
-            "descripcion": item['attributes']['descripcion'],
-            "categoria": item['attributes']['categoria']['data']['attributes']['nombre'],
-            "imagen": item['attributes']['foto']['data']['attributes']['url'],
+      List<Map<String, dynamic>> inscripciones = await _getActividadesInscritosId2(userId);
+      inscripciones.forEach((inscripcion) async {
+        if (inscripcion["qr"].contains("Club-")) {
+          int? idEvento = await _getActividadId(inscripcion["id"], "club");
+          var aux = {
+            "idInscripcion": inscripcion["id"],
+            "qr": inscripcion["qr"],
+            "id":idEvento
           };
           res.add(aux);
         }
-        return res;
-      } else {
-        print(jsonDecode(response.body)["error"]["message"]);
-        return res;
-      }
-    } catch (e) {
-      print(e);
+      });
       return res;
+    } catch (e) {
+      print('Error en getClubesInscritos: $e');
+      return res;
+    }
+  }
+  //EXTRAS FIN
+
+  Future<bool> setUserMetaFotoPerfil2(int userId, File foto) async {
+    dio.FormData formData = dio.FormData();
+
+    // Adjuntar el archivo al formulario
+    formData.files.add(MapEntry(
+      "files",
+      await MultipartFile.fromFile(foto.path, filename: path.basename(foto.path)),
+    ));
+
+    // Realizar la solicitud con dio
+    try {
+      Response response = await Dio().post(
+        'https://upsa.focoazul.com/upload',
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': 'Bearer 4ef15e28c1a0d4938ce4e52d0a4843399e4283410d8b12306e3134a6cfee6e4ca7bdb2c65694fd5c037e332e5683d60cfbe32c2850068682d3eaddab77de21e01ddc88c3ace56b9c48034ad61b29090d94c983fa2885c589b609de75bbe3fdf2c67faf39233468c53b6077220f7c2de14f4666b9b37e639e022b129190371ebe',
+          },
+        ),
+      );
+
+      // Manejar la respuesta
+      print(response.data);
+    } catch (e) {
+      print('Error al enviar formulario: $e');
+      return false;
+    }
+    return true;
+  }
+  Future<bool> setUserMetaFotoPerfil(int userId, File file) async {
+    var request = http.MultipartRequest(
+      'PUT',
+      Uri.parse('https://upsa.focoazul.com/api/user-metas/31'),
+    );
+    var stream = http.ByteStream(file.openRead());
+    stream.cast();
+    var length = await file.length();
+    var multipartFileSign = http.MultipartFile(
+      'files.fotoPerfil',
+      stream,
+      length,
+      filename: file.path.split('/').last,
+      //contentType: MediaType('image', 'jpeg'),
+    );
+    request.files.add(multipartFileSign);
+    var emptyData = jsonEncode({});
+    request.fields['data'] = emptyData;
+    String token = '4ef15e28c1a0d4938ce4e52d0a4843399e4283410d8b12306e3134a6cfee6e4ca7bdb2c65694fd5c037e332e5683d60cfbe32c2850068682d3eaddab77de21e01ddc88c3ace56b9c48034ad61b29090d94c983fa2885c589b609de75bbe3fdf2c67faf39233468c53b6077220f7c2de14f4666b9b37e639e022b129190371ebe'; // Reemplaza con tu token Bearer
+    request.headers.addAll({
+      'Authorization': 'Bearer $token',
+    });
+    var response = await request.send();
+    if (response.statusCode == 200) {
+       print(response.stream.bytesToString());
+       return true;
+    } else {
+      throw Exception('Failed to upload media file');
     }
   }
 }

@@ -1,13 +1,10 @@
 import 'package:flutkit/custom/models/interes.dart';
+import 'package:flutkit/custom/models/user_meta.dart';
+import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/custom/widgets/progress_custom.dart';
-import 'package:flutkit/helpers/extensions/extensions.dart';
-import 'package:flutkit/helpers/widgets/my_container.dart';
 import 'package:flutkit/homes/homes_screen.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/user.dart';
@@ -15,7 +12,6 @@ import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
-import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutkit/loading_effect.dart';
@@ -24,13 +20,13 @@ class RegistroIntereses extends StatefulWidget {
   @override
   _RegistroInteresesState createState() => _RegistroInteresesState();
 }
-
+ 
 class _RegistroInteresesState extends State<RegistroIntereses> {
   late CustomTheme customTheme;
   late ThemeData theme;
   late ProfileController controller;
   Validacion validacion = Validacion();
-  UserMeta _userMeta = UserMeta();
+  final UserMeta _userMeta = UserMeta();
   User _user = User();
   int _isInProgress = -1;
   final Map<String, String> _errores = {
@@ -79,12 +75,14 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
         setState(() {
           _isInProgress = -1;
         });
-        MensajeTemporalInferior().mostrarMensaje(context,"Completaste tu cuenta con exito.",Color.fromRGBO(5, 50, 12, 1), Color.fromRGBO(255, 255, 255, 1));
+        MensajeTemporalInferior().mostrarMensaje(context,"Completaste tu cuenta con exito.", "exito");
         Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
       }
     } on Exception catch (e) {
       setState(() {
         _errores["error"] = e.toString().substring(11);
+        print(e);
+        _isInProgress = -1;
       });
     }
   }
@@ -101,77 +99,32 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
       );
     } else {
       return Scaffold(
+        backgroundColor: AppColorStyles.verdeFondo,
         appBar: AppBar(
-          leading: InkWell(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: Icon(
+          backgroundColor: AppColorStyles.verdeFondo,
+          leading: IconButton(
+            icon: Icon(
               LucideIcons.chevronLeft,
-              size: 20,
-              color: theme.colorScheme.onBackground,
-            ).autoDirection(),
+              color: AppColorStyles.oscuro1
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
           ),
         ),
         body: SingleChildScrollView(
           child: Stack(
             children: <Widget>[
-              Column(
-                children: <Widget>[
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    //margin: EdgeInsets.only(top: 100,),
-                    color: theme.scaffoldBackgroundColor,
-                    child: Column(     
-                      children: <Widget>[
-                        Row(
-                          children: <Widget>[// Espacio entre el icono y el texto
-                            MyText.titleLarge(
-                              "👨‍🎨 ¿Cuáles son tus intereses?",
-                              style: TextStyle(
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 8), // Espacio entre el título y el texto
-                        MyText.bodyMedium(
-                          'Así podremos mejorar nuestra oferta de actividades para todos nuestros bachilleres.',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 15.0,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Divider(),
-                        Wrap(
-                          children: _buildChoiceList(),
-                        ),
-                        MySpacing.height(20),
-                          SizedBox(
-                            width: double.infinity,
-                            child: CupertinoButton(
-                              color: Color.fromRGBO(5, 50, 12, 1),
-                              onPressed: () {
-                                _validarCampos();
-                              },
-                              borderRadius: BorderRadius.all(Radius.circular(5)),
-                              padding: MySpacing.xy(100, 16),
-                              pressedOpacity: 0.5,
-                              child: MyText.bodyMedium(
-                                "Finalizar llenado",
-                                color: theme.colorScheme.onSecondary,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                        MySpacing.height(20),
-                      ]
-                    )
-                  )
-                ]
+              Container(
+                margin: EdgeInsets.all(15),
+                child: Column(     
+                  children: <Widget>[
+                    _crearTitulo(),
+                    _crearDescripcion(),
+                    _crearIntereses(),
+                    _crearBoton(),
+                  ]
+                )
               ),
               if (_isInProgress == 0)
               Positioned.fill(
@@ -180,10 +133,54 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
                 ),
               ),
             ]
-          )
+          ),
         )
       );
     } 
+  }
+  Widget _crearIntereses(){
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 15),
+      child: Wrap(
+        children: _buildChoiceList(),
+      )
+    );
+  }
+  Widget _crearBoton(){
+    return Container(
+      width: double.infinity,
+      height: 50,
+      margin: EdgeInsets.symmetric(vertical: 15),
+      child: ElevatedButton(
+        onPressed: () {
+         _validarCampos();
+        },
+        style: AppDecorationStyle.botonBienvenida(),
+        child: Text(
+          'Finalizar llenado',
+          style: AppTextStyles.botonMayor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+        ),
+      ),
+    );
+  }
+  Widget _crearDescripcion(){
+    return Text(
+      'Juramos, es la última pantalla.',
+      style: TextStyle(
+        color: AppColorStyles.oscuro1,
+        fontSize: 15,
+        fontWeight: FontWeight.normal,
+      ),
+    );
+  }
+  Widget _crearTitulo() {
+    return Container(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        "¿Cuáles son tus intereses?",
+        style: AppTitleStyles.onboarding(color: AppColorStyles.verde1),
+      ),
+    );
   }
  _buildChoiceList() {
     List<Widget> choices = [];
@@ -191,18 +188,18 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
       choices.add(Container(
         padding: MySpacing.only(left: 0, right: 8, bottom: 16),
         child: ChoiceChip(
+          backgroundColor: AppColorStyles.blancoFondo,
           avatar: _userMeta.intereses!.contains(item.id!) ? Icon(Icons.check_circle_outline) : Icon(Icons.circle_outlined),
-          checkmarkColor: Colors.white,
+          checkmarkColor: AppColorStyles.blancoFondo,
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          selectedColor: Color.fromRGBO(5, 50, 12, 1),
-          label: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              MyText.bodyMedium(item.nombre!,
-                color: _userMeta.intereses!.contains(item.id!)
-                  ? theme.colorScheme.onPrimary
-                  : theme.colorScheme.onBackground),
-            ],
+          selectedColor: AppColorStyles.verde2,
+          label: Text(
+            item.nombre!,
+            style: TextStyle(
+              color: _userMeta.intereses!.contains(item.id!)
+              ? AppColorStyles.blancoFondo
+              : AppColorStyles.verde2
+            ),
           ),
           selected: _userMeta.intereses!.contains(item.id!),
           onSelected: (selected) {
@@ -214,10 +211,10 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
           },
           shape: RoundedRectangleBorder(
             side: BorderSide(
-              color: Color.fromRGBO(5, 50, 12, 1), // Color del borde
+              color: AppColorStyles.verde2, // Color del borde
               width: 1.0, // Ancho del borde
             ),
-            borderRadius: BorderRadius.circular(14), // Radio de borde
+            borderRadius: BorderRadius.circular(5), // Radio de borde
           ),
         ),
       ));

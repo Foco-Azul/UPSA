@@ -1,13 +1,15 @@
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/categoria.dart';
+import 'package:flutkit/custom/models/club.dart';
 import 'package:flutkit/custom/models/concurso.dart';
 import 'package:flutkit/custom/models/evento.dart';
+import 'package:flutkit/custom/screens/actividades/club_screen.dart';
 import 'package:flutkit/custom/screens/actividades/concurso_escreen.dart';
 import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
+import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
-import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -22,61 +24,125 @@ class ActividadesScreen extends StatefulWidget {
 class _ActividadesScreenState extends State<ActividadesScreen> {
   late ThemeData theme;
   late CustomTheme customTheme;
-  List<Categoria> _categorias = [];
-  List<Categoria> _categoriasConcurso = [];
   late ProfileController controller;
-  int _selectedChoiceIndex = -1;
-  int _selectedChoiceIndexConcurso = -1;
-  List<Evento> _eventos =  [];
-  List<Concurso> _concursos =  [];
   String _backUrl = "";
-  bool _cargando = false;
+
+  List<Evento> _eventos =  [];
+  List<Evento> _eventosCategorizados = [];
+  List<Categoria> _eventosCategorias = [];
+
+  List<Club> _clubes = [];
+  List<Club> _clubesCategorizados = [];
+  List<Categoria> _clubesCategorias = [];
+
+  List<Concurso> _concursos =  [];
+  List<Concurso> _concursosCategorizados = [];
+  List<Categoria> _concursosCategorias = [];
+  
   @override
   void initState() {
     super.initState();
     theme = AppTheme.theme;
     customTheme = AppTheme.customTheme;
     controller = ProfileController();
-    _cargarCategorias();
+    _cargarDatos();
   }
-  void _cargarCategorias() async{
+  
+  void _cargarDatos() async{
+    setState(() {
+      controller.uiLoading = true;
+    });
+
     await dotenv.load(fileName: ".env");
     _backUrl = dotenv.get('backUrl');
-    List<Categoria> categoriasActual = await ApiService().getCategorias();
-    _categoriasConcurso = await ApiService().getCategoriasConcurso();
+
+    _clubes = await ApiService().getClubes();
+    _clubesCategorizados = _clubes;
+    _clubesCategorias = _crearCategoriasActividad("Clubes");
+
     _eventos = await ApiService().getEventos();
+    _eventosCategorizados = _eventos;
+    _eventosCategorias = _crearCategoriasActividad("Eventos");
+
     _concursos = await ApiService().getConcursos();
+    _concursosCategorizados = _concursos;
+    _concursosCategorias = _crearCategoriasActividad("Concursos");
+    
     setState(() {
-      _categorias = categoriasActual;
       controller.uiLoading = false;
     });
-  }  
-  void _cargarEventosCategoria() async{
-    setState(() {
-      _cargando = true;
-    });
-    if(_selectedChoiceIndex == -1){
-      _eventos = await ApiService().getEventos();
-    }else{
-      _eventos = await ApiService().getEventosPorIds(_categorias[_selectedChoiceIndex].idsContenido!);
-    }
-    setState(() {
-      _cargando = false;
-    });
   }
-    void _cargarConcursosCategoria() async{
-    setState(() {
-      _cargando = true;
-    });
-    if(_selectedChoiceIndexConcurso == -1){
-      _concursos = await ApiService().getConcursos();
-    }else{
-      _concursos = await ApiService().getConcursosPorIds(_categoriasConcurso[_selectedChoiceIndexConcurso].idsContenido!);
+  List<Categoria> _crearCategoriasActividad(String actividad) {
+    List<Categoria> res = [];
+    if (actividad == "Eventos") {
+      for (var item in _eventos) {
+        Categoria aux = item.categoria!;
+        if (!res.any((element) => element.nombre == aux.nombre!)) {
+          res.add(aux);
+        }
+      }
     }
-    setState(() {
-      _cargando = false;
-    });
+    if (actividad == "Clubes") {
+      for (var item in _clubes) {
+        Categoria aux = item.categoria!;
+        if (!res.any((element) => element.nombre == aux.nombre!)) {
+          res.add(aux);
+        }
+      }
+    }
+    if (actividad == "Concursos") {
+      for (var item in _concursos) {
+        Categoria aux = item.categoria!;
+        if (!res.any((element) => element.nombre == aux.nombre!)) {
+          res.add(aux);
+        }
+      }
+    }
+    return res;
   }
+  void _filtarPorCategoria(String actividad, String categoria){
+    if(actividad == "Eventos"){
+      if(categoria.isNotEmpty){
+        _eventosCategorizados = [];
+        for (var item in _eventos) {
+          Categoria aux = item.categoria!;
+          if(aux.nombre == categoria){
+            _eventosCategorizados.add(item);
+          }
+        }
+      }else{
+        _eventosCategorizados = _eventos;
+      }
+    }
+    if(actividad == "Clubes"){
+      if(categoria.isNotEmpty){
+        _clubesCategorizados = [];
+        for (var item in _clubes) {
+          Categoria aux = item.categoria!;
+          if(aux.nombre == categoria){
+            _clubesCategorizados.add(item);
+          }
+        }
+      }else{
+        _clubesCategorizados = _clubes;
+      }
+    }
+    if(actividad == "Concursos"){
+      if(categoria.isNotEmpty){
+        _concursosCategorizados = [];
+        for (var item in _concursos) {
+          Categoria aux = item.categoria!;
+          if(aux.nombre == categoria){
+            _concursosCategorizados.add(item);
+          }
+        }
+      }else{
+        _concursosCategorizados = _concursos;
+      }
+    }
+    setState(() {});
+  } 
+  
   @override
   Widget build(BuildContext context) {
     if (controller.uiLoading) {
@@ -90,33 +156,53 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
       );
     } else {
       return Scaffold(
+      backgroundColor: AppColorStyles.verdeFondo,
       body: DefaultTabController(
         length: 4,
         initialIndex: 0,
         child: Scaffold(
           appBar: AppBar(
+            backgroundColor: AppColorStyles.verdeFondo,
             automaticallyImplyLeading: false,
             flexibleSpace: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                /*-------------- Build Tabs here ------------------*/
                 TabBar(
                   isScrollable: true,
-                  tabs: [
-                    Tab(child: MyText.titleMedium("Eventos", fontWeight: 600, fontSize: 14,)),
-                    Tab(child: MyText.titleMedium("Clubes", fontWeight: 600, fontSize: 14,)),
-                    Tab(child: MyText.titleMedium("Concursos", fontWeight: 600, fontSize: 14,)),
-                    Tab(child: MyText.titleMedium("Quiz", fontWeight: 600, fontSize: 14,)),
+                   tabs: [
+                    Tab(
+                      child: Text(
+                        "Eventos",
+                        style: AppTextStyles.botonMayor(color: AppColorStyles.verde1)
+                      ),
+                    ),
+                    Tab(
+                      child: Text(
+                        "Clubes",
+                        style: AppTextStyles.botonMayor(color: AppColorStyles.verde1)
+                      ),
+                    ),
+                    Tab(
+                      child: Text(
+                        "Concursos",
+                        style: AppTextStyles.botonMayor(color: AppColorStyles.verde1)
+                      ),
+                    ),
+                    Tab(
+                      child: Text(
+                        "Quiz",
+                        style: AppTextStyles.botonMayor(color: AppColorStyles.verde1)
+                      ),
+                    ),
                   ],
                   tabAlignment: TabAlignment.start,
                   indicator: UnderlineTabIndicator(
-                    borderSide: BorderSide(color: Color.fromRGBO(32, 104, 14, 1), width: 2.0),
+                    borderSide: BorderSide(color: AppColorStyles.verde1, width: 2.0),
                   ),
                 )
               ],
             ),
           ),
-
           /*--------------- Build Tab body here -------------------*/
           body: TabBarView(
             children: <Widget>[
@@ -131,121 +217,84 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
     );
     }
   }
-
-  Widget getTabContent(String text) {
-    switch (text) {
-      case "Eventos":
-        return Scaffold(
-          body: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    Column(
-                      children: <Widget>[
-                          Container(
-                          padding: MySpacing.only(top: 12, bottom: 12),
-                          child: Wrap(
-                            children: _buildChoiceList(),
-                          ),
-                        )
-                      ]
-                    ),
-                  ],
-                ),
-              ),
-              _cargando
-              ? Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(32, 104, 14, 1)),
-                ),
-              )
-                // Muestra el indicador de carga si `_cargando` es true
-              : generarContenido(_eventos), // Muestra el contenido generado si `_cargando` es false
-            ],
-          ),
-        );
-      case "Concursos":
-        return Scaffold(
-          body: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    Column(
-                      children: <Widget>[
-                          Container(
-                          padding: MySpacing.only(top: 12, bottom: 12),
-                          child: Wrap(
-                            children: _buildChoiceListConcurso(),
-                          ),
-                        )
-                      ]
-                    ),
-                  ],
-                ),
-              ),
-              _cargando
-              ? Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(32, 104, 14, 1)),
-                ),
-              )
-                // Muestra el indicador de carga si `_cargando` es true
-              : generarContenidoConcurso(_concursos), // Muestra el contenido generado si `_cargando` es false
-            ],
-          ),
-        );
-      default:
-        return Scaffold(
-          backgroundColor: theme.colorScheme.background,
-          body: Center(
-            child: MyText.titleMedium(text, fontWeight: 600),
-          ),
-        );
+  
+  Widget getTabContent(String actividad) {
+    List<Categoria> categorias = [];
+    List<dynamic> actividades = [];
+    if(actividad == "Eventos"){
+      categorias = _eventosCategorias;
+      actividades = _eventosCategorizados;
     }
+    if(actividad == "Clubes"){
+      categorias = _clubesCategorias;
+      actividades = _clubesCategorizados;
+    }
+    if(actividad == "Concursos"){
+      categorias = _concursosCategorias;
+      actividades = _concursosCategorizados;
+    }
+    return Scaffold(
+          backgroundColor: AppColorStyles.verdeFondo,
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: _crearCategorias(actividad, categorias),
+                ),
+              ),
+              generarContenidoActividad(actividad, actividades), // Muestra el contenido generado si `_cargando` es false
+            ],
+          ),
+        );
   }
-  Widget generarContenidoConcurso(List<Concurso> data) {
+  Widget generarContenidoActividad(String actividad, List<dynamic> actividades) {
     return Expanded(
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        itemCount: data.length,
+        itemCount: actividades.length,
         itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: GestureDetector(
-              onTap: () {
-                // Acción al hacer clic en el elemento
-                Navigator.push(context, MaterialPageRoute(builder: (context) => ConcursoScreen(idConcurso: data[index].id!,)));
-              },
+          return GestureDetector(
+            onTap: () {
+              if(actividad == "Eventos"){
+                Navigator.push(context, MaterialPageRoute(builder: (context) => EventoScreen(id: actividades[index].id!,)));
+              }
+              if(actividad == "Clubes"){
+                Navigator.push(context, MaterialPageRoute(builder: (context) => ClubScreen(id: actividades[index].id!,)));
+              }
+              if(actividad == "Concursos"){
+                Navigator.push(context, MaterialPageRoute(builder: (context) => ConcursoScreen(id: actividades[index].id!,)));
+              }
+            },
+            child: Container(
+              padding: EdgeInsets.all(15),
+              margin: EdgeInsets.all(15),
+              decoration: AppDecorationStyle.tarjeta(),
               child: Row(
                 children: [
                   // Imagen a la izquierda
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.25,
-                    child: Image.network(_backUrl+data[index].fotoPrincipal!),
+                    height: MediaQuery.of(context).size.height * 0.10,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(5), // Radio del borde
+                      child: Image.network(_backUrl + actividades[index].imagen!, fit: BoxFit.cover),
+                    ),
                   ),
-                  // Espaciador
-                  SizedBox(width: 16),
-                  // Columna con el texto
+                  SizedBox(width: 15),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        MyText.bodyLarge(data[index].titulo!, fontSize: 14, fontWeight: 600,),
-                        SizedBox(height: 8), // Espacio de 8 de alto entre los textos
                         Text(
-                          data[index].descripcion!.replaceAll('\n', ''),
+                          actividades[index].titulo!, 
+                          style: AppTitleStyles.tarjetaMenor()
+                        ),
+                        Text(
+                          actividades[index].descripcion!.replaceAll('\n', ''),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.normal,
-                          ),
+                          style: AppTextStyles.menor(color: AppColorStyles.oscuro2)
                         ),
                       ],
                     ),
@@ -258,134 +307,87 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
       ),
     );
   }
-  Widget generarContenido(List<Evento> data) {
-    return Expanded(
-      child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        itemCount: data.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: GestureDetector(
-              onTap: () {
-                // Acción al hacer clic en el elemento
-                Navigator.push(context, MaterialPageRoute(builder: (context) => EventoScreen(idEvento: int.parse(data[index].id!,))));
-              },
-              child: Row(
-                children: [
-                  // Imagen a la izquierda
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.25,
-                    child: Image.network(_backUrl+data[index].fotoPrincipal!),
-                  ),
-                  // Espaciador
-                  SizedBox(width: 16),
-                  // Columna con el texto
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        MyText.bodyLarge(data[index].titulo!, fontSize: 14, fontWeight: 600,),
-                        SizedBox(height: 8), // Espacio de 8 de alto entre los textos
-                        Text(
-                          data[index].cuerpo!.replaceAll('\n', ''),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-  _buildChoiceList() {
+  _crearCategorias(String actividad, List<Categoria> categorias) {
     List<Widget> choices = [];
-    for (int index = 0; index < _categorias.length; index++) {
-      var item = _categorias[index];
+    for (int index = 0; index < categorias.length; index++) {
+      var item = categorias[index];
       choices.add(Container(
         padding: MySpacing.all(8),
-        child: ChoiceChip(
-          checkmarkColor: Colors.white,
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          selectedColor: Color.fromRGBO(32, 104, 14, 1),
-          label: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              MyText.bodyMedium(item.nombre!,
-                fontSize: 8,
-                color: _selectedChoiceIndex == index
-                    ? theme.colorScheme.onPrimary
-                    : theme.colorScheme.onBackground),
-            ],
-          ),
-          selected: _selectedChoiceIndex == index, // Verifica si este chip está seleccionado
-          onSelected: (selected) {
-            setState(() {
-              if (_selectedChoiceIndex != index) {
-                _selectedChoiceIndex = selected ? index : -1; // Actualiza el índice seleccionado solo si es diferente
-                _cargarEventosCategoria();
-              } else {
-                _selectedChoiceIndex = -1; // Deselecciona si se pulsa el mismo item
-                _cargarEventosCategoria();
-              }
-            });
-          },
-          shape: RoundedRectangleBorder(
-            side: BorderSide(
-              color: Color.fromRGBO(32, 104, 14, 1), // Color del borde
-              width: 1.0, // Ancho del borde
-            ),
-            borderRadius: BorderRadius.circular(4), // Radio de borde
-          ),
+        decoration: BoxDecoration(
+          boxShadow: [
+            AppSombra.categoria(),
+          ],
         ),
-      ));
-    }
-    return choices;
-  }
-  _buildChoiceListConcurso() {
-    List<Widget> choices = [];
-    for (int index = 0; index < _categoriasConcurso.length; index++) {
-      var item = _categoriasConcurso[index];
-      choices.add(Container(
-        padding: MySpacing.all(8),
         child: ChoiceChip(
-          checkmarkColor: Colors.white,
+          showCheckmark: false,
+          avatar: Icon(
+            AppIconStyles.icono(nombre: categorias[index].icono!), 
+            color: categorias[index].activo! ? AppColorStyles.blancoFondo : AppColorStyles.gris1
+          ),
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          selectedColor: Color.fromRGBO(32, 104, 14, 1),
+          selectedColor: AppColorStyles.verde2, 
+          backgroundColor: AppColorStyles.blancoFondo,
           label: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              MyText.bodyMedium(item.nombre!,
-                fontSize: 8,
-                color: _selectedChoiceIndexConcurso == index
-                    ? theme.colorScheme.onPrimary
-                    : theme.colorScheme.onBackground),
+              Text(categorias[index].nombre!,
+                style: TextStyle(
+                  fontSize: 8, 
+                  fontWeight: FontWeight.bold,
+                  color: categorias[index].activo! ? AppColorStyles.blancoFondo : AppColorStyles.gris1
+                ),
+              )
             ],
           ),
-          selected: _selectedChoiceIndexConcurso == index, // Verifica si este chip está seleccionado
+          selected: categorias[index].activo!, // Verifica si este chip está seleccionado
           onSelected: (selected) {
-            setState(() {
-              if (_selectedChoiceIndexConcurso != index) {
-                _selectedChoiceIndexConcurso = selected ? index : -1; // Actualiza el índice seleccionado solo si es diferente
-                _cargarConcursosCategoria();
+            if(actividad == "Eventos"){
+              if(_eventosCategorias[index].activo! == false) {
+                _eventosCategorias[index].activo = true;
+                for (var i = 0; i < _eventosCategorias.length; i++) {
+                  if (i != index) {
+                    _eventosCategorias[i].activo = false;
+                  }
+                }
+                _filtarPorCategoria(actividad, item.nombre!);
               } else {
-                _selectedChoiceIndexConcurso = -1; // Deselecciona si se pulsa el mismo item
-                _cargarConcursosCategoria();
+                _eventosCategorias[index].activo = false;
+                _filtarPorCategoria(actividad, "");
               }
-            });
+            }
+            if(actividad == "Clubes"){
+              if(_clubesCategorias[index].activo! == false) {
+                _clubesCategorias[index].activo = true;
+                for (var i = 0; i < _clubesCategorias.length; i++) {
+                  if (i != index) {
+                    _clubesCategorias[i].activo = false;
+                  }
+                }
+                _filtarPorCategoria(actividad, item.nombre!);
+              } else {
+                _clubesCategorias[index].activo = false;
+                _filtarPorCategoria(actividad, "");
+              }
+            }
+            if(actividad == "Concursos"){
+              if(_concursosCategorias[index].activo! == false) {
+                _concursosCategorias[index].activo = true;
+                for (var i = 0; i < _concursosCategorias.length; i++) {
+                  if (i != index) {
+                    _concursosCategorias[i].activo = false;
+                  }
+                }
+                _filtarPorCategoria(actividad, item.nombre!);
+              } else {
+                _concursosCategorias[index].activo = false;
+                _filtarPorCategoria(actividad, "");
+              }
+            }
+            setState(() {});
           },
           shape: RoundedRectangleBorder(
             side: BorderSide(
-              color: Color.fromRGBO(32, 104, 14, 1), // Color del borde
+              color: AppColorStyles.blancoFondo, // Color del borde
               width: 1.0, // Ancho del borde
             ),
             borderRadius: BorderRadius.circular(4), // Radio de borde

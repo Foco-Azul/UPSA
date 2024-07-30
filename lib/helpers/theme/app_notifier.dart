@@ -5,6 +5,8 @@
 
 import 'dart:convert';
 
+import 'package:flutkit/custom/models/notificacion.dart';
+import 'package:flutkit/custom/models/user_meta.dart';
 import 'package:flutkit/helpers/extensions/theme_extension.dart';
 import 'package:flutkit/helpers/localizations/language.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
@@ -21,12 +23,14 @@ class AppNotifier extends ChangeNotifier {
   UserMeta _userMeta = UserMeta();
   bool _esNuevo = true;
   String _tokenDispositivo = "";
+  final List<Notificacion> _notificaciones= [];
 
   bool get isLoggedIn => _isLoggedIn;
   User get user => _user;
   UserMeta get userMeta => _userMeta;
   bool get esNuevo => _esNuevo;
   String get tokenDispositivo => _tokenDispositivo;
+  List<Notificacion> get notificaciones => _notificaciones;
 
   AppNotifier() {
     init();
@@ -50,10 +54,10 @@ class AppNotifier extends ChangeNotifier {
       Map<String, dynamic> userMap = json.decode(userJson);
       _user = User.fromJson(userMap);
     }
-    String? userMetaJson = _prefs.getString('user');
-    if (userMetaJson != null && _isLoggedIn) {
-      Map<String, dynamic> userMetaMap = json.decode(userMetaJson);
-      _user = User.fromJson(userMetaMap);
+    List<String> notificacionesCadenas = _prefs.getStringList('notificaciones') ?? [];
+    for (var item in notificacionesCadenas) {
+      Notificacion notificacion = Notificacion.fromJson(json.decode(item));
+      notificaciones.add(notificacion);
     }
   }
   Future<void> _resetPrefs() async {
@@ -77,9 +81,6 @@ class AppNotifier extends ChangeNotifier {
 
   void changeDirectionality(TextDirection textDirection, [bool notify = true]) {
     AppTheme.textDirection = textDirection;
-    //TODO:-----------------
-    // FxAppTheme.textDirection = textDirection;
-
     if (notify) notifyListeners();
   }
 
@@ -145,5 +146,8 @@ class AppNotifier extends ChangeNotifier {
   }
   bool getEsNuevo(){
     return _esNuevo;
+  }
+  List<Notificacion> getNotificaciones(){
+    return _notificaciones;
   }
 }

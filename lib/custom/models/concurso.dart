@@ -1,27 +1,10 @@
 import 'dart:convert';
+import 'package:flutkit/custom/models/categoria.dart';
+import 'package:flutkit/custom/models/etiqueta.dart';
+import 'package:flutkit/custom/models/inscripcion.dart';
+import 'package:flutkit/custom/models/noticia.dart';
+import 'package:flutkit/custom/utils/funciones.dart';
     
-// getting a list of users from json
-List<Concurso> ConcursosFromJson(String str) {
-  final jsonData = json.decode(str);
-  final List<dynamic> data = jsonData['data'];
-
-  return data.map((item) => Concurso.fromJson(item)).toList();
-}
-List<Concurso> ConcursosFromJsonCategoria(String str) {
-  final jsonData = json.decode(str);
-  final List<dynamic> data = jsonData["data"][0]["attributes"]["concursos"]["data"];
-  return data.map((item) => Concurso.fromJson(item)).toList();
-}
-
-
-Concurso ConcursoFromJson(String str) {
-  final jsonData = json.decode(str);
-  final Map<String, dynamic> data = jsonData['data'];
-
-  return Concurso.fromJson(data);
-}
-
-
 // Concurso class
 class Concurso {
   Concurso({
@@ -29,153 +12,120 @@ class Concurso {
     this.titulo,
     this.categoria,
     this.publicacion,
-    this.fotoPrincipal,
-    this.galeriaDeFotos,
-    this.fechaInicio,
-    this.fechaFin,
+    this.imagen,
+    this.imagenes,
+    this.fechaDeInicio,
+    this.fechaDeFin,
     this.descripcion,
     this.etiquetas,
     this.calendario,
     this.capacidad,
     this.inscritos,
     this.inscripciones,
-    this.noticiasRelacionadas,
+    this.noticias,
+    this.seguidores,
+    this.enlaceExterno,
   });
 
   int? id;
   String? titulo;
-  String? categoria;
+  Categoria? categoria;
   String? publicacion;
-  String? fotoPrincipal;
-  List<String>? galeriaDeFotos;
-  String? fechaInicio;
-  String? fechaFin;
+  String? imagen;
+  List<String>? imagenes;
+  String? fechaDeInicio;
+  String? fechaDeFin;
   String? descripcion;
-  List<String>? etiquetas;
+  List<Etiqueta>? etiquetas;
   List<Map<String, dynamic>>? calendario;
   int? capacidad;
   int? inscritos;
-  List<Map<String, dynamic>>? inscripciones;
-  List<int>? noticiasRelacionadas;
+  List<Noticia>? noticias;
+  List<Inscripcion>? inscripciones;
+  List<int>? seguidores;
+  String? enlaceExterno;
   
-  factory Concurso.fromJson(Map<String, dynamic> json) {
+  static List<Concurso> armarConcursosPopulateFechaOriginal(String str) {
+    List<Concurso> res = [];
+    final jsonData = json.decode(str);
+    final List<dynamic> data = jsonData['data'];
+    for (var item in data) {
+      Concurso aux = Concurso(
+        id: item["id"],
+        titulo: item['attributes']["titulo"],
+        categoria: Categoria.armarCategoria(item['attributes']["categoria"]["data"]),
+        publicacion: FuncionUpsa.armarFechaPublicacion(item['attributes']["publishedAt"]), 
+        imagen: item['attributes']["imagen"]['data'] != null ? item['attributes']["imagen"]['data']['attributes']['url'] : "/uploads/default_02263f0f89.png", 
+        imagenes: FuncionUpsa.armarGaleriaImagenes(item['attributes']["imagenes"]['data'], item['attributes']["imagen"]['data']),
+        fechaDeInicio: item['attributes']["fechaDeInicio"], 
+        fechaDeFin: item['attributes']["fechaDeFin"],
+        descripcion: item['attributes']["descripcion"], 
+        etiquetas: Etiqueta.armarEtiquetas(item['attributes']["etiquetas"]['data']),
+      );
+      res.add(aux);
+    }
+    return res;
+  }
+
+  static List<Concurso> armarConcursosPopulate(String str) {
+    List<Concurso> res = [];
+    final jsonData = json.decode(str);
+    final List<dynamic> data = jsonData['data'];
+    for (var item in data) {
+      Concurso aux = Concurso(
+        id: item["id"],
+        titulo: item['attributes']["titulo"],
+        categoria: Categoria.armarCategoria(item['attributes']["categoria"]["data"]),
+        publicacion: FuncionUpsa.armarFechaPublicacion(item['attributes']["publishedAt"]), 
+        imagen: item['attributes']["imagen"]['data'] != null ? item['attributes']["imagen"]['data']['attributes']['url'] : "/uploads/default_02263f0f89.png", 
+        imagenes: FuncionUpsa.armarGaleriaImagenes(item['attributes']["imagenes"]['data'], item['attributes']["imagen"]['data']),
+        fechaDeInicio: FuncionUpsa.armarfechaDeInicioFinConHora(item['attributes']["fechaDeInicio"]), 
+        fechaDeFin: FuncionUpsa.armarfechaDeInicioFinConHora(item['attributes']["fechaDeFin"]),
+        descripcion: item['attributes']["descripcion"], 
+        etiquetas: Etiqueta.armarEtiquetas(item['attributes']["etiquetas"]['data']),
+      );
+      res.add(aux);
+    }
+    return res;
+  }
+  static Concurso armarConcursoPopulate(String str) {
+    final jsonData = json.decode(str);
+    final Map<String, dynamic> data = jsonData['data'];
     return Concurso(
-      id: json["id"],
-      titulo: json['attributes']["titulo"],
-      categoria: json['attributes']["categoria"]?['data']?['attributes']?['nombre'] ?? "Sin categoría",
-      publicacion: _convertirFechaPublicacion(json['attributes']["publishedAt"]), 
-      fotoPrincipal: json['attributes']["fotoPrincipal"]?['data']?['attributes']?['url'] ?? "/uploads/default_02263f0f89.png", 
-      galeriaDeFotos: _convertirGaleria(json['attributes']["galeriaDeFotos"]?['data']), 
-      fechaInicio: json['attributes']["fechaInicio"], 
-      fechaFin: json['attributes']["fechaFin"],
-      descripcion: json['attributes']["descripcion"], 
-      etiquetas: _convertirEtiquetas(json['attributes']["etiquetas"]?['data']), 
-      capacidad: json['attributes']["capacidad"] ?? -1,
-      inscritos: json['attributes']?["inscripciones"]?['data']?.length ?? 0,
-      inscripciones: _convertirInscripciones(json['attributes']?['inscripciones']?['data']),
-      noticiasRelacionadas: json['attributes']['noticias']["data"] != null ? _convertirNoticiasRelacionadas(json['attributes']['noticias']["data"]) : [],
-      calendario: _convertirCalendario(json['attributes']?["calendario"]), 
+      id: data["id"],
+      titulo: data['attributes']["titulo"],
+      categoria: Categoria.armarCategoria(data['attributes']["categoria"]["data"]),
+      publicacion: FuncionUpsa.armarFechaPublicacion(data['attributes']["publishedAt"]), 
+      imagen: data['attributes']["imagen"]['data'] != null ? data['attributes']["imagen"]['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",  
+      imagenes: FuncionUpsa.armarGaleriaImagenes(data['attributes']["imagenes"]['data'], data['attributes']["imagen"]['data']),
+      fechaDeInicio: FuncionUpsa.armarfechaDeInicioFinConHora(data['attributes']["fechaDeInicio"]), 
+      fechaDeFin: FuncionUpsa.armarfechaDeInicioFinConHora(data['attributes']["fechaDeFin"]),
+      descripcion: data['attributes']["descripcion"], 
+      etiquetas: Etiqueta.armarEtiquetas(data['attributes']["etiquetas"]['data']),
     );
   }
-  static String _convertirFecha(String fecha) {
-    // Dividir la cadena en año, mes y día
-    List<String> partes = fecha.split('-');
-    if (partes.length != 3) {
-      throw ArgumentError('La fecha debe estar en formato YYYY-MM-DD');
-    }
-
-    // Convertir el mes a nombre
-    List<String> meses = [
-      '', 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
-    ];
-    int mes = int.tryParse(partes[1]) ?? 0;
-    if (mes < 1 || mes > 12) {
-      throw ArgumentError('El mes debe estar entre 1 y 12');
-    }
-
-    // Crear la fecha en el formato deseado
-    return '${int.parse(partes[2])} de ${meses[mes]} del ${partes[0]}';
-  }
-  static List<int> _convertirNoticiasRelacionadas(dynamic data) {
-    List<int> res = [];
-    for (var item in data) {
-      int idNoticia = item["id"];
-      res.add(idNoticia);
-    }
-    return res;
-  }
-  static List<Map<String, String>> _convertirInscripciones(dynamic data) {
-    List<Map<String, String>> res = [];
-    if (data != null) {
-      for (var item in data) {
-        if (item['id'] != null && item['attributes'] != null && item['attributes']['qr'] != null && item['attributes']['asistencia'] != null) {
-          Map<String, String> asistenciaData = {
-            'id':item['id'].toString(),
-            'qr':item['attributes']['qr'],
-            "asistencia": item['attributes']['asistencia'] ? 'true' : 'false',
-          };
-          res.add(asistenciaData);
-        }
-      }
-    }
-    return res;
-  }
-  static List<Map<String, String>> _convertirCalendario(dynamic data) {
-    List<Map<String, String>> res = [];
-    if (data != null) {
-      for (var item in data) {
-        if (item['calendarioTitulo'] != null && item['calendarioFecha'] != null) {
-          Map<String, String> concurso = {
-            "titulo":item['calendarioTitulo'],
-            "inicio":item['calendarioFecha'],
-            "fin":item['calendarioFechaFin'] != null ? " - "+ _convertirFecha(item['calendarioFechaFin']) : "",
-          };
-          res.add(concurso);
-        }
-      }
-    }
-    return res;
-  }
-
-  static List<String> _convertirEtiquetas(dynamic data) {
-    List<String> res = [];
-    if (data != null) {
-      for (var item in data) {
-        if (item['attributes'] != null) {
-          String url = item['attributes']['nombre'];
-          res.add(url);
-        }
-      }
-    }
-    return res;
-  }
-  static List<String> _convertirGaleria(dynamic data) {
-    List<String> res = [];
-    if (data != null) {
-      for (var item in data) {
-        if (item['attributes'] != null) {
-          String url = item['attributes']['url'];
-          res.add(url);
-        }
-      }
-    }
-    return res;
-  }
-  static String _convertirFechaPublicacion(String data) {
-    DateTime fechaPublicacion = DateTime.parse(data);
-    DateTime ahora = DateTime.now();
-    Duration diferencia = ahora.difference(fechaPublicacion);
-
-    if (diferencia.inHours < 24) {
-      return "Hace ${diferencia.inHours} horas";
-    } else {
-      int dias = diferencia.inDays;
-      if (diferencia.inHours % 24 != 0) {
-        dias++; // Añadir un día si hay horas extras
-      }
-      return "Hace $dias días";
-    }
+  static Concurso armarConcursoPopulateConInscripcionesSeguidores(String str) {
+    final jsonData = json.decode(str);
+    final Map<String, dynamic> data = jsonData['data'];
+    return Concurso(
+      id: data["id"],
+      titulo: data['attributes']["titulo"],
+      categoria: Categoria.armarCategoria(data['attributes']["categoria"]["data"]),
+      publicacion: FuncionUpsa.armarFechaPublicacion(data['attributes']["publishedAt"]), 
+      imagen: data['attributes']["imagen"]['data'] != null ? data['attributes']["imagen"]['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",  
+      imagenes: FuncionUpsa.armarGaleriaImagenes(data['attributes']["imagenes"]['data'], data['attributes']["imagen"]['data']),
+      fechaDeInicio: FuncionUpsa.armarfechaDeInicioFinConHora(data['attributes']["fechaDeInicio"]), 
+      fechaDeFin: FuncionUpsa.armarfechaDeInicioFinConHora(data['attributes']["fechaDeFin"]),
+      descripcion: data['attributes']["descripcion"], 
+      etiquetas: Etiqueta.armarEtiquetas(data['attributes']["etiquetas"]['data']),
+      calendario: FuncionUpsa.armarFechaCalendarioConHora(data['attributes']["calendario"]), 
+      capacidad: data['attributes']["capacidad"] ?? -1,
+      inscritos: data['attributes']["inscripciones"]['data'].length,
+      inscripciones: Inscripcion.armarInscripciones(data['attributes']['inscripciones']['data'], data["id"], "evento"),
+      seguidores: FuncionUpsa.armarSeguidores(data['attributes']['usuarios']['data']),
+      noticias: Noticia.armarNoticiasRelacionadas(data['attributes']['noticias']['data']),
+      enlaceExterno: data['attributes']["enlaceExterno"] ?? "", 
+    );
   }
 
   Map<String, dynamic> toJson() => {

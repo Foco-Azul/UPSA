@@ -1,15 +1,21 @@
-//import 'package:flutkit/custom/auth/registro_estudiante.dart';
+// ignore_for_file: avoid_print
+
+import 'dart:io';
 import 'package:flutkit/custom/auth/registro_carrera.dart';
 import 'package:flutkit/custom/auth/registro_intereses.dart';
 import 'package:flutkit/custom/auth/registro_perfil.dart';
 import 'package:flutkit/custom/auth/validar_email.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
+import 'package:flutkit/custom/models/avatar.dart';
 import 'package:flutkit/custom/models/user.dart';
-import 'package:flutkit/custom/screens/actividades/actividades_inicio.dart';
+import 'package:flutkit/custom/models/user_meta.dart';
+import 'package:flutkit/custom/screens/actividades/club_screen.dart';
 import 'package:flutkit/custom/screens/actividades/concurso_escreen.dart';
 import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
 import 'package:flutkit/custom/screens/admin/lector_qr.dart';
-import 'package:flutkit/custom/screens/perfil/app_setting_screen.dart';
+import 'package:flutkit/custom/screens/campus/carrera_screen.dart';
+import 'package:flutkit/custom/screens/perfil/actividades_pasadas_screen.dart';
+import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/homes/homes_screen.dart';
@@ -33,7 +39,6 @@ class PerfilScreen extends StatefulWidget {
   @override
   _PerfilScreenState createState() => _PerfilScreenState();
 }
-
 class _PerfilScreenState extends State<PerfilScreen> {
   late ThemeData theme;
   late CustomTheme customTheme;
@@ -44,9 +49,10 @@ class _PerfilScreenState extends State<PerfilScreen> {
   late ProfileController controller;
   final PageController _pageController = PageController(initialPage: 0);
   int _currentPage = 0;
-  int _numPages = 2;
+  final int _numPages = 2;
   String _backUrl = "";
   final MensajeTemporalInferior _mensajeTemporalInferior = MensajeTemporalInferior();
+  List<Avatar> _avatares = [];
   @override
   void initState() {
     super.initState();
@@ -58,20 +64,21 @@ class _PerfilScreenState extends State<PerfilScreen> {
   }
   void _cargarDatos() async{
     await dotenv.load(fileName: ".env");
+    _backUrl = dotenv.get('backUrl');
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
     if(_isLoggedIn){
       _user = Provider.of<AppNotifier>(context, listen: false).user;
-      _user.actividadesInscritas = await ApiService().getActividadesInscritosForUserNotPopulate(_user.id!);
-      _user.actividadesSeguidas = await ApiService().getActividadesSeguidosForUserNotPopulate(_user.id!);
-      if(_user.estado != "Nuevo" && _user.estado != "Verificado"){
-        _userMeta = await ApiService().getUserMeta(_user.id!);
+      if(_user.rolCustom! != "admin"){
+        _user = await ApiService().getUserPopulateConMetasActividades(_user.id!);
+        _userMeta = _user.userMeta!;
+        _avatares = await ApiService().getAvataresPopulate(_user.id!);
       }
-      _backUrl = dotenv.get('backUrl');
     }
-    controller.uiLoading = false;
-    setState(() {});
-  }
 
+    setState(() {
+      controller.uiLoading = false;
+    });
+  }
   Widget _buildPageIndicatorStatic() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,21 +86,32 @@ class _PerfilScreenState extends State<PerfilScreen> {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4), // Padding interno del contenedor
           decoration: BoxDecoration(
-            color: Color.fromRGBO(133, 133, 133, 1), // Color de fondo del contenedor
+            color: AppColorStyles.verde2, // Color de fondo del contenedor
             borderRadius: BorderRadius.circular(24.0), // Borde redondeado con radio de 24
           ),
           child: Text(
-            '${_currentPage+1}/$_numPages',
-            style: TextStyle(
-              color: Colors.white, // Color del texto
-              fontSize: 10,
-              fontWeight: FontWeight.w700
-            ),
+            '${_currentPage + 1}/$_numPages',
+            style: AppTextStyles.etiqueta(color: AppColorStyles.blancoFondo)
           ),
         ),
       ],
     );
   }
+  void _actualizarAvatar(int id, String imagen) async{
+    bool bandera = await ApiService().setUserMetaAvatar(_userMeta.id!, id);
+    _userMeta.avatar = imagen;
+    if(bandera){
+      setState(() {
+        MensajeTemporalInferior().mostrarMensaje(context,"Se cambio tu avatar con exito.", "exito");
+      });
+    }else{
+      setState(() {
+        MensajeTemporalInferior().mostrarMensaje(context,"Algo salio mal.", "error");
+      });
+    }
+    Navigator.pop(context);
+  }
+  
   @override
   Widget build(BuildContext context) {
     if (controller.uiLoading) {
@@ -114,23 +132,70 @@ class _PerfilScreenState extends State<PerfilScreen> {
         });
     }
   }
+  
+  void _showImagePicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                title: Text(
+                  'Cambia tu imagen de perfil por:',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              SizedBox(
+                height: 400, // Ajusta la altura según tus necesidades
+                child: SingleChildScrollView(
+                  child: _armarAvatares(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+  Widget _armarAvatares(){
+    List<Widget> avatares = _avatares.map((item) => _crearAvatar(item)).toList();
+    return Wrap(
+      children: avatares,
+    );
+  }
+  Widget _crearAvatar(Avatar avatar){
+     return Container(
+      width: 150,
+      height: 150,
+      margin: EdgeInsets.all(15.0),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(50),
+        onTap: () {
+          _actualizarAvatar(avatar.id!, avatar.imagen!);
+        },
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(50),
+          child: Image.network(
+            _backUrl + avatar.imagen!,
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+    );
+  }
   Widget _buildBody() {
     if(_isLoggedIn){
       return Scaffold(
+        backgroundColor: AppColorStyles.verdeFondo,
         body: ListView(
-          padding: MySpacing.fromLTRB(20, 10, 20, 20),
+          padding: MySpacing.fromLTRB(15, 10, 15, 15),
           children: [
-            if((_user.estado != "Nuevo" && _user.estado != "Verificado"))
             _cabeceraPerfil(),
-            if((_user.estado != "Nuevo" && _user.estado != "Verificado") && _userMeta.carreraSugerida!.isNotEmpty)
             _carreraSugerida(),
-            Divider(),
-            if(_user.actividadesInscritas!.isNotEmpty || _user.actividadesSeguidas!.isNotEmpty)
             _misActividades(),
-            if(_user.actividadesInscritas!.isNotEmpty || _user.actividadesSeguidas!.isNotEmpty)
-            Divider(),
-            _miPromo(),
-            Divider(),
+            //_miPromo(),
             _ajustes(),
           ],
         ),
@@ -164,7 +229,9 @@ class _PerfilScreenState extends State<PerfilScreen> {
   }
   Widget _miPromo() {
     return Container(
-      margin: EdgeInsets.only(top: 16.0, bottom: 22), // Aplica margen a toda la columna
+      padding: MySpacing.fromLTRB(15, 15, 15, 15),
+      margin: MySpacing.symmetric(vertical: 15),
+      decoration: AppDecorationStyle.tarjeta(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -174,19 +241,16 @@ class _PerfilScreenState extends State<PerfilScreen> {
               Icon(
                 LucideIcons.camera, // Cambia el icono según lo que necesites
                 size: 20,
+                color: AppColorStyles.verde1
               ),
               SizedBox(width: 8),
               Text(
                 "MI PROMO",
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: Color.fromRGBO(133, 133, 133, 1)
-                ),
+                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
               ),
             ],
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 15),
           Stack(
             alignment: AlignmentDirectional.center,
             children: <Widget>[
@@ -232,186 +296,193 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 blurRadius: 24,
                 spreadRadius: 4)
           ]),
-        child: Padding(
-          padding: EdgeInsets.all(0.0),
+        child: ClipRRect(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
           child: Image.network(
             url,
             height: 240.0,
             fit: BoxFit.fill,
           ),
-        ),
+        )
       );
     }).toList();
   }
   Widget _ajustes() {
     return Container(
-      margin: EdgeInsets.only(top: 16.0), // Aplica margen a toda la columna
+      padding: MySpacing.fromLTRB(15, 15, 15, 15),
+      margin: MySpacing.symmetric(vertical: 15),
+      decoration: BoxDecoration(
+        color: AppColorStyles.blancoFondo, // Fondo blanco
+        borderRadius: BorderRadius.circular(5), // Bordes redondeados de 5
+        boxShadow: [
+          AppSombra.tarjeta(),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Fila con ícono y título
           Row(
-            children: const [
+            children: [
               Icon(
                 LucideIcons.settings, // Cambia el icono según lo que necesites
                 size: 20,
+                color: AppColorStyles.verde1
               ),
               SizedBox(width: 8),
               Text(
                 "AJUSTES",
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: Color.fromRGBO(133, 133, 133, 1)
-                ),
+                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
               ),
             ],
           ),
           if(_user.rolCustom == "admin")
-          SizedBox(height: 8),
-          if(_user.rolCustom == "admin")
-          GestureDetector(
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => LectorQRScreen()));
-            },
-            child: Text(
-              "Escanear QR",
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w400
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 5),
+            child:  GestureDetector(
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => LectorQRScreen()));
+              },
+              child: Text(
+                "Escanear QR",
+                style: AppTextStyles.parrafo()
               ),
             ),
           ),
-          SizedBox(height: 8),
-          GestureDetector(
-            onTap: () {
-              
-            },
-            child: Text(
-              "Desactivar notificaciones",
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w400
+          /*
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 5),
+            child: GestureDetector(
+              onTap: () {
+                //_user = await ApiService().setUserParaDesactivarNotificaciones(_user.id!);
+              },
+              child: Text(
+                "Desactivar notificaciones",
+                style: AppTextStyles.parrafo()
               ),
             ),
           ),
-          SizedBox(height: 8),
-          GestureDetector(
-            onTap: () {
-              
-            },
-            child: Text(
-              "Eliminar mi cuenta",
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w400
-              ),
-            ),
-          ),
-          SizedBox(height: 8),
-          GestureDetector(
-            onTap: () {
-              
-            },
-            child: Text(
-              "Editar mis datos",
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w400
-              ),
-            ),
-          ),
-          if(_user.estado != "Completado" && _user.estado != "Nuevo")
-          SizedBox(height: 8),
-          if(_user.estado != "Completado" && _user.estado != "Nuevo")
-          GestureDetector(
-            onTap: () {
-              if(_user.estado == "Verificado"){
-                Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroPerfil()));
-              }else{
-                if(_user.estado == "Perfil parte 1"){
-                Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroCarrera()));
-                }else{
-                  if(_user.estado == "Perfil parte 2"){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroIntereses()));
-                  }
-                }
-              } 
-            },
-            child: Text(
-              "Retomar formulario de admisión",
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w400
+          */
+          /*
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 5),
+            child: GestureDetector(
+              onTap: () {
+                
+              },
+              child: Text(
+                "Eliminar mi cuenta",
+                style: AppTextStyles.parrafo()
               ),
             ), 
           ),
-          if(_user.estado == "Nuevo")
-          GestureDetector(
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => ValidarEmail(theme: theme)));
-            },
-            child: Text(
-              "Verificar cuenta",
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w400
-              ),
-            ), 
-          ),
-          SizedBox(height: 8),
-          GestureDetector(
-            onTap: () {
-              _mensajeTemporalInferior.mostrarMensaje(context,"Se cerró tu cuenta con exito.",Color.fromRGBO(32, 104, 14, 1), Color.fromRGBO(255, 255, 255, 1));
-              loginController.logout(context);
-            },
-            child: Text(
-              "Cerrar sesión",
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
+          */
+          /*
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 5),
+            child: GestureDetector(
+              onTap: () {
+                
+              },
+              child: Text(
+                "Editar mis datos",
+                style: AppTextStyles.parrafo()
               ),
             ),
+          ),*/
+          Visibility(
+            visible: _isLoggedIn,
+            child: Container(
+              margin: EdgeInsets.symmetric(vertical: 5),
+              child: GestureDetector(
+                onTap: () async{
+                    _user = await ApiService().getUserPopulateConMetasActividades(_user.id!);
+                    Provider.of<AppNotifier>(context, listen: false).setUser(_user);
+                    MensajeTemporalInferior().mostrarMensaje(context,"Se sincronizó tus datos con exito.", "exito");
+                    Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
+                },
+                child: Text(
+                  "Sincronizar datos",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 5),
+            child: GestureDetector(
+              onTap: () {
+                _mensajeTemporalInferior.mostrarMensaje(context,"Se cerró tu cuenta con exito.", "exito");
+                loginController.logout(context);
+              },
+              child: Text(
+                "Cerrar sesión",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ), 
           ),
         ],
       ),
     );
   }
   Widget _misActividades() {
-    return Container(
-      margin: EdgeInsets.only(top: 16.0, bottom: 16), // Aplica margen a toda la columna
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Fila con ícono y título
-          Row(
-            children: const [
-              Icon(
-                LucideIcons.trophy, // Cambia el icono según lo que necesites
-                size: 20,
-              ),
-              SizedBox(width: 8),
-              Text(
-                "MIS ACTIVIDADES",
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: Color.fromRGBO(133, 133, 133, 1)
+    if(_user.rolCustom != "admin" && (_user.actividadesSeguidas!.isNotEmpty || _user.actividadesInscritas!.isNotEmpty)){
+      return Container(
+        padding: MySpacing.fromLTRB(15, 15, 15, 15),
+        margin: MySpacing.symmetric(vertical: 15),
+        decoration: AppDecorationStyle.tarjeta(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  LucideIcons.trophy, // Cambia el icono según lo que necesites
+                  size: 20,
+                  color: AppColorStyles.verde1,
                 ),
-              ),
-            ],
-          ),
-          if(_user.actividadesInscritas!.isNotEmpty)
-          SizedBox(height: 8),
-          if(_user.actividadesInscritas!.isNotEmpty)
-          _actividadesInscritas(),
-          if(_user.actividadesSeguidas!.isNotEmpty)
-          SizedBox(height: 8),
-          if(_user.actividadesSeguidas!.isNotEmpty)
-          _actividadesSeguidas(),
-        ],
-      ),
-    );  
+                SizedBox(width: 8),
+                Text(
+                  "MIS ACTIVIDADES",
+                  style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+                ),
+              ],
+            ),
+            _actividadesInscritas(),
+            Divider(),
+            _actividadesSeguidas(),
+            Divider(),
+            InkWell(
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => ActividadesPasadasScreen()));
+              },  
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.swap_horiz_outlined, // Cambia el ícono según lo que necesites
+                    size: 20,
+                    color: AppColorStyles.gris2
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    "Ver actividades pasadas",
+                    style: AppTextStyles.botonSinFondo(color: AppColorStyles.gris2)
+                  ),
+                ],
+              )
+            ),
+          ],
+        ),
+      );  
+    }else{
+      return Container();
+    }
   }
   Widget _actividadesSeguidas() {
     return Column(
@@ -427,35 +498,32 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 actividad["titulo"],
                 style: TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.bold,
+                  color: AppColorStyles.oscuro1
                 ),
               ),
-              SizedBox(height: 8),
-              // Subtítulo
               Text(
                 "Siguiendo",
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: AppTextStyles.parrafo(color: AppColorStyles.oscuro1),
               ),
-              SizedBox(height: 8),
-              // Texto adicional con ícono a la derecha
               InkWell(
                 onTap: () {
-                  if(actividad["actividad"] == "evento"){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => EventoScreen(idEvento: actividad["id"])));
+                  if(actividad["tipo"] == "evento"){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => EventoScreen(id: actividad["id"])));
                   }
-                  if(actividad["actividad"] == "concurso"){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => ConcursoScreen(idConcurso: actividad["id"])));
+                  if(actividad["tipo"] == "concurso"){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => ConcursoScreen(id: actividad["id"])));
+                  }
+                  if(actividad["tipo"] == "club"){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => ClubScreen(id: actividad["id"])));
                   }
                 },
                 child: Row(
                   children: const [
                     Icon(
-                      LucideIcons.arrowRightCircle, // Cambia el ícono según lo que necesites
+                      LucideIcons.calendar, // Cambia el ícono según lo que necesites
                       size: 20,
-                      color: Color.fromRGBO(133, 133, 133, 1),
+                      color: AppColorStyles.gris2
                     ),
                     SizedBox(width: 8),
                     Text(
@@ -463,7 +531,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
-                        color: Color.fromRGBO(133, 133, 133, 1),
+                        color: AppColorStyles.gris2
                       ),
                     ),
                   ],
@@ -487,48 +555,37 @@ class _PerfilScreenState extends State<PerfilScreen> {
               // Título
               Text(
                 actividad["titulo"],
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: AppTitleStyles.tarjetaMenor()
               ),
-              SizedBox(height: 8),
-              // Subtítulo
               Text(
                 "Inscrito",
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                ),
+                style: AppTextStyles.parrafo(),
               ),
-              SizedBox(height: 8),
-              // Texto adicional con ícono a la derecha
               Row(
                 children: [
                   InkWell(
                     onTap: () {
-                      if(actividad["actividad"] == "evento"){
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => EventoScreen(idEvento: actividad["id"])));
+                      if(actividad["tipo"] == "evento"){
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => EventoScreen(id: actividad["id"])));
                       }
-                     if(actividad["actividad"] == "concurso"){
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => ConcursoScreen(idConcurso: actividad["id"])));
+                      if(actividad["tipo"] == "concurso"){
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => ConcursoScreen(id: actividad["id"])));
+                      }
+                      if(actividad["tipo"] == "club"){
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => ClubScreen(id: actividad["id"])));
                       }
                     },
                     child: Row(
-                      children: const [
+                      children: [
                         Icon(
-                          LucideIcons.logIn, // Cambia el ícono según lo que necesites
+                          LucideIcons.qrCode, // Cambia el ícono según lo que necesites
                           size: 20,
-                          color: Color.fromRGBO(133, 133, 133, 1),
+                          color: AppColorStyles.gris2
                         ),
                         SizedBox(width: 8),
                         Text(
                           "Ver ingreso",
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: Color.fromRGBO(133, 133, 133, 1),
-                          ),
+                          style: AppTextStyles.botonSinFondo(color: AppColorStyles.gris2)
                         ),
                       ],
                     ),
@@ -542,109 +599,213 @@ class _PerfilScreenState extends State<PerfilScreen> {
     );
   }
   Widget _carreraSugerida() {
-    return Container(
-      margin: EdgeInsets.only(top: 32.0, bottom: 16), // Aplica margen a toda la columna
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Fila con ícono y título
-          Row(
-            children: const [
-              Icon(
-                LucideIcons.bookMarked, // Cambia el icono según lo que necesites
-                size: 20,
-              ),
-              SizedBox(width: 8),
-              Text(
-                "CARRERA SUGERIDA",
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: Color.fromRGBO(133, 133, 133, 1)
+    if(_user.rolCustom != "admin"){
+      return Container(
+        padding: MySpacing.fromLTRB(15, 15, 15, 15),
+        margin: MySpacing.symmetric(vertical: 15),
+        decoration: BoxDecoration(
+          color: AppColorStyles.blancoFondo, // Fondo blanco
+          borderRadius: BorderRadius.circular(5), // Bordes redondeados de 5
+          boxShadow: [
+            AppSombra.tarjeta(),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Fila con ícono y título
+            Row(
+              children: [
+                Icon(
+                  LucideIcons.bookMarked, // Cambia el icono según lo que necesites
+                  size: 20,
+                  color: AppColorStyles.verde1,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  "CARRERA SUGERIDA",
+                  style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+                ),
+              ],
+            ),
+            Container(
+              margin: EdgeInsets.only(top: 5),
+              child: GestureDetector(
+                onTap: () {
+                  if(_userMeta.carreraSugerida!["idCarreraUpsa"] > 0){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => CarreraScreen(id: _userMeta.carreraSugerida!["idCarreraUpsa"]),));
+                  }
+                },
+                child: Text(
+                  _userMeta.carreraSugerida!["nombre"],
+                  style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1),
                 ),
               ),
-            ],
-          ),
-          SizedBox(height: 8),
-          // Subtítulo
-          Text(
-            _userMeta.carreraSugerida!["carrera"]!,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
             ),
-          ),
-          if(_userMeta.carreraSugerida!["facultad"]!.isNotEmpty)
-          SizedBox(height: 8),
-          if(_userMeta.carreraSugerida!["facultad"]!.isNotEmpty)
-          Text(
-            _userMeta.carreraSugerida!["facultad"]!,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w400
+            Container(
+              margin: EdgeInsets.only(top: 5),
+              child: Text(
+                _userMeta.carreraSugerida!["facultad"],
+                style: AppTextStyles.menor()
+              ),
             ),
-          ),
-          SizedBox(height: 8),
-          Row(
-            children: const [
-              Expanded(
-                child: Text(
-                  "¿Cómo te sugerimos esta carrera?",
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: Color.fromRGBO(133, 133, 133, 1),
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 5),
+              child: Divider(),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    "¿Cómo te sugerimos esta carrera?",
+                    style: AppTextStyles.menor()
+                  ),
+                ),
+                Icon(
+                  LucideIcons.helpCircle, // Cambia el ícono según lo que necesites
+                  size: 20,
+                  color: AppColorStyles.oscuro1,
+                ),
+              ],
+            ),
+            SizedBox(height: 4),
+            Text(
+              "De acuerdo a lo seleccionado en las preferencias del formulario de registro. Si aún estás indeciso/a sobre cuál estudiar, contáctanos para agendar un test vocacional en la UPSA.",
+              style: AppTextStyles.menor(color: AppColorStyles.gris2)
+            ),
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 5),
+              child: Divider(),
+            ),
+            InkWell(
+              onTap: () {
+                print("dasdas");
+              },
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.edit_outlined, // Cambia el ícono según lo que necesites
+                    size: 20,
+                    color: AppColorStyles.gris2,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    "Agendar test vocacional",
+                    style: AppTextStyles.botonSinFondo(color: AppColorStyles.gris2)
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 20),
+            InkWell(
+              onTap: () {
+                if(_user.estado == "Nuevo"){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => ValidarEmail()));
+                }
+                if(_user.estado == "Verificado"){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroPerfil()));
+                }
+                if(_user.estado == "Perfil parte 1" || _user.estado == "Completado"){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroCarrera()));
+                }
+                if(_user.estado == "Perfil parte 2"){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroIntereses()));
+                } 
+              },
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.feed_outlined, // Cambia el ícono según lo que necesites
+                    size: 20,
+                    color: AppColorStyles.gris2,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    "Retomar formulario de preferencias",
+                    style: AppTextStyles.botonSinFondo(color: AppColorStyles.gris2)
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );  
+    }else{
+      return Container();
+    }
+  }
+  Widget _cabeceraPerfil() {
+    if(_user.rolCustom != "admin"){
+      return Row(
+        children: [
+        Stack(
+            children: [
+              SizedBox(
+                width: 65,
+                height: 65,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(50),
+                  child: Image.network(
+                      _backUrl + _userMeta.avatar!,
+                      fit: BoxFit.cover,
+                    ),
+                ),
+              ),
+              // Icono de lápiz para cambiar la imagen
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: GestureDetector(
+                  onTap: () {
+                    _showImagePicker(context);
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColorStyles.blancoFondo,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.edit,
+                      color: AppColorStyles.verde1,
+                      size: 15,
+                    ),
                   ),
                 ),
               ),
-              Icon(
-                LucideIcons.helpCircle, // Cambia el ícono según lo que necesites
-                size: 20,
-                color: Color.fromRGBO(133, 133, 133, 1),
-              ),
             ],
           ),
-        ],
-      ),
-    );  
-  }
-  Widget _cabeceraPerfil() {
-    return Row(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: NetworkImage(_backUrl+_userMeta.fotoPerfil!),
-              fit: BoxFit.cover,
+          SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${_userMeta.nombres!} ${_userMeta.apellidos!}', 
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColorStyles.oscuro1
+                  ),
+                ),
+                if(_userMeta.colegio!.nombre != null)
+                Container(
+                  margin: EdgeInsets.only(top: 10),
+                  child: Text(
+                    'Colegio ${_userMeta.colegio!.nombre}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: AppColorStyles.gris1
+                    ),
+                  ),
+                )
+              ],
             ),
           ),
-          height: MediaQuery.of(context).size.height * 0.10,
-          width: MediaQuery.of(context).size.width * 0.25, // 25% del ancho de la pantalla
-        ),
-        // Espaciador
-        SizedBox(width: 16),
-        // Columna con el texto
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              MyText.bodyLarge(
-                _userMeta.nombres! +' '+ _userMeta.apellidos!,
-                fontSize: 18,
-                fontWeight: 600, // Corregido de 600 a FontWeight.w600
-              ),
-              SizedBox(height: 8), // Espacio de 8 de alto entre los textos
-              Text(
-                "Colegio "+_userMeta.colegio!["nombre"],
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
+        ],
+      );
+    }else{
+      return Container();
+    }
   }
 }

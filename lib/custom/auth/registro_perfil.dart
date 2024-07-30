@@ -1,12 +1,11 @@
 import 'package:flutkit/custom/auth/registro_carrera.dart';
 import 'package:flutkit/custom/models/colegio.dart';
+import 'package:flutkit/custom/models/user_meta.dart';
+import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
 import 'package:flutkit/custom/widgets/progress_custom.dart';
-import 'package:flutkit/helpers/extensions/extensions.dart';
 import 'package:flutkit/helpers/widgets/my_button.dart';
 import 'package:flutkit/homes/homes_screen.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +15,6 @@ import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
-import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutkit/loading_effect.dart';
@@ -43,7 +41,6 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
     "colegio": "",
   };
   List<Colegio> _colegios = [];
-
   @override
   void initState() {
     super.initState();
@@ -55,7 +52,9 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
   }
   void cargarDatos() async{
     _user = Provider.of<AppNotifier>(context, listen: false).user;
+    _user = await ApiService().getUserPopulateConMetasParaFormularioPerfil(_user.id!);
     _colegios = await ApiService().getColegios();
+    _userMeta = _user.userMeta!;
     setState(() {
       controller.uiLoading = false;
     });
@@ -66,10 +65,10 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       _errores["apellidos"] = validacion.validarNombres(_userMeta.apellidos, true);
       _errores["cedulaDeIdentidad"] = validacion.validarNumerosPositivos(_userMeta.cedulaDeIdentidad, true, true);
       _errores["celular1"] = validacion.validarNumerosPositivos(_userMeta.celular1, true, true);
-      if (_userMeta.colegio == null || _userMeta.colegio!.isEmpty) {
-        _errores["colegio"] = "Selecciona una opción";
-      }else{
+      if (_userMeta.colegio!.nombre!.isNotEmpty){
         _errores["colegio"] = "";
+      }else{
+        _errores["colegio"] = "Selecciona una opción";
       }
       if(_userMeta.fechaDeNacimiento == null){
         _errores["fechaDeNacimiento"] = "Este campo es requerido";
@@ -106,7 +105,6 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       setState(() {
         _isInProgress = -1;
         _errores["error"] = e.toString().substring(11);
-        print(e.toString().substring(11));
       });
     }
   }
@@ -117,7 +115,24 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
         context: context,
         initialDate: selectedDate,
         firstDate: DateTime(2005),
-        lastDate: DateTime.now(),);
+        lastDate: DateTime.now(),
+        builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColorStyles.verde2, // header background color
+              onPrimary: AppColorStyles.oscuro1, // header text color
+              onSurface: AppColorStyles.verde2, // body text color
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColorStyles.verde2, // button text color
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },);
     if (picked != null && picked != selectedDate) {
       setState(() {
         selectedDate = picked;
@@ -127,13 +142,17 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
   }
   void _onOptionSelected(List<ValueItem> selectedOptions) {
     if(selectedOptions.isNotEmpty){
-      _userMeta.colegio = {"id":int.parse(selectedOptions[0].value!)};
+      _userMeta.colegio = Colegio(
+        id :int.parse(selectedOptions[0].value!),
+        nombre: selectedOptions[0].label,
+      );
     }else{
-      _userMeta.colegio = {};
+      _userMeta.colegio = Colegio();
     }
     setState(() {
     });
   }
+  
   @override
   Widget build(BuildContext context) {
     if (controller.uiLoading) {
@@ -147,401 +166,37 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       );
     } else {
       return Scaffold(
+        backgroundColor: AppColorStyles.verdeFondo,
         appBar: AppBar(
-          leading: InkWell(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: Icon(
+          backgroundColor: AppColorStyles.verdeFondo,
+          leading: IconButton(
+            icon: Icon(
               LucideIcons.chevronLeft,
-              size: 20,
-              color: theme.colorScheme.onBackground,
-            ).autoDirection(),
+              color: AppColorStyles.oscuro1
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
           ),
         ),
         body: SingleChildScrollView(
           child: Stack(
             children: <Widget>[
-              Column(
-                children: <Widget>[
-                  Container(
-                    padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
-                    color: Color.fromRGBO(244, 251, 249, 1),
-                    child: Column(     
-                      children: <Widget>[
-                        Row(
-                          children: <Widget>[// Espacio entre el icono y el texto
-                            MyText.titleLarge(
-                              "Llenemos tu perfil",
-                              style: TextStyle(
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 8), // Espacio entre el título y el texto
-                        MyText.bodyMedium(
-                          'Los datos de tu perfil nos permitirá sugerirte una carrera de estudio y un seguimiento más personalizado.',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 15.0,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                        Column(
-                          children: <Widget>[
-                            Container(
-                              margin: EdgeInsets.only(top: 16, bottom: 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(5),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
-                                          spreadRadius: 2, // Radio de propagación
-                                          blurRadius: 5, // Radio de desenfoque
-                                          offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
-                                        ),
-                                      ],
-                                    ),
-                                    child: TextFormField(
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _userMeta.nombres = value;
-                                        });
-                                      },
-                                      decoration: InputDecoration(
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                                        border: InputBorder.none,
-                                        labelText: 'Nombre(s)',
-                                        labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Color.fromRGBO(5, 50, 12, 1),
-                                            width: 2.0,
-                                          ),
-                                          borderRadius: BorderRadius.circular(5),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  if (_errores["nombres"]!.isNotEmpty)
-                                  Padding(
-                                    padding: EdgeInsets.only(top: 8),
-                                    child: Text(
-                                      _errores["nombres"]!,
-                                      style: TextStyle(color: Colors.red),
-                                      textAlign: TextAlign.start,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(top: 16, bottom: 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(5),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
-                                          spreadRadius: 2, // Radio de propagación
-                                          blurRadius: 5, // Radio de desenfoque
-                                          offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
-                                        ),
-                                      ],
-                                    ),
-                                    child: TextFormField(
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _userMeta.apellidos = value;
-                                        });
-                                      },
-                                      decoration: InputDecoration(
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                                        border: InputBorder.none,
-                                        labelText: 'Apellido(s)',
-                                        labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Color.fromRGBO(5, 50, 12, 1),
-                                            width: 2.0,
-                                          ),
-                                          borderRadius: BorderRadius.circular(5),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  if (_errores["apellidos"]!.isNotEmpty)
-                                  Padding(
-                                    padding: EdgeInsets.only(top: 8),
-                                    child: Text(
-                                      _errores["apellidos"]!,
-                                      style: TextStyle(color: Colors.red),
-                                      textAlign: TextAlign.start,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(top: 16, bottom: 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Row(
-                                    children: <Widget>[
-                                      Expanded(
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(5),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
-                                                spreadRadius: 2, // Radio de propagación
-                                                blurRadius: 5, // Radio de desenfoque
-                                                offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
-                                              ),
-                                            ],
-                                          ),
-                                          child: TextFormField(
-                                            readOnly: true,
-                                            controller: TextEditingController(text: _userMeta.fechaDeNacimiento),
-                                            decoration: InputDecoration(
-                                              contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                                              border: InputBorder.none,
-                                              labelText: 'Fecha de nacimiento',
-                                              labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-                                              focusedBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Color.fromRGBO(5, 50, 12, 1),
-                                                  width: 2.0,
-                                                ),
-                                                borderRadius: BorderRadius.circular(5),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Container(
-                                        margin: EdgeInsets.only(left: 16),
-                                        child: MyButton(
-                                          padding: EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-                                          onPressed: () {
-                                            _pickDate(context);
-                                          },
-                                          elevation: 0,
-                                          borderRadiusAll: 4,
-                                          backgroundColor: Color.fromRGBO(5, 50, 12, 1),
-                                          child: Icon(
-                                            LucideIcons.calendar,
-                                            size: 20,
-                                            color: theme.colorScheme.onPrimary,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  if (_errores["fechaDeNacimiento"]!.isNotEmpty)
-                                  Padding(
-                                    padding: EdgeInsets.only(top: 8),
-                                    child: Text(
-                                      _errores["fechaDeNacimiento"]!,
-                                      style: TextStyle(color: Colors.red),
-                                      textAlign: TextAlign.start,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(top: 16, bottom: 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(5),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
-                                          spreadRadius: 2, // Radio de propagación
-                                          blurRadius: 5, // Radio de desenfoque
-                                          offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
-                                        ),
-                                      ],
-                                    ),
-                                    child: TextFormField(
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _userMeta.celular1 = value;
-                                        });
-                                      },
-                                      decoration: InputDecoration(
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                                        border: InputBorder.none,
-                                        labelText: 'Número de teléfono',
-                                        labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Color.fromRGBO(5, 50, 12, 1),
-                                            width: 2.0,
-                                          ),
-                                          borderRadius: BorderRadius.circular(5),
-                                        ),
-                                      ),
-                                      keyboardType: TextInputType.number,
-                                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                    ),
-                                  ),
-                                  if (_errores["celular1"]!.isNotEmpty)
-                                  Padding(
-                                    padding: EdgeInsets.only(top: 8),
-                                    child: Text(
-                                      _errores["celular1"]!,
-                                      style: TextStyle(color: Colors.red),
-                                      textAlign: TextAlign.start,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(top: 16, bottom: 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(5),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
-                                          spreadRadius: 2, // Radio de propagación
-                                          blurRadius: 5, // Radio de desenfoque
-                                          offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
-                                        ),
-                                      ],
-                                    ),
-                                    child: TextFormField(
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _userMeta.cedulaDeIdentidad = value;
-                                        });
-                                      },
-                                      decoration: InputDecoration(
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                                        border: InputBorder.none,
-                                        labelText: 'Cédula de identidad',
-                                        labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Color.fromRGBO(5, 50, 12, 1),
-                                            width: 2.0,
-                                          ),
-                                          borderRadius: BorderRadius.circular(5),
-                                        ),
-                                      ),
-                                      keyboardType: TextInputType.number,
-                                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                    ),
-                                  ),
-                                  if (_errores["cedulaDeIdentidad"]!.isNotEmpty)
-                                  Padding(
-                                    padding: EdgeInsets.only(top: 8),
-                                    child: Text(
-                                      _errores["cedulaDeIdentidad"]!,
-                                      style: TextStyle(color: Colors.red),
-                                      textAlign: TextAlign.start,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),   
-                            Container(
-                              margin: EdgeInsets.only(top: 16, bottom: 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[                                                             
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(5),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
-                                          spreadRadius: 2, // Radio de propagación
-                                          blurRadius: 5, // Radio de desenfoque
-                                          offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
-                                        ),
-                                      ],
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        MultiSelectDropDown(
-                                          onOptionSelected: _onOptionSelected,
-                                          options: _buildValueItems(),
-                                          hint: "- Colegio -",
-                                          selectionType: SelectionType.single,
-                                          chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
-                                          optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
-                                          selectedOptionIcon: const Icon(Icons.check_circle),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  if (_errores["colegio"]!.isNotEmpty)     
-                                  Padding(
-                                    padding: EdgeInsets.only(top: 8),
-                                    child: Text(
-                                      _errores["colegio"]!,
-                                      style: TextStyle(color: Colors.red),
-                                      textAlign: TextAlign.start,
-                                    ),
-                                  ),
-                                ]
-                              )
-                            ),
-                            MySpacing.height(20),
-                            SizedBox(
-                              width: double.infinity,
-                              child: CupertinoButton(
-                                color: Color.fromRGBO(5, 50, 12, 1),
-                                onPressed: () {
-                                  _validarCampos();
-                                },
-                                borderRadius: BorderRadius.all(Radius.circular(5)),
-                                padding: MySpacing.xy(100, 16),
-                                pressedOpacity: 0.5,
-                                child: MyText.bodyMedium(
-                                  "Continuar",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            MySpacing.height(20),
-                          ]
-                        ),
-                      ]
-                    )
-                  ),
-                ]
+              Container(
+                margin: EdgeInsets.all(15),
+                child: Column(     
+                  children: <Widget>[
+                    _crearTitulo(),
+                    _crearDescripcion(),
+                    _crearCampoConError(_errores["nombres"]!, _userMeta.nombres!, "Nombre(s)", "", "nombres"),
+                    _crearCampoConError(_errores["apellidos"]!, _userMeta.apellidos!,"Apellido(s)", "", "apellidos"),
+                    _crearCampoConIcono(),
+                    _crearCampoConError(_errores["celular1"]!, "","Número de teléfono", "", "celular1"),
+                    _crearCampoConError(_errores["cedulaDeIdentidad"]!, "", "Cédula de identidad", "", "cedulaDeIdentidad"),
+                    _crearCampoSelector(),
+                    _crearBoton(),
+                  ]
+                )
               ),
               if (_isInProgress == 0)
               Positioned.fill(
@@ -554,6 +209,175 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
         )
       );
     } 
+  }
+  
+  Widget _crearCampoConIcono(){
+    return  Container(
+      margin: EdgeInsets.only(top: 16, bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Container(
+                  decoration: AppDecorationStyle.campoContainerForm(),
+                  child: TextFormField(
+                    readOnly: true,
+                    controller: TextEditingController(text: _userMeta.fechaDeNacimiento),
+                    decoration: AppDecorationStyle.campoTextoForm(hintText: "", labelText: "Fecha de nacimiento"),
+                  ),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(left: 15),
+                child: MyButton(
+                  padding: EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                  onPressed: () {
+                    _pickDate(context);
+                  },
+                  elevation: 0,
+                  borderRadiusAll: 4,
+                  backgroundColor: AppColorStyles.verde1,
+                  child: Icon(
+                    LucideIcons.calendar,
+                    size: 20,
+                    color: AppColorStyles.blancoFondo,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (_errores["fechaDeNacimiento"]!.isNotEmpty)
+          Container(
+            margin: EdgeInsets.only(top: 8),
+            child: Text(
+              _errores["fechaDeNacimiento"]!,
+              style: TextStyle(color: Colors.red),
+              textAlign: TextAlign.start,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _crearBoton(){
+    return Container(
+      width: double.infinity,
+      height: 50,
+      margin: EdgeInsets.symmetric(vertical: 15),
+      child: ElevatedButton(
+        onPressed: () {
+         _validarCampos();
+        },
+        style: AppDecorationStyle.botonBienvenida(),
+        child: Text(
+          'Continuar',
+          style: AppTextStyles.botonMayor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+        ),
+      ),
+    );
+  }
+  Widget _crearCampoSelector(){
+    return  Container(
+      margin: EdgeInsets.only(top: 16, bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[                                                             
+          Container(
+            decoration: AppDecorationStyle.campoContainerForm(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                MultiSelectDropDown(
+                  onOptionSelected: _onOptionSelected,
+                  options: _buildValueItems(),
+                  hint: "- Colegio -",
+                  selectionType: SelectionType.single,
+                  chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.verde2),
+                  selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.verde2),
+                  selectedOptionTextColor: AppColorStyles.oscuro1,
+                  selectedOptionBackgroundColor: AppColorStyles.verdeFondo,
+                  optionTextStyle: AppTextStyles.parrafo(color: AppColorStyles.verde2),
+                  borderRadius: 14,
+                  borderColor: AppColorStyles.blancoFondo,
+                ),
+              ],
+            ),
+          ),
+          if (_errores["colegio"]!.isNotEmpty)     
+          Container(
+            margin: EdgeInsets.only(top: 8),
+            child: Text(
+              _errores["colegio"]!,
+              style: TextStyle(color: Colors.red),
+              textAlign: TextAlign.start,
+            ),
+          ),
+        ]
+      )
+    );
+  }
+  Widget _crearCampoConError(String error, String value, String labelText, String hintText, String campo){
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            decoration: AppDecorationStyle.campoContainerForm(),
+            child: TextFormField(
+              initialValue: value,
+              onChanged: (value) {
+                if(campo == "nombres"){
+                  _userMeta.nombres = value;
+                }
+                if(campo == "apellidos"){
+                  _userMeta.apellidos = value;
+                }
+                if(campo == "celular1"){
+                  _userMeta.celular1 = value;
+                }
+                if(campo == "cedulaDeIdentidad"){
+                  _userMeta.cedulaDeIdentidad = value;
+                }
+                setState(() {});
+              },
+              decoration: AppDecorationStyle.campoTextoForm(hintText: hintText, labelText: labelText),  
+              style: AppTextStyles.parrafo(color: AppColorStyles.gris1)
+            ),
+          ),
+          if (error.isNotEmpty)
+          Container(
+            margin: EdgeInsets.only(top: 8),
+            child: Text(
+              error,
+              style: TextStyle(color: Colors.red),
+              textAlign: TextAlign.start,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+  Widget _crearDescripcion(){
+    return Text(
+      'Tus datos permitirá que podas inscribirte en nuestros eventos, becas, test vocacionales, entre otros.',
+      style: TextStyle(
+        color: AppColorStyles.oscuro1,
+        fontSize: 15,
+        fontWeight: FontWeight.normal,
+      ),
+    );
+  }
+  Widget _crearTitulo() {
+    return Container(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        "Llenemos tu perfil",
+        style: AppTitleStyles.onboarding(color: AppColorStyles.verde1),
+      ),
+    );
   }
   List<ValueItem> _buildValueItems() {
     return _colegios.map((colegio) {

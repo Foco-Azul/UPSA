@@ -1,13 +1,11 @@
 import 'package:flutkit/custom/auth/registro_intereses.dart';
 import 'package:flutkit/custom/models/carrera.dart';
 import 'package:flutkit/custom/models/universidad.dart';
+import 'package:flutkit/custom/models/user_meta.dart';
+import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
 import 'package:flutkit/custom/widgets/progress_custom.dart';
-import 'package:flutkit/helpers/extensions/extensions.dart';
-import 'package:flutkit/helpers/widgets/my_container.dart';
 import 'package:flutkit/homes/homes_screen.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
 import 'package:provider/provider.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
@@ -16,7 +14,6 @@ import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
-import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutkit/loading_effect.dart';
@@ -34,9 +31,10 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
   UserMeta _userMeta = UserMeta();
   User _user = User();
   int _isInProgress = -1;
+  int _idDepartamento = 1;
   final Map<String, String> _errores = {
     "carreras": "",
-    "infoCar": "",
+    "informacionCarrera": "",
     "aplicacionTest": "",
     "universidades": "",
     "universidadExtranjera": "",
@@ -50,46 +48,52 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
     customTheme = AppTheme.customTheme;
     theme = AppTheme.theme;
     controller = ProfileController();
-    selectedDate = DateTime.now();
     cargarDatos();
   }
   void cargarDatos() async{
     _user = Provider.of<AppNotifier>(context, listen: false).user;
+    _user = await ApiService().getUserPopulateConMetasParaFormularioCarrera(_user.id!);
     _carreras = await ApiService().getCarreras();
+    _userMeta = _user.userMeta!;
+    for (var item in _userMeta.universidades!) {
+      _idDepartamento = item.idDepartamento!;
+      _universidades = await ApiService().getUnivesidadeForId(item.idDepartamento!);
+      break;
+    }
     setState(() {
       controller.uiLoading = false;
     });
   }
   void _validarCampos(){
     if(_userMeta.testVocacional!){
-      _errores["aplicacionTest"] = _userMeta.aplicacionTest == null || _userMeta.aplicacionTest!.isEmpty ? "Este campo es requerido" : "";
+      _errores["aplicacionTest"] = _userMeta.aplicacionTest!.isEmpty ? "Este campo es requerido" : "";
     }else{
       _errores["aplicacionTest"] = "";
       _userMeta.aplicacionTest = "";
     }
-    if(_userMeta.estudiarBolivia!){
-      _errores["departamento"] = _userMeta.departamentoEstudiar == null || _userMeta.departamentoEstudiar!.isEmpty ? "Este campo es requerido" : "";
+    if(_userMeta.estudiarEnBolivia!){
+      _errores["departamento"] = _userMeta.departamentoUniversidad!.isEmpty ? "Este campo es requerido" : "";
       _errores["universidadExtranjera"] = "";
       _userMeta.universidadExtranjera = "";
     }else{
-      _errores["universidadExtranjera"] = _userMeta.universidadExtranjera == null || _userMeta.universidadExtranjera!.isEmpty ? "Este campo es requerido" : "";
+      _errores["universidadExtranjera"] = _userMeta.universidadExtranjera!.isEmpty ? "Este campo es requerido" : "";
       _errores["departamento"] = "";
-      _userMeta.departamentoEstudiar = "";
+      _userMeta.departamentoUniversidad = "";
     }
-    if(_userMeta.departamentoEstudiar!.isNotEmpty){
-      _errores["universidades"] = (_userMeta.universidades == null || _userMeta.universidades!.isEmpty || _userMeta.universidades!.length > 3) ? "Selecciona de 1 a 3 universidades" : "";
+    if(_userMeta.departamentoUniversidad!.isNotEmpty){
+      _errores["universidades"] = (_userMeta.universidades!.isEmpty || _userMeta.universidades!.length > 3) ? "Selecciona de 1 a 3 universidades" : "";
     }else{
       _errores["universidades"] = "";
       _userMeta.universidades = [];
     }
-    _errores["carreras"] =(_userMeta.carreras == null || _userMeta.carreras!.isEmpty || _userMeta.carreras!.length > 3) ? "Selecciona de 1 a 3 carreras" : "";
-    _errores["infoCar"] = _userMeta.infoCar == null || _userMeta.infoCar!.isEmpty ? "Este campo es requerido" : "";
+    _errores["carreras"] =(_userMeta.carreras!.isEmpty || _userMeta.carreras!.length > 3) ? "Selecciona de 1 a 3 carreras" : "";
+    _errores["informacionCarrera"] = _userMeta.informacionCarrera!.isEmpty ? "Este campo es requerido" : "";
 
     setState(() {
 
     });
 
-    if (_errores["carreras"]!.isEmpty && _errores["infoCar"]!.isEmpty && _errores["aplicacionTest"]!.isEmpty && _errores["universidades"]!.isEmpty) {
+    if (_errores["carreras"]!.isEmpty && _errores["informacionCarrera"]!.isEmpty && _errores["aplicacionTest"]!.isEmpty && _errores["universidades"]!.isEmpty) {
       _registrarCarrera();
     }
   }
@@ -98,20 +102,27 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
       setState(() {
         _isInProgress = 0;
       });
-      bool bandera = await ApiService().registrarCarrera(_userMeta, _user.id!);
+      bool bandera = await ApiService().registrarCarrera(_userMeta, _user);
       if(!bandera) {
         setState(() {
           _errores["error"] = "Algo salio mal, intentalo màs tarde";
           _isInProgress = -1;
         });
       } else {
-        _user.estado = "Perfil parte 2";
-        Provider.of<AppNotifier>(context, listen: false).setUser(_user);
-        setState(() {
-          _isInProgress = -1;
-        });
-        Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
-        Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroIntereses()));
+        if(_user.estado == "Completado"){
+          setState(() {
+            _isInProgress = -1;
+          });
+          Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
+        }else{
+          _user.estado = "Perfil parte 2";
+          Provider.of<AppNotifier>(context, listen: false).setUser(_user);
+          setState(() {
+            _isInProgress = -1;
+          });
+          Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
+          Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroIntereses()));
+        }
       }
     } on Exception catch (e) {
       setState(() {
@@ -120,12 +131,17 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
       });
     }
   }
-  DateTime selectedDate = DateTime.now();
   void _onOptionSelectedCarrera(List<ValueItem> selectedOptions) {
+    _userMeta.carreras = [];
     if (selectedOptions.isNotEmpty) {
-      List<int> carreras = selectedOptions.map((option) => int.parse(option.value!)).toList();
+      for (var opcion in selectedOptions) {
+        Carrera aux = Carrera(
+          id: int.parse(opcion.value!),
+          nombre: opcion.label
+        );
+        _userMeta.carreras!.add(aux);
+      }
       setState(() {
-        _userMeta.carreras = carreras;
       });
     } else {
       setState(() {
@@ -135,19 +151,26 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
   }
   void _onOptionSelectedDepartamento(List<ValueItem> selectedOptions) async {
     if(selectedOptions.isNotEmpty){
-      _userMeta.departamentoEstudiar = selectedOptions[0].label;
+      _idDepartamento = int.parse(selectedOptions[0].value!);
+      _userMeta.departamentoUniversidad = selectedOptions[0].label;
+      _userMeta.universidades = [];
       _universidades = await ApiService().getUnivesidadeForId(int.parse(selectedOptions[0].value!));
     }else{
-      _userMeta.departamentoEstudiar = "";
+      _userMeta.departamentoUniversidad = "";
     }
     setState(() {});
-    // Aquí puedes realizar otras acciones con las opciones seleccionadas, si es necesario
   }
   void _onOptionSelectedUniversidad(List<ValueItem> selectedOptions) {
     if (selectedOptions.isNotEmpty) {
-      List<String> universidades = selectedOptions.map((option) => option.label).toList();
+      _userMeta.universidades = [];
+      for (var opcion in selectedOptions) {
+        Universidad aux = Universidad(
+          nombre: opcion.label,
+          idDepartamento: _idDepartamento,
+        );
+        _userMeta.universidades!.add(aux);
+      }
       setState(() {
-        _userMeta.universidades = universidades;
       });
     } else {
       setState(() {
@@ -155,11 +178,11 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
       });
     }
   }
-  void _onOptionSelectedInfoCar(List<ValueItem> selectedOptions) {
+  void _onOptionSelectedinformacionCarrera(List<ValueItem> selectedOptions) {
     if(selectedOptions.isNotEmpty){
-      _userMeta.infoCar = selectedOptions[0].label;
+      _userMeta.informacionCarrera = selectedOptions[0].label;
     }else{
-      _userMeta.infoCar = "";
+      _userMeta.informacionCarrera = "";
     }
     setState(() {});
   }
@@ -173,16 +196,106 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
   }
   void _onOptionSelectedInfo(List<ValueItem> selectedOptions) {
     if (selectedOptions.isNotEmpty) {
-      List<String> recibirInfo = selectedOptions.map((option) => option.label).toList();
+      _userMeta.recibirInformacion = [];
+      for (var item in selectedOptions) {
+        Map<String, dynamic> aux = {
+          "titulo": item.label,
+        };
+        _userMeta.recibirInformacion!.add(aux);
+      }
       setState(() {
-        _userMeta.recibirInfo = recibirInfo;
       });
     } else {
       setState(() {
-        _userMeta.recibirInfo = [];
+        _userMeta.recibirInformacion = [];
       });
     }
   }
+  List<ValueItem> _armarSelectedOptions(String  meta){
+    List<ValueItem> res = [];
+    if(meta == "recibirInformacion"){
+      for (var item in _userMeta.recibirInformacion!) {
+        ValueItem aux = ValueItem(
+          label: item["titulo"]
+        );
+        res.add(aux);
+      }
+    }
+    if(meta == "universidades"){
+      for (var item in _userMeta.universidades!) {
+        ValueItem aux = ValueItem(
+          label: item.nombre!,
+        );
+        res.add(aux);
+      }
+    }
+    if(meta == "departamentoUniversidad"){
+      if(_userMeta.departamentoUniversidad!.isNotEmpty){
+        if (_userMeta.departamentoUniversidad! == "CHUQUISACA") {
+          ValueItem aux = ValueItem(label: _userMeta.departamentoUniversidad!, value: '1');
+          
+          res.add(aux);
+        } else if (_userMeta.departamentoUniversidad! == "LA PAZ") {
+          ValueItem aux = ValueItem(label: _userMeta.departamentoUniversidad!, value: '2');
+          
+          res.add(aux);
+        } else if (_userMeta.departamentoUniversidad! == "ORURO") {
+          ValueItem aux = ValueItem(label: _userMeta.departamentoUniversidad!, value: '4');
+          
+          res.add(aux);
+        } else if (_userMeta.departamentoUniversidad! == "TARIJA") {
+          ValueItem aux = ValueItem(label: _userMeta.departamentoUniversidad!, value: '6');
+          
+          res.add(aux);
+        } else if (_userMeta.departamentoUniversidad! == "SANTA CRUZ") {
+          ValueItem aux = ValueItem(label: _userMeta.departamentoUniversidad!, value: '7');
+          
+          res.add(aux);
+        } else if (_userMeta.departamentoUniversidad! == "PANDO") {
+          ValueItem aux = ValueItem(label: _userMeta.departamentoUniversidad!, value: '9');
+          
+          res.add(aux);
+        } else if (_userMeta.departamentoUniversidad! == "COCHABAMBA") {
+          ValueItem aux = ValueItem(label: _userMeta.departamentoUniversidad!, value: '11');
+          
+          res.add(aux);
+        } else if (_userMeta.departamentoUniversidad! == "POTOSÍ") {
+          ValueItem aux = ValueItem(label: _userMeta.departamentoUniversidad!, value: '12');
+          
+          res.add(aux);
+        } else if (_userMeta.departamentoUniversidad! == "BENI") {
+          ValueItem aux = ValueItem(label: _userMeta.departamentoUniversidad!, value: '13');
+          
+          res.add(aux);
+        }
+      }
+    }
+    if(meta == "informacionCarrera"){
+      if(_userMeta.informacionCarrera!.isNotEmpty){
+        ValueItem aux = ValueItem(label: _userMeta.informacionCarrera!);
+        res.add(aux);
+      }
+    }
+    if(meta == "aplicacionTest"){
+      if(_userMeta.aplicacionTest!.isNotEmpty){
+        ValueItem aux = ValueItem(label: _userMeta.aplicacionTest!);
+        res.add(aux);
+      }
+    }
+    if(meta == "carreras"){
+      if(_userMeta.carreras!.isNotEmpty){
+        for (var item in _userMeta.carreras!) {
+          ValueItem aux = ValueItem(
+            value: item.id.toString(),
+            label: item.nombre!,
+          );
+          res.add(aux);
+        }
+      }
+    }
+    return res;
+  }
+  
   @override
   Widget build(BuildContext context) {
     if (controller.uiLoading) {
@@ -196,17 +309,17 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
       );
     } else {
       return Scaffold(
-        backgroundColor: Color.fromRGBO(244, 251, 249, 1),
+        backgroundColor: AppColorStyles.verdeFondo,
         appBar: AppBar(
-          leading: InkWell(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: Icon(
+          backgroundColor: AppColorStyles.verdeFondo,
+          leading: IconButton(
+            icon: Icon(
               LucideIcons.chevronLeft,
-              size: 20,
-              color: theme.colorScheme.onBackground,
-            ).autoDirection(),
+              color: AppColorStyles.oscuro1
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
           ),
         ),
         body: SingleChildScrollView(
@@ -215,600 +328,22 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
               Column(
                 children: <Widget>[
                   Container(
-                    padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
-                    color: Color.fromRGBO(244, 251, 249, 1),
+                    padding: EdgeInsets.all(15),
+                    margin: EdgeInsets.only(bottom: 30),
                     child: Column(     
                       children: <Widget>[
-                        Row(
-                          children: <Widget>[// Espacio entre el icono y el texto
-                            MyText.titleLarge(
-                              "Tus preferencias de carrera",
-                              style: TextStyle(
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 8), // Espacio entre el título y el texto
-                        MyText.bodyMedium(
-                          'Gracias a esta información recibirás una atención pedagógica adecuada tu perfil.',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 15.0,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Divider(),
-                        Column(
-                          children: <Widget>[
-                            Container(
-                              margin: EdgeInsets.only(top: 16, bottom: 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  MyText.bodyMedium(
-                                    '¿Ya hiciste un Test Vocacional?',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 12.0,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                  SizedBox(height: 16.0),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start, // Alinea los hijos a la izquierda
-                                    children: [
-                                      ChoiceChip(
-                                        avatar: _userMeta.testVocacional! ? Icon(Icons.check_circle_outline) : Icon(Icons.circle_outlined),
-                                        checkmarkColor: Colors.white,
-                                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                        selectedColor: Color.fromRGBO(5, 50, 12, 1),
-                                        label: MyText.bodyMedium(
-                                          "Si",
-                                          color: _userMeta.testVocacional!
-                                          ? theme.colorScheme.onPrimary
-                                          : theme.colorScheme.onBackground
-                                        ),
-                                        selected: _userMeta.testVocacional!,
-                                        onSelected: (selected) {
-                                          setState(() {
-                                            _userMeta.testVocacional = selected; 
-                                          });
-                                        },
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                            color: Color.fromRGBO(5, 50, 12, 1), // Color del borde
-                                            width: 1.0, // Ancho del borde
-                                          ),
-                                          borderRadius: BorderRadius.circular(14), // Radio de borde
-                                        ),
-                                      ),
-                                      SizedBox(width: 8.0),
-                                      ChoiceChip(
-                                        avatar: _userMeta.testVocacional! ? Icon(Icons.circle_outlined) : Icon(Icons.check_circle_outline),
-                                        checkmarkColor: Colors.white,
-                                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                        selectedColor: Color.fromRGBO(5, 50, 12, 1),
-                                        label: MyText.bodyMedium(
-                                          "No",
-                                          color: !_userMeta.testVocacional!
-                                          ? theme.colorScheme.onPrimary
-                                          : theme.colorScheme.onBackground
-                                        ),
-                                        selected: !_userMeta.testVocacional!,
-                                        onSelected: (selected) {
-                                          setState(() {
-                                            _userMeta.testVocacional = !selected; 
-                                          });
-                                        },
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                            color: Color.fromRGBO(5, 50, 12, 1), // Color del borde
-                                            width: 1.0, // Ancho del borde
-                                          ),
-                                          borderRadius: BorderRadius.circular(14), // Radio de borde
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Visibility(
-                              visible: _userMeta.testVocacional ?? false,
-                              child: Container(
-                                margin: EdgeInsets.only(top: 16, bottom: 8),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Container(
-                                      margin: EdgeInsets.only(top: 16, bottom: 8),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          MyText.bodyMedium(
-                                            '¿Dónde de aplicarón el test?',
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 12.0,
-                                              fontWeight: FontWeight.w400,
-                                            ),
-                                          ),
-                                          SizedBox(height: 16.0),
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.circular(5),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
-                                                  spreadRadius: 2, // Radio de propagación
-                                                  blurRadius: 5, // Radio de desenfoque
-                                                  offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
-                                                ),
-                                              ],
-                                            ),
-                                            child: MultiSelectDropDown(
-                                              onOptionSelected: _onOptionSelectedDonde,
-                                              options: const <ValueItem>[
-                                                ValueItem(label: 'En el colegio', value: '1'),
-                                                ValueItem(label: 'En la UPSA', value: '2'),
-                                                ValueItem(label: 'Servicio Privado', value: '3'),
-                                                ValueItem(label: 'En otra Universidad', value: '4'),
-                                              ],
-                                              hint: "- Seleccionar -",
-                                              selectionType: SelectionType.single,
-                                              chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
-                                              optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
-                                              selectedOptionIcon: const Icon(Icons.check_circle),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    if (_errores["aplicacionTest"]!.isNotEmpty)
-                                      Padding(
-                                        padding: EdgeInsets.only(top: 8),
-                                        child: Text(
-                                          _errores["aplicacionTest"]!,
-                                          style: TextStyle(color: Colors.red),
-                                          textAlign: TextAlign.start,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(top: 16, bottom: 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  MyText.bodyMedium(
-                                    'Selecciona hasta tres carreras que te gustaría estudiar(en orden de importancia)',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 12.0,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                  SizedBox(height: 16.0),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(5),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
-                                          spreadRadius: 2, // Radio de propagación
-                                          blurRadius: 5, // Radio de desenfoque
-                                          offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
-                                        ),
-                                      ],
-                                    ),
-                                    child: MultiSelectDropDown(
-                                      onOptionSelected: _onOptionSelectedCarrera,
-                                      options: _buildValueItems("carreras"),
-                                      hint: "- Seleccionar -",
-                                      selectionType: SelectionType.multi,
-                                      chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
-                                      optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
-                                      selectedOptionIcon: const Icon(Icons.check_circle),
-                                    ),
-                                  ),
-                                  if (_errores["carreras"]!.isNotEmpty)
-                                  Padding(
-                                    padding: EdgeInsets.only(top: 8),
-                                    child: Text(
-                                      _errores["carreras"]!,
-                                      style: TextStyle(color: Colors.red),
-                                      textAlign: TextAlign.start,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(top: 16, bottom: 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  MyText.bodyMedium(
-                                    '¿Qué tan informado estás sobre tus opciones de carrera?',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 12.0,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                  SizedBox(height: 16.0),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(5),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
-                                          spreadRadius: 2, // Radio de propagación
-                                          blurRadius: 5, // Radio de desenfoque
-                                          offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
-                                        ),
-                                      ],
-                                    ),
-                                    child: MultiSelectDropDown(
-                                      onOptionSelected: _onOptionSelectedInfoCar,
-                                      options: const <ValueItem>[
-                                        ValueItem(label: 'Poco informado', value: '1'),
-                                        ValueItem(label: 'Medianamente informado', value: '2'),
-                                        ValueItem(label: 'Muy informado', value: '3'),
-                                        ValueItem(label: 'Ninguna de las anteriores', value: '4'),
-                                      ],
-                                      hint: "- Seleccionar -",
-                                      selectionType: SelectionType.single,
-                                      chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
-                                      optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
-                                      selectedOptionIcon: const Icon(Icons.check_circle),
-                                    ),
-                                  ),
-                                  if (_errores["infoCar"]!.isNotEmpty)
-                                  Padding(
-                                    padding: EdgeInsets.only(top: 8),
-                                    child: Text(
-                                      _errores["infoCar"]!,
-                                      style: TextStyle(color: Colors.red),
-                                      textAlign: TextAlign.start,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(top: 16, bottom: 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  MyText.bodyMedium(
-                                    '¿Piensas estudiar en Bolivia o en el extranjero?',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 12.0,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                  SizedBox(height: 16.0),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start, // Alinea los hijos a la izquierda
-                                    children: [
-                                      ChoiceChip(
-                                        avatar: _userMeta.estudiarBolivia! ? Icon(Icons.check_circle_outline) : Icon(Icons.circle_outlined),
-                                        checkmarkColor: Colors.white,
-                                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                        selectedColor: Color.fromRGBO(5, 50, 12, 1),
-                                        label: MyText.bodyMedium(
-                                          "Bolivia",
-                                        color: _userMeta.estudiarBolivia!
-                                          ? theme.colorScheme.onPrimary
-                                          : theme.colorScheme.onBackground
-                                        ),
-                                        selected: _userMeta.estudiarBolivia!,
-                                        onSelected: (selected) {
-                                          setState(() {
-                                            _userMeta.estudiarBolivia = selected; 
-                                          });
-                                        },
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                            color: Color.fromRGBO(5, 50, 12, 1), // Color del borde
-                                            width: 1.0, // Ancho del borde
-                                          ),
-                                          borderRadius: BorderRadius.circular(14), // Radio de borde
-                                        ),
-                                      ),
-                                      SizedBox(width: 8.0),
-                                      ChoiceChip(
-                                        avatar: !_userMeta.estudiarBolivia! ? Icon(Icons.check_circle_outline) : Icon(Icons.circle_outlined),
-                                        checkmarkColor: Colors.white,
-                                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                        selectedColor: Color.fromRGBO(5, 50, 12, 1),
-                                        label: MyText.bodyMedium(
-                                          "Extranjero",
-                                        color: !_userMeta.estudiarBolivia!
-                                          ? theme.colorScheme.onPrimary
-                                          : theme.colorScheme.onBackground
-                                        ),
-                                        selected: !_userMeta.estudiarBolivia!,
-                                        onSelected: (selected) {
-                                          setState(() {
-                                            _userMeta.estudiarBolivia = !selected; 
-                                          });
-                                        },
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                            color: Color.fromRGBO(5, 50, 12, 1), // Color del borde
-                                            width: 1.0, // Ancho del borde
-                                          ),
-                                          borderRadius: BorderRadius.circular(14), // Radio de borde
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if(!_userMeta.estudiarBolivia!)
-                            Container(
-                              margin: EdgeInsets.only(top: 16, bottom: 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(5),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
-                                          spreadRadius: 2, // Radio de propagación
-                                          blurRadius: 5, // Radio de desenfoque
-                                          offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
-                                        ),
-                                      ],
-                                    ),
-                                    child: TextFormField(
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _userMeta.universidadExtranjera = value;
-                                        });
-                                      },
-                                      decoration: InputDecoration(
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                                        border: InputBorder.none,
-                                        labelText: 'Nombre de la Universidad',
-                                        labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Color.fromRGBO(5, 50, 12, 1),
-                                            width: 2.0,
-                                          ),
-                                          borderRadius: BorderRadius.circular(5),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  if (_errores["universidadExtranjera"]!.isNotEmpty)
-                                  Padding(
-                                    padding: EdgeInsets.only(top: 8),
-                                    child: Text(
-                                      _errores["universidadExtranjera"]!,
-                                      style: TextStyle(color: Colors.red),
-                                      textAlign: TextAlign.start,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Visibility(
-                              visible: _userMeta.estudiarBolivia!,
-                              child: Container(
-                                margin: EdgeInsets.only(top: 16, bottom: 8),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Container(
-                                      margin: EdgeInsets.only(top: 16, bottom: 8),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          MyText.bodyMedium(
-                                            '¿En qué departamento piensas estudiar?',
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 12.0,
-                                              fontWeight: FontWeight.w400,
-                                            ),
-                                          ),
-                                          SizedBox(height: 16.0),
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.circular(5),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
-                                                  spreadRadius: 2, // Radio de propagación
-                                                  blurRadius: 5, // Radio de desenfoque
-                                                  offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
-                                                ),
-                                              ],
-                                            ),
-                                            child: MultiSelectDropDown(
-                                              onOptionSelected: _onOptionSelectedDepartamento,
-                                              options: const <ValueItem>[
-                                                ValueItem(label: 'CHUQUISACA', value: '1'),
-                                                ValueItem(label: 'LA PAZ', value: '2'),
-                                                ValueItem(label: 'ORURO', value: '4'),
-                                                ValueItem(label: 'TARIJA', value: '6'),
-                                                ValueItem(label: 'SANTA CRUZ', value: '7'),
-                                                ValueItem(label: 'PANDO', value: '9'),
-                                                ValueItem(label: 'COCHABAMBA', value: '11'),
-                                                ValueItem(label: 'POTOSÍ', value: '12'),
-                                                ValueItem(label: 'BENI', value: '13'),
-                                              ],
-                                              hint: "- Seleccionar -",
-                                              selectionType: SelectionType.single,
-                                              chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
-                                              optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
-                                              selectedOptionIcon: const Icon(Icons.check_circle),
-                                            ),
-                                          ),
-                                          if (_errores["departamento"]!.isNotEmpty)
-                                          Padding(
-                                            padding: EdgeInsets.only(top: 8),
-                                            child: Text(
-                                              _errores["departamento"]!,
-                                              style: TextStyle(color: Colors.red),
-                                              textAlign: TextAlign.start,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ]
-                                ),
-                              )
-                            ),
-                            Visibility(
-                              visible: _userMeta.estudiarBolivia! && _userMeta.departamentoEstudiar!.isNotEmpty,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Container(
-                                    margin: EdgeInsets.only(top: 16, bottom: 8),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        MyText.bodyMedium(
-                                          'Selecciona hasta tres universidades dónde te gustaría estudiar (en orden de importancia)',
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 12.0,
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                        SizedBox(height: 16.0),
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(5),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
-                                                spreadRadius: 2, // Radio de propagación
-                                                blurRadius: 5, // Radio de desenfoque
-                                                offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
-                                              ),
-                                            ],
-                                          ),
-                                          child: MultiSelectDropDown(
-                                            onOptionSelected: _onOptionSelectedUniversidad,
-                                            options: _buildValueItems("universidades"),
-                                            hint: "- Seleccionar -",
-                                            selectionType: SelectionType.multi,
-                                            chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
-                                            optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
-                                            selectedOptionIcon: const Icon(Icons.check_circle),
-                                          ),
-                                        ),
-                                        if (_errores["universidades"]!.isNotEmpty)
-                                        Padding(
-                                          padding: EdgeInsets.only(top: 8),
-                                          child: Text(
-                                            _errores["universidades"]!,
-                                            style: TextStyle(color: Colors.red),
-                                            textAlign: TextAlign.start,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ]
-                              )
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(top: 16, bottom: 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  MyText.bodyMedium(
-                                    '¿Sobre qué aspectos te gustaría recibir información?(selecciona todas que aplican)',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 12.0,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                  SizedBox(height: 16.0),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(5),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey.withOpacity(0.5), // Color de la sombra con opacidad
-                                          spreadRadius: 2, // Radio de propagación
-                                          blurRadius: 5, // Radio de desenfoque
-                                          offset: Offset(0, 3), // Desplazamiento de la sombra (horizontal, vertical)
-                                        ),
-                                      ],
-                                    ),
-                                    child: MultiSelectDropDown(
-                                      onOptionSelected: _onOptionSelectedInfo,
-                                      options: const <ValueItem>[
-                                        ValueItem(label: 'Orientación Vocacional', value: '1'),
-                                        ValueItem(label: 'Carreras (planes de estudio)', value: '2'),
-                                        ValueItem(label: 'Concursos académicos', value: '3'),
-                                        ValueItem(label: 'Doble titulación', value: '4'),
-                                        ValueItem(label: 'Intercambio estudiantil', value: '5'),
-                                        ValueItem(label: 'Ferias cientificas y/o emprendiemiento', value: '6'),
-                                        ValueItem(label: 'Actividades deportivas y culturales de la U', value: '7'),
-                                        ValueItem(label: 'Financiamiento/créditos/becas', value: '8'),
-                                        ValueItem(label: 'Programas de Postgrado', value: '9'),
-                                      ],
-                                      hint: "- Seleccionar -",
-                                      selectionType: SelectionType.multi,
-                                      chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: Color.fromRGBO(32, 104, 14, 1)),
-                                      optionTextStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
-                                      selectedOptionIcon: const Icon(Icons.check_circle),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            MySpacing.height(20),
-                            SizedBox(
-                              width: double.infinity,
-                              child: CupertinoButton(
-                                color: Color.fromRGBO(5, 50, 12, 1),
-                                onPressed: () {
-                                  _validarCampos();
-                                },
-                                borderRadius: BorderRadius.all(Radius.circular(5)),
-                                padding: MySpacing.xy(100, 16),
-                                pressedOpacity: 0.5,
-                                child: MyText.bodyMedium(
-                                  "Continuar",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            MySpacing.height(20),
-                          ]
-                        ),
+                        _crearTitulo(),
+                        _crearDescripcion(),
+                        _crearCampoOpcion("¿Ya hiciste un Test Vocacional?", "Si", "No", _userMeta.testVocacional!, _userMeta.testVocacional!, "testVocacional"),
+                        _crearCampoSelectorOpcional('¿Dónde de aplicarón el test?', _userMeta.testVocacional!, _errores["aplicacionTest"]!, "aplicacionTest"),
+                        _crearCampoSelectorMulti('Selecciona hasta tres carreras que te gustaría estudiar(en orden de importancia)', _userMeta.carreras!, _errores["carreras"]!, "carreras"),
+                        _crearCampoSelectorMulti('¿Qué tan informado estás sobre tus opciones de carrera?', _userMeta.informacionCarrera!, _errores["informacionCarrera"]!, "informacionCarrera"),
+                        _crearCampoOpcion('¿Piensas estudiar en Bolivia o en el extranjero?', "Bolivia", "Extranjero", _userMeta.estudiarEnBolivia!, _userMeta.estudiarEnBolivia!, "estudiarEnBolivia"),
+                        _crearCampoTextoOpcional('Nombre de la Universidad', _userMeta.universidadExtranjera!, !_userMeta.estudiarEnBolivia!, _errores["universidadExtranjera"]!, "universidadExtranjera"),
+                        _crearCampoSelectorOpcional('¿En qué departamento piensas estudiar?', _userMeta.estudiarEnBolivia!, _errores["departamento"]!, "departamentoUniversidad"),
+                        _crearCampoSelectorMultiOpcional('Selecciona hasta tres universidades dónde te gustaría estudiar (en orden de importancia)', _userMeta.estudiarEnBolivia! && _userMeta.departamentoUniversidad!.isNotEmpty, _errores["universidades"]!, "universidades"),
+                        _crearCampoSelectorMulti('¿Sobre qué aspectos te gustaría recibir información?(selecciona todas que aplican)', _userMeta.recibirInformacion!, "", "recibirInformacion"),
+                        _crearBoton(),
                       ]
                     )
                   )
@@ -826,25 +361,448 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
       );
     } 
   }
+  
+  Widget _crearBoton(){
+    return Container(
+      width: double.infinity,
+      height: 50,
+      margin: EdgeInsets.symmetric(vertical: 15),
+      child: ElevatedButton(
+        onPressed: () {
+         _validarCampos();
+        },
+        style: AppDecorationStyle.botonBienvenida(),
+        child: Text(
+          'Continuar',
+          style: AppTextStyles.botonMayor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+        ),
+      ),
+    );
+  }
+  Widget _crearCampoSelectorMultiOpcional(String label, bool condicion, String error, String campo){
+    List<ValueItem> opciones = [];
+    List<ValueItem> opcionesSeleccionadas = [];
+    if(campo == "universidades"){
+      opciones = _buildValueItems("universidades");
+      opcionesSeleccionadas = _armarSelectedOptions("universidades");
+    }
+    return Visibility(
+      visible: condicion,
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: AppColorStyles.gris1,
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  SizedBox(height: 8.0),
+                  Container(
+                    decoration: AppDecorationStyle.campoContainerForm(),
+                    child: MultiSelectDropDown(
+                      onOptionSelected: (selectedOptions) {
+                        if (campo == "universidades") {
+                          _onOptionSelectedUniversidad(selectedOptions);
+                        }
+                      },
+                      options: opciones,
+                      hint: "- Seleccionar -",
+                      selectionType: SelectionType.multi,
+                      chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.verde2),
+                      selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.verde2),
+                      selectedOptionTextColor: AppColorStyles.oscuro1,
+                      selectedOptionBackgroundColor: AppColorStyles.verdeFondo,
+                      optionTextStyle: AppTextStyles.parrafo(color: AppColorStyles.verde2),
+                      borderRadius: 14,
+                      borderColor: AppColorStyles.blancoFondo,
+                      selectedOptions: opcionesSeleccionadas,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (error.isNotEmpty)
+            Container(
+              margin: EdgeInsets.only(top: 8),
+              child: Text(
+                error,
+                style: TextStyle(color: Colors.red),
+                textAlign: TextAlign.start,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  Widget _crearCampoTextoOpcional(String label, String valor, bool condicion, String error, String campo){
+    return Visibility(
+      visible: condicion,
+      child: Container(
+        margin: EdgeInsets.only(top: 16, bottom: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: AppColorStyles.gris1,
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  SizedBox(height: 8.0),
+                  Container(
+                    decoration: AppDecorationStyle.campoContainerForm(),
+                    child: TextFormField(
+                      initialValue: valor,
+                      onChanged: (value) {
+                        setState(() {
+                          _userMeta.universidadExtranjera = value;
+                        });
+                      },
+                      decoration: AppDecorationStyle.campoTextoForm(hintText: "", labelText: ""),
+                      style: AppTextStyles.parrafo(color: AppColorStyles.gris1)
+                    ),
+                  ),
+                ]
+              )
+            ),
+            if (error.isNotEmpty)
+            Container(
+              margin: EdgeInsets.only(top: 8),
+              child: Text(
+                error,
+                style: TextStyle(color: Colors.red),
+                textAlign: TextAlign.start,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  Widget _crearCampoSelectorMulti(String label, dynamic valor, String error, String campo){
+    List<ValueItem> opciones = [];
+    List<ValueItem> opcionesSeleccionadas = [];
+    if(campo == "carreras"){
+      opciones =  _buildValueItems("carreras");
+      opcionesSeleccionadas = _armarSelectedOptions("carreras");
+    }
+    if(campo == "informacionCarrera"){
+      opciones =  [
+        ValueItem(label: 'Poco informado'),
+        ValueItem(label: 'Medianamente informado'),
+        ValueItem(label: 'Muy informado'),
+        ValueItem(label: 'Ninguna de las anteriores'),
+      ];
+      opcionesSeleccionadas = _armarSelectedOptions("informacionCarrera");
+    }
+    if(campo == "recibirInformacion"){
+      opciones =  [
+        ValueItem(label: 'Orientación Vocacional'),
+        ValueItem(label: 'Carreras (planes de estudio)'),
+        ValueItem(label: 'Concursos académicos'),
+        ValueItem(label: 'Doble titulación'),
+        ValueItem(label: 'Intercambio estudiantil'),
+        ValueItem(label: 'Ferias cientificas y/o emprendiemiento'),
+        ValueItem(label: 'Actividades deportivas y culturales de la U'),
+        ValueItem(label: 'Financiamiento/créditos/becas'),
+        ValueItem(label: 'Programas de Postgrado'),
+      ];
+      opcionesSeleccionadas = _armarSelectedOptions("recibirInformacion");
+    }
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            label,
+            style: TextStyle(
+              color: AppColorStyles.gris1,
+              fontSize: 12.0,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          SizedBox(height: 8.0),
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 8),
+            decoration: AppDecorationStyle.campoContainerForm(),
+            child: MultiSelectDropDown(
+              onOptionSelected: (selectedOptions) {
+                if (campo == "carreras") {
+                   _onOptionSelectedCarrera(selectedOptions);
+                }
+                if (campo == "informacionCarrera") {
+                   _onOptionSelectedinformacionCarrera(selectedOptions);
+                }
+                if (campo == "recibirInformacion") {
+                   _onOptionSelectedInfo(selectedOptions);
+                }
+              },
+              options: opciones,
+              hint: "- Seleccionar -",
+              selectionType: SelectionType.multi,
+              chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.verde2),
+              selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.verde2),
+              selectedOptionTextColor: AppColorStyles.oscuro1,
+              selectedOptionBackgroundColor: AppColorStyles.verdeFondo,
+              optionTextStyle: AppTextStyles.parrafo(color: AppColorStyles.verde2),
+              borderRadius: 14,
+              borderColor: AppColorStyles.blancoFondo,
+              selectedOptions: opcionesSeleccionadas,
+            ),
+          ),
+          if (error.isNotEmpty)
+          Container(
+            margin: EdgeInsets.only(top: 8),
+            child: Text(
+              error,
+              style: TextStyle(color: Colors.red),
+              textAlign: TextAlign.start,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _crearCampoSelectorOpcional(String label, bool condicion, String error, String campo){
+    List<ValueItem> opciones = [];
+    List<ValueItem> opcionesSeleccionadas = [];
+    if(campo == "aplicacionTest"){
+      opciones = [
+        ValueItem(label: 'En el colegio'),
+        ValueItem(label: 'En la UPSA'),
+        ValueItem(label: 'Servicio Privado'),
+        ValueItem(label: 'En otra Universidad'),
+      ];
+      opcionesSeleccionadas = _armarSelectedOptions("aplicacionTest");
+    }
+    if(campo == "departamentoUniversidad"){
+      opciones = [
+        ValueItem(label: 'CHUQUISACA', value: '1'),
+        ValueItem(label: 'LA PAZ', value: '2'),
+        ValueItem(label: 'ORURO', value: '4'),
+        ValueItem(label: 'TARIJA', value: '6'),
+        ValueItem(label: 'SANTA CRUZ', value: '7'),
+        ValueItem(label: 'PANDO', value: '9'),
+        ValueItem(label: 'COCHABAMBA', value: '11'),
+        ValueItem(label: 'POTOSÍ', value: '12'),
+        ValueItem(label: 'BENI', value: '13'),
+      ];
+      opcionesSeleccionadas = _armarSelectedOptions("departamentoUniversidad");
+    }
+    return Visibility(
+      visible: condicion,
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: AppColorStyles.gris1,
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  SizedBox(height: 8.0),
+                  Container(
+                    decoration: AppDecorationStyle.campoContainerForm(),
+                    child: MultiSelectDropDown(
+                      onOptionSelected: (selectedOptions) {
+                        if (campo == "aplicacionTest") {
+                          _onOptionSelectedDonde(selectedOptions);
+                        }
+                        if (campo == "departamentoUniversidad") {
+                          _onOptionSelectedDepartamento(selectedOptions);
+                        }
+                      },
+                      options: opciones,
+                      hint: "- Seleccionar -",
+                      selectionType: SelectionType.single,
+                      chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.verde2),
+                      selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.verde2),
+                      selectedOptionTextColor: AppColorStyles.oscuro1,
+                      selectedOptionBackgroundColor: AppColorStyles.verdeFondo,
+                      optionTextStyle: AppTextStyles.parrafo(color: AppColorStyles.verde2),
+                      borderRadius: 14,
+                      borderColor: AppColorStyles.blancoFondo,
+                      selectedOptions: opcionesSeleccionadas,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (error.isNotEmpty)
+            Container(
+              margin: EdgeInsets.only(top: 8),
+              child: Text(
+                error,
+                style: TextStyle(color: Colors.red),
+                textAlign: TextAlign.start,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  Widget _crearCampoOpcion(String label, String opcion1, String opcion2, bool opcionValue1, bool opcionValue2, String campo){
+    return Container(
+      margin: EdgeInsets.only(top: 15, bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            label,
+            style: TextStyle(
+              color: AppColorStyles.gris1,
+              fontSize: 12.0,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          SizedBox(height: 8.0),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start, // Alinea los hijos a la izquierda
+            children: [
+              ChoiceChip(
+                backgroundColor: AppColorStyles.blancoFondo,
+                avatar: opcionValue1 ? Icon(Icons.check_circle_outline) : Icon(Icons.circle_outlined),
+                checkmarkColor: AppColorStyles.blancoFondo,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                selectedColor: AppColorStyles.verde2,
+                label: Text(
+                  opcion1,
+                  style: TextStyle(
+                    color: opcionValue1
+                    ? AppColorStyles.blancoFondo
+                    : AppColorStyles.verde2
+                  ),
+                ),
+                selected: opcionValue1,
+                onSelected: (selected) {
+                  if(campo == "testVocacional"){
+                    _userMeta.testVocacional = selected; 
+                  }
+                  if(campo == "estudiarEnBolivia"){
+                    _userMeta.estudiarEnBolivia = selected; 
+                  }
+                  setState(() {});
+                },
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(
+                    color: AppColorStyles.verde2, // Color del borde
+                    width: 1.0, // Ancho del borde
+                  ),
+                  borderRadius: BorderRadius.circular(14), // Radio de borde
+                ),
+              ),
+              SizedBox(width: 8.0),
+              ChoiceChip(
+                backgroundColor: AppColorStyles.blancoFondo,
+                avatar: !opcionValue2 ? Icon(Icons.check_circle_outline) : Icon(Icons.circle_outlined),
+                checkmarkColor: AppColorStyles.blancoFondo,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                selectedColor: AppColorStyles.verde2,
+                label: Text(
+                  opcion2,
+                  style: TextStyle(
+                    color: !opcionValue2
+                    ? AppColorStyles.blancoFondo
+                    : AppColorStyles.verde2
+                  ),
+                ),
+                selected: !opcionValue2,
+                onSelected: (selected) {
+                  if(campo == "testVocacional"){
+                    _userMeta.testVocacional = !selected; 
+                  }
+                  if(campo == "estudiarEnBolivia"){
+                    _userMeta.estudiarEnBolivia = !selected; 
+                  }
+                  setState(() {});
+                },
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(
+                    color: AppColorStyles.verde2, // Color del borde
+                    width: 1.0, // Ancho del borde
+                  ),
+                  borderRadius: BorderRadius.circular(14), // Radio de borde
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _crearDescripcion(){
+    return Container( 
+        margin: EdgeInsets.symmetric(vertical: 15),
+        child: Text(
+          '¿Qué piensas estudiar? Seleccioná tus preferencias.',
+          style: TextStyle(
+            color: AppColorStyles.oscuro1,
+            fontSize: 15,
+            fontWeight: FontWeight.normal,
+          ),
+        ),
+    );
+  }
+  Widget _crearTitulo() {
+    return Container(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        "Tus preferencias de carrera",
+        style: AppTitleStyles.onboarding(color: AppColorStyles.verde1),
+      ),
+    );
+  }
   List<ValueItem> _buildValueItems(String tipo) {
+    List<ValueItem> res = [];
     if(tipo == "carreras"){
-      return _carreras.map((promocion) {
-      return ValueItem(
-        label: promocion.nombre!,
-        value: promocion.id.toString(),
-      );
-    }).toList();
-    }else{
-      if(tipo == "universidades"){
-        return _universidades.map((universidad) {
-        return ValueItem(
-          label: universidad.nombre!,
-          value: universidad.id,
-        );
-        }).toList();
-      }else{
-        return [];
+      for (var item in _carreras) {
+        res.add(
+          ValueItem(
+            label: item.nombre!,
+            value: item.id.toString(),
+          )
+        );  
       }
     }
+    if(tipo == "universidades"){
+      for (var item in _universidades) {
+        res.add(
+          ValueItem(
+            label: item.nombre!
+          )
+        );
+      }
+
+    }
+    return res;
   }
 }

@@ -12,14 +12,17 @@ Campus CampusFromJson(String str) {
 class Campus {
   Campus({
     this.imagenes,
+    this.descripcion,
   });
 
   int? id;
   List<String>? imagenes;
+  String? descripcion;
 
   factory Campus.fromJson(Map<String, dynamic> json) {
     return Campus(
       imagenes: _convertirGaleria(json['attributes']["imagenes"]["data"]),
+      descripcion: json['attributes']["descripcion"],
     );
   }
   static List<String> _convertirGaleria(dynamic data) {

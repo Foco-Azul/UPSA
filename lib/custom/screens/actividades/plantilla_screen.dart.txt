@@ -1,0 +1,200 @@
+import 'package:flutkit/custom/controllers/profile_controller.dart';
+import 'package:flutkit/loading_effect.dart';
+import 'package:flutkit/custom/controllers/login_controller.dart';
+import 'package:flutkit/helpers/theme/app_theme.dart';
+import 'package:flutkit/helpers/widgets/my_spacing.dart';
+import 'package:flutter/material.dart';
+
+
+class PlantillaScreen extends StatefulWidget {
+  const PlantillaScreen({Key? key, this.id=-1}) : super(key: key);
+  final int id;
+  @override
+  _PlantillaScreenState createState() => _PlantillaScreenState();
+}
+
+class _PlantillaScreenState extends State<PlantillaScreen> {
+  int _id = -1;
+  late ThemeData theme;
+  late CustomTheme customTheme;
+  late ProfileController controller;
+  late LoginController loginController;
+  @override
+  void initState() {
+    super.initState();
+    _id = widget.id;     
+    theme = AppTheme.theme;
+    customTheme = AppTheme.customTheme;
+    controller = ProfileController();
+    _cargarDatos();
+  }
+
+  void _cargarDatos() {
+      setState(() {
+        controller.uiLoading = true;
+      });
+      setState(() {
+        controller.uiLoading = false;
+      });
+  }
+  @override
+  Widget build(BuildContext context) {
+    if (controller.uiLoading) {
+      return Scaffold(
+        body: Container(
+          margin: MySpacing.top(MySpacing.safeAreaTop(context) + 20),
+          child: LoadingEffect.getSearchLoadingScreen(
+            context,
+          ),
+        ),
+      );
+    } else {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Color.fromRGBO(244, 251, 249, 1),
+          title: Center(
+            child: Padding(
+              padding: const EdgeInsets.only(right: 50.0), // Margen a la derecha
+              child: RichText(
+                text: TextSpan(
+                  text: "Titutlo",
+                  style: TextStyle(
+                    fontSize: 18, // Tamaño del texto
+                    fontWeight: FontWeight.w600, // Peso del texto
+                    color: Colors.black, // Color del texto
+                  ),
+                ),
+                overflow: TextOverflow.visible, // Permite que el texto se muestre en múltiples líneas
+                textAlign: TextAlign.center, // Alinea el texto al centro
+              ),
+            ),
+          ),
+        ), 
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: MySpacing.only(left: 24, right: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+              
+              ]
+            ),
+          ),
+        ),
+      );
+    }
+  }
+}
+
+class Plantilla2Screen extends StatefulWidget {
+  const Plantilla2Screen({Key? key}) : super(key: key);
+  @override
+  _Plantilla2ScreenState createState() => _Plantilla2ScreenState();
+}
+
+class _Plantilla2ScreenState extends State<Plantilla2Screen> {
+  late ThemeData theme;
+  late CustomTheme customTheme;
+  late ProfileController controller;
+  late LoginController loginController;
+      final List<Map<String, dynamic>> _data = [
+      {
+        "headerValue": "Panel 1",
+        "expandedValue": "Contenido del panel 1",
+        "isExpanded": true
+      },
+      {
+        "headerValue": "Panel 2",
+        "expandedValue": "Contenido del panel 2",
+        "isExpanded": false
+      },
+      {
+        "headerValue": "Panel 3",
+        "expandedValue": "Contenido del panel 3",
+        "isExpanded": false
+      }
+    ];
+  @override
+  void initState() {
+    super.initState();
+    theme = AppTheme.theme;
+    customTheme = AppTheme.customTheme;
+    controller = ProfileController();
+    _cargarDatos();
+  }
+
+  void _cargarDatos() {
+      setState(() {
+        controller.uiLoading = true;
+      });
+      setState(() {
+        controller.uiLoading = false;
+      });
+  }
+  @override
+  Widget build(BuildContext context) {
+    if (controller.uiLoading) {
+      return Scaffold(
+        body: Container(
+          margin: MySpacing.top(MySpacing.safeAreaTop(context) + 20),
+          child: LoadingEffect.getSearchLoadingScreen(
+            context,
+          ),
+        ),
+      );
+    } else {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Color.fromRGBO(244, 251, 249, 1),
+          title: Center(
+            child: Padding(
+              padding: const EdgeInsets.only(right: 50.0), // Margen a la derecha
+              child: RichText(
+                text: TextSpan(
+                  text: "Titutlo2",
+                  style: TextStyle(
+                    fontSize: 18, // Tamaño del texto
+                    fontWeight: FontWeight.w600, // Peso del texto
+                    color: Colors.black, // Color del texto
+                  ),
+                ),
+                overflow: TextOverflow.visible, // Permite que el texto se muestre en múltiples líneas
+                textAlign: TextAlign.center, // Alinea el texto al centro
+              ),
+            ),
+          ),
+        ), 
+        body: SingleChildScrollView(
+          child: Container(
+            child: buildExpandableTextComponent(),
+          ),
+        ),
+      );
+    }
+  }
+    Widget buildExpandableTextComponent() {
+
+    return ExpansionPanelList(
+      expansionCallback: (int index, bool isExpanded) {
+        setState(() {
+          _data[index]["isExpanded"] = isExpanded; 
+        });
+      },
+      children: _data.map<ExpansionPanel>((dynamic item) {
+        return ExpansionPanel(
+          headerBuilder: (BuildContext context, bool isExpanded) {
+            return ListTile(
+              title: Text(item["headerValue"]),
+            );
+          },
+          body: ListTile(
+              title: Text(item["expandedValue"]),
+              subtitle: const Text('To delete this panel, tap the trash can icon'),
+          ),
+          isExpanded: item["isExpanded"],
+        );
+      }).toList(),
+    );
+  }
+}
+

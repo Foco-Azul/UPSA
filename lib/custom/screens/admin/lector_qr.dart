@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:qrscan/qrscan.dart' as scanner;
+//import 'package:qrscan/qrscan.dart' as scanner;
 
 class LectorQRScreen extends StatefulWidget {
   const LectorQRScreen({Key? key}) : super(key: key);
@@ -36,13 +36,14 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
   void _cargarDatos()async{
     _eventos = await ApiService().getEventos();
     setState(() {
-      selectedValue = int.parse(_eventos[0].id!);
+      selectedValue = _eventos[0].id!;
     });
   }
   void _verificarQR(String codigo){
     Evento? evento = obtenerEventoPorId();
     if(evento != null){
-      int estado = encontrarInscripcion(evento.inscripciones2!, codigo);
+      /*
+      int estado = encontrarInscripcion(evento.inscripciones!, codigo);
       if(estado == 1){
         showSnackBarWithFloating("QR valido", Color.fromRGBO(32, 104, 14, 1));
       }else{
@@ -52,6 +53,7 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
           showSnackBarWithFloating("QR no valido", Color.fromRGBO(255, 0, 0, 1));
         }
       }
+      */
     }
   }
   int encontrarInscripcion(List<Map<String, String>> inscripciones, String claveBuscada) {
@@ -73,7 +75,7 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
   }
   Evento? obtenerEventoPorId() {
     try {
-      return _eventos.firstWhere((evento) => int.parse(evento.id!) == selectedValue);
+      return _eventos.firstWhere((evento) => evento.id! == selectedValue);
     } catch (e) {
       return null;
     }
@@ -82,12 +84,11 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
 
   Future _scan() async {
     await Permission.camera.request();
-    String? barcode = await scanner.scan();
-    if (barcode != null) {
-      _outputController.text = barcode;
-      _verificarQR(_outputController.text);
+    //String? barcode = await scanner.scan();
+    String? barcode = "sdsadadsa";
+    _outputController.text = barcode;
+    _verificarQR(_outputController.text);
     }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +123,7 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
                       },
                       items: _eventos.map<DropdownMenuItem<int>>((Evento evento) {
                         return DropdownMenuItem<int>(
-                          value: int.parse(evento.id!),
+                          value: evento.id!,
                           child: Text(evento.titulo!),
                         );
                       }).toList(),

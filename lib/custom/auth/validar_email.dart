@@ -1,9 +1,8 @@
-//import 'package:flutkit/custom/auth/registro_estudiante.dart';
 import 'package:flutkit/custom/auth/registro_perfil.dart';
-import 'package:flutkit/custom/widgets/efectoCarga.dart';
-import 'package:flutkit/helpers/widgets/my_container.dart';
+import 'package:flutkit/custom/theme/styles.dart';
+import 'package:flutkit/custom/widgets/efecto_carga.dart';
+import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/homes/homes_screen.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -11,28 +10,19 @@ import 'package:provider/provider.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
-import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/helpers/widgets/my_text.dart';
-import 'package:flutkit/helpers/widgets/my_text_style.dart';
 
 class ValidarEmail extends StatefulWidget {
-  final ThemeData theme;
-  final int estado;
-
-  const ValidarEmail({Key? key, required this.theme, this.estado = 0}) : super(key: key);
+  const ValidarEmail({Key? key}) : super(key: key);
 
   @override
-  _ValidarEmailState createState() => _ValidarEmailState(estado: estado);
+  _ValidarEmailState createState() => _ValidarEmailState();
 }
 class _ValidarEmailState extends State<ValidarEmail> {
-  final int estado;
-  _ValidarEmailState({required this.estado});
-
-  String _titulo = "", _texto1 = "", _token = "";
+  String _token = "";
   String _errorToken = "";
   User _user = User();
-  bool _seReenvio = false;
   bool _errorVerificacion = false;
   @override
   void initState() {
@@ -41,8 +31,6 @@ class _ValidarEmailState extends State<ValidarEmail> {
     armarInformacion();
   }
   void armarInformacion(){
-      _titulo = "Verifiquemos que no sos un robot";
-      _texto1 = "Verifica tu correo ingresando el código enviado a: ";
   }
   
   void verificarCodigo(String verificationCode){
@@ -55,11 +43,11 @@ class _ValidarEmailState extends State<ValidarEmail> {
     }
   }
   void reenviarToken() async{  
-    //int userId=39;
-    //String email = "carlosvargasbazoalto@gmail.com";
     bool bandera = await ApiService().reenviarToken(_user.id!, _user.email!);
+    if(bandera){
+      MensajeTemporalInferior().mostrarMensaje(context,"Correo enviado satisfactoriamente.", "exito");
+    }
     setState(() {
-      _seReenvio = bandera;
     });
   }
   void verificarCuenta() async{
@@ -89,176 +77,132 @@ class _ValidarEmailState extends State<ValidarEmail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromRGBO(244, 251, 249, 1),
-      body: Stack(
+      backgroundColor: AppColorStyles.verdeFondo,
+      appBar: AppBar(
+        backgroundColor: AppColorStyles.verdeFondo,
+        leading: IconButton(
+          icon: Icon(
+            LucideIcons.chevronLeft,
+            color: AppColorStyles.oscuro1
+          ),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
+      body: Container(
+        margin: EdgeInsets.only(right: 15, left: 15, bottom: 50),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            _crearTitulo(),
+            _crearDescripcion(),
+            _crearCamposCodigo(),
+            _crearBoton(),
+            _textoFooter(),
+          ],
+        ),
+      ),
+    );
+  }
+  Widget _textoFooter(){
+    return GestureDetector(
+      onTap: () {
+        reenviarToken();
+      },
+      child: Center(
+        child: RichText(
+          text: TextSpan(children: const <TextSpan>[
+            TextSpan(
+                text: "¿No recibiste un código? ",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: AppColorStyles.gris1)),
+            TextSpan(
+                text: " Envialo de nuevo",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColorStyles.verde2)),
+          ]),
+        ),
+      ),
+    );
+  }
+  Widget _crearBoton(){
+    return Container(
+      width: double.infinity,
+      height: 50,
+      margin: EdgeInsets.symmetric(vertical: 15),
+      child: ElevatedButton(
+        onPressed: () {
+          verificarCuenta();
+        },
+        style: AppDecorationStyle.botonBienvenida(),
+        child: Text(
+          'Continuar',
+          style: AppTextStyles.botonMayor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+        ),
+      ),
+    );
+  }
+  Widget _crearCamposCodigo(){
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 15),
+      child: OtpTextField(
+        numberOfFields: 5,
+        showFieldAsBox: true,
+        fieldWidth: 50.0,
+        borderRadius: BorderRadius.circular(14), // Ajusta el radio de borde para que sea más cuadrado
+        keyboardType: TextInputType.number,
+        focusedBorderColor: AppColorStyles.verde2, 
+        onSubmit: (String verificationCode) {
+          verificarCodigo(verificationCode);
+        },
+      ),
+    );
+  }
+  Widget _crearDescripcion(){
+    return Container(
+      margin: MySpacing.symmetric(vertical: 15, horizontal: 15),
+      child: Column(
         children: <Widget>[
-          Positioned(
-            left: 30,
-            right: 30,
-            top: MediaQuery.of(context).size.height * 0.2,
-            child: ListView(
-              shrinkWrap: true,
-              children: <Widget>[
-                Container(
-                  //padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
-                  color: Color.fromRGBO(244, 251, 249, 1),
-                  child: Column(
-                    children: <Widget>[
-                      Center(
-                        child: Icon(
-                          LucideIcons.shieldCheck,
-                          size: 40,
-                          color: theme.colorScheme.onBackground.withAlpha(220),
-                        ),
-                      ),
-                      Container(
-                        margin: EdgeInsets.symmetric(horizontal: 24),
-                        child: Center(
-                          child: MyText.titleLarge(
-                            _titulo,
-                            style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w700,
-                                
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.only(left: 16, right: 16),
-                        child: Column(
-                          children: <Widget>[
-                            Container(
-                              margin: MySpacing.top(16),
-                              child: Center(
-                                child: MyText.bodySmall(
-                                  _texto1,
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w400,
-                                    letterSpacing: 0,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                            Container(
-                              margin: MySpacing.top(8),
-                              child: Center(
-                                child: MyText.bodySmall(
-                                  _user.email!,
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                            if(_errorToken.isNotEmpty || _errorVerificacion)
-                            Container(
-                              margin: MySpacing.top(16),
-                              child: Center(
-                                child: MyText.bodySmall(
-                                  _errorToken,
-                                  fontWeight: 500,
-                                  height: 1.15,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(color: Colors.red, fontSize: 12),
-                                ),
-                              ),
-                            ),
-                            Container(
-                              margin: MySpacing.top(16),
-                              child: OtpTextField(
-                                numberOfFields: 5,
-                                showFieldAsBox: true,
-                                fieldWidth: 50.0,
-                                borderRadius: BorderRadius.circular(14), // Ajusta el radio de borde para que sea más cuadrado
-                                keyboardType: TextInputType.number,
-                                focusedBorderColor: Color.fromRGBO(32, 104, 14, 1), 
-                                onSubmit: (String verificationCode) {
-                                  verificarCodigo(verificationCode);
-                                },
-                              ),
-                            ),
-                            Container(
-                              width: double.infinity,
-                              margin: EdgeInsets.only(top: 26),
-                              child: CupertinoButton(
-                                color: Color.fromRGBO(5, 50, 12, 1),
-                                onPressed: () {
-                                  verificarCuenta();
-                                },
-                                borderRadius: BorderRadius.all(Radius.circular(5)),
-                                padding: MySpacing.xy(100, 16),
-                                pressedOpacity: 0.5,
-                                child: MyText.bodyMedium(
-                                  "Continuar",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                if(_seReenvio)
-                Center(
-                  child: MyText.bodySmall(
-                    "Correo enviado satisfactoriamente.",
-                    fontWeight: 500,
-                    height: 1.15,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    reenviarToken();
-                  },
-                  child: Container(
-                    margin: EdgeInsets.only(top: 16),
-                    child: Center(
-                      child: RichText(
-                        text: TextSpan(children: <TextSpan>[
-                          TextSpan(
-                              text: "¿No recibiste un código? ",
-                              style: MyTextStyle.bodyMedium(fontWeight: 400, fontSize: 14)),
-                          TextSpan(
-                              text: " Envialo de nuevo",
-                              style: MyTextStyle.bodyMedium(
-                                  fontWeight: 600,
-                                  fontSize: 14,
-                                  color: theme.colorScheme.primary)),
-                        ]),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+          Center(
+            child: MyText.bodySmall(
+              "Verifica tu correo ingresando el código enviado a: ",
+              style: AppTextStyles.parrafo(),
+              textAlign: TextAlign.center,
             ),
           ),
-          Positioned(
-            top: MySpacing.safeAreaTop(context) + 12,
-            left: 16,
-            child: InkWell(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: Icon(
-                LucideIcons.chevronLeft,
-                color: theme.colorScheme.onBackground,
+          Center(
+            child: MyText.bodySmall(
+              _user.email!,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
               ),
+              textAlign: TextAlign.center,
             ),
-          )
-        ],
+          ),
+          if(_errorToken.isNotEmpty || _errorVerificacion)
+          Center(
+            child: MyText.bodySmall(
+              _errorToken,
+              fontWeight: 500,
+              height: 1.15,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.red, fontSize: 12),
+            ),
+          ),
+        ]
       )
+    );
+  }
+  Widget _crearTitulo(){
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 24),
+      child: Center(
+        child: MyText.titleLarge(
+          "Verifiquemos que no sos un robot",
+          style: AppTitleStyles.onboarding(color: AppColorStyles.verde1),
+          textAlign: TextAlign.center,
+        ),
+      ),
     );
   }
 }

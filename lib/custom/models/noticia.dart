@@ -1,112 +1,83 @@
 import 'dart:convert';
+import 'package:flutkit/custom/models/categoria.dart';
+import 'package:flutkit/custom/models/etiqueta.dart';
+import 'package:flutkit/custom/utils/funciones.dart';
     
-// getting a list of users from json
-List<Noticia> NoticiasFromJson(String str) {
-  final jsonData = json.decode(str);
-  final List<dynamic> data = jsonData['data'];
-
-  return data.map((item) => Noticia.fromJson(item)).toList();
-}
-List<Noticia> NoticiasFromJsonCategoria(String str) {
-  final jsonData = json.decode(str);
-  final List<dynamic> data = jsonData["data"][0]["attributes"]["noticias"]["data"];
-  return data.map((item) => Noticia.fromJson(item)).toList();
-}
-
-
-Noticia NoticiaFromJson(String str) {
-  final jsonData = json.decode(str);
-  final Map<String, dynamic> data = jsonData['data'];
-
-  return Noticia.fromJson(data);
-}
-
-
 // Noticia class
 class Noticia {
   Noticia({
     this.id,
-    this.titular,
+    this.titulo,
     this.categoria,
     this.publicacion,
-    this.foto,
-    this.galeriaDeFotos,
+    this.imagen,
     this.notaCompleta,
     this.descripcion,
     this.etiquetas,
   });
 
   int? id;
-  String? titular;
-  String? categoria;
+  String? titulo;
+  Categoria? categoria;
   String? publicacion;
-  String? foto;
-  List<String>? galeriaDeFotos;
+  String? imagen;
   String? notaCompleta;
   String? descripcion;
-  List<String>? etiquetas;
+  List<Etiqueta>? etiquetas;
 
-  factory Noticia.fromJson(Map<String, dynamic> json) {
+  static List<Noticia> armarNoticiasPopulate(String str) {
+    List<Noticia> res = [];
+    final jsonData = json.decode(str);
+    final List<dynamic> data = jsonData['data'];
+    for (var item in data) {
+      Noticia aux = Noticia(
+        id: item["id"],
+        titulo: item['attributes']["titulo"],
+        categoria: Categoria.armarCategoria(item['attributes']["categoria"]["data"]),
+        publicacion: FuncionUpsa.armarFechaPublicacion(item['attributes']["publishedAt"]), 
+        imagen: item['attributes']["imagen"]['data'] != null ? item['attributes']["imagen"]['data']['attributes']['url'] : "/uploads/default_02263f0f89.png", 
+        notaCompleta: item['attributes']["notaCompleta"], 
+        descripcion: item['attributes']["descripcion"], 
+        etiquetas: Etiqueta.armarEtiquetas(item['attributes']["etiquetas"]['data']),
+      );
+      res.add(aux);
+    }
+    return res;
+  }
+  static Noticia armarNoticiaPopulate(String str) {
+    final jsonData = json.decode(str);
+    final Map<String, dynamic> data = jsonData['data'];
     return Noticia(
-      id: json["id"],
-      titular: json['attributes']["titular"],
-      categoria: json['attributes']["categoria"]?['data']?['attributes']?['nombre'] ?? "Sin categoría",
-      publicacion: _convertirFechaPublicacion(json['attributes']["publishedAt"]), 
-      foto: json['attributes']["foto"]?['data']?['attributes']?['url'] ?? "/uploads/default_02263f0f89.png", 
-      galeriaDeFotos: _convertirGaleria(json['attributes']["galeriaFotos"]?['data']), 
-      notaCompleta: json['attributes']["notaCompleta"], 
-      descripcion: json['attributes']["descripcion"], 
-      etiquetas: _convertirEtiquetas(json['attributes']["etiquetas"]?['data']),
+      id: data["id"],
+      titulo: data['attributes']["titulo"],
+      categoria: Categoria.armarCategoria(data['attributes']["categoria"]["data"]),
+      publicacion: FuncionUpsa.armarFechaPublicacion(data['attributes']["publishedAt"]), 
+      imagen: data['attributes']["imagen"]['data'] != null ? data['attributes']["imagen"]['data']['attributes']['url'] : "/uploads/default_02263f0f89.png", 
+      notaCompleta: data['attributes']["notaCompleta"], 
+      descripcion: data['attributes']["descripcion"], 
+      etiquetas: Etiqueta.armarEtiquetas(data['attributes']["etiquetas"]['data']),
     );
   }
-
-  static List<String> _convertirEtiquetas(dynamic data) {
-    List<String> res = [];
-    if (data != null) {
-      for (var item in data) {
-        if (item['attributes'] != null) {
-          String url = item['attributes']['nombre'];
-          res.add(url);
-        }
-      }
+  static List<Noticia> armarNoticiasRelacionadas(List<dynamic> data){
+    List<Noticia> res = [];
+    for (var item in data) {
+      Noticia aux = Noticia(
+        id: item["id"],
+        titulo: item['attributes']["titulo"],
+        imagen: item['attributes']["imagen"]['data'] != null ? item['attributes']["imagen"]['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",
+      );
+      res.add(aux);
     }
     return res;
-  }
-  static List<String> _convertirGaleria(dynamic data) {
-    List<String> res = [];
-    if (data != null) {
-      for (var item in data) {
-        if (item['attributes'] != null) {
-          String url = item['attributes']['url'];
-          res.add(url);
-        }
-      }
-    }
-    return res;
-  }
-  static String _convertirFechaPublicacion(String data) {
-    DateTime fechaPublicacion = DateTime.parse(data);
-    DateTime ahora = DateTime.now();
-    Duration diferencia = ahora.difference(fechaPublicacion);
-
-    if (diferencia.inHours < 24) {
-      return "Hace ${diferencia.inHours} horas";
-    } else {
-      int dias = diferencia.inDays;
-      if (diferencia.inHours % 24 != 0) {
-        dias++; // Añadir un día si hay horas extras
-      }
-      return "Hace $dias días";
-    }
   }
 
   Map<String, dynamic> toJson() => {
     "id": id,
-    "titular": titular,
+    "titulo": titulo,
   };
   @override
   String toString() {
-    return 'Noticia{id: $id, titular: $titular}';
+    return 'Noticia{id: $id, titulo: $titulo}';
   }
   
 }

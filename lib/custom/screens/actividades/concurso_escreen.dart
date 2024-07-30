@@ -1,10 +1,16 @@
 import 'dart:async';
 import 'package:barcode_widget/barcode_widget.dart';
+import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
+import 'package:flutkit/custom/models/categoria.dart';
 import 'package:flutkit/custom/models/concurso.dart';
+import 'package:flutkit/custom/models/etiqueta.dart';
+import 'package:flutkit/custom/models/inscripcion.dart';
 import 'package:flutkit/custom/models/noticia.dart';
 import 'package:flutkit/custom/models/user.dart';
+import 'package:flutkit/custom/screens/inicio/etiquetas_screen.dart';
 import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
+import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
@@ -19,114 +25,103 @@ import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 
 class ConcursoScreen extends StatefulWidget {
-  const ConcursoScreen({Key? key, this.idConcurso=-1}) : super(key: key);
-  final int idConcurso;
+  const ConcursoScreen({Key? key, this.id=-1}) : super(key: key);
+  final int id;
   @override
   _ConcursoScreenState createState() => _ConcursoScreenState();
 }
 
 class _ConcursoScreenState extends State<ConcursoScreen> {
-  int _idConcurso = -1;
+  int _id = -1;
   late ThemeData theme;
   late CustomTheme customTheme;
   late ProfileController controller;
   late LoginController loginController;
-
   final PageController _pageController = PageController(initialPage: 0);
   int _currentPage = 0;
-  int _numPages = 1;
-  int _inscritos = -1;
-  String _qr = "";
-  List<Noticia> _noticiasRelacionadas = [];
   String _backUrl = "";
   Concurso _concurso = Concurso();
   User _user = User();
   bool _isLoggedIn = false;
   bool _ingresoMostrado = false;
+  bool _inscrito = false;
+  bool _siguiendo = false;
+  Inscripcion _inscripcion = Inscripcion();
+  
   @override
   void initState() {
     super.initState();
-    _idConcurso = widget.idConcurso;
+    _id = widget.id;
     theme = AppTheme.theme;
     customTheme = AppTheme.customTheme;
     controller = ProfileController();
-    _inicializarDatos();
+    _cargarDatos();
   }
-
-  void _inicializarDatos() {
+  
+  Future<void> _cargarDatos() async { 
+    _concurso = await ApiService().getConcursoPopulateConInscripcionesSeguidores(_id);
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
     if (_isLoggedIn) {
       _user = Provider.of<AppNotifier>(context, listen: false).user;
-    }
-    _cargarDatosAsincronos();
-  }
-
-  Future<void> _cargarDatosAsincronos() async { 
-    if (_isLoggedIn) {
-      _user.concursosInscritos = await ApiService().getConcursosInscritos(_user.id!);
-      _user.concursosSeguidos = await ApiService().getConcursosSeguidos(_user.id!);
-      if(_user.concursosInscritos!.isNotEmpty){
-        for (var inscripcion in _user.concursosInscritos!) {
-          _qr = inscripcion["qr"]!;
+      if (_concurso.seguidores!.contains(_user.id)) {
+        _siguiendo =  true;
+      }
+      for (var item in _concurso.inscripciones!) {
+        if(item.user == _user.id){
+          _inscrito =  true;
+          _inscripcion =  item;
         }
       }
     }
-    _concurso = await ApiService().getConcurso(_idConcurso);
-    _noticiasRelacionadas = await ApiService().getNoticiasRelacionadasConActividad(_concurso.noticiasRelacionadas!);
     await dotenv.load(fileName: ".env");
     Timer(Duration(milliseconds: 1000), () {});
     _backUrl = dotenv.get('backUrl');
-    _concurso.galeriaDeFotos!.insert(0, _concurso.fotoPrincipal!);
-    _numPages = _concurso.galeriaDeFotos!.length;
-    _inscritos = _concurso.inscritos!;
     Timer(Duration(seconds: 1), () {
       setState(() {
         controller.uiLoading = false;
       });
      });
   }
-
   void _seguirActividad() async {
-    _user.concursosSeguidos!.add({"idActividad":_idConcurso});
-    await ApiService().setActividadesSeguidos(_user.id!, _user.concursosSeguidos!, "concursos");
+    _concurso.seguidores!.add(_user.id!);
+    await ApiService().setConcursoSeguidores(_concurso.id!, _concurso.seguidores!);
     setState(() {    
+      _siguiendo = true;
     });
   }
   void _dejarDeSeguirActividad() async {
-    _user.concursosSeguidos!.removeWhere((actividad) => actividad["idActividad"] == _idConcurso);
-    await ApiService().setActividadesSeguidos(_user.id!, _user.concursosSeguidos!, "concursos");
+    _concurso.seguidores!.remove(_user.id!);
+    await ApiService().setConcursoSeguidores(_user.id!, _concurso.seguidores!);
     setState(() {
-      // Actualiza la interfaz de usuario si es necesario
+      _siguiendo = false;
     });
   }
   void _inscribirseActividad() async {
-    _concurso = await ApiService().getConcurso(_idConcurso);
+    _concurso = await ApiService().getConcursoPopulateConInscripcionesSeguidores(_id);
     if(_concurso.capacidad! > -1){
       if(_concurso.inscritos! < _concurso.capacidad!){
-        int idInscripcion = await ApiService().crearInscripcionConcurso(_user.id!, _idConcurso);
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => super.widget));
+        await ApiService().crearInscripcionActividad(_user.id!, _id, "concurso");
         setState(() {
-          _inscritos++;
-          MensajeTemporalInferior().mostrarMensaje(context,"¡Inscrito! Presenta el código QR para ingresar al evento. Tus inscripciones las podrás ver en sus mismos eventos y en tu perfil.",Color.fromRGBO(5, 50, 12, 1), Color.fromRGBO(255, 255, 255, 1));
+          MensajeTemporalInferior().mostrarMensaje(context,"¡Inscrito! Presenta el código QR para ingresar al evento. Tus inscripciones las podrás ver en sus mismos eventos y en tu perfil.", "exito");
         });
       }else{
         setState(() {
-          _inscritos = _concurso.inscritos!;
-          MensajeTemporalInferior().mostrarMensaje(context,"Lo sentimos, cupos agotados.",Color.fromRGBO(255, 0, 0, 1), Color.fromRGBO(255, 255, 255, 1));
+          MensajeTemporalInferior().mostrarMensaje(context,"Lo sentimos, cupos agotados.","error");
         });
       }
     }else{
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => super.widget));
-      int idInscripcion = await ApiService().crearInscripcionConcurso(_user.id!, _idConcurso);
+      await ApiService().crearInscripcionActividad(_user.id!, _id, "concurso");
       setState(() {
-        _inscritos++;
-        MensajeTemporalInferior().mostrarMensaje(context,"¡Inscrito! Presenta el código QR para ingresar al evento. Tus inscripciones las podrás ver en sus mismos eventos y en tu perfil.",Color.fromRGBO(5, 50, 12, 1), Color.fromRGBO(255, 255, 255, 1));
+        MensajeTemporalInferior().mostrarMensaje(context,"¡Inscrito! Presenta el código QR para ingresar al evento. Tus inscripciones las podrás ver en sus mismos eventos y en tu perfil.", "wxito");
       });
     }
+    Navigator.pop(context);
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => super.widget));
   }
+  
   @override
   Widget build(BuildContext context) {
     if (controller.uiLoading) {
@@ -140,358 +135,522 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
       );
     } else {
       return Scaffold(
+        backgroundColor: AppColorStyles.verdeFondo,
         appBar: AppBar(
-          backgroundColor: Color.fromRGBO(244, 251, 249, 1),
+           backgroundColor: AppColorStyles.verdeFondo,
+          leading: IconButton(
+            icon: Icon(
+              LucideIcons.chevronLeft,
+              color: AppColorStyles.oscuro1
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
           title: Center(
             child: Padding(
-              padding: const EdgeInsets.only(right: 50.0), // Margen a la derecha
+              padding: const EdgeInsets.only(right: 50.0),
               child: RichText(
                 text: TextSpan(
                   text: _concurso.titulo!,
-                  style: TextStyle(
-                    fontSize: 18, // Tamaño del texto
-                    fontWeight: FontWeight.w600, // Peso del texto
-                    color: Colors.black, // Color del texto
-                  ),
+                  style: AppTitleStyles.principal(),
                 ),
-                overflow: TextOverflow.visible, // Permite que el texto se muestre en múltiples líneas
-                textAlign: TextAlign.center, // Alinea el texto al centro
+                overflow: TextOverflow.visible,
+                textAlign: TextAlign.center,
               ),
             ),
           ),
         ),
         body: SingleChildScrollView(
-          child: Padding(
-            padding: MySpacing.only(left: 24, right: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                _breadcrumbs(),
-                SizedBox(
-                  height: 8,
-                ),
-                Stack(
-                  alignment: AlignmentDirectional.center,
-                  children: <Widget>[
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.3,
-                      child: PageView(
-                        pageSnapping: true,
-                        physics: ClampingScrollPhysics(),
-                        controller: _pageController,
-                        onPageChanged: (int page) {
-                          setState(() {
-                            _currentPage = page;
-                          });
-                        },
-                        children: _crearGaleria().map((widget) {
-                          return Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 0),
-                            child: widget,
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 10,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: _buildPageIndicatorStatic(),
-                      ),
-                    ),
-                  ],
-                ),
-                if(_concurso.fechaInicio!.isNotEmpty)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center, // Alinea los elementos del Row al centro
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          MyText(
-                            "Inicia",
-                            fontSize: 12,
-                            fontWeight: 500,
-                          ),
-                          MyText(
-                            _concurso.fechaInicio!,
-                            fontSize: 14,
-                            fontWeight: 600,
-                          ),
-                        ],
-                      ),
-                    ),
-                    if(_concurso.fechaFin!.isNotEmpty)
-                    Container(
-                      padding: EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          MyText(
-                            "Finaliza",
-                            fontSize: 12,
-                            fontWeight: 500,
-                          ),
-                          MyText(
-                            _concurso.fechaFin!,
-                            fontSize: 14,
-                            fontWeight: 600,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                Divider(),
-                Container(
-                  margin: MySpacing.top(12),
-                  child: MyText(
-                    _concurso.descripcion!,
-                    fontSize: 14,
-                  ),
-                ),
-                _crearEtiquetas(),
-                _concurso.capacidad! > -1
-                ? ((_concurso.capacidad! - _inscritos) > 0
-                    ? MyText.titleLarge(
-                        "Cupos disponibles: ${_concurso.capacidad! - _inscritos}",
-                        fontSize: 16,
-                        fontWeight: 600,
-                      )
-                    : MyText.titleLarge(
-                        "Cupos agotados",
-                        fontSize: 16,
-                        fontWeight: 600,
-                      ))
-                : MyText.titleLarge(
-                    "Cupos ilimitados",
-                    fontSize: 16,
-                    fontWeight: 600,
-                  ),
-                if(_isLoggedIn && _user.estado! == "Completado")
-                Container(
-                  padding: EdgeInsets.only(top: 12, bottom: 16),
-                  child: Wrap(
-                    children: [
-                        if (_user.concursosInscritos!.any((concurso) => concurso['idActividad'] == _idConcurso))
-                        Container(
-                          margin: const EdgeInsets.all(8.0),
-                          child: MyButton.large(
-                            padding: const EdgeInsets.fromLTRB(23, 23, 23, 23),
-                            onPressed: () {},
-                            elevation: 0,
-                            splashColor: theme.colorScheme.onPrimary.withAlpha(60),
-                            backgroundColor: Color.fromRGBO(5, 50, 12, 1),
-                            borderRadiusAll: 16.0,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(LucideIcons.logIn, color: Colors.white), // Icono antes del texto
-                                SizedBox(width: 8.0),
-                                MyText.bodyMedium(
-                                  'Inscritó',
-                                  color: theme.colorScheme.onPrimary,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      if(!(_user.concursosInscritos!.any((concurso) => concurso['idActividad'] == _idConcurso)) && ((_concurso.capacidad!-_inscritos) > 0 || _concurso.capacidad! == -1))
-                      Container(
-                        margin: const EdgeInsets.all(8.0),
-                        child: MyButton.medium(
-                          buttonType: MyButtonType.outlined,
-                          borderColor: Colors.black,
-                          borderRadiusAll: 16.0,
-                          splashColor: Color.fromRGBO(32, 104, 14, 1).withAlpha(60),
-                          onPressed: () {
-                            if (!(_user.concursosInscritos!.any((concurso) => concurso['idActividad'] == _idConcurso))) {
-                              _showBottomSheet(context);
-                            }
-                          },
-                          elevation: 0,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(LucideIcons.logIn, color: Colors.black), // Icono antes del texto
-                              SizedBox(width: 8.0), // Espacio entre el icono y el texto
-                              MyText.bodyMedium(
-                                'Inscribirse',
-                                color: Colors.black,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      _user.concursosSeguidos!.any((actividad) => actividad["idActividad"] == _idConcurso)
-                        ? Container(
-                          margin: const EdgeInsets.all(8.0),
-                          child: MyButton.large(
-                            padding: const EdgeInsets.fromLTRB(23, 23, 23, 23),
-                            onPressed: () {_dejarDeSeguirActividad();},
-                            elevation: 0,
-                            splashColor: theme.colorScheme.onPrimary.withAlpha(60),
-                            backgroundColor: Color.fromRGBO(5, 50, 12, 1),
-                            borderRadiusAll: 16.0,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(LucideIcons.bellRing, color: Colors.white), // Icono antes del texto
-                                SizedBox(width: 8.0),
-                                MyText.bodyMedium(
-                                  'Dejar de seguir',
-                                  color: theme.colorScheme.onPrimary,
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                        : Container(
-                          margin: const EdgeInsets.all(8.0),
-                          child: MyButton.medium(
-                            buttonType: MyButtonType.outlined,
-                            borderColor: Colors.black,
-                            borderRadiusAll: 16.0,
-                            borderRadius: BorderRadius.circular(16.0),
-                            splashColor: Color.fromRGBO(32, 104, 14, 1).withAlpha(60),
-                            onPressed: () {_seguirActividad();},
-                            elevation: 0,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(LucideIcons.bellRing, color: Colors.black), // Icono antes del texto
-                                SizedBox(width: 8.0), 
-                                MyText.bodyMedium(
-                                  'Seguir',
-                                  color: Colors.black,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                ),
-                Divider(),
-                if( _concurso.calendario!.isNotEmpty)
-                _crearCalendario(),
-                if(_concurso.calendario!.isNotEmpty)
-                Divider(),
-                if (_user.concursosInscritos!.any((concurso) => concurso['idActividad'] == _idConcurso))
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        MyText.titleLarge(
-                          "Ingreso",
-                          fontSize: 18,
-                          fontWeight: 800,
-                        ),
-                        SizedBox(width: 8), // Espacio entre el texto y el icono
-                        IconButton(
-                          icon: Icon(
-                            _ingresoMostrado ? Icons.remove_red_eye_outlined : Icons.visibility_off_outlined,
-                            size: 24,
-                            color: Colors.black,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _ingresoMostrado = !_ingresoMostrado; // Alterna el valor de _ingresoMostrado
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                    if(_ingresoMostrado)
-                    MyText.titleLarge(
-                      "Presenta el código para ingresar al evento.",
-                      fontSize: 15,
-                      fontWeight: 600,
-                    ),
-                    SizedBox(height: 10),
-                    if(_ingresoMostrado)
-                    _mostrarIngreso(),
-                    Container(
-                      padding: EdgeInsets.only(top: 16.0, bottom: 0), // Espacio en la parte superior del Divider
-                      child: Divider(),
-                    )
-                  ],
-                ),
-                if(_concurso.noticiasRelacionadas!.isNotEmpty && _noticiasRelacionadas.isNotEmpty)
-                Container(
-                  margin: EdgeInsets.only(top: 16.0),
-                  child: Text(
-                    "Seguimiento",
-                    style: TextStyle(
-                      fontSize: 18, 
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                if(_concurso.noticiasRelacionadas!.isNotEmpty && _noticiasRelacionadas.isNotEmpty)
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      Column(
-                        children: <Widget>[
-                            Container(
-                            padding: MySpacing.only(top: 12, bottom: 12),
-                            child: Wrap(
-                              children: _buildMasNoticias(),
-                            ),
-                          )
-                        ]
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              _breadcrumbs(),
+              _crearGaleriaImagenes(),
+              _crearFechasInicioFin(_concurso.fechaDeInicio!, _concurso.fechaDeFin!),
+              _contenedorDescripcion(),
+              _crearCalendarioOpcional(_concurso.calendario!.isNotEmpty),
+              _crearIngresoOpcional(_inscrito),
+              _crearSeguimientoOpcional((_concurso.noticias!.isNotEmpty)),
+            ],
           ),
+        ),
+        bottomNavigationBar: FlashyTabBar(
+          iconSize: 24,
+          backgroundColor: AppColorStyles.blancoFondo,
+          selectedIndex: 1,
+          animationDuration: Duration(milliseconds: 500),
+          showElevation: true,
+          items: [
+            FlashyTabBarItem(
+              inactiveColor: AppColorStyles.verde1,
+              activeColor: AppColorStyles.verde1,
+              icon: Icon(Icons.home_sharp),
+              title: Text(
+                'Inicio',
+                style: AppTextStyles.bottomMenu()
+              ),
+            ),
+            FlashyTabBarItem(
+              inactiveColor: AppColorStyles.verde1,
+              activeColor: AppColorStyles.verde1,
+              icon: Icon(Icons.emoji_events_sharp),
+              title: Text(
+                'Actividades',
+                style: AppTextStyles.bottomMenu()
+              ),
+            ),
+            FlashyTabBarItem(
+              inactiveColor: AppColorStyles.verde1,
+              activeColor: AppColorStyles.verde1,
+              icon: Icon(Icons.local_library_sharp),
+              title: Text(
+                'Campus',
+                style: AppTextStyles.bottomMenu()
+              ),
+            ),
+            FlashyTabBarItem(
+              inactiveColor: AppColorStyles.verde1,
+              activeColor: AppColorStyles.verde1,
+              icon: Icon(Icons.push_pin_sharp),
+              title: Text(
+                'Noticias',
+                style: AppTextStyles.bottomMenu()
+              ),
+            ),
+            FlashyTabBarItem(
+              inactiveColor: AppColorStyles.verde1,
+              activeColor: AppColorStyles.verde1,
+              icon: Icon(Icons.account_circle_sharp),
+              title: Text(
+                'Mi perfil',
+                style: AppTextStyles.bottomMenu()
+              ),
+            ),
+          ],
+          onItemSelected: (index) {
+            Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: index,)),(Route<dynamic> route) => false);
+          },
         ),
       );
     }
   }
   
-  
+  Widget _crearSeguimientoOpcional(bool condicion){
+    return Visibility(
+      visible: condicion,
+      child: Container(
+        margin: EdgeInsets.all(15),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Seguimiento",
+              style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1)
+            ),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  Container(
+                    margin: EdgeInsets.symmetric(vertical: 15),
+                    child: Wrap(
+                      children: _buildMasNoticias(),
+                    ),
+                  )
+                ]
+              ),
+            ),
+          ],
+        )
+      )
+    );
+  }
+  Widget _crearIngresoOpcional(bool condicion){
+    return Visibility(
+      visible: condicion,
+      child: Container(
+        padding: EdgeInsets.all(15), // Añade un padding si es necesario
+        margin: EdgeInsets.all(15), // Añade un padding si es necesario
+        decoration: AppDecorationStyle.tarjeta(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  "Ingreso",
+                  style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1)
+                ),
+                SizedBox(width: 8), // Espacio entre el texto y el icono
+                Row(
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          _ingresoMostrado = !_ingresoMostrado; // Alterna el valor de _ingresoMostrado
+                        });
+                      },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min, // Ajusta el tamaño del Row al contenido
+                        children: [
+                          Icon(
+                            _ingresoMostrado ? Icons.remove_red_eye_outlined : Icons.visibility_off_outlined,
+                            size: 24,
+                            color: AppColorStyles.verde1,
+                          ),
+                          SizedBox(width: 8.0), // Espacio entre el icono y el texto
+                          Text(
+                            _ingresoMostrado ? 'Clic para ocultar' : 'Click para mostrar', // Texto que cambia según _ingresoMostrado
+                            style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.verde1)
+                          ),
+                        ],
+                      ),
+                    )
+                  ]
+                )
+              ],
+            ),
+            Visibility(
+              visible: _ingresoMostrado,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: EdgeInsets.symmetric(vertical: 15),
+                    child: Text(
+                      "Presenta el código para ingresar al evento.",
+                      style: AppTextStyles.parrafo(),
+                    ),
+                  ),
+                  _mostrarIngreso(),
+                  SizedBox(height: 15)
+                ],
+              )
+            )
+          ],
+        ),
+      )
+    );
+  }
+  Widget _crearCalendarioOpcional(bool condicion) {
+    List<Map<String, dynamic>> calendarios = _concurso.calendario!;
+    return Visibility(
+      visible: condicion,
+      child: Container(
+        margin: EdgeInsets.all(15),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Calendario de actividades",
+              style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1)
+            ),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: _concurso.calendario!.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Container(
+                  padding: EdgeInsets.only(top: 12, bottom: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _concurso.calendario![index]["titulo"]!,
+                        style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.verde1),
+                      ),
+                      SizedBox(height: 4.0),
+                      Text(
+                        calendarios[index]["fechaDeInicio"]!+(calendarios[index]["fechaDeFin"]!.toString().isNotEmpty ? " - " : "")+calendarios[index]["fechaDeFin"]!+(calendarios[index]["horaDeInicio"]!.toString().isNotEmpty || calendarios[index]["horaDeInicio"]!.toString().isNotEmpty ? "\n" : "") +calendarios[index]["horaDeInicio"]! + (calendarios[index]["horaDeFin"]!.toString().isNotEmpty ? " - " : "")+calendarios[index]["horaDeFin"]!, 
+                        style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      )
+    );
+  }
+  Widget _contenedorDescripcion(){
+    String descripcion = _concurso.descripcion!;
+    return
+      Container(
+        margin: EdgeInsets.all(15.0),
+        padding: EdgeInsets.all(15),
+        decoration: AppDecorationStyle.tarjeta(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              descripcion,
+              style: AppTextStyles.parrafo()
+            ),
+            _crearEtiquetas(),
+            _crearEnlaceExterno(),
+            //_botonesOpcionales((_isLoggedIn && _user.estado! == "Completado"), (!_inscrito && ((_concurso.capacidad!-_concurso.inscritos!) > 0 || _concurso.capacidad! == -1)), _inscrito, _siguiendo),
+          ],
+        ),
+      );
+  }
+  Widget _crearEnlaceExterno(){
+    return Visibility(
+      visible: _concurso.enlaceExterno!.isNotEmpty,
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 15),
+        alignment: Alignment.centerLeft,
+        child: ElevatedButton(
+          onPressed: () async {
+            if (!await launchUrl(
+                Uri.parse(_concurso.enlaceExterno!),
+                mode: LaunchMode.externalApplication,
+              )) {}
+          },
+          style: AppDecorationStyle.botonContacto(),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                LucideIcons.link2,
+                color: AppColorStyles.blancoFondo
+              ),
+              SizedBox(width: 8.0), // Espacio entre el icono y el texto
+              Text(
+                'Más información',
+                style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+              ),
+            ],
+          ),
+        ),
+      )
+    );
+  }
+  Widget _botonesOpcionales(bool condicion, condicionInscribirse, condicionInscrito, condicionSeguir){
+    return Visibility(
+      visible: condicion,
+      child: SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            Visibility(
+              visible: condicionInscrito,
+              child: Container(
+                margin: EdgeInsets.only(right: 15),
+                alignment: Alignment.centerLeft,
+                child: ElevatedButton(
+                  onPressed: () {},
+                  style: AppDecorationStyle.botonContacto(color: AppColorStyles.blancoFondo),
+                  child: Row(
+                    children: [
+                      Icon(LucideIcons.logIn, color: AppColorStyles.verde2), // Icono a la izquierda
+                      SizedBox(width: 8.0), // Espacio entre el icono y el texto
+                      Text(
+                        'Inscritó',
+                        style: AppTextStyles.botonMenor(color: AppColorStyles.verde2), // Estilo del texto del botón
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: condicionInscribirse,
+              child: Container(
+                margin: EdgeInsets.only(right: 15),
+                alignment: Alignment.centerLeft,
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (!_inscrito) {
+                      _showBottomSheet(context);
+                    }
+                  },
+                  style: AppDecorationStyle.botonContacto(),
+                  child: Row(
+                    children: [
+                      Icon(LucideIcons.logIn, color: AppColorStyles.blancoFondo), // Icono a la izquierda
+                      SizedBox(width: 8.0), // Espacio entre el icono y el texto
+                      Text(
+                        'Inscribirse',
+                        style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                      )
+                    ]
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: condicionSeguir,
+              child: Container(
+                margin: EdgeInsets.only(right: 15),
+                alignment: Alignment.centerLeft,
+                child: ElevatedButton(
+                  onPressed: () {
+                    _dejarDeSeguirActividad();
+                  },
+                  style: AppDecorationStyle.botonContacto(),
+                  child: Row(
+                    children: [
+                      Icon(LucideIcons.bellRing, color: AppColorStyles.blancoFondo), // Icono a la izquierda
+                      SizedBox(width: 8.0), // Espacio entre el icono y el texto
+                      Text(
+                        'Dejar de seguir',
+                        style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                      ),
+                    ]
+                  )
+                ),
+              ),
+            ),
+            Visibility(
+              visible: !condicionSeguir,
+              child: Container(
+                margin: EdgeInsets.only(right: 15),
+                alignment: Alignment.centerLeft,
+                child: ElevatedButton(
+                  onPressed: () {
+                    _seguirActividad();
+                  },
+                  style: AppDecorationStyle.botonContacto(),
+                  child: Row(
+                    children: [
+                      Icon(LucideIcons.bellRing, color: AppColorStyles.blancoFondo),// Icono a la izquierda
+                      SizedBox(width: 8.0), // Espacio entre el icono y el texto
+                      Text(
+                        'Seguir',
+                        style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                      ),
+                    ]
+                  )
+                ),
+              ),
+            ),
+          ],
+        )
+      )
+    );
+  }
+  Widget _crearFechasInicioFin(String inicio, String fin){
+    return Container(
+      margin: EdgeInsets.all(15),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center, // Alinea los elementos del Row al centro
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "INICIA",
+                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+              ),
+              Text(
+                inicio,
+                style: AppTextStyles.botonMayor()
+              ),
+            ],
+          ),
+          SizedBox( width: 30,),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "FINALIZA",
+                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+              ),
+              Text(
+                fin,
+                style: AppTextStyles.botonMayor()
+              ),
+            ],
+          ),
+        ],
+      )
+    );
+  }
+  Widget _crearGaleriaImagenes(){
+    return Container(
+      margin: EdgeInsets.all(15), 
+      child: Stack(
+        alignment: AlignmentDirectional.center,
+        children: <Widget>[
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.3,
+            child: PageView(
+              pageSnapping: true,
+              physics: ClampingScrollPhysics(),
+              controller: _pageController,
+              onPageChanged: (int page) {
+                setState(() {
+                  _currentPage = page;
+                });
+              },
+              children: _crearGaleria().map((widget) {
+                return Container(
+                  child: widget,
+                );
+              }).toList(),
+            ),
+          ),
+          Positioned(
+            bottom: 10,
+            left: 10, // Añade esta línea para alinear a la izquierda
+            child: _buildPageIndicatorStatic(),
+          ),
+        ],
+      )
+    );
+  }
+  Widget _buildPageIndicatorStatic() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4), // Padding interno del contenedor
+          decoration: BoxDecoration(
+            color: AppColorStyles.verde2, // Color de fondo del contenedor
+            borderRadius: BorderRadius.circular(24.0), // Borde redondeado con radio de 24
+          ),
+          child: Text(
+            '${_currentPage + 1}/${_concurso.imagenes!.length}',
+            style: AppTextStyles.etiqueta(color: AppColorStyles.blancoFondo)
+          ),
+        ),
+      ],
+    );
+  }
   _buildMasNoticias() {
     List<Widget> masNoticias = [];
-    for (int index = 0; index < _noticiasRelacionadas.length; index++) {
-      Noticia noticia = _noticiasRelacionadas[index];
+    for (int index = 0; index < _concurso.noticias!.length; index++) {
+      Noticia noticia = _concurso.noticias![index];
       masNoticias.add(InkWell(
         onTap: () {
           Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 3,)),(Route<dynamic> route) => false);
           Navigator.push(context, MaterialPageRoute(builder: (context) => NoticiaScreen(idNoticia: noticia.id!,)));
         },
         child: Container(
-          margin: EdgeInsets.only(top: 8.0, bottom: 8, right: 16),
+          margin: EdgeInsets.only(right: 15),
           child: SizedBox(
             width: MediaQuery.of(context).size.width * 0.65, // 65% del ancho de la pantalla
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
+                  margin: EdgeInsets.only(bottom: 15),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16.0),
+                    borderRadius: BorderRadius.circular(5.0),
                     image: DecorationImage(
-                      image: NetworkImage(_backUrl + noticia.foto!),
+                      image: NetworkImage(_backUrl + noticia.imagen!),
                       fit: BoxFit.cover,
                     ),
                   ),
                   height: 150,
                   width: MediaQuery.of(context).size.width * 0.65, // 65% del ancho de la pantalla
                 ),
-                SizedBox(height: 16),
                 Text(
-                  noticia.titular!,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  noticia.titulo!,
+                  style: AppTitleStyles.tarjetaMenor()
                 ),
               ],
             ),
@@ -529,7 +688,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
                         borderRadiusAll: 16.0,
                         splashColor: Color.fromRGBO(32, 104, 14, 1).withAlpha(60),
                         onPressed: () {
-                          if (!(_user.concursosInscritos!.any((concurso) => concurso['idActividad'] == _idConcurso))) {
+                          if (!_inscrito) {
                             _inscribirseActividad();
                             _seguirActividad();
                           }
@@ -557,46 +716,6 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
       }
     );
   }
-  Widget _crearCalendario() {
-    return Container(
-      padding: EdgeInsets.only(top: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          MyText.titleLarge(
-            "Calendario de eventos",
-            fontSize: 18,
-            fontWeight: 800,
-          ),
-          SizedBox(height: 8.0), // Espacio entre los textos
-          ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: _concurso.calendario!.length,
-            itemBuilder: (BuildContext context, int index) {
-              return Container(
-                padding: EdgeInsets.only(top: 12, bottom: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _concurso.calendario![index]["titulo"],
-                      style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 4.0),
-                    Text(
-                      _concurso.calendario![index]["inicio"]+_concurso.calendario![index]["fin"],
-                      style: TextStyle(fontSize: 14.0),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
   Widget _mostrarIngreso(){
     return
       Center(
@@ -606,7 +725,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
           children: [
             BarcodeWidget(
               barcode: Barcode.qrCode(),
-              data: _qr,
+              data: _inscripcion.qr!,
               width: 200,
               height: 200,
               style: TextStyle(fontSize: 16),
@@ -616,17 +735,24 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
       );
   }
   Widget _crearEtiquetas() {
+    List<Etiqueta> etiquetas = _concurso.etiquetas!;
     return Container(
-      padding: EdgeInsets.only(top: 16, bottom: 12),
+      margin: EdgeInsets.symmetric(vertical: 15),
       child: Wrap(
         spacing: 8.0, // Espacio entre elementos en el eje principal
         runSpacing: 8.0, // Espacio entre elementos en el eje transversal
         children: List.generate(
-          _concurso.etiquetas!.length,
+          etiquetas.length,
           (index) {
-            return Text(
-              "#${_concurso.etiquetas![index]}",
-              style: TextStyle(fontSize: 14.0),
+            return InkWell(
+              onTap: () {
+                Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => EtiquetasScreen(etiqueta: etiquetas[index].nombre!,)));
+              },
+              child: Text(
+                "#${etiquetas[index].nombre}",
+                style: AppTextStyles.parrafo(color: AppColorStyles.verde1),
+              ),
             );
           },
         ),
@@ -634,7 +760,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
     );
   }
   List<Widget> _crearGaleria() {
-    return _concurso.galeriaDeFotos!.map((url) {
+    return _concurso.imagenes!.map((url) {
       return Container(
         decoration: BoxDecoration(
           color: customTheme.card,
@@ -659,47 +785,25 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
       );
     }).toList();
   }
-  List<Widget> _buildPageIndicatorStatic() {
-    List<Widget> list = [];
-    for (int i = 0; i < _numPages; i++) {
-      list.add(i == _currentPage ? _indicator(true) : _indicator(false));
-    }
-    return list;
-  }
-  Widget _indicator(bool isActive) {
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 300),
-      curve: Curves.easeInToLinear,
-      margin: EdgeInsets.symmetric(horizontal: 4.0),
-      height: 8.0,
-      width: 8,
-      decoration: BoxDecoration(
-        color: isActive ? const Color.fromRGBO(32, 104, 14, 1) : const Color.fromARGB(160, 156, 171, 1).withAlpha(140),
-        borderRadius: BorderRadius.all(Radius.circular(4)),
-      ),
-    );
-  }
   Widget _breadcrumbs() {
+    Categoria categoria = _concurso.categoria!;
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center, // Alinea los elementos del Row al centro
         children: [
-          MyText(
-            "Evento",
-            fontSize: 14,
-            fontWeight: 500,
+          Text(
+            "Concurso",
+            style: AppTextStyles.botonMenor(color: AppColorStyles.gris1)
           ),
-          Icon(LucideIcons.dot),
-          MyText(
-            _concurso.categoria!,
-            fontSize: 14,
-            fontWeight: 500,
+          Icon(LucideIcons.dot, color: AppColorStyles.gris1),
+          Text(
+            categoria.nombre!,
+            style: AppTextStyles.botonMenor(color: AppColorStyles.gris1)
           ),
-          Icon(LucideIcons.dot),
-          MyText(
+           Icon(LucideIcons.dot, color: AppColorStyles.gris1),
+          Text(
             _concurso.publicacion!,
-            fontSize: 14,
-            fontWeight: 500,
+            style: AppTextStyles.botonMenor(color: AppColorStyles.gris1)
           ),
         ],
       ),

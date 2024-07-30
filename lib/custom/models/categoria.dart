@@ -1,65 +1,32 @@
-import 'dart:convert';
-    
-// getting a list of users from json
-List<Categoria> categoriaFromJson(String str) {
-  final jsonData = json.decode(str);
-  final List<dynamic> data = jsonData['data'];
 
-  return List<Categoria>.from(data.map((x) => Categoria.fromJsonEvento(x['attributes'])));
-}
-//EVENTOS
-List<Categoria> categoriasEventosFromJson(String str) {
-  final jsonData = json.decode(str);
-  final List<dynamic> data = jsonData['data'];
-
-  return List<Categoria>.from(data.map((x) {
-    final eventosData = x['attributes']['eventos']?['data'];
-    if (eventosData == null || eventosData!.length <= 0) {
-      // O puedes devolver una lista vacía si prefieres
-      return null; // O algún valor que indique que no hay datos
-    }
-    return Categoria.fromJsonEvento(x['attributes']);
-  }).where((element) => element != null)); // Filtrar elementos nulos
-}
-//CONCURSOS
-List<Categoria> categoriasConcursosFromJson(String str) {
-  final jsonData = json.decode(str);
-  final List<dynamic> data = jsonData['data'];
-
-  return List<Categoria>.from(data.map((x) {
-    final concursosData = x['attributes']['concursos']?['data'];
-    if (concursosData == null || concursosData!.length <= 0) {
-      // O puedes devolver una lista vacía si prefieres
-      return null; // O algún valor que indique que no hay datos
-    }
-    return Categoria.fromJsonConcurso(x['attributes']);
-  }).where((element) => element != null)); // Filtrar elementos nulos
-}
-//NOTICIAS
-List<Categoria> categoriasNoticiasFromJson(String str) {
-  final jsonData = json.decode(str);
-  final List<dynamic> data = jsonData['data'];
-
-  return List<Categoria>.from(data.map((x) {
-    final eventosData = x['attributes']['noticias']?['data'];
-    if (eventosData == null || eventosData!.length <= 0) {
-      // O puedes devolver una lista vacía si prefieres
-      return null; // O algún valor que indique que no hay datos
-    }
-    return Categoria.fromJsonNoticia(x['attributes']);
-  }).where((element) => element != null)); // Filtrar elementos nulos
-}
 // Categoria class
 class Categoria {
-  Categoria({
-    this.id,
-    this.nombre,
-    this.idsContenido,
-  });
-
   int? id;
   String? nombre;
+  String? icono;
+  bool? activo;
   List<int>? idsContenido;
+
+  Categoria({
+    this.id = -1,
+    this.nombre = "Sin categoría",
+    this.icono = "sin icono",
+    this.activo = false,
+    this.idsContenido,
+  });
+  
+  static Categoria armarCategoria(dynamic data){
+    Categoria res = Categoria();
+    if (data != null) {
+      res = Categoria(
+        id: data["id"],
+        nombre: data["attributes"]["nombre"],
+        icono: data["attributes"]["icono"],
+      );
+    }
+    return res;
+  }
+
   //EVENTOS
   factory Categoria.fromJsonEvento(Map<String, dynamic> json) => Categoria(
     id: json["id"],

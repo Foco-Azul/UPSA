@@ -20,14 +20,16 @@ class Universidad {
   Universidad({
     this.id,
     this.nombre,
+    this.idDepartamento,
   });
 
-  String? id;
+  int? id;
   String? nombre;
+  int? idDepartamento;
 
   factory Universidad.fromJson(Map<String, dynamic> json) {
     return Universidad(
-      id: json["id"],
+      id: int.parse(json["id"]),
       nombre: json["nombre"],
     );
   }
