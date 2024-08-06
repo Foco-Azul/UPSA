@@ -23,14 +23,14 @@ Future<void> main() async {
   bool? esNuevo = prefs.getBool('esNuevo') ?? true;
   Widget initialScreen = esNuevo == true ? WelcomeScreen() : HomesScreen();
   runApp(
-    MultiProvider(
+    MultiProvider( 
       providers:[
         ChangeNotifierProvider<AppNotifier>(create: (context) => AppNotifier()),
       ],
       child: MyApp(initialScreen: initialScreen),
     )
   ); 
-}
+} 
 class MyApp extends StatelessWidget {
   final Widget initialScreen;
 

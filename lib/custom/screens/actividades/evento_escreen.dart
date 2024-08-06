@@ -8,6 +8,7 @@ import 'package:flutkit/custom/models/evento.dart';
 import 'package:flutkit/custom/models/inscripcion.dart';
 import 'package:flutkit/custom/models/noticia.dart';
 import 'package:flutkit/custom/models/user.dart';
+import 'package:flutkit/custom/screens/actividades/retroalimentacion_screen.dart';
 import 'package:flutkit/custom/screens/inicio/etiquetas_screen.dart';
 import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
@@ -18,7 +19,6 @@ import 'package:flutkit/helpers/widgets/my_button.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutkit/custom/controllers/login_controller.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/helpers/widgets/my_text.dart';
@@ -38,7 +38,6 @@ class _EventoScreenState extends State<EventoScreen> {
   late ThemeData theme;
   late CustomTheme customTheme;
   late ProfileController controller;
-  late LoginController loginController;
   final PageController _pageController = PageController(initialPage: 0);
   int _currentPage = 0;
   String _backUrl = "";
@@ -65,15 +64,20 @@ class _EventoScreenState extends State<EventoScreen> {
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
     if (_isLoggedIn) {
       _user = Provider.of<AppNotifier>(context, listen: false).user;
-      if (_evento.seguidores!.contains(_user.id)) {
-        _siguiendo =  true;
-      }
-      for (var item in _evento.inscripciones!) {
-        if(item.user == _user.id){
-          _inscrito =  true;
-          _inscripcion =  item;
+      if(_user.rolCustom! == "estudiante" || true){
+        _filtrarNoticias(_user.id!);
+        if (_evento.seguidores!.contains(_user.id)) {
+          _siguiendo =  true;
+        }
+        for (var item in _evento.inscripciones!) {
+          if(item.user == _user.id){
+            _inscrito =  true;
+            _inscripcion =  item;
+          }
         }
       }
+    }else{
+      _filtrarNoticias(-1);
     }
     await dotenv.load(fileName: ".env");
     Timer(Duration(milliseconds: 1000), () {});
@@ -84,6 +88,21 @@ class _EventoScreenState extends State<EventoScreen> {
       });
      });
   }
+  void _filtrarNoticias(int id){
+    List<Noticia> aux = [];
+    for (var item in _evento.noticias!) {
+      if(item.usuariosPermitidos!.isNotEmpty){
+        for (var item2 in item.usuariosPermitidos!) {
+          if(item2 == id){
+            aux.add(item);
+          }
+        }
+      }else{
+        aux.add(item);
+      }
+    }
+    _evento.noticias = aux;
+  } 
   void _seguirActividad() async {
     _evento.seguidores!.add(_user.id!);
     await ApiService().setEventoSeguidores(_evento.id!, _evento.seguidores!);
@@ -167,6 +186,7 @@ class _EventoScreenState extends State<EventoScreen> {
               _breadcrumbs(),
               _crearGaleriaImagenes(),
               _crearFechasInicioFin(_evento.fechaDeInicio!, _evento.fechaDeFin!),
+              _contenedorRetroalimentacion(),
               _contenedorDescripcion(),
               _crearCalendarioOpcional(_evento.calendario!.isNotEmpty),
               _crearIngresoOpcional(_inscrito),
@@ -234,7 +254,59 @@ class _EventoScreenState extends State<EventoScreen> {
       );
     }
   }
- 
+  
+  Widget _contenedorRetroalimentacion(){
+    return Visibility(
+      visible: (_isLoggedIn && _user.rolCustom == "estudiante" && _user.estado! == "Completado") && _inscrito && _inscripcion.asistencia!,
+      child: Container(
+        padding: EdgeInsets.all(15.0),
+        margin: EdgeInsets.all(15.0),
+        decoration: AppDecorationStyle.tarjeta(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.live_help_outlined, // Reemplaza con el icono que desees
+                  color: AppColorStyles.verde1, // Ajusta el color si es necesario
+                ), 
+                SizedBox(width: 4.0), // Espaciado entre el icono y el texto
+                Text(
+                  "retroalimentación".toUpperCase(), // Primer texto
+                  style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+                ),
+              ]
+            ),
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 8.0), // Ajusta los valores del margen según sea necesario
+              child: Column(
+                children: [
+                  Text(
+                    "¿Que opinaste del evento? Dejanos tu opinión para que podamos mejorar nuestras actividades.",
+                    style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
+                  ),
+                ]
+              ),
+            ),
+            Container(
+              alignment: Alignment.centerLeft,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => RetroalimentacionScreen(id: _evento.id!, tipo: "evento", titulo: _evento.titulo!,)));
+                },
+                style: AppDecorationStyle.botonContacto(),
+                child: Text(
+                  'Llenar retroalimentación',
+                  style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                ),
+              ),
+            )
+          ],
+        ),
+      )
+    );
+  }
   Widget _crearSeguimientoOpcional(bool condicion){
     return Visibility(
       visible: condicion,
@@ -337,7 +409,7 @@ class _EventoScreenState extends State<EventoScreen> {
   }
   Widget _crearIngresoOpcional(bool condicion){
     return Visibility(
-      visible: condicion,
+      visible: (_isLoggedIn && _user.rolCustom == "estudiante" && _user.estado! == "Completado") && condicion,
       child: Container(
         padding: EdgeInsets.all(15), // Añade un padding si es necesario
         margin: EdgeInsets.all(15), // Añade un padding si es necesario
@@ -417,7 +489,7 @@ class _EventoScreenState extends State<EventoScreen> {
               style: AppTextStyles.parrafo()
             ),
             _crearEtiquetas(),
-            _botonesOpcionales((_isLoggedIn && _user.estado! == "Completado"), (!_inscrito && ((_evento.capacidad!-_evento.inscritos!) > 0 || _evento.capacidad! == -1)), _inscrito, _siguiendo),
+            _botonesOpcionales((_isLoggedIn && _user.rolCustom == "estudiante" && _user.estado! == "Completado"), (!_inscrito && ((_evento.capacidad!-_evento.inscritos!) > 0 || _evento.capacidad! == -1)), _inscrito, _siguiendo),
           ],
         ),
       );
@@ -650,7 +722,7 @@ class _EventoScreenState extends State<EventoScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Calendario de actividades",
+              "Info",
               style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1)
             ),
             ListView.builder(
@@ -667,9 +739,18 @@ class _EventoScreenState extends State<EventoScreen> {
                         calendarios[index]["titulo"]!,
                         style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.verde1),
                       ),
-                      SizedBox(height: 4.0),
+                      Visibility(
+                        visible: calendarios[index]["descripcion"].toString().isNotEmpty,
+                        child: Container(
+                          margin: EdgeInsets.symmetric(vertical: 5),
+                          child: Text(
+                            calendarios[index]["descripcion"]!,
+                            style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
+                          ),
+                        )
+                      ),
                       Text(
-                        calendarios[index]["fechaDeInicio"]!+(calendarios[index]["fechaDeFin"]!.toString().isNotEmpty ? " - " : "")+calendarios[index]["fechaDeFin"]!+(calendarios[index]["horaDeInicio"]!.toString().isNotEmpty || calendarios[index]["horaDeInicio"]!.toString().isNotEmpty ? "\n" : "") +calendarios[index]["horaDeInicio"]! + (calendarios[index]["horaDeFin"]!.toString().isNotEmpty ? " - " : "")+calendarios[index]["horaDeFin"]!, 
+                        calendarios[index]["horaDeInicio"]!.toString().isNotEmpty ? calendarios[index]["fechaDeInicio"]! + " - " + calendarios[index]["horaDeInicio"] : calendarios[index]["fechaDeInicio"], 
                         style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
                       ),
                     ],
@@ -694,7 +775,7 @@ class _EventoScreenState extends State<EventoScreen> {
           (index) {
             return InkWell(
               onTap: () {
-                Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
+                //Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
                 Navigator.push(context, MaterialPageRoute(builder: (context) => EtiquetasScreen(etiqueta: etiquetas[index].nombre!,)));
               },
               child: Text(

@@ -1,27 +1,19 @@
 // ignore_for_file: avoid_print
 
-import 'dart:convert';
-
 import 'package:flutkit/custom/controllers/profile_controller.dart';
-import 'package:flutkit/custom/models/notificacion.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/screens/actividades/club_screen.dart';
 import 'package:flutkit/custom/screens/actividades/concurso_escreen.dart';
 import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
-import 'package:flutkit/custom/screens/campus/cursillo_screen.dart';
-import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
-import 'package:flutkit/helpers/widgets/my_text.dart';
-import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ActividadesPasadasScreen extends StatefulWidget {
   const ActividadesPasadasScreen({Key? key}) : super(key: key);
@@ -33,7 +25,6 @@ class ActividadesPasadasScreen extends StatefulWidget {
 class _ActividadesPasadasScreenState extends State<ActividadesPasadasScreen> {
   late ThemeData theme;
   late ProfileController controller;
-  final List<Notificacion> _notificaciones = [];
   bool _isLoggedIn = false;
   User _user = User();
   @override
@@ -100,7 +91,7 @@ class _ActividadesPasadasScreenState extends State<ActividadesPasadasScreen> {
     if(_user.rolCustom != "admin" && (_user.actividadesSeguidas!.isNotEmpty || _user.actividadesInscritas!.isNotEmpty)){
       return Container(
         padding: MySpacing.fromLTRB(15, 15, 15, 15),
-        margin: MySpacing.symmetric(vertical: 15),
+        margin: MySpacing.all(15),
         decoration: AppDecorationStyle.tarjeta(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,6 +118,7 @@ class _ActividadesPasadasScreenState extends State<ActividadesPasadasScreen> {
       return Container();
     }
   }
+  /*
   Widget _actividadesSeguidas() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,6 +179,7 @@ class _ActividadesPasadasScreenState extends State<ActividadesPasadasScreen> {
       }).toList(),
     );
   }
+  */
   Widget _actividadesInscritas() {
     int count = 0;
     return Column(

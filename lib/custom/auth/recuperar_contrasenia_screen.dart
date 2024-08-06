@@ -1,4 +1,3 @@
-import 'package:flutkit/custom/auth/recuperar_contrasenia_screen.dart';
 import 'package:flutkit/custom/auth/register_screen.dart';
 import 'package:flutkit/custom/auth/registro_carrera.dart';
 import 'package:flutkit/custom/auth/registro_intereses.dart';
@@ -17,23 +16,27 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Login2Screen extends StatefulWidget {
+class RecuperarContraseniaScreen extends StatefulWidget {
   static const namedRoute = "login2-screen";
   @override
-  _Login2ScreenState createState() => _Login2ScreenState();
+  _RecuperarContraseniaScreenState createState() => _RecuperarContraseniaScreenState();
 }
 
-class _Login2ScreenState extends State<Login2Screen> {
+class _RecuperarContraseniaScreenState extends State<RecuperarContraseniaScreen> {
   bool? _passwordVisible = true;
   late CustomTheme customTheme;
   late ThemeData theme;
   String _email = "";
+  String _codigoDeVerificacion = "";
   String _password = "";
-  String _error = "";
+
   String _errorEmail = "";
+  String _errorCodigoDeVerificacion = "";
   String _errorPassword = "";
   Validacion validacion = Validacion();
   late SharedPreferences _prefs;
+  String _paso = "email";
+  User _user = User();
   
   @override
   void initState() {
@@ -41,52 +44,45 @@ class _Login2ScreenState extends State<Login2Screen> {
     customTheme = AppTheme.customTheme;
     theme = AppTheme.theme;
   }
-  void _validarCamposLogin(){
-    setState(() {
-      _errorEmail = validacion.validarCorreo(_email, true);
-      _errorPassword = validacion.validarContrasenia(_password, true);
-    });
-    if(_errorEmail.isEmpty && _errorPassword.isEmpty){
-      _login();
-    }
-  }
-  void _login() async {
-    _prefs = await SharedPreferences.getInstance();
-    String tokenDispositivo = _prefs.getString('tokenDispositivo') ?? "";
-    User user = await ApiService().login(_email, _password, tokenDispositivo);
-    if (user.id == -1) {
-      setState(() {
-        _error = "Email o contraseña incorrecta";
-      });
-    } else {
-      Provider.of<AppNotifier>(context, listen: false).login();
-      Provider.of<AppNotifier>(context, listen: false).setUser(user);
-      MensajeTemporalInferior().mostrarMensaje(context,"Ingreso exitoso.", "exito");
-      switch (user.estado) {
-        case "Nuevo":
-          Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
-          Navigator.push(context,MaterialPageRoute(builder: (context) => ValidarEmail()));
-          break;
-        case "Verificado":
-          Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
-          Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroPerfil()));
-          break;
-        case "Perfil parte 1":
-          Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
-          Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroCarrera()));
-          break;
-        case "Perfil parte 2":
-          Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
-          Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroIntereses()));
-          break;
-        case "Completado":
-          Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
-          break;
-        default:
-          Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
-          break;
+  void _verificarCuentaPorEmail() async{
+    _errorEmail = validacion.validarCorreo(_email, true);
+    if(_errorEmail.isEmpty){
+      _user = await ApiService().getUserPorEmail(_email);
+      if(_user.id! == -1){
+        _errorEmail = "No se encontró la cuenta";
+      }else{
+        _errorEmail = "";
+        _paso = "codigoDeVerificacion";
       }
     }
+    setState(() {});
+  }
+  void _verificarCodigo() async{
+    _errorCodigoDeVerificacion = validacion.validarCodigoDeVerificacion(_codigoDeVerificacion, true);
+    if(_errorCodigoDeVerificacion.isEmpty){
+      User usuario = await ApiService().getUserPorEmail(_user.email!);
+      if(usuario.id! == -1){
+        _errorCodigoDeVerificacion = "Código incorrecto";
+      }else{
+        _errorCodigoDeVerificacion = "";
+        _paso = "password";
+      }
+    }
+    setState(() {});
+  }
+  void _actualizarContrasenia() async{
+    _errorPassword = validacion.validarContrasenia(_password, true);
+    if(_errorPassword.isEmpty){
+      User usuario = await ApiService().setActualizarContrasenia(_user.id!, _password);
+      _errorPassword = "";
+      if(usuario.id! == -1){
+        MensajeTemporalInferior().mostrarMensaje(context,"Algo salió mal.", "error");
+      }else{
+        Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
+        MensajeTemporalInferior().mostrarMensaje(context,"Se actualizó tu contraseña con exito.", "exito");
+      }
+    }
+    setState(() {});
   }
   @override
   Widget build(BuildContext context) {
@@ -111,11 +107,10 @@ class _Login2ScreenState extends State<Login2Screen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               _crearTituloConError(),
-              _crearCampoConError(_errorEmail, "Email", "Email", "email"),
-              _crearCampoPassConError(),
+              _crearCampoConErrorOpcional(_errorEmail, "Email", "Email", "email", _paso == "email"),
+              _crearCampoConErrorOpcional(_errorCodigoDeVerificacion, "Código de verificación", "Código de verificación", "codigoDeVerificacion", _paso == "codigoDeVerificacion"),
+              _crearCampoPassConErrorOpcional(_paso == "password"),
               _crearBoton(),
-              _crearTextoInferior(),
-              _crearOlvideMiContrasenia(),
             ],
           ),
         )
@@ -125,7 +120,7 @@ class _Login2ScreenState extends State<Login2Screen> {
   Widget _crearOlvideMiContrasenia(){
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => RecuperarContraseniaScreen()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Register2Screen()));
       },
       child: Container(
         margin: EdgeInsets.only(top: 15),
@@ -172,71 +167,88 @@ class _Login2ScreenState extends State<Login2Screen> {
         Container(
           alignment: Alignment.centerLeft, 
           child: Text(
-            "Ingresa con tu email",
+            "Cambia tu contraseña",
             style: AppTitleStyles.onboarding(color: AppColorStyles.verde1),
             textAlign: TextAlign.start,
-          ),
-        ),
-        if (_error.isNotEmpty)
-        Container(
-          alignment: Alignment.centerLeft, 
-          margin: EdgeInsets.only(top: 10),
-          child: Text(
-            _error,
-            style: const TextStyle(color: Colors.red),
           ),
         ),
       ],
     );
   }
   Widget _crearBoton(){
+    String texto = "";
+    if(_paso == "email" || _paso == "codigoDeVerificacion"){
+      texto = "Continuar";
+    }
+    if(_paso == "codigoDeVerificacion"){
+      texto = "Continuar";
+    }
+    if(_paso == "password"){
+      texto = "Finalizar";
+    }
     return Container(
       width: double.infinity,
       height: 50,
       margin: EdgeInsets.symmetric(vertical: 15),
       child: ElevatedButton(
         onPressed: () {
-          _validarCamposLogin();
+          if(_paso == "email"){
+            _verificarCuentaPorEmail();
+          }
+          if(_paso == "codigoDeVerificacion"){
+            _verificarCodigo();
+          }
+          if(_paso == "password"){
+            _actualizarContrasenia();
+          }
         },
         style: AppDecorationStyle.botonBienvenida(),
         child: Text(
-          'Ingresar',
+          texto,
           style: AppTextStyles.botonMayor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
         ),
       ),
     );
   }
-  Widget _crearCampoConError(String error, String labelText, String hintText, String campo){
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            decoration: AppDecorationStyle.campoContainer(),
-            child: TextField(
-              onChanged: (value) {
-                if(campo == "email"){
-                  _email = value;
-                }
-                setState(() {});
-              },
-              decoration: AppDecorationStyle.campoTexto(hintText: hintText, labelText: labelText),
-              style: AppTextStyles.parrafo(color: AppColorStyles.gris1)
+  Widget _crearCampoConErrorOpcional(String error, String labelText, String hintText, String campo, bool condicion){
+    return Visibility(
+      visible: condicion,
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 15),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              decoration: AppDecorationStyle.campoContainer(),
+              child: TextField(
+                onChanged: (value) {
+                  if(campo == "email"){
+                    _email = value;
+                  }
+                  if(campo == "codigoDeVerificacion"){
+                    _codigoDeVerificacion = value;
+                  }
+                  setState(() {});
+                },
+                decoration: AppDecorationStyle.campoTexto(hintText: hintText, labelText: labelText),
+                style: AppTextStyles.parrafo(color: AppColorStyles.gris1)
+              ),
             ),
-          ),
-          if (error.isNotEmpty)
-          Text(
-            error,
-            style: TextStyle(color: Colors.red),
-            textAlign: TextAlign.start,
-          ),
-        ],
-      ),
+            if (error.isNotEmpty)
+            Text(
+              error,
+              style: TextStyle(color: Colors.red),
+              textAlign: TextAlign.start,
+            ),
+          ],
+        ),
+      ) 
     );
   }
-  Widget _crearCampoPassConError(){
-    return Container(
+  Widget _crearCampoPassConErrorOpcional(bool condicion){
+    return Visibility(
+      visible: condicion,
+      child: Container(
       margin: EdgeInsets.symmetric(vertical: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,6 +296,8 @@ class _Login2ScreenState extends State<Login2Screen> {
           ),
         ],
       ),
+    )
+      
     );
   }
 }

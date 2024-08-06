@@ -168,4 +168,42 @@ class Validacion{
     }
     return error;
   }
+  String validarCelular(String? value, bool? esObligatorio){
+    String error = "";
+    if(esObligatorio!){
+      if(value != null && value.isNotEmpty){
+        if(int.tryParse(value) == null ||  (int.tryParse(value)! < 60000000 || int.tryParse(value)! > 80000000 || int.tryParse(value).toString() != value)){
+          error = "Campo no valido";
+        }
+      }else{
+        error = "Este campo es requerido";
+      }
+    }else{
+      if(value != null && value.isNotEmpty){
+        if(int.tryParse(value) == null ||  (int.tryParse(value)! < 60000000 || int.tryParse(value)! > 80000000 || int.tryParse(value).toString() != value)){
+          error = "Campo no valido";
+        }
+      }
+    }
+    return error;
+  }
+  String validarCodigoDeVerificacion(String? value, bool? esObligatorio){
+    String error = "";
+    if(esObligatorio!){
+      if(value != null && value.isNotEmpty){
+        if(int.tryParse(value) == null ||  (int.tryParse(value)! < 9999 || int.tryParse(value)! > 99999 || int.tryParse(value).toString() != value)){
+          error = "Campo no valido";
+        }
+      }else{
+        error = "Este campo es requerido";
+      }
+    }else{
+      if(value != null && value.isNotEmpty){
+        if(int.tryParse(value) == null ||  (int.tryParse(value)! < 9999 || int.tryParse(value)! > 99999 || int.tryParse(value).toString() != value)){
+          error = "Campo no valido";
+        }
+      }
+    }
+    return error;
+  }
 }

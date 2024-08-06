@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutkit/custom/models/categoria.dart';
+import 'package:flutkit/custom/models/evento.dart';
+import 'package:flutkit/custom/models/noticia.dart';
 import 'package:intl/intl.dart';
 
 class FuncionUpsa {
@@ -13,6 +15,41 @@ class FuncionUpsa {
       for (var item in datas) {
         res.add(item["attributes"]["url"]);
       }
+    }
+    return res;
+  }
+  static List<Map<String, dynamic>> _armarEntradasParaEscanear(dynamic data){
+    List<Map<String, dynamic>> res = [];
+    if(data != null){
+      for (var item in data) {
+        res.add(
+          {
+            "id": item["id"],
+            "qr": item["attributes"]["qr"] ?? "",
+            "asistencia": item["attributes"]["asistencia"] ?? false,
+            "email": item["attributes"]["user"]["data"] != null ? item["attributes"]["user"]["data"]["attributes"]["email"] : "",
+            "nombres": item["attributes"]["user"]["data"] != null ? (item["attributes"]["user"]["data"]["attributes"]["userMeta"]["data"] != null ? item["attributes"]["user"]["data"]["attributes"]["userMeta"]["data"]["attributes"]["nombres"] : "") : "",
+            "apellidos": item["attributes"]["user"]["data"] != null ? (item["attributes"]["user"]["data"]["attributes"]["userMeta"]["data"] != null ? item["attributes"]["user"]["data"]["attributes"]["userMeta"]["data"]["attributes"]["apellidos"] : "") : "",
+          }
+        );
+      }
+    }
+    return res;
+  } 
+  static List<Map<String,dynamic>> armarActividadesPopulateParaEscanearEntradas(String str, String tipo) {
+    List<Map<String,dynamic>> res = [];
+    final jsonData = json.decode(str);
+    final List<dynamic> data = jsonData['data'];
+    for (var item in data) {
+      Map<String,dynamic> aux = {
+        "id": item["id"],
+        "titulo": item['attributes']["titulo"],
+        "tipo": tipo,
+        "fechaDeInicio": item['attributes']["fechaDeInicio"],
+        "fechaDeFin": item['attributes']["fechaDeFin"],
+        "entradas": _armarEntradasParaEscanear(item['attributes']["inscripciones"]["data"])
+      };
+      res.add(aux);
     }
     return res;
   }
@@ -31,7 +68,7 @@ class FuncionUpsa {
       return "Hace $dias días";
     }
   }
-  static String armarfechaDeInicioFinConHora(String data) {
+  static String armarFechaDeInicioFinConHora(String data) {
     DateTime dateTime = DateTime.parse(data).toLocal();
     DateFormat dateFormatDate = DateFormat('dd MMMM', 'es_ES');
     DateFormat dateFormatTime = DateFormat('HH:mm', 'es_ES');
@@ -41,10 +78,25 @@ class FuncionUpsa {
     
     return '$formattedDate - $formattedTime';
   }
-  static List<int> armarSeguidores(List<dynamic> data){
+  static String armarFechaDeInicioFin(String data) {
+    // Parse the input data to a DateTime object and convert to local time
+    DateTime dateTime = DateTime.parse(data).toLocal();
+    
+    // Create a DateFormat object for the desired format
+    DateFormat dateFormatDate = DateFormat('dd MMMM', 'es_ES');
+    
+    // Format the DateTime object to a string
+    String formattedDate = dateFormatDate.format(dateTime);
+    
+    // Return the formatted date string
+    return formattedDate;
+  }
+  static List<int> armarSeguidores(List<dynamic>? data){
     List<int> res = [];
-    for (var item in data) {
-      res.add(item["id"]);
+    if(data !=  null){
+      for (var item in data) {
+        res.add(item["id"]);
+      }
     }
     return res;
   }
@@ -66,17 +118,16 @@ class FuncionUpsa {
     }
 
     // Crear la fecha en el formato deseado
-    return '${int.parse(partes[2])} de ${meses[mes]} del ${partes[0]}';
+    return '${int.parse(partes[2])} de ${meses[mes]}';
   }
   static List<Map<String, dynamic>> armarFechaCalendarioConHora(List<dynamic> data) {
     List<Map<String, dynamic>> res = [];
     for (var item in data) {
       Map<String, dynamic> aux = {
         "titulo":item['titulo'],
+        "descripcion": item["descripcion"] ?? "",
         "fechaDeInicio":_armarFechaLiteral(item['fechaDeInicio']),
-        "fechaDeFin": item['fechaDeFin'] != null ? _armarFechaLiteral(item['fechaDeFin']) : "",
         "horaDeInicio": item['horaDeInicio'] != null ? DateFormat('HH:mm').format(DateFormat('HH:mm:ss.SSS').parseUTC(item["horaDeInicio"]).toLocal()) : "",
-        "horaDeFin": item['horaDeFin'] != null ? DateFormat('HH:mm').format(DateFormat('HH:mm:ss.SSS').parseUTC(item["horaDeFin"]).toLocal()) : "",
       };
       res.add(aux);
     }
@@ -124,6 +175,7 @@ class FuncionUpsa {
           "descripcion": item['attributes']["descripcion"],
           "categoria": Categoria.armarCategoria(item['attributes']["categoria"]["data"]), 
           "tipo": "noticias",
+          "usuariosPermitidos": Noticia.armarListaDeEnteros(item['attributes']["colegios"]['data']),
         };
         res.add(aux);
       }
@@ -141,6 +193,40 @@ class FuncionUpsa {
       };
       aux.add(aux2);
       res.add(aux);
+    }
+    return res;
+  }
+  static List<String> armarOpciones(String str){
+    List<String> res = [];
+    final jsonData = json.decode(str);
+    if(jsonData['data'] != null){
+      final Map<String, dynamic> data = jsonData['data'];
+      for (var item in data["attributes"]["opciones"]) {
+        res.add(item["opcion"]);
+      }
+    }
+    return res;
+  }
+  static List<int> armarListaEnterosDesdeJsonString(String tipo, String str){
+    List<int> res = [];
+    if(tipo == "cursillosVistos"){
+      final jsonData = json.decode(str);
+      if(jsonData["cursillos"] != null){
+        for (var item in jsonData["cursillos"]) {
+          res.add(item["id"]);
+        }
+      }
+    }
+    return res;
+  }
+  static List<String> armarGaleriaDeImagenes(String tipo, dynamic data){
+    List<String> res = [];
+    if(tipo == "imagenesColegio"){
+      if(data != null){
+        for (var item in data) {
+          res.add(item["url"]);
+        }
+      }
     }
     return res;
   }

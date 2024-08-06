@@ -1,5 +1,7 @@
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
+import 'package:flutkit/custom/models/noticia.dart';
 import 'package:flutkit/custom/models/resultado.dart';
+import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/screens/actividades/actividades_inicio.dart';
 import 'package:flutkit/custom/screens/actividades/calendario_screen.dart';
 import 'package:flutkit/custom/screens/actividades/club_screen.dart';
@@ -49,11 +51,29 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
   bool _showPopup = false;
   List<Resultado> _resultados = [];
   bool _buscando =  false;
+  User _user = User();
+  bool _isLoggedIn = false;
+
   @override
   void initState() {
     super.initState();
     selectedIndex = widget.indice;
   }
+
+  void _filtrarNoticias(int id){
+    List<Resultado> aux = [];
+    for (var item in _resultados) {
+      if(item.usuariosPermitidos != ";-1;"){
+        if(item.usuariosPermitidos!.contains(';$id;')){
+          aux.add(item);
+        }
+      }else{
+        aux.add(item);
+      }
+    }
+    _resultados = aux;
+  }  
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AppNotifier>(
@@ -280,8 +300,17 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
                           if(query.length > 2){
                             setState(() {
                               _buscando = true;
-                            });
+                            }); 
                             _resultados = await ApiService().getBusquedas(query);
+                            _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
+                            if (_isLoggedIn) {
+                              _user = Provider.of<AppNotifier>(context, listen: false).user;
+                              if(_user.rolCustom! == "estudiante"){
+                                _filtrarNoticias(_user.id!);
+                              }
+                            }else{
+                              _filtrarNoticias(-1);
+                            }
                             setState(() {
                               _showPopup = true; // Alterna la visibilidad del popup
                               _buscando = false;

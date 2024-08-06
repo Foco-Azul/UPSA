@@ -94,18 +94,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         children: <Widget>[
           _crearContenido(
             'lib/custom/assets/images/bienvenida_1.png',
-            'Conéctate con tu nueva vida universitaria',
-            'Encuentra las últimas novedades, becas y eventos para bachilleres como vos.'
+            'Conectate con tu nueva vida universitaria',
+            'Econtrá las últimas novedades, becas y eventos para bachilleres como vos.'
           ),
           _crearContenido(
             'lib/custom/assets/images/bienvenida_2.png',
-            'Participa junto a tu promo',
+            'Participá junto a tu promo',
             'Sus memorias aparecerán en tu perfil, junto a tus actividades a participar.'
           ),
           _crearContenido(
             'lib/custom/assets/images/bienvenida_3.png',
-            'Prepárate para tu futuro',
-            'Junto a nuestros cursillos, quizzes e info de carreras, podrás estar mejor preparado en tu formación académica.'
+            'Preparate para tu futuro',
+            'Junto a nuestros cursillos, quizzes e info de carreras, podrás estar mejor preparado para tu formación académica.'
           ),
         ],
       ),

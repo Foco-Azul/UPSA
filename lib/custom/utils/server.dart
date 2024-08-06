@@ -1,10 +1,8 @@
 // ignore_for_file: avoid_print
 
 import 'dart:convert';
-import 'dart:developer';
-import 'dart:io';
-import 'package:dio/dio.dart' as dio;
-import 'package:dio/dio.dart';
+//import 'package:dio/dio.dart' as dio;
+//import 'package:path/path.dart' as path;
 import 'package:flutkit/custom/models/avatar.dart';
 import 'package:flutkit/custom/models/carrera_upsa.dart';
 import 'package:flutkit/custom/models/club.dart';
@@ -17,7 +15,6 @@ import 'package:flutkit/custom/models/resultado.dart';
 import 'package:flutkit/custom/models/sobre_nosotros.dart';
 import 'package:flutkit/custom/models/user_meta.dart';
 import 'package:flutkit/custom/utils/funciones.dart';
-import 'package:path/path.dart' as path;
 import 'package:flutkit/custom/models/campus.dart';
 import 'package:flutkit/custom/models/carrera.dart';
 import 'package:flutkit/custom/models/categoria.dart';
@@ -28,6 +25,7 @@ import 'package:flutkit/custom/models/interes.dart';
 import 'package:flutkit/custom/models/noticia.dart';
 import 'package:flutkit/custom/models/promocion.dart';
 import 'package:flutkit/custom/models/universidad.dart';
+import 'package:flutkit/custom/utils/generadores.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -36,7 +34,7 @@ import 'package:flutkit/custom/models/user.dart';
     
 class ApiService {
   //USER INICIO
-  Future<User> login(String email, String pass) async {
+  Future<User> login(String email, String pass, String tokenDispositivo) async {
     User res = User();
     await dotenv.load(fileName: ".env");
     try {
@@ -54,6 +52,11 @@ class ApiService {
       );
       if (response.statusCode == 200) {
         res = User.armarUsuarioParaLogin(response.body);
+        User usuario = await getUsuarioPopulate(res.id!);
+        if(!usuario.dispositivos!.contains(tokenDispositivo)){
+          usuario.dispositivos!.add(tokenDispositivo);
+          await actualizarUsuarioTokens(res.id!, usuario.dispositivos!);
+        }
         return res;
       } else {
         String error = jsonDecode(response.body)['error']['message'];
@@ -62,6 +65,60 @@ class ApiService {
       }
     } catch (e) {
       print('Error en login: $e');
+      return res;
+    }
+  }
+  Future<void> actualizarUsuarioTokens(int idUser, List<String> data) async {
+    List<Map<String, dynamic>> dispositivos = [];
+    for (var item in data) {
+      dispositivos.add(
+        {
+          "token": item,
+        }
+      );
+    }
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/users/$idUser');
+      var response = await http.put(url,
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+        },
+        body: json.encode(
+          {
+            "dispositivos": dispositivos
+          }
+        )
+      );
+      if (response.statusCode != 200) {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  Future<User> getUsuarioPopulate(int id) async {
+    User res = User();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}${dotenv.get('usersRegisterEndpoint')}/$id/");
+      var response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          }, 
+      );
+      if (response.statusCode == 200) {
+        res = User.armarUsuarioPopulate(response.body);
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  getUsuarioPopulate: $error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getUsuarioPopulate: $e');
       return res;
     }
   }
@@ -447,7 +504,7 @@ class ApiService {
     User res = User();
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse("${dotenv.get('baseUrl')}${dotenv.get('usersRegisterEndpoint')}/$id/?populate[inscripciones][populate][0]=evento&populate[inscripciones][populate][1]=concurso&populate[inscripciones][populate][2]=club&populate[eventos][populate][0]=eventos&populate[concursos][populate][0]=concursos&populate[clubes][populate][0]=clubes&populate[userMeta][populate][0]=carreraSugerida&populate[userMeta][populate][1]=colegio&populate[userMeta][populate][2]=avatar.imagen");
+      var url = Uri.parse("${dotenv.get('baseUrl')}${dotenv.get('usersRegisterEndpoint')}/$id/?populate[inscripciones][populate][0]=evento&populate[inscripciones][populate][1]=concurso&populate[inscripciones][populate][2]=club&populate[eventos][populate][0]=eventos&populate[concursos][populate][0]=concursos&populate[clubes][populate][0]=clubes&populate[userMeta][populate][0]=carreraSugerida&populate[userMeta][populate][1]=colegio.imagenes&populate[userMeta][populate][2]=avatar.imagen&populate[userMeta][populate][3]=insignias.imagen&populate[dispositivos][populate][0]=dispositivos");
       var response = await http.get(
         url,
         headers: {
@@ -471,7 +528,7 @@ class ApiService {
     User res = User();
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse("${dotenv.get('baseUrl')}${dotenv.get('usersRegisterEndpoint')}/$id/?populate[userMeta][populate][0]=carreras&populate[userMeta][populate][1]=universidades&populate[userMeta][populate][2]=recibirInformacion");
+      var url = Uri.parse("${dotenv.get('baseUrl')}${dotenv.get('usersRegisterEndpoint')}/$id/?populate[userMeta][populate][0]=carreras&populate[userMeta][populate][1]=universidades&populate[userMeta][populate][2]=recibirInformacion&populate[userMeta][populate][3]=universidad");
       var response = await http.get(
         url,
         headers: {
@@ -507,11 +564,11 @@ class ApiService {
         return res;
       } else {
         String error = jsonDecode(response.body)['error']['message'];
-        print('Error en  getUserPopulateConMetasEActividades: $error');
+        print('Error en  getUserPopulateConMetasParaFormularioPerfil: $error');
         return res;
       }
     } catch (e) {
-      print('Error en getUserPopulateConMetasEActividades: $e');
+      print('Error en getUserPopulateConMetasParaFormularioPerfil: $e');
       return res;
     }
   }
@@ -536,6 +593,239 @@ class ApiService {
       }
     } catch (e) {
       print('Error en getUserPopulateConActividadesPasadas: $e');
+      return res;
+    }
+  }
+  Future<void> setUserParaDesactivarNotificaciones(int idUser, bool estado) async {
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/users/$idUser');
+      var response = await http.put(url,
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+        },
+        body: json.encode(
+          {
+            "notificacionesHabilitadas": estado
+          }
+        )
+      );
+      if (response.statusCode != 200) {
+        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+  Future<User> getUserPopulateParaSolitudDeTestVocacional(int id) async {
+    User res = User();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}${dotenv.get('usersRegisterEndpoint')}/$id/?populate=*");
+      var response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          }, 
+      );
+      if (response.statusCode == 200) {
+        res = User.armarUsuarioPopulateConMetasParaSolitudDeTestVocacional(response.body);
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  getUserPopulateParaSolitudDeTestVocacional: $error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getUserPopulateParaSolitudDeTestVocacional: $e');
+      return res;
+    }
+  }
+  Future<User> getUserPopulateParaRetroalimentacion(int id) async {
+    User res = User();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}${dotenv.get('usersRegisterEndpoint')}/$id/?populate[retroalimentaciones][populate][0]=evento&populate[retroalimentaciones][populate][1]=concurso&populate[retroalimentaciones][populate][2]=club");
+      var response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          }, 
+      );
+      if (response.statusCode == 200) {
+        res = User.armarUsuarioPopulateParaRetroalimentacion(response.body);
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  getUserPopulateParaRetroalimentacion: $error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getUserPopulateParaRetroalimentacion: $e');
+      return res;
+    }
+  }
+  Future<void> setUserCursillosVistos(int userId, int cursilloId) async {
+    List<int> cursillosVistos = await _getUserCursillosVistos(userId);
+    bool bandera = false;
+    for (var item in cursillosVistos) {
+      if(item == cursilloId){
+        bandera = true;
+      }
+    }
+    if(!bandera){
+      cursillosVistos.add(cursilloId);
+      await dotenv.load(fileName: ".env");
+      try {
+        var url = Uri.parse('${dotenv.get('baseUrl')}/users/$userId');
+        var response = await http.put(url,
+          headers: {
+            'Content-Type': 'application/json',
+            "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          },
+          body: json.encode(
+            {
+              "cursillos": cursillosVistos,
+            }
+          )
+        );
+        if (response.statusCode != 200) {
+          String e = jsonDecode(response.body)['error']['message'];
+          print('Error en setUserCursillosVistos: $e');
+        }
+      } catch (e) {
+        print('Error en setUserCursillosVistos: $e');
+      }
+    }
+  }
+  Future<List<int>> _getUserCursillosVistos(int id) async {
+    List<int> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}/users/$id/?populate=*");
+      var response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          }, 
+      );
+      if (response.statusCode == 200) {
+        res = FuncionUpsa.armarListaEnterosDesdeJsonString("cursillosVistos", response.body);
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  _getUserCursillosVistos: $error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en _getUserCursillosVistos: $e');
+      return res;
+    }
+  }
+  Future<User> getUserPorEmail(String data) async {
+    User res = User();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}${dotenv.get('usersRegisterEndpoint')}/?filters[\$and][0][email][\$eq]=$data");
+      var response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          }, 
+      );
+      if (response.statusCode == 200) {
+        res = User.armarUsuarioPorEmail(response.body);
+        if(res.id! != -1){
+          await _setActualizarCodigoDeVerificacion(res.id!, data);
+        }
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  getUserPorEmail: $error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getUserPorEmail: $e');
+      return res;
+    }
+  }
+  Future<User> verificarCodigo(String email, String codigo) async {
+    User res = User();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}${dotenv.get('usersRegisterEndpoint')}/?filters[\$and][0][email][\$eq]=$email&filters[\$and][1][codigoDeVerificacion][\$eq]=$codigo");
+      var response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          }, 
+      );
+      if (response.statusCode == 200) {
+        res = User.armarUsuarioPorEmail(response.body);
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  verificarCodigo: $error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en verificarCodigo: $e');
+      return res;
+    }
+  }
+  Future<void> _setActualizarCodigoDeVerificacion(int userId, String email) async {
+    String codigoDeVerificacion = Generador().generarCodigoDeVerificacion();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/users/$userId');
+      var response = await http.put(url,
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+        },
+        body: json.encode(
+          {
+            "codigoDeVerificacion": codigoDeVerificacion,
+          }
+        )
+      );
+      if (response.statusCode == 200) {
+        await enviarCorreo({"codigoDeVerificacion":codigoDeVerificacion}, "Contraseña olvidada", email);
+      }else{
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en _setActualizarCodigoDeVerificacion: $e');
+      }
+    } catch (e) {
+      print('Error en _setActualizarCodigoDeVerificacion: $e');
+    }
+  }
+  Future<User> setActualizarContrasenia(int userId, String password) async {
+    User res = User();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/users/$userId');
+      var response = await http.put(url,
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+        },
+        body: json.encode(
+          {
+            "password": password,
+          }
+        )
+      );
+      if (response.statusCode == 200) {
+        res = User.armarUsuario(response.body);
+        return res;
+      }else{
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en _setActualizarCodigoDeVerificacion: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en _setActualizarCodigoDeVerificacion: $e');
       return res;
     }
   }
@@ -759,25 +1049,6 @@ class ApiService {
       throw Exception(e);
     }
   }
-  Future<UserMeta> getUserMeta (int userId) async {
-    UserMeta userMeta = UserMeta();
-    await dotenv.load(fileName: ".env");
-    try {
-      int idUserMeta = await _getIdUserMeta(userId) ;
-      var url = Uri.parse("${dotenv.get('baseUrl')}/user-metas/${idUserMeta.toString()}?populate=*");
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        UserMeta userMeta = getSingleUserMetaFronJson(response.body);
-        return userMeta;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      print(e);
-      return userMeta;
-    }
-  }
   Future<bool> registrarPerfil(UserMeta datos, int idUser) async {
     await dotenv.load(fileName: ".env");
     try {
@@ -795,6 +1066,7 @@ class ApiService {
             "fechaDeNacimiento": datos.fechaDeNacimiento == "" ? null : datos.fechaDeNacimiento,
             "celular1": datos.celular1 == "" ? null : datos.celular1,
             "colegio": datos.colegio!.id,
+            "curso": datos.curso,
           }}
         )
       );
@@ -815,7 +1087,6 @@ class ApiService {
   Future<bool> registrarCarrera(UserMeta data, User user) async {
     List<Map<String, dynamic>> recibirInformacion = [];
     List<int> carreras = [];
-    List<Map<String, dynamic>> universidades = [];
     for (var item in data.recibirInformacion!) {
       recibirInformacion.add(
         {
@@ -825,14 +1096,6 @@ class ApiService {
     }
     for (var item in data.carreras!) {
       carreras.add(item.id!);
-    }
-    for (var item in data.universidades!) {
-      universidades.add(
-        {
-          "nombre" : item.nombre,
-          "idDepartamento" : item.idDepartamento
-        }
-      );
     }
     await dotenv.load(fileName: ".env");
     try {
@@ -845,19 +1108,16 @@ class ApiService {
         body: json.encode(
           {"data":{
             "testVocacional": data.testVocacional,
-            "estudiarEnBolivia": data.estudiarEnBolivia,
-            "informacionCarrera": data.informacionCarrera,
-            "departamentoUniversidad": data.departamentoUniversidad,
             "recibirInformacion": recibirInformacion,
             "carreras": carreras,
             "aplicacionTest": data.aplicacionTest,
-            "universidades": universidades,
-            "universidadExtranjera": data.universidadExtranjera,
+            "universidad": data.universidad!.id,
             "carreraSugerida": {"facultad": "", "nombre": "Ninguna", "idCarreraUpsa": -1}
           }}
         )
       );
       if (response.statusCode == 200) {
+        await crearHistorialDePreferencias(user.id!, data);
         if(user.estado == "Completado"){
           return true;
         }else{
@@ -988,7 +1248,7 @@ class ApiService {
     Evento res = Evento();
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/$id/?populate[categoria][populate][0]=categoria&populate[etiquetas][populate][0]=etiquetas&populate[calendario][populate][0]=calendario&populate[imagen][populate][0]=imagen&populate[imagenes][populate][0]=imagenes&populate[inscripciones][populate][0]=user&populate[usuarios][populate][0]=usuarios&populate[noticias][populate][0]=imagen');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/$id/?populate[categoria][populate][0]=categoria&populate[etiquetas][populate][0]=etiquetas&populate[calendario][populate][0]=calendario&populate[imagen][populate][0]=imagen&populate[imagenes][populate][0]=imagenes&populate[inscripciones][populate][0]=user&populate[usuarios][populate][0]=usuarios&populate[noticias][populate][0]=imagen&populate[noticias][populate][1]=colegios.usersMeta.user');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -1052,6 +1312,26 @@ class ApiService {
       }
     } catch (e) {
       print('Error en getEventosDesde: $e');
+      return res;
+    }
+  }
+  Future<List<Map<String,dynamic>>> getEventosEnCurso(String fechaActual, String fechaActualMasUno) async {
+    List<Map<String,dynamic>> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/?filters[\$and][1][fechaDeInicio][\$lte]=$fechaActualMasUno&filters[\$and][2][fechaDeFin][\$gte]=$fechaActual&filters[\$and][0][activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200&populate[inscripciones][populate][0]=user.userMeta');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = FuncionUpsa.armarActividadesPopulateParaEscanearEntradas(response.body, "evento");
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getEventosEnCurso: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getEventosEnCurso: $e');
       return res;
     }
   }
@@ -1125,7 +1405,7 @@ class ApiService {
     List<Noticia> res = [];
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/noticias/?populate=*&filters[activo][\$eq]=true&sort=id:desc');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/noticias/?populate[imagen][populate][0]=imagen&populate[categoria][populate][0]=categoria&populate[etiquetas][populate][0]=etiquetas&populate[colegios][populate][0]=usersMeta.user&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -1165,7 +1445,7 @@ class ApiService {
     List<Noticia> res = [];
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/noticias/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200&filters[id][\$ne]=$idNoticia');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/noticias/?populate[imagen][populate][0]=imagen&populate[categoria][populate][0]=categoria&populate[etiquetas][populate][0]=etiquetas&populate[colegios][populate][0]=usersMeta.user&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200&filters[id][\$ne]=$idNoticia');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -1185,7 +1465,7 @@ class ApiService {
     List<Map<String,dynamic>> res = [];
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/noticias/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=$cantidad');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/noticias/?populate[imagen][populate][0]=imagen&populate[categoria][populate][0]=categoria&populate[etiquetas][populate][0]=etiquetas&populate[colegios][populate][0]=usersMeta.user&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=$cantidad');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -1199,6 +1479,7 @@ class ApiService {
             "descripcion": item['attributes']['descripcion'],
             "categoria": item['attributes']['categoria']['data'] != null ? item['attributes']['categoria']['data']['attributes']['nombre'] : "Sin categoria", 
             "imagen": item['attributes']['imagen']['data'] != null ? item['attributes']['imagen']['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",
+            "usuariosPermitidos": Noticia.armarListaDeEnteros(item['attributes']["colegios"]['data']),
           };
           res.add(aux);
         }
@@ -1291,7 +1572,7 @@ class ApiService {
     Club res = Club();
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/clubes/$id/?populate[categoria][populate][0]=categoria&populate[etiquetas][populate][0]=etiquetas&populate[calendario][populate][0]=calendario&populate[imagen][populate][0]=imagen&populate[imagenes][populate][0]=imagenes&populate[inscripciones][populate][0]=user&populate[usuarios][populate][0]=usuarios&populate[noticias][populate][0]=imagen');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/clubes/$id/?populate[categoria][populate][0]=categoria&populate[etiquetas][populate][0]=etiquetas&populate[calendario][populate][0]=calendario&populate[imagen][populate][0]=imagen&populate[imagenes][populate][0]=imagenes&populate[inscripciones][populate][0]=user&populate[usuarios][populate][0]=usuarios&populate[noticias][populate][0]=imagen&populate[usuariosHabilitados][populate][0]=usuariosHabilitados&populate[noticias][populate][1]=colegios.usersMeta.user');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -1366,6 +1647,26 @@ class ApiService {
       }
     } catch (e) {
       print('Error en getClubesDesde: $e');
+      return res;
+    }
+  }
+  Future<List<Map<String,dynamic>>> getClubesEnCurso(String fechaActual, String fechaActualMasUno) async {
+    List<Map<String,dynamic>> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/clubes/?filters[\$and][1][fechaDeInicio][\$lte]=$fechaActualMasUno&filters[\$and][2][fechaDeFin][\$gte]=$fechaActual&filters[\$and][0][activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200&populate[inscripciones][populate][0]=user.userMeta');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = FuncionUpsa.armarActividadesPopulateParaEscanearEntradas(response.body, "club");
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getClubesEnCurso: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getClubesEnCurso: $e');
       return res;
     }
   }
@@ -1603,11 +1904,31 @@ class ApiService {
       return res;
     }
   }
+  Future<List<Map<String,dynamic>>> getConcursosEnCurso(String fechaActual, String fechaActualMasUno) async {
+    List<Map<String,dynamic>> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/?filters[\$and][1][fechaDeInicio][\$lte]=$fechaActualMasUno&filters[\$and][2][fechaDeFin][\$gte]=$fechaActual&filters[\$and][0][activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200&populate[inscripciones][populate][0]=user.userMeta');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = FuncionUpsa.armarActividadesPopulateParaEscanearEntradas(response.body, "concurso");
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getConcursosEnCurso: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getConcursosEnCurso: $e');
+      return res;
+    }
+  }
   Future<Concurso> getConcursoPopulateConInscripcionesSeguidores(int id) async {
     Concurso res = Concurso();
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/$id/?populate[categoria][populate][0]=categoria&populate[etiquetas][populate][0]=etiquetas&populate[calendario][populate][0]=calendario&populate[imagen][populate][0]=imagen&populate[imagenes][populate][0]=imagenes&populate[inscripciones][populate][0]=user&populate[usuarios][populate][0]=usuarios&populate[noticias][populate][0]=imagen');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/$id/?populate[categoria][populate][0]=categoria&populate[etiquetas][populate][0]=etiquetas&populate[calendario][populate][0]=calendario&populate[imagen][populate][0]=imagen&populate[imagenes][populate][0]=imagenes&populate[inscripciones][populate][0]=user&populate[usuarios][populate][0]=usuarios&populate[noticias][populate][0]=imagen&populate[noticias][populate][1]=colegios.usersMeta.user');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -1829,7 +2150,7 @@ class ApiService {
   //CONTACTO FIN
 
   //FORMULARIO DE CONTACTO INICIO
-  Future<String> crearContacto(Map<String, String> data) async {
+  Future<String> crearContacto(Map<String, dynamic> data) async {
     String res = "fallo";
     await dotenv.load(fileName: ".env");
     try {
@@ -1872,7 +2193,7 @@ class ApiService {
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
-        res = ResultadosFromJson(response.body);
+        res = Resultado.armarResultadosPopulate(response.body);
         return res;
       } else {
         String error = jsonDecode(response.body)['error']['message'];
@@ -1891,7 +2212,7 @@ class ApiService {
     List<Map<String, dynamic>> res = [];
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/etiquetas/?populate[eventos][populate][0]=eventos&populate[concursos][populate][0]=concursos&populate[clubes][populate][0]=clubes&populate[noticias][populate][0]=noticias&populate[eventos][populate][1]=categoria&populate[concursos][populate][1]=categoria&populate[clubes][populate][1]=categoria&populate[noticias][populate][1]=categoria&filters[nombre][\$eq]=$etiqueta');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/etiquetas/?populate[eventos][populate][0]=eventos&populate[concursos][populate][0]=concursos&populate[clubes][populate][0]=clubes&populate[noticias][populate][0]=noticias&populate[eventos][populate][1]=categoria&populate[concursos][populate][1]=categoria&populate[clubes][populate][1]=categoria&populate[noticias][populate][1]=categoria&populate[noticias][populate][2]=colegios.usersMeta.user&filters[nombre][\$eq]=$etiqueta');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -1912,6 +2233,208 @@ class ApiService {
   //BORRAME INICIO 
 
   //BORRAME FIN
+
+  //RETROALIMENTACION INICIO 
+  Future<String> crearRetroalimentacion(Map<String, dynamic> data, int userId, int actividadId, String tipo) async {
+    String res = "fallo";
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}/retroalimentaciones/");
+      var response = await http.post(url,
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+        },
+        body: json.encode(
+          {
+            "data":{
+              "relevancia": data["relevancia"], 
+              "calidad": data["calidad"],
+              "organizacion": data["organizacion"],
+              "queTeGustoMas": data["queTeGustoMas"],
+              "queTeGustoMenos": data["queTeGustoMenos"],
+              "comoPodriamosMejorar": data["comoPodriamosMejorar"],
+              "comentario": data["comentario"],
+              "usuario": userId,
+              tipo: actividadId,
+            }
+          }
+        )
+      );
+      if (response.statusCode == 200) {
+        res = "exito";
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  crearRetroalimentacion: $error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en  crearRetroalimentacion: $e');
+      return res;
+    }
+  }
+  //RETROALIMENTACION FIN
+
+  //SOLICITUD DE TEST VOCACIONAL INICIO 
+  Future<String> crearSolicitudDeTestVocacional(Map<String, dynamic> data, int id) async {
+    String res = "fallo";
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}/solicitudes-de-test-vocacional/");
+      var response = await http.post(url,
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+        },
+        body: json.encode(
+          {
+            "data":{
+              "fechas": data["fechas"], 
+              "telefono": int.tryParse(data["telefono"]!), 
+              "carreras": data["carreras"],
+              "usuario": id,
+            }
+          }
+        )
+      );
+      if (response.statusCode == 200) {
+        res = "exito";
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  crearSolicitudDeTestVocacional$error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en  crearSolicitudDeTestVocacional$e');
+      return res;
+    }
+  }
+  //SOLICITUD DE TEST VOCACIONAL FIN
+
+  //HISTORIAL DE PREFERENCIAS INICIO 
+  Future<void> crearHistorialDePreferencias(int id, UserMeta data) async {
+    List<Map<String, dynamic>> aux = [];
+    aux.add(
+      {
+        "label": "¿Ya hiciste un Test Vocacional?",
+        "value": data.testVocacional == true ? "Si" : "No",
+      }
+    );
+    if(data.testVocacional!){
+      aux.add(
+        {
+          "label": "¿Dónde de aplicarón el test?",
+          "value":  data.aplicacionTest,
+        }
+      );
+    }
+    String aux2 = "";
+    for (int i = 0; i < data.carreras!.length; i++) {
+      aux2 += data.carreras![i].nombre!;
+      if (i < data.carreras!.length - 1) {
+        aux2 += ";";
+      }
+    }
+    aux.add(
+      {
+        "label": "Seleccioná hasta dos carreras que te gustaría estudiar(en orden de importancia)",
+        "value": aux2,
+      }
+    );
+    aux.add(
+      {
+        "label": "Seleccioná la universidad dónde te gustaría estudiar (en orden de importancia)",
+        "value": data.universidad!.nombre,
+      }
+    );
+    String aux3 = "";
+    for (int i = 0; i < data.recibirInformacion!.length; i++) {
+      aux3 += data.recibirInformacion![i]["titulo"];
+      if (i < data.recibirInformacion!.length - 1) {
+        aux3 += ";";
+      }
+    }
+    aux.add(
+      {
+        "label": "¿Sobre qué aspectos te gustaría recibir información?(seleccioná todas las que aplican)",
+        "value": aux3,
+      }
+    );
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}/historiales-de-preferencias/");
+      var response = await http.post(url,
+          headers: {
+            'Content-Type': 'application/json',
+            "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          },
+          body: json.encode(
+            {
+              "data":
+                {
+                  "campos": aux,
+                  "usuario": id,
+                }
+              }
+            )
+          );
+      if (response.statusCode != 200) {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en crearHistorialDePreferencias: $e');
+      }
+    } catch (e) {
+      print('Error en crearHistorialDePreferencias: $e');
+    }
+  }
+  //HISTORIAL DE PREFERENCIAS FIN
+
+  //UNIVERSIDAD INICIO 
+  Future<List<Universidad>> getUniversidadesPopulate() async {
+    List<Universidad> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/universidades/?pagination[pageSize]=200');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = Universidad.armarUniversidadesPopulate(response.body);
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getUniversidadesPopulate: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getUniversidadesPopulate: $e');
+      return res;
+    }
+  }
+  //UNIVERSIDAD FIN
+
+  //CAMPO PERSONALZIADO INICIO 
+  Future<List<String>> getCampoPersonalziado(int id) async {
+    List<String> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/campos-personalizados/$id/?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = FuncionUpsa.armarOpciones(response.body);
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  getCampoPersonalziado: $error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getCampoPersonalziado: $e');
+      return res;
+    }
+  }
+  //CAMPO PERSONALZIADO FIN
 
   //AVATAR INICIO 
   Future<List<Avatar>> getAvataresPopulate(int id) async {
@@ -2090,11 +2613,30 @@ class ApiService {
     res.addAll(aux);
     return res;
   }
+  Future<List<Map<String,dynamic>>> getActividadesConInscripciones() async {
+    List<Map<String,dynamic>> res = [];
+    List<Map<String,dynamic>> aux = [];
+    String fechaActual = obtenerFechaActual();
+    String fechaActualMasUno = obtenerFechaActualMasUno();
+    aux = await getEventosEnCurso(fechaActual, fechaActualMasUno);
+    res.addAll(aux);
+    aux = await getConcursosEnCurso(fechaActual, fechaActualMasUno);
+    res.addAll(aux);
+    aux = await getClubesEnCurso(fechaActual, fechaActualMasUno);
+    res.addAll(aux);
+    return res;
+  }
   String obtenerFechaActual() {
     DateTime ahora = DateTime.now();
     DateFormat formato = DateFormat('yyyy-MM-dd');
     return formato.format(ahora);
   }
+String obtenerFechaActualMasUno() {
+  DateTime ahora = DateTime.now();
+  DateTime fechaMasUno = ahora.add(Duration(days: 1));
+  DateFormat formato = DateFormat('yyyy-MM-dd');
+  return formato.format(fechaMasUno);
+}
   Future<List<Concurso>> getConcursosPorIds(List<int> idsConcursos) async {
     List<Concurso> res = [];
     for (var item in idsConcursos) {
@@ -2138,7 +2680,8 @@ class ApiService {
     }
   }
   //EXTRAS FIN
-
+  
+  /*
   Future<bool> setUserMetaFotoPerfil2(int userId, File foto) async {
     dio.FormData formData = dio.FormData();
 
@@ -2199,4 +2742,5 @@ class ApiService {
       throw Exception('Failed to upload media file');
     }
   }
+  */
 }

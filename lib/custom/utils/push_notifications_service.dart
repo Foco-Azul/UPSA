@@ -2,6 +2,8 @@
 
 // ignore_for_file: avoid_print
 
+import 'dart:convert';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutkit/custom/models/notificacion.dart';
@@ -20,6 +22,7 @@ class PushNotificationService{
     //print(message.toMap());
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> notificacionesCadenas = prefs.getStringList('notificaciones') ?? [];
+
     Notificacion notificacion = Notificacion(
       tipoNotificacion: message.data["tipoNotificacion"],
       tipoContenido: message.data["tipoContenido"],
@@ -28,8 +31,13 @@ class PushNotificationService{
       id: int.parse(message.data["id"]),
       estadoNotificacion: message.data["estadoNotificacion"],
     );
-    notificacionesCadenas.add(notificacion.toString());
-    prefs.setStringList('notificaciones', notificacionesCadenas); 
+
+    // Convierte la notificación a JSON antes de guardarla
+    String notificacionJson = json.encode(notificacion.toJson());
+    notificacionesCadenas.add(notificacionJson);
+
+    await prefs.setStringList('notificaciones', notificacionesCadenas);
+
     navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => HomesScreen(indice: 0,)),(Route<dynamic> route) => false);
     navigatorKey.currentState!.pushReplacement(MaterialPageRoute(builder: (context) => NotificacionesScreen()));
   }
@@ -38,6 +46,7 @@ class PushNotificationService{
     //print(message.toMap());
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> notificacionesCadenas = prefs.getStringList('notificaciones') ?? [];
+
     Notificacion notificacion = Notificacion(
       tipoNotificacion: message.data["tipoNotificacion"],
       tipoContenido: message.data["tipoContenido"],
@@ -46,8 +55,13 @@ class PushNotificationService{
       id: int.parse(message.data["id"]),
       estadoNotificacion: message.data["estadoNotificacion"],
     );
-    notificacionesCadenas.add(notificacion.toString());
-    prefs.setStringList('notificaciones', notificacionesCadenas); 
+
+    // Convierte la notificación a JSON antes de guardarla
+    String notificacionJson = json.encode(notificacion.toJson());
+    notificacionesCadenas.add(notificacionJson);
+
+    await prefs.setStringList('notificaciones', notificacionesCadenas);
+
     navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => HomesScreen(indice: 0,)),(Route<dynamic> route) => false);
     navigatorKey.currentState!.pushReplacement(MaterialPageRoute(builder: (context) => NotificacionesScreen()));
   }
@@ -56,6 +70,7 @@ class PushNotificationService{
     //print(message.toMap());
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> notificacionesCadenas = prefs.getStringList('notificaciones') ?? [];
+
     Notificacion notificacion = Notificacion(
       tipoNotificacion: message.data["tipoNotificacion"],
       tipoContenido: message.data["tipoContenido"],
@@ -64,8 +79,13 @@ class PushNotificationService{
       id: int.parse(message.data["id"]),
       estadoNotificacion: message.data["estadoNotificacion"],
     );
-    notificacionesCadenas.add(notificacion.toString());
-    prefs.setStringList('notificaciones', notificacionesCadenas);
+
+    // Convierte la notificación a JSON antes de guardarla
+    String notificacionJson = json.encode(notificacion.toJson());
+    notificacionesCadenas.add(notificacionJson);
+
+    await prefs.setStringList('notificaciones', notificacionesCadenas);
+
     navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => HomesScreen(indice: 0,)),(Route<dynamic> route) => false);
     navigatorKey.currentState!.pushReplacement(MaterialPageRoute(builder: (context) => NotificacionesScreen()));
   }

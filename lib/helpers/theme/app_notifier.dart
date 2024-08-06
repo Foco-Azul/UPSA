@@ -20,16 +20,12 @@ class AppNotifier extends ChangeNotifier {
 
   bool _isLoggedIn = false;
   User _user = User();
-  UserMeta _userMeta = UserMeta();
   bool _esNuevo = true;
-  String _tokenDispositivo = "";
   final List<Notificacion> _notificaciones= [];
 
   bool get isLoggedIn => _isLoggedIn;
   User get user => _user;
-  UserMeta get userMeta => _userMeta;
   bool get esNuevo => _esNuevo;
-  String get tokenDispositivo => _tokenDispositivo;
   List<Notificacion> get notificaciones => _notificaciones;
 
   AppNotifier() {
@@ -38,8 +34,7 @@ class AppNotifier extends ChangeNotifier {
 
   init() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    ThemeType themeType =
-        sharedPreferences.getString("theme_mode").toString().toThemeType;
+    ThemeType themeType = sharedPreferences.getString("theme_mode").toString().toThemeType;
     _changeTheme(themeType);
     await _loadFromPrefs();
     notifyListeners();
@@ -48,22 +43,15 @@ class AppNotifier extends ChangeNotifier {
     _prefs = await SharedPreferences.getInstance();
     _isLoggedIn = _prefs.getBool('isLoggedIn') ?? false;
     _esNuevo = _prefs.getBool('esNuevo') ?? true;
-    _tokenDispositivo = _prefs.getString('tokenDispositivo') ?? "";
-    String? userJson = _prefs.getString('user');
-    if (userJson != null && _isLoggedIn) {
+    String? userJson = _prefs.getString('user') ?? "";
+    if (userJson.isNotEmpty && _isLoggedIn) {
       Map<String, dynamic> userMap = json.decode(userJson);
       _user = User.fromJson(userMap);
-    }
-    List<String> notificacionesCadenas = _prefs.getStringList('notificaciones') ?? [];
-    for (var item in notificacionesCadenas) {
-      Notificacion notificacion = Notificacion.fromJson(json.decode(item));
-      notificaciones.add(notificacion);
     }
   }
   Future<void> _resetPrefs() async {
     _prefs = await SharedPreferences.getInstance();
     await _prefs.clear(); // Esto eliminará todos los valores almacenados en SharedPreferences
-    // Ahora puedes volver a cargar los valores predeterminados o dejarlos en su estado inicial
     _isLoggedIn = false;
   }
   updateTheme(ThemeType themeType) {
@@ -107,10 +95,8 @@ class AppNotifier extends ChangeNotifier {
   }
   void _saveToPrefs() {
     _prefs.setBool('isLoggedIn', _isLoggedIn);
-    _prefs.setString('user', json.encode(_user.toJson())); // Aquí convertimos el objeto User a JSON
-    _prefs.setString('userMeta', json.encode(_userMeta.toJson())); 
+    _prefs.setString('user', json.encode(_user.toJson()));
     _prefs.setBool('esNuevo', _esNuevo); 
-    _prefs.setString('tokenDispositivo', _tokenDispositivo); 
   }
   void login() {
     _isLoggedIn = true;
@@ -123,6 +109,7 @@ class AppNotifier extends ChangeNotifier {
   }
   void logout() {
     _isLoggedIn = false;
+    _prefs.setString('user', "");
     _saveToPrefs();
     notifyListeners();
   }
@@ -131,11 +118,6 @@ class AppNotifier extends ChangeNotifier {
   }
   void setUser(User user) {
     _user = user;
-    _saveToPrefs();
-    notifyListeners();
-  }
-  void setUserMeta(UserMeta user) {
-    _userMeta = userMeta;
     _saveToPrefs();
     notifyListeners();
   }

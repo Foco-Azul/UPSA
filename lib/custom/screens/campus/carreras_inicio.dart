@@ -3,7 +3,6 @@ import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/carrera_upsa.dart';
 import 'package:flutkit/custom/models/categoria.dart';
-import 'package:flutkit/custom/models/facultad.dart';
 import 'package:flutkit/custom/screens/campus/carrera_screen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
@@ -14,7 +13,6 @@ import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 

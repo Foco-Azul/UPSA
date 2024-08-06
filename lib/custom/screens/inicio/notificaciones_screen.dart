@@ -4,6 +4,9 @@ import 'dart:convert';
 
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/notificacion.dart';
+import 'package:flutkit/custom/screens/actividades/club_screen.dart';
+import 'package:flutkit/custom/screens/actividades/concurso_escreen.dart';
+import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
 import 'package:flutkit/custom/screens/campus/cursillo_screen.dart';
 import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
@@ -40,24 +43,23 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
       controller.uiLoading = true;
     });
     _prefs = await SharedPreferences.getInstance();
+    //await _prefs.setStringList('notificaciones', []);
     List<String> notificacionesCadenas = _prefs.getStringList('notificaciones') ?? [];
-    print("sadsadsada");
-    print(notificacionesCadenas);
     _armarListaNotificaciones(notificacionesCadenas);
-    //_prefs.setStringList('notificaciones', []);
     setState(() {
       controller.uiLoading = false;
     });
   }
   void _armarListaNotificaciones(List<String> data){
     for (var item in data) {
+      print(item);
       Map<String, dynamic> aux = json.decode(item);
       Notificacion notificacion = Notificacion(
         tipoNotificacion: aux["tipoNotificacion"],
         tipoContenido: aux["tipoContenido"],
         titulo: aux["titulo"],
         descripcion: aux["descripcion"],
-        id: int.parse(aux["id"]),
+        id: aux["id"],
         estadoNotificacion: aux["estadoNotificacion"],
       );
       _notificaciones.add(notificacion);
@@ -134,23 +136,24 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
       onTap: () {
         if(item.tipoNotificacion == "actividad"){
           if(item.tipoContenido == "evento"){
-            print("evento");
+            Navigator.push(context, MaterialPageRoute(builder: (context) => EventoScreen(id: item.id!,)));
           }
           if(item.tipoContenido == "concurso"){
-            print("concurso");
-          }
+            Navigator.push(context, MaterialPageRoute(builder: (context) => ConcursoScreen(id: item.id!,)));
+          }        
           if(item.tipoContenido == "club"){
-            print("club");
+            Navigator.push(context, MaterialPageRoute(builder: (context) => ClubScreen(id: item.id!,)));
+          }        
+          if(item.tipoContenido == "noticia"){
+            Navigator.push(context, MaterialPageRoute(builder: (context) => NoticiaScreen(idNoticia: item.id!,)));
           }
         }else{
           if(item.tipoNotificacion == "contenidoApp"){
             if(item.tipoContenido == "noticia"){
-              print("noticia");
               Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 3,)),(Route<dynamic> route) => false);
               Navigator.push(context, MaterialPageRoute(builder: (context) => NoticiaScreen(idNoticia: item.id!,)));
             }
             if(item.tipoContenido == "cursillo"){
-              print("cursillo");
               Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 2,)),(Route<dynamic> route) => false);
               Navigator.push(context, MaterialPageRoute(builder: (context) => CursilloScreen(id: item.id!,)));
             }

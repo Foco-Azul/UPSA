@@ -18,6 +18,17 @@ class Notificacion {
   String? estadoNotificacion;
   bool? visto;
 
+  static Notificacion armarNotificacion(Map<String, dynamic> json) {
+    return Notificacion(
+      tipoNotificacion: json['tipoNotificacion'],
+      tipoContenido: json['tipoContenido'],
+      titulo: json['titulo'],
+      descripcion: json['descripcion'],
+      id: int.parse(json['id']),
+      estadoNotificacion: json['estadoNotificacion'],
+    );
+  }
+
   factory Notificacion.fromJson(Map<String, dynamic> json) {
     return Notificacion(
       tipoNotificacion: json['tipoNotificacion'],

@@ -2,6 +2,8 @@
 
 import 'package:flutkit/custom/auth/login_screen.dart';
 import 'package:flutkit/custom/auth/register_screen.dart';
+import 'package:flutkit/custom/models/sobre_nosotros.dart';
+import 'package:flutkit/custom/screens/campus/sobre_nosotros_escreen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/homes/homes_screen.dart';
@@ -78,17 +80,17 @@ class _PostBienvenidaScreenState extends State<PostBienvenidaScreen>{
               ),
               SizedBox(height: 15,),
               Text(
-                'Inicia tu carrera universitaria junto a la UPSA.',
+                'Iniciá tu carrera universitaria junto a la UPSA.',
                 style: TextStyle(fontWeight: FontWeight.normal, fontSize: 15, color: AppColorStyles.blancoFondo),
                 textAlign: TextAlign.center,
               ),
               _crearBoton("Registrar mi cuenta", "signup", AppColorStyles.verde1, AppColorStyles.blancoFondo),
-              _crearBoton("Registrar mi cuenta", "login",AppColorStyles.blancoFondo, AppColorStyles.verde1),
+              _crearBoton("Iniciar Sesión", "login",AppColorStyles.blancoFondo, AppColorStyles.verde1),
               Container(
                 margin: MySpacing.only(top: 50, bottom: 15, left: 60, right: 60),
                 child: Text.rich(
                   TextSpan(
-                    text: 'Al registrar tu cuenta, aceptas nuestros ',
+                    text: 'Al registrar tu cuenta, aceptás nuestros ',
                     style: TextStyle(fontWeight: FontWeight.normal, height: 1.3, fontSize: 10, color: AppColorStyles.blancoFondo),
                     children: <TextSpan>[
                       TextSpan(
@@ -96,7 +98,7 @@ class _PostBienvenidaScreenState extends State<PostBienvenidaScreen>{
                         style: TextStyle(decoration: TextDecoration.underline, decorationColor: AppColorStyles.blancoFondo,  decorationThickness: 2),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                            print('Términos de uso presionados');
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => SobreNosotrosScreen()));
                           },
                       ),
                       TextSpan( 
@@ -107,7 +109,7 @@ class _PostBienvenidaScreenState extends State<PostBienvenidaScreen>{
                         style: TextStyle(decoration: TextDecoration.underline, decorationColor: AppColorStyles.blancoFondo, decorationThickness: 2),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                            print('Políticas de privacidad presionados');
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => SobreNosotrosScreen()));
                           },
                       ),
                       TextSpan(

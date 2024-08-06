@@ -1,14 +1,17 @@
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/categoria.dart';
 import 'package:flutkit/custom/models/noticia.dart';
+import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
 
 class NoticiasScreen extends StatefulWidget {
   const NoticiasScreen({Key? key}) : super(key: key);
@@ -21,7 +24,8 @@ class _NoticiasScreenState extends State<NoticiasScreen> {
   late ThemeData theme;
   late CustomTheme customTheme;
   late ProfileController controller;
-
+  User _user = User();
+  bool _isLoggedIn = false;
   List<Noticia> _noticias = [];
   List<Noticia> _noticiasCategorizados = [];
   List<Categoria> _noticiasCategorias = [];
@@ -38,16 +42,40 @@ class _NoticiasScreenState extends State<NoticiasScreen> {
   void _cargarCategorias() async{
     await dotenv.load(fileName: ".env");
     _backUrl = dotenv.get('backUrl');
-
+  
     _noticias = await ApiService().getNoticias();
+    _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
+    if (_isLoggedIn) {
+      _user = Provider.of<AppNotifier>(context, listen: false).user;
+      if(_user.rolCustom! == "estudiante"){
+        _filtrarNoticias(_user.id!);
+      }
+    }else{
+      _filtrarNoticias(-1);
+    }
     _noticiasCategorizados = _noticias;
     _noticiasCategorias = _crearCategoriasContenido("Noticias");
 
     setState(() {
       controller.uiLoading = false;
     });
+  }
+  void _filtrarNoticias(int id){
+    List<Noticia> aux = [];
+    for (var item in _noticias) {
+      if(item.usuariosPermitidos!.isNotEmpty){
+        for (var item2 in item.usuariosPermitidos!) {
+          if(item2 == id){
+            aux.add(item);
+          }
+        }
+      }else{
+        aux.add(item);
+      }
+    }
+    _noticias = aux;
   }  
-    List<Categoria> _crearCategoriasContenido(String contenido) {
+  List<Categoria> _crearCategoriasContenido(String contenido) {
     List<Categoria> res = [];
     if (contenido == "Noticias") {
       for (var item in _noticias) {

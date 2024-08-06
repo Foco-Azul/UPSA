@@ -1,18 +1,21 @@
 
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/categoria.dart';
+import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/screens/actividades/club_screen.dart';
 import 'package:flutkit/custom/screens/actividades/concurso_escreen.dart';
 import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
 import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:provider/provider.dart';
 
 class EtiquetasScreen extends StatefulWidget {
   const EtiquetasScreen({Key? key, this.etiqueta = ""}) : super(key: key);
@@ -26,6 +29,9 @@ class _EtiquetasScreenState extends State<EtiquetasScreen> {
   late ThemeData theme;
   late ProfileController controller;
   List<Map<String,dynamic>> _contenidos = [];
+  User _user = User();
+  bool _isLoggedIn = false;
+
   @override
   void initState() {
     super.initState();
@@ -40,10 +46,38 @@ class _EtiquetasScreenState extends State<EtiquetasScreen> {
       controller.uiLoading = true;
     });
     _contenidos = await ApiService().getContenidosPorEtiquetas(_etiqueta);
+    _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
+    if (_isLoggedIn) {
+      _user = Provider.of<AppNotifier>(context, listen: false).user;
+      if(_user.rolCustom! == "estudiante" || true){
+        _filtrarNoticias(_user.id!);
+      }
+    }else{
+      _filtrarNoticias(-1);
+    }
     setState(() {
       controller.uiLoading = false;
     });
   }
+  void _filtrarNoticias(int id){
+    List<Map<String,dynamic>> aux = [];
+    for (var item in _contenidos) {
+      if(item["tipo"] == "noticias"){
+        if(item["usuariosPermitidos"].isNotEmpty){
+            for (var item2 in item["usuariosPermitidos"]) {
+              if(item2 == id){
+                aux.add(item);
+              }
+            }
+        }else{
+          aux.add(item);
+        }
+      }else{
+        aux.add(item);
+      }
+    }
+    _contenidos = aux;
+  } 
 
   @override
   Widget build(BuildContext context) {

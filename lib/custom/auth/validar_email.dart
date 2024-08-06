@@ -164,7 +164,7 @@ class _ValidarEmailState extends State<ValidarEmail> {
         children: <Widget>[
           Center(
             child: MyText.bodySmall(
-              "Verifica tu correo ingresando el código enviado a: ",
+              "Verificá tu correo ingresando el código enviado a: ",
               style: AppTextStyles.parrafo(),
               textAlign: TextAlign.center,
             ),

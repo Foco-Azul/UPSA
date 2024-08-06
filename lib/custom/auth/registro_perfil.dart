@@ -39,6 +39,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
     "fechaDeNacimiento": "",
     "celular1": "",
     "colegio": "",
+    "curso": "",
   };
   List<Colegio> _colegios = [];
   @override
@@ -64,7 +65,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       _errores["nombres"] = validacion.validarNombres(_userMeta.nombres, true);
       _errores["apellidos"] = validacion.validarNombres(_userMeta.apellidos, true);
       _errores["cedulaDeIdentidad"] = validacion.validarNumerosPositivos(_userMeta.cedulaDeIdentidad, true, true);
-      _errores["celular1"] = validacion.validarNumerosPositivos(_userMeta.celular1, true, true);
+      _errores["celular1"] = validacion.validarCelular(_userMeta.celular1, true);
       if (_userMeta.colegio!.nombre!.isNotEmpty){
         _errores["colegio"] = "";
       }else{
@@ -75,9 +76,14 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       }else{
         _errores["fechaDeNacimiento"] = "";
       }
+      if (_userMeta.curso!.isNotEmpty){
+        _errores["curso"] = "";
+      }else{
+        _errores["curso"] = "Selecciona una opción";
+      }
     });
 
-    if (_errores["nombres"]!.isEmpty && _errores["apellidos"]!.isEmpty && _errores["cedulaDeIdentidad"]!.isEmpty && _errores["celular1"]!.isEmpty && _errores["colegio"]!.isEmpty) {
+    if (_errores["nombres"]!.isEmpty && _errores["apellidos"]!.isEmpty && _errores["cedulaDeIdentidad"]!.isEmpty && _errores["celular1"]!.isEmpty && _errores["colegio"]!.isEmpty && _errores["curso"]!.isEmpty) {
       _registrarEstudiante();
     }
   }
@@ -152,7 +158,35 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
     setState(() {
     });
   }
-  
+  List<ValueItem> _armarSelectedOptions(String  tipo){
+    List<ValueItem> res = [];
+    if(tipo == "curso"){
+      if(_userMeta.curso!.isNotEmpty){
+        ValueItem aux = ValueItem(
+          label: _userMeta.curso!,
+        );
+        res.add(aux);
+      }
+    }
+    if(tipo == "colegio"){
+      if(_userMeta.colegio!.nombre!.isNotEmpty){
+        ValueItem aux = ValueItem(
+          label: _userMeta.colegio!.nombre!,
+        );
+        res.add(aux);
+      }
+    }
+    return res;
+  }
+  void _onOptionSelectedCurso(List<ValueItem> selectedOptions) {
+    if(selectedOptions.isNotEmpty){
+      _userMeta.curso = selectedOptions[0].label;
+    }else{
+      _userMeta.curso = "";
+    }
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     if (controller.uiLoading) {
@@ -191,9 +225,10 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
                     _crearCampoConError(_errores["nombres"]!, _userMeta.nombres!, "Nombre(s)", "", "nombres"),
                     _crearCampoConError(_errores["apellidos"]!, _userMeta.apellidos!,"Apellido(s)", "", "apellidos"),
                     _crearCampoConIcono(),
-                    _crearCampoConError(_errores["celular1"]!, "","Número de teléfono", "", "celular1"),
-                    _crearCampoConError(_errores["cedulaDeIdentidad"]!, "", "Cédula de identidad", "", "cedulaDeIdentidad"),
-                    _crearCampoSelector(),
+                    _crearCampoConError2(_errores["celular1"]!, _userMeta.celular1!,"Número de teléfono", "", "celular1"),
+                    _crearCampoConError(_errores["cedulaDeIdentidad"]!, _userMeta.cedulaDeIdentidad!, "Cédula de identidad", "", "cedulaDeIdentidad"),
+                    _crearCampoSelectorSimple('¿En que curso de secundaria estás?', _errores["curso"]!, "curso"),
+                    _crearCampoSelectorSimple('Colegio', _errores["colegio"]!, "colegio"),
                     _crearBoton(),
                   ]
                 )
@@ -210,7 +245,63 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       );
     } 
   }
-  
+  Widget _crearCampoSelectorSimple(String label, String error, String campo){
+    List<ValueItem> opciones = [];
+    List<ValueItem> opcionesSeleccionadas = [];
+    if(campo == "curso"){
+      opciones =  [
+        ValueItem(label: '4º Secundaria'),
+        ValueItem(label: '5º Secundaria'),
+        ValueItem(label: '6º Secundaria'),
+      ];
+      opcionesSeleccionadas = _armarSelectedOptions("curso");
+    }
+    if(campo == "colegio"){
+      for (var item in _colegios) {
+        opciones.add(ValueItem(label: item.nombre!));
+      }
+      opcionesSeleccionadas = _armarSelectedOptions("colegio");
+    }
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 8),
+            decoration: AppDecorationStyle.campoContainerForm(),
+            child: MultiSelectDropDown(
+              onOptionSelected: (selectedOptions) {
+                if (campo == "curso") {
+                  _onOptionSelectedCurso(selectedOptions);
+                }
+              },
+              options: opciones,
+              hint: label,
+              selectionType: SelectionType.single,
+              chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.verde2),
+              selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.verde2),
+              selectedOptionTextColor: AppColorStyles.oscuro1,
+              selectedOptionBackgroundColor: AppColorStyles.verdeFondo,
+              optionTextStyle: AppTextStyles.parrafo(color: AppColorStyles.verde2),
+              borderRadius: 14,
+              borderColor: AppColorStyles.blancoFondo,
+              selectedOptions: opcionesSeleccionadas,
+            ),
+          ),
+          if (error.isNotEmpty)
+          Container(
+            margin: EdgeInsets.only(top: 8),
+            child: Text(
+              error,
+              style: TextStyle(color: Colors.red),
+              textAlign: TextAlign.start,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
   Widget _crearCampoConIcono(){
     return  Container(
       margin: EdgeInsets.only(top: 16, bottom: 8),
@@ -292,7 +383,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
                 MultiSelectDropDown(
                   onOptionSelected: _onOptionSelected,
                   options: _buildValueItems(),
-                  hint: "- Colegio -",
+                  hint: "Colegio",
                   selectionType: SelectionType.single,
                   chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.verde2),
                   selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.verde2),
@@ -316,6 +407,67 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
           ),
         ]
       )
+    );
+  }
+  Widget _crearCampoConError2(String error, String value, String labelText, String hintText, String campo){
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: [
+              Container(
+                width: 70,
+                decoration: AppDecorationStyle.campoContainerForm(),
+                child: TextFormField(
+                  readOnly: true,
+                  initialValue: "+591",
+                  onChanged: (value) {
+                  },
+                  decoration: AppDecorationStyle.campoTextoForm(hintText: "hintText", labelText: ""),  
+                  style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
+                ),
+              ),
+              SizedBox(width: 10), // Para agregar un espacio entre los campos
+              Expanded(
+                child: Container(
+                  decoration: AppDecorationStyle.campoContainerForm(),
+                  child: TextFormField(
+                    initialValue: value,
+                    onChanged: (value) {
+                      if (campo == "nombres") {
+                        _userMeta.nombres = value;
+                      }
+                      if (campo == "apellidos") {
+                        _userMeta.apellidos = value;
+                      }
+                      if (campo == "celular1") {
+                        _userMeta.celular1 = value;
+                      }
+                      if (campo == "cedulaDeIdentidad") {
+                        _userMeta.cedulaDeIdentidad = value;
+                      }
+                      setState(() {});
+                    },
+                    decoration: AppDecorationStyle.campoTextoForm(hintText: hintText, labelText: labelText),  
+                    style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (error.isNotEmpty)
+          Container(
+            margin: EdgeInsets.only(top: 8),
+            child: Text(
+              error,
+              style: TextStyle(color: Colors.red),
+              textAlign: TextAlign.start,
+            ),
+          )
+        ],
+      ),
     );
   }
   Widget _crearCampoConError(String error, String value, String labelText, String hintText, String campo){
@@ -362,7 +514,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
   }
   Widget _crearDescripcion(){
     return Text(
-      'Tus datos permitirá que podas inscribirte en nuestros eventos, becas, test vocacionales, entre otros.',
+      'Tus datos permitirán que podás inscribirte en nuestros eventos, becas, test vocacionales, entre otros.',
       style: TextStyle(
         color: AppColorStyles.oscuro1,
         fontSize: 15,

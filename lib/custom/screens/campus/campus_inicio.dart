@@ -6,6 +6,7 @@ import 'package:flutkit/custom/screens/campus/convenio_screem.dart';
 import 'package:flutkit/custom/screens/campus/cursillos_inicio.dart';
 import 'package:flutkit/custom/screens/campus/matriculate_screem.dart';
 import 'package:flutkit/custom/screens/campus/sobre_nosotros_escreen.dart';
+import 'package:flutkit/custom/screens/campus/test_vocacional_screen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
@@ -105,10 +106,18 @@ class _CampusScreenState extends State<CampusScreen> {
                 },
               ),
               _buildPulsableContainer(context,
-                'Matriculate',
+                'Inscribite',
                 Icons.assignment_turned_in_outlined,
                 () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => MatriculateScreen()));
+                },
+              ),
+              _buildPulsableContainer(
+                context,
+                'Test vocacional',
+                Icons.person_search_outlined,
+                () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => TestVocacionalScreen()));
                 },
               ),
               _buildPulsableContainer(

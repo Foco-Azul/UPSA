@@ -18,8 +18,8 @@ Universidad UniverdadFromJson(String str) {
 // Universidad class
 class Universidad {
   Universidad({
-    this.id,
-    this.nombre,
+    this.id = -1,
+    this.nombre = "",
     this.idDepartamento,
   });
 
@@ -33,7 +33,19 @@ class Universidad {
       nombre: json["nombre"],
     );
   }
-
+  static List<Universidad> armarUniversidadesPopulate(String str) {
+    List<Universidad> res = [];
+    final jsonData = json.decode(str);
+    final List<dynamic> data = jsonData['data'];
+    for (var item in data) {
+      Universidad aux = Universidad(
+        id: item["id"],
+        nombre: item["attributes"]["nombre"],
+      );
+      res.add(aux);
+    }
+    return res;
+  }
   Map<String, dynamic> toJson() => {
     "id": id,
     "nombre": nombre,

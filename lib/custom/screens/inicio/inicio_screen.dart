@@ -1,12 +1,14 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutkit/custom/controllers/profile_controller.dart';
+import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/screens/actividades/club_screen.dart';
 import 'package:flutkit/custom/screens/actividades/concurso_escreen.dart';
 import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
 import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/helpers/widgets/my_text.dart';
@@ -14,6 +16,7 @@ import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:provider/provider.dart';
 
 class InicioScreen extends StatefulWidget {
   const InicioScreen({Key? key}) : super(key: key);
@@ -26,7 +29,9 @@ class _InicioScreenState extends State<InicioScreen> {
   late ThemeData theme;
   late ProfileController controller;
   List<Map<String,dynamic>> _contenido = [];
-   String _backUrl = "";
+  String _backUrl = "";
+  User _user = User();
+  bool _isLoggedIn = false;
   @override
   void initState() {
     super.initState();
@@ -42,10 +47,38 @@ class _InicioScreenState extends State<InicioScreen> {
     await dotenv.load(fileName: ".env");
     _backUrl = dotenv.get('backUrl');
     _contenido = await ApiService().getContenido();
+    _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
+    if (_isLoggedIn) {
+      _user = Provider.of<AppNotifier>(context, listen: false).user;
+      if(_user.rolCustom! == "estudiante"){
+        _filtrarNoticias(_user.id!);
+      }
+    }else{
+      _filtrarNoticias(-1);
+    }
     setState(() {
       controller.uiLoading = false;
     });
   }
+  void _filtrarNoticias(int id){
+    List<Map<String,dynamic>> aux = [];
+    for (var item in _contenido) {
+      if(item["tipo"] == "Noticias"){
+        if(item["usuariosPermitidos"].isNotEmpty){
+            for (var item2 in item["usuariosPermitidos"]) {
+              if(item2 == id){
+                aux.add(item);
+              }
+            }
+        }else{
+          aux.add(item);
+        }
+      }else{
+        aux.add(item);
+      }
+    }
+    _contenido = aux;
+  } 
 
   @override
   Widget build(BuildContext context) {

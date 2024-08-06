@@ -48,6 +48,7 @@ class _ClubScreenState extends State<ClubScreen> {
   bool _ingresoMostrado = false;
   bool _inscrito = false;
   bool _siguiendo = false;
+  bool _habilitado = false;
   Inscripcion _inscripcion = Inscripcion();
   
   @override
@@ -65,15 +66,23 @@ class _ClubScreenState extends State<ClubScreen> {
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
     if (_isLoggedIn) {
       _user = Provider.of<AppNotifier>(context, listen: false).user;
-      if (_club.seguidores!.contains(_user.id)) {
-        _siguiendo =  true;
-      }
-      for (var item in _club.inscripciones!) {
-        if(item.user == _user.id){
-          _inscrito =  true;
-          _inscripcion =  item;
+      if(_user.rolCustom! == "estudiante" || true){
+        _filtrarNoticias(_user.id!);
+        if (_club.seguidores!.contains(_user.id)) {
+          _siguiendo =  true;
+        }
+        if (_club.usuariosHabilitados!.contains(_user.id)) {
+          _habilitado =  true;
+        }
+        for (var item in _club.inscripciones!) {
+          if(item.user == _user.id){
+            _inscrito =  true;
+            _inscripcion =  item;
+          }
         }
       }
+    }else{
+      _filtrarNoticias(-1);
     }
     await dotenv.load(fileName: ".env");
     Timer(Duration(milliseconds: 1000), () {});
@@ -84,6 +93,21 @@ class _ClubScreenState extends State<ClubScreen> {
       });
      });
   }
+  void _filtrarNoticias(int id){
+    List<Noticia> aux = [];
+    for (var item in _club.noticias!) {
+      if(item.usuariosPermitidos!.isNotEmpty){
+        for (var item2 in item.usuariosPermitidos!) {
+          if(item2 == id){
+            aux.add(item);
+          }
+        }
+      }else{
+        aux.add(item);
+      }
+    }
+    _club.noticias = aux;
+  } 
   void _seguirActividad() async {
     _club.seguidores!.add(_user.id!);
     await ApiService().setClubSeguidores(_club.id!, _club.seguidores!);
@@ -337,7 +361,7 @@ class _ClubScreenState extends State<ClubScreen> {
   }
   Widget _crearIngresoOpcional(bool condicion){
     return Visibility(
-      visible: condicion,
+      visible: (_isLoggedIn && _user.rolCustom == "estudiante" && _user.estado! == "Completado") && condicion,
       child: Container(
         padding: EdgeInsets.all(15), // Añade un padding si es necesario
         margin: EdgeInsets.all(15), // Añade un padding si es necesario
@@ -412,7 +436,7 @@ class _ClubScreenState extends State<ClubScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Visibility(
-              visible: !_siguiendo,
+              visible: !_habilitado,
               child:Column(
                 children: [
                   Container(
@@ -431,7 +455,7 @@ class _ClubScreenState extends State<ClubScreen> {
               style: AppTextStyles.parrafo()
             ),
             _crearEtiquetas(),
-            _botonesOpcionales((_isLoggedIn && _user.estado! == "Completado"), (!_inscrito && ((_club.capacidad!-_club.inscritos!) > 0 || _club.capacidad! == -1)), _inscrito, _siguiendo),
+            _botonesOpcionales((_isLoggedIn && _user.rolCustom == "estudiante" && _user.estado! == "Completado"), (!_inscrito && ((_club.capacidad!-_club.inscritos!) > 0 || _club.capacidad! == -1)), _inscrito, _siguiendo),
           ],
         ),
       );
@@ -659,6 +683,7 @@ class _ClubScreenState extends State<ClubScreen> {
     );
   }
   Widget _crearCalendarioOpcional(bool condicion) {
+    List<Map<String, dynamic>> calendarios = _club.calendario!;
     return Visibility(
       visible: condicion,
       child: Container(
@@ -667,7 +692,7 @@ class _ClubScreenState extends State<ClubScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Calendario de actividades",
+              "Info",
               style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1)
             ),
             ListView.builder(
@@ -684,9 +709,18 @@ class _ClubScreenState extends State<ClubScreen> {
                         _club.calendario![index]["titulo"]!,
                         style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.verde1),
                       ),
-                      SizedBox(height: 4.0),
+                      Visibility(
+                        visible: calendarios[index]["descripcion"].toString().isNotEmpty,
+                        child: Container(
+                          margin: EdgeInsets.symmetric(vertical: 5),
+                          child: Text(
+                            calendarios[index]["descripcion"]!,
+                            style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
+                          ),
+                        )
+                      ),
                       Text(
-                        _club.calendario![index]["inicio"]!+_club.calendario![index]["fin"]!,
+                        calendarios[index]["horaDeInicio"]!.toString().isNotEmpty ? calendarios[index]["fechaDeInicio"]! + " - " + calendarios[index]["horaDeInicio"] : calendarios[index]["fechaDeInicio"], 
                         style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
                       ),
                     ],
@@ -711,7 +745,7 @@ class _ClubScreenState extends State<ClubScreen> {
           (index) {
             return InkWell(
               onTap: () {
-                Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
+                //Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
                 Navigator.push(context, MaterialPageRoute(builder: (context) => EtiquetasScreen(etiqueta: etiquetas[index].nombre!,)));
               },
               child: Text(

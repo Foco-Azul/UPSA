@@ -28,23 +28,6 @@ class _CarreraScreenState extends State<CarreraScreen> {
   late LoginController loginController;
   late Timer timerAnimation;
   String text = "La Doble Titulación de Arquitectura con la Università degli Studi di Genova (UNIGE) beneficia a los estudiantes de la UPSA que han culminado el séptimo semestre, eso los habilita para estudiar en la mencionada universidad italiana durante un año, luego de lo cual deben elaborar un proyecto que les permite obtener el título italiano de Licenciatura. Al retornar a Bolivia concluyen con el proceso de graduación para la Licenciatura en Arquitectura en la UPSA. Como profesional licenciado en Arquitectura podrás participar en la estructuración del hábitat en forma científica, responsable y funcional. Dado que la formación en Arquitectura integra conocimientos y habilidades tecnológicas, sociales y artísticas, con un alto sentido crítico, podrás responder en forma adecuada a los desafíos urbanísticos y la complejidad de las tareas que te plantea la profesión. Estarás en condiciones de proponer proyectos que resuelvan el requerimiento en forma efectiva, factible y al mismo tiempo atractiva, ya sea como profesional independiente, como empresario de la construcción o en una empresa o institución. Podrás desarrollar avalúos, peritajes técnicos, investigación urbana, patrimonial, tecnológica, así como organizar y liderar actividades de impacto social y ambiental.";
-  final List<List<Map<String, dynamic>>> _data2 = 
-  [
-    [
-      {
-        "headerValue": "Objetivos",
-        "expandedValue": "sdsadadas",
-        "isExpanded": false
-      },
-    ],
-    [
-      {
-        "headerValue": "Respaldo legal",
-        "expandedValue": "dsadasdsa",
-        "isExpanded": false
-      }
-    ]
-  ];
   int _id = -1;
   CarreraUpsa _carreraUpsa = CarreraUpsa();
   String _backUrl = "";

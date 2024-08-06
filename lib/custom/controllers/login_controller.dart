@@ -26,7 +26,7 @@ class LoginController extends GetxController {
   }
 
   void logout(BuildContext context) {
-    Provider.of<AppNotifier>(context, listen: false).limpiarValores();
+    Provider.of<AppNotifier>(context, listen: false).logout();
     Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
     //Get.back();
     // Navigator.pop(context);

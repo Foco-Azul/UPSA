@@ -269,7 +269,7 @@ class _Register2ScreenState extends State<Register2Screen> {
           ),
         ),
         Text(
-          'Posterior a tu registro, llenaras tu perfil para recibir recomendaciones pedagógicas de carreras a estudiar.',
+          'Posterior a tu registro, llenarás tu perfil para recibir recomendaciones vocacionales de carreras a estudiar.',
           style: TextStyle(
             color: AppColorStyles.oscuro1,
             fontSize: 15,

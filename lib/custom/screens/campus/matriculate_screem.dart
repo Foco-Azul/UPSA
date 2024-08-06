@@ -285,7 +285,7 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
               ), 
               SizedBox(width: 4.0), // Espaciado entre el icono y el texto
               Text(
-                "¿Cómo matricularse?".toUpperCase(), // Primer texto
+                "¿Cómo inscribirte?".toUpperCase(), // Primer texto
                 style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
               ),
             ]

@@ -1,17 +1,6 @@
 
 import 'dart:convert';
 
-List<Resultado> ResultadosFromJson(String str) {
-  final jsonData = json.decode(str);
-  final List<dynamic> data = jsonData['data'];
-  return data.map((item) => Resultado.fromJson(item)).toList();
-}
-Resultado ResultadoFromJson(String str) {
-  final jsonData = json.decode(str);
-  final Map<String, dynamic> data = jsonData['data'];
-  return Resultado.fromJson(data);
-} 
-
 class Resultado {
   Resultado({
     this.id,
@@ -23,6 +12,7 @@ class Resultado {
     this.tipo,
     this.palabrasClaves,
     this.descripcionClave,
+    this.usuariosPermitidos,
   });
     int? id;
     String? titulo;
@@ -33,19 +23,28 @@ class Resultado {
     String? tipo;
     String? palabrasClaves;
     String? descripcionClave;
+    String? usuariosPermitidos;
 
-  factory Resultado.fromJson(Map<String, dynamic> json) {
-    return Resultado(
-      id: json['id'],
-      titulo: json["attributes"]['titulo'],
-      descripcion: json["attributes"]['descripcion'],
-      idContenido: json["attributes"]['idContenido'],
-      categoria: json["attributes"]['categoria'],
-      etiquetas: json["attributes"]['etiquetas'],
-      tipo: json["attributes"]['tipo'],
-      palabrasClaves: json["attributes"]['palabrasClaves'],
-      descripcionClave: json["attributes"]['descripcionClave'],
-    );
+  static List<Resultado> armarResultadosPopulate(String str) {
+    List<Resultado> res = [];
+    final jsonData = json.decode(str);
+    final List<dynamic> data = jsonData['data'];
+    for (var item in data) {
+      Resultado aux = Resultado(
+        id: item['id'],
+        titulo: item["attributes"]['titulo'],
+        descripcion: item["attributes"]['descripcion'],
+        idContenido: item["attributes"]['idContenido'],
+        categoria: item["attributes"]['categoria'],
+        etiquetas: item["attributes"]['etiquetas'],
+        tipo: item["attributes"]['tipo'],
+        palabrasClaves: item["attributes"]['palabrasClaves'],
+        descripcionClave: item["attributes"]['descripcionClave'],
+        usuariosPermitidos: item["attributes"]["usuariosPermitidos"] ?? ";-1;",
+      );
+      res.add(aux);
+    }
+    return res;
   }
   
   Map<String, dynamic> toJson() => {

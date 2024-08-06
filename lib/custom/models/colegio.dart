@@ -21,10 +21,12 @@ class Colegio {
   Colegio({
     this.id = -1,
     this.nombre = "",
+    this.imagenes,
   });
 
   int? id;
   String? nombre;
+  List<String>? imagenes;
 
   factory Colegio.fromJson(Map<String, dynamic> json) {
     return Colegio(

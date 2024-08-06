@@ -14,6 +14,10 @@ class User {
     this.userMeta,
     this.actividadesSeguidas,
     this.actividadesInscritas,
+    this.notificacionesHabilitadas,
+    this.dispositivos,
+    this.solicitudesDeTestVocacional,
+    this.retroalimentaciones,
   });
 
   int? id;
@@ -24,8 +28,12 @@ class User {
   String? rolCustom; 
   String? estado;
   UserMeta? userMeta;
+  bool? notificacionesHabilitadas;
+  List<String>? dispositivos;
   List<Map<String, dynamic>>? actividadesInscritas;
   List<Map<String, dynamic>>? actividadesSeguidas;
+  List<int>? solicitudesDeTestVocacional;
+  List<Map<String, dynamic>>? retroalimentaciones;
 
   static User fromJson(Map<String, dynamic> json){
     return User(
@@ -82,6 +90,38 @@ class User {
       estado: data["estado"],
     );
   }
+  static User armarUsuarioPorEmail(String str) {
+    User res = User();
+    final jsonData = json.decode(str);
+    final List<dynamic> data = jsonData;
+    for (var item in data) {
+      res = User(
+        id: item["id"],
+        username: item["username"],
+        email: item["email"],
+        provider: item["provider"],
+        confirmed: item["confirmed"],
+        rolCustom: item["rolCustom"],
+        estado: item["estado"],
+      );
+      break;
+    }
+    return res;
+  }
+  static User armarUsuarioPopulate(String str) {
+    final jsonData = json.decode(str);
+    final Map<String, dynamic> data = jsonData;
+    return User(
+      id: data["id"],
+      username: data["username"],
+      email: data["email"],
+      provider: data["provider"],
+      confirmed: data["confirmed"],
+      rolCustom: data["rolCustom"],
+      estado: data["estado"],
+      dispositivos: _armarDispositivos(data["dispositivos"]),
+    );
+  }
   static User armarUsuarioPopulateConMetasParaFormularioPerfil(String str) {
     final jsonData = json.decode(str);
     final Map<String, dynamic> data = jsonData;
@@ -89,7 +129,33 @@ class User {
       id: data["id"],
       estado: data["estado"],
       rolCustom: data["rolCustom"],
+      username: data["username"],
+      email: data["email"],
       userMeta: UserMeta.armarUsuarioMetaPopulateConMetasParaFormularioPerfil(data["userMeta"]),
+    );
+  }
+  static User armarUsuarioPopulateConMetasParaSolitudDeTestVocacional(String str) {
+    final jsonData = json.decode(str);
+    final Map<String, dynamic> data = jsonData;
+    return User(
+      id: data["id"],
+      estado: data["estado"],
+      rolCustom: data["rolCustom"],
+      username: data["username"],
+      email: data["email"],
+      solicitudesDeTestVocacional: _armarSolicitudesDeTestVocacional(data["solicitudesDeTestVocacional"]),
+    );
+  }
+  static User armarUsuarioPopulateParaRetroalimentacion(String str) {
+    final jsonData = json.decode(str);
+    final Map<String, dynamic> data = jsonData;
+    return User(
+      id: data["id"],
+      estado: data["estado"],
+      rolCustom: data["rolCustom"],
+      username: data["username"],
+      email: data["email"],
+      retroalimentaciones: _armarRetroalimentaciones(data["retroalimentaciones"]),
     );
   }
   static User armarUsuarioPopulateConMetasParaFormularioCarrera(String str) {
@@ -99,6 +165,8 @@ class User {
       id: data["id"],
       estado: data["estado"],
       rolCustom: data["rolCustom"],
+      username: data["username"],
+      email: data["email"],
       userMeta: UserMeta.armarUsuarioMetaPopulateConMetasParaFormularioCarrera(data["userMeta"]),
       actividadesInscritas: _armarActividadesInscritas(data["inscripciones"], 1),
       actividadesSeguidas: _armarActividadesSeguidas(data["eventos"], data["concursos"], data["clubes"], 1),
@@ -111,9 +179,13 @@ class User {
       id: data["id"],
       estado: data["estado"],
       rolCustom: data["rolCustom"],
+      username: data["username"],
+      email: data["email"],
+      notificacionesHabilitadas: data["notificacionesHabilitadas"] ?? true,
       userMeta: UserMeta.armarUsuarioMetaPopulateParaMiPerfil(data["userMeta"]),
       actividadesInscritas: _armarActividadesInscritas(data["inscripciones"], 1),
       actividadesSeguidas: _armarActividadesSeguidas(data["eventos"], data["concursos"], data["clubes"], 1),
+      dispositivos: _armarDispositivos(data["dispositivos"]),
     );
   }
   static User armarUsuarioPopulateConActividadesPasadas(String str) {
@@ -123,9 +195,62 @@ class User {
       id: data["id"],
       estado: data["estado"],
       rolCustom: data["rolCustom"],
+      username: data["username"],
+      email: data["email"],
       actividadesInscritas: _armarActividadesInscritas(data["inscripciones"], -1),
       actividadesSeguidas: _armarActividadesSeguidas(data["eventos"], data["concursos"], data["clubes"], -1),
     );
+  }
+  static List<Map<String, dynamic>> _armarRetroalimentaciones(dynamic data){
+    List<Map<String, dynamic>> res = [];
+    if(data != null){
+      for (var item in data) {
+        Map<String, dynamic> aux = {};
+        if(item["evento"] != null){
+          aux = {
+            "id": item["evento"]["id"],
+            "titulo": item["evento"]["titulo"],
+            "tipo": "evento",
+          };
+          res.add(aux);
+        }
+        if(item["concurso"] != null){
+          aux = {
+            "id": item["concurso"]["id"],
+            "titulo": item["concurso"]["titulo"],
+            "tipo": "concurso",
+          };
+          res.add(aux);
+        }
+        if(item["club"] != null){
+          aux = {
+            "id": item["club"]["id"],
+            "titulo": item["club"]["titulo"],
+            "tipo": "club",
+          };
+          res.add(aux);
+        }
+      }
+    }
+    return res;
+  }
+  static List<int> _armarSolicitudesDeTestVocacional(List<dynamic>? data){
+    List<int> res = [];
+    if(data != null){
+      for (var item in data) {
+        res.add(item["id"]);
+      }
+    }
+    return res;
+  }
+  static List<String> _armarDispositivos(dynamic data){
+    List<String> res = [];
+    if(data != null){
+      for (var item in data) {
+        res.add(item["token"]);
+      }
+    }
+    return res;
   }
   static List<Map<String, dynamic>> _armarActividadesInscritas(dynamic data, int cantidad){
     List<Map<String, dynamic>> res = [];
@@ -163,7 +288,6 @@ class User {
     }
     return res;
   }
-
   static List<Map<String, dynamic>> _armarActividadesSeguidas(List<dynamic>? data1, List<dynamic>? data2, List<dynamic>? data3, int cantidad){
     List<Map<String, dynamic>> res = [];
     int count = 0;

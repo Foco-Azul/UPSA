@@ -36,7 +36,7 @@ class _ContactoScreenState extends State<ContactoScreen> {
   Contacto _contacto = Contacto();
   bool _isLoggedIn = false;
   User _user = User();
-  final Map<String, String> _formData = {
+  final Map<String, dynamic> _formData = {
     "email": "",
     "asunto": "",
     "mensaje": ""
@@ -47,6 +47,7 @@ class _ContactoScreenState extends State<ContactoScreen> {
     "errorMensaje": ""
   };
   Validacion validacion = Validacion();
+  bool _bandera = false;
   @override
   void initState() {
     super.initState();
@@ -82,7 +83,8 @@ class _ContactoScreenState extends State<ContactoScreen> {
   void _crearRegistroContacto() async{
     String respuesta = await ApiService().crearContacto(_formData);
     if(respuesta == "exito"){
-      MensajeTemporalInferior().mostrarMensaje(context,"Mensaje enviado exitosamente.\nTe responderemos a tu correo.", "exito");
+      _bandera = true;
+      MensajeTemporalInferior().mostrarMensaje(context,"Mensaje enviado exitosamente.", "exito");
     }else{
       MensajeTemporalInferior().mostrarMensaje(context,"Algo salio mal.", "error");
     }
@@ -192,122 +194,150 @@ class _ContactoScreenState extends State<ContactoScreen> {
     }
   } 
   Widget _crearFormulario(){
-    return Container(
-      padding: EdgeInsets.all(15.0),
-      margin: EdgeInsets.all(15.0),
-      decoration: AppDecorationStyle.tarjeta(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            margin: EdgeInsets.symmetric(vertical: 15.0), // Ajusta los valores del margen según sea necesario
-            child: Text(
-              "Formulario de contacto".toUpperCase(), // Primer texto
-              style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
-            ),
-          ),
-          if(_contacto.descripcionFormularioContacto!.isNotEmpty && _contacto.descripcionFormularioContacto! != " ")
-          Container(
-            margin: EdgeInsets.symmetric(vertical: 10.0), // Ajusta los valores del margen según sea necesario
-            child: Text(
-              _contacto.descripcionFormularioContacto!,
-              style: AppTextStyles.parrafo(),
-            ),
-          ),
-          Column(
-            children: [
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    TextFormField(
-                      onChanged: (value) {
-                        _formData["email"] = value;
-                        setState(() {});
-                      },
-                      initialValue: _formData["email"],
-                      readOnly: _isLoggedIn,
-                      decoration: AppDecorationStyle.campoContacto(hintText: "Email", labelText: "Email"),
-                      style: AppTextStyles.parrafo(color: AppColorStyles.gris1)
-                    ),
-                    if (_formDataError["errorEmail"]!.isNotEmpty)
-                    Text(
-                      _formDataError["errorEmail"]!,
-                      style: TextStyle(color: Colors.red),
-                      textAlign: TextAlign.start,
-                    ),
-                  ]
-                )
+    if(_bandera){
+      return Container(
+        padding: EdgeInsets.all(15.0),
+        margin: EdgeInsets.all(15.0),
+        decoration: AppDecorationStyle.tarjeta(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 15.0), // Ajusta los valores del margen según sea necesario
+              child: Text(
+                "Formulario de contacto".toUpperCase(), // Primer texto
+                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
               ),
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    TextFormField(
-                      onChanged: (value) {
-                        _formData["asunto"] = value;
-                        setState(() {});
-                      },
-                      initialValue: _formData["asunto"],
-                      decoration: AppDecorationStyle.campoContacto(hintText: "Asunto", labelText: "Asunto"),
-                      style: AppTextStyles.parrafo(color: AppColorStyles.gris1)
-                    ),
-                    if (_formDataError["errorAsunto"]!.isNotEmpty)
-                    Text(
-                      _formDataError["errorAsunto"]!,
-                      style: TextStyle(color: Colors.red),
-                      textAlign: TextAlign.start,
-                    ),
-                  ]
-                )
+            ),
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 10.0), // Ajusta los valores del margen según sea necesario
+              child: Text(
+                "Gracias por contactarte con la UPSA",
+                style: AppTextStyles.parrafo(),
               ),
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    TextFormField(
-                      onChanged: (value) {
-                        _formData["mensaje"] = value;
-                        setState(() {});
-                      },
-                      initialValue: _formData["mensaje"],
-                      decoration: AppDecorationStyle.campoContacto(hintText: "¿Cómo te podemos ayudar?", labelText: "¿Cómo te podemos ayudar?"),
-                      style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
-                      maxLines: null,
-                      maxLength: 200,
-                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                    ),
-                    if (_formDataError["errorMensaje"]!.isNotEmpty)
-                    Text(
-                      _formDataError["errorMensaje"]!,
-                      style: TextStyle(color: Colors.red),
-                      textAlign: TextAlign.start,
-                    ),
-                  ]
-                )
-              ),  
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 15),
-                alignment: Alignment.centerLeft,
-                child: ElevatedButton(
-                  onPressed: () {
-                    _validarCamposLogin();
-                  },
-                  style: AppDecorationStyle.botonContacto(),
-                  child: Text(
-                    'Enviar',
-                    style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
-                  ),
+            ),
+          ]
+        )
+      );
+    }else{
+      return Container(
+        padding: EdgeInsets.all(15.0),
+        margin: EdgeInsets.all(15.0),
+        decoration: AppDecorationStyle.tarjeta(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 15.0), // Ajusta los valores del margen según sea necesario
+              child: Text(
+                "Formulario de contacto".toUpperCase(), // Primer texto
+                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+              ),
+            ),
+            if(_contacto.descripcionFormularioContacto!.isNotEmpty && _contacto.descripcionFormularioContacto! != " ")
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 10.0), // Ajusta los valores del margen según sea necesario
+              child: Text(
+                _contacto.descripcionFormularioContacto!,
+                style: AppTextStyles.parrafo(),
+              ),
+            ),
+            Column(
+              children: [
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      TextFormField(
+                        onChanged: (value) {
+                          _formData["email"] = value;
+                          setState(() {});
+                        },
+                        initialValue: _formData["email"],
+                        readOnly: _isLoggedIn,
+                        decoration: AppDecorationStyle.campoContacto(hintText: "Email", labelText: "Email"),
+                        style: AppTextStyles.parrafo(color: AppColorStyles.gris1)
+                      ),
+                      if (_formDataError["errorEmail"]!.isNotEmpty)
+                      Text(
+                        _formDataError["errorEmail"]!,
+                        style: TextStyle(color: Colors.red),
+                        textAlign: TextAlign.start,
+                      ),
+                    ]
+                  )
                 ),
-              )
-            ],
-          ),
-        ],
-      ),
-    );
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      TextFormField(
+                        onChanged: (value) {
+                          _formData["asunto"] = value;
+                          setState(() {});
+                        },
+                        initialValue: _formData["asunto"],
+                        decoration: AppDecorationStyle.campoContacto(hintText: "Asunto", labelText: "Asunto"),
+                        style: AppTextStyles.parrafo(color: AppColorStyles.gris1)
+                      ),
+                      if (_formDataError["errorAsunto"]!.isNotEmpty)
+                      Text(
+                        _formDataError["errorAsunto"]!,
+                        style: TextStyle(color: Colors.red),
+                        textAlign: TextAlign.start,
+                      ),
+                    ]
+                  )
+                ),
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      TextFormField(
+                        onChanged: (value) {
+                          _formData["mensaje"] = value;
+                          setState(() {});
+                        },
+                        initialValue: _formData["mensaje"],
+                        decoration: AppDecorationStyle.campoContacto(hintText: "¿Cómo te podemos ayudar?", labelText: "¿Cómo te podemos ayudar?"),
+                        style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
+                        maxLines: null,
+                        minLines: 3,
+                        maxLength: 300,
+                        maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                      ),
+                      if (_formDataError["errorMensaje"]!.isNotEmpty)
+                      Text(
+                        _formDataError["errorMensaje"]!,
+                        style: TextStyle(color: Colors.red),
+                        textAlign: TextAlign.start,
+                      ),
+                    ]
+                  )
+                ),  
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 15),
+                  alignment: Alignment.centerLeft,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _validarCamposLogin();
+                    },
+                    style: AppDecorationStyle.botonContacto(),
+                    child: Text(
+                      'Enviar',
+                      style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ],
+        ),
+      );
+    }
   }
   Widget _crearEnlaces(String tipo){
     List<Map<String, dynamic>> aux = [];
@@ -370,7 +400,7 @@ class _ContactoScreenState extends State<ContactoScreen> {
     return Container(
       padding: EdgeInsets.all(15.0), // Ajusta el valor de acuerdo a tus necesidades
       child: Text(
-        'Envíanos un mensaje, estamos aquí para ayudarte en tu próxima vida universitaria.',
+        'Envianos un mensaje, estamos aquí para ayudarte en tu próxima vida universitaria.',
         style: AppTextStyles.parrafo(),
       ),
     );

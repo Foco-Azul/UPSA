@@ -31,17 +31,17 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
   UserMeta _userMeta = UserMeta();
   User _user = User();
   int _isInProgress = -1;
-  int _idDepartamento = 1;
   final Map<String, String> _errores = {
     "carreras": "",
     "informacionCarrera": "",
     "aplicacionTest": "",
-    "universidades": "",
+    "universidad": "",
     "universidadExtranjera": "",
     "departamento": "",
   };
   List<Carrera> _carreras = [];
   List<Universidad> _universidades = [];
+  List<String> _opcionesRecibirInformacion = [];
   @override
   void initState() {
     super.initState();
@@ -53,13 +53,10 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
   void cargarDatos() async{
     _user = Provider.of<AppNotifier>(context, listen: false).user;
     _user = await ApiService().getUserPopulateConMetasParaFormularioCarrera(_user.id!);
+    _opcionesRecibirInformacion = await ApiService().getCampoPersonalziado(1); 
     _carreras = await ApiService().getCarreras();
+    _universidades = await ApiService().getUniversidadesPopulate();
     _userMeta = _user.userMeta!;
-    for (var item in _userMeta.universidades!) {
-      _idDepartamento = item.idDepartamento!;
-      _universidades = await ApiService().getUnivesidadeForId(item.idDepartamento!);
-      break;
-    }
     setState(() {
       controller.uiLoading = false;
     });
@@ -71,29 +68,14 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
       _errores["aplicacionTest"] = "";
       _userMeta.aplicacionTest = "";
     }
-    if(_userMeta.estudiarEnBolivia!){
-      _errores["departamento"] = _userMeta.departamentoUniversidad!.isEmpty ? "Este campo es requerido" : "";
-      _errores["universidadExtranjera"] = "";
-      _userMeta.universidadExtranjera = "";
-    }else{
-      _errores["universidadExtranjera"] = _userMeta.universidadExtranjera!.isEmpty ? "Este campo es requerido" : "";
-      _errores["departamento"] = "";
-      _userMeta.departamentoUniversidad = "";
-    }
-    if(_userMeta.departamentoUniversidad!.isNotEmpty){
-      _errores["universidades"] = (_userMeta.universidades!.isEmpty || _userMeta.universidades!.length > 3) ? "Selecciona de 1 a 3 universidades" : "";
-    }else{
-      _errores["universidades"] = "";
-      _userMeta.universidades = [];
-    }
-    _errores["carreras"] =(_userMeta.carreras!.isEmpty || _userMeta.carreras!.length > 3) ? "Selecciona de 1 a 3 carreras" : "";
-    _errores["informacionCarrera"] = _userMeta.informacionCarrera!.isEmpty ? "Este campo es requerido" : "";
+    _errores["carreras"] =(_userMeta.carreras!.isEmpty || _userMeta.carreras!.length > 2) ? "Selecciona de 1 a 2 carreras" : "";
+    _errores["universidad"] = _userMeta.universidad!.id! == -1 ? "Este campo es requerido" : "";
 
     setState(() {
 
     });
 
-    if (_errores["carreras"]!.isEmpty && _errores["informacionCarrera"]!.isEmpty && _errores["aplicacionTest"]!.isEmpty && _errores["universidades"]!.isEmpty) {
+    if (_errores["carreras"]!.isEmpty && _errores["aplicacionTest"]!.isEmpty && _errores["universidad"]!.isEmpty) {
       _registrarCarrera();
     }
   }
@@ -149,42 +131,19 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
       });
     }
   }
-  void _onOptionSelectedDepartamento(List<ValueItem> selectedOptions) async {
-    if(selectedOptions.isNotEmpty){
-      _idDepartamento = int.parse(selectedOptions[0].value!);
-      _userMeta.departamentoUniversidad = selectedOptions[0].label;
-      _userMeta.universidades = [];
-      _universidades = await ApiService().getUnivesidadeForId(int.parse(selectedOptions[0].value!));
-    }else{
-      _userMeta.departamentoUniversidad = "";
-    }
-    setState(() {});
-  }
   void _onOptionSelectedUniversidad(List<ValueItem> selectedOptions) {
     if (selectedOptions.isNotEmpty) {
-      _userMeta.universidades = [];
-      for (var opcion in selectedOptions) {
-        Universidad aux = Universidad(
-          nombre: opcion.label,
-          idDepartamento: _idDepartamento,
-        );
-        _userMeta.universidades!.add(aux);
-      }
+      _userMeta.universidad = Universidad(
+        id: int.tryParse(selectedOptions[0].value!),
+        nombre: selectedOptions[0].label,
+      );
       setState(() {
       });
     } else {
       setState(() {
-        _userMeta.universidades = [];
+        _userMeta.universidad = Universidad();
       });
     }
-  }
-  void _onOptionSelectedinformacionCarrera(List<ValueItem> selectedOptions) {
-    if(selectedOptions.isNotEmpty){
-      _userMeta.informacionCarrera = selectedOptions[0].label;
-    }else{
-      _userMeta.informacionCarrera = "";
-    }
-    setState(() {});
   }
   void _onOptionSelectedDonde(List<ValueItem> selectedOptions) {
     if(selectedOptions.isNotEmpty){
@@ -211,9 +170,9 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
       });
     }
   }
-  List<ValueItem> _armarSelectedOptions(String  meta){
+  List<ValueItem> _armarSelectedOptions(String  tipo){
     List<ValueItem> res = [];
-    if(meta == "recibirInformacion"){
+    if(tipo == "recibirInformacion"){
       for (var item in _userMeta.recibirInformacion!) {
         ValueItem aux = ValueItem(
           label: item["titulo"]
@@ -221,68 +180,23 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
         res.add(aux);
       }
     }
-    if(meta == "universidades"){
-      for (var item in _userMeta.universidades!) {
-        ValueItem aux = ValueItem(
-          label: item.nombre!,
+    if(tipo == "universidad"){
+      if(_userMeta.universidad!.id != -1){
+        res.add(
+          ValueItem(
+            label: _userMeta.universidad!.nombre!,
+            value: _userMeta.universidad!.id!.toString(),
+          )
         );
-        res.add(aux);
       }
     }
-    if(meta == "departamentoUniversidad"){
-      if(_userMeta.departamentoUniversidad!.isNotEmpty){
-        if (_userMeta.departamentoUniversidad! == "CHUQUISACA") {
-          ValueItem aux = ValueItem(label: _userMeta.departamentoUniversidad!, value: '1');
-          
-          res.add(aux);
-        } else if (_userMeta.departamentoUniversidad! == "LA PAZ") {
-          ValueItem aux = ValueItem(label: _userMeta.departamentoUniversidad!, value: '2');
-          
-          res.add(aux);
-        } else if (_userMeta.departamentoUniversidad! == "ORURO") {
-          ValueItem aux = ValueItem(label: _userMeta.departamentoUniversidad!, value: '4');
-          
-          res.add(aux);
-        } else if (_userMeta.departamentoUniversidad! == "TARIJA") {
-          ValueItem aux = ValueItem(label: _userMeta.departamentoUniversidad!, value: '6');
-          
-          res.add(aux);
-        } else if (_userMeta.departamentoUniversidad! == "SANTA CRUZ") {
-          ValueItem aux = ValueItem(label: _userMeta.departamentoUniversidad!, value: '7');
-          
-          res.add(aux);
-        } else if (_userMeta.departamentoUniversidad! == "PANDO") {
-          ValueItem aux = ValueItem(label: _userMeta.departamentoUniversidad!, value: '9');
-          
-          res.add(aux);
-        } else if (_userMeta.departamentoUniversidad! == "COCHABAMBA") {
-          ValueItem aux = ValueItem(label: _userMeta.departamentoUniversidad!, value: '11');
-          
-          res.add(aux);
-        } else if (_userMeta.departamentoUniversidad! == "POTOSÍ") {
-          ValueItem aux = ValueItem(label: _userMeta.departamentoUniversidad!, value: '12');
-          
-          res.add(aux);
-        } else if (_userMeta.departamentoUniversidad! == "BENI") {
-          ValueItem aux = ValueItem(label: _userMeta.departamentoUniversidad!, value: '13');
-          
-          res.add(aux);
-        }
-      }
-    }
-    if(meta == "informacionCarrera"){
-      if(_userMeta.informacionCarrera!.isNotEmpty){
-        ValueItem aux = ValueItem(label: _userMeta.informacionCarrera!);
-        res.add(aux);
-      }
-    }
-    if(meta == "aplicacionTest"){
+    if(tipo == "aplicacionTest"){
       if(_userMeta.aplicacionTest!.isNotEmpty){
         ValueItem aux = ValueItem(label: _userMeta.aplicacionTest!);
         res.add(aux);
       }
     }
-    if(meta == "carreras"){
+    if(tipo == "carreras"){
       if(_userMeta.carreras!.isNotEmpty){
         for (var item in _userMeta.carreras!) {
           ValueItem aux = ValueItem(
@@ -336,13 +250,9 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                         _crearDescripcion(),
                         _crearCampoOpcion("¿Ya hiciste un Test Vocacional?", "Si", "No", _userMeta.testVocacional!, _userMeta.testVocacional!, "testVocacional"),
                         _crearCampoSelectorOpcional('¿Dónde de aplicarón el test?', _userMeta.testVocacional!, _errores["aplicacionTest"]!, "aplicacionTest"),
-                        _crearCampoSelectorMulti('Selecciona hasta tres carreras que te gustaría estudiar(en orden de importancia)', _userMeta.carreras!, _errores["carreras"]!, "carreras"),
-                        _crearCampoSelectorMulti('¿Qué tan informado estás sobre tus opciones de carrera?', _userMeta.informacionCarrera!, _errores["informacionCarrera"]!, "informacionCarrera"),
-                        _crearCampoOpcion('¿Piensas estudiar en Bolivia o en el extranjero?', "Bolivia", "Extranjero", _userMeta.estudiarEnBolivia!, _userMeta.estudiarEnBolivia!, "estudiarEnBolivia"),
-                        _crearCampoTextoOpcional('Nombre de la Universidad', _userMeta.universidadExtranjera!, !_userMeta.estudiarEnBolivia!, _errores["universidadExtranjera"]!, "universidadExtranjera"),
-                        _crearCampoSelectorOpcional('¿En qué departamento piensas estudiar?', _userMeta.estudiarEnBolivia!, _errores["departamento"]!, "departamentoUniversidad"),
-                        _crearCampoSelectorMultiOpcional('Selecciona hasta tres universidades dónde te gustaría estudiar (en orden de importancia)', _userMeta.estudiarEnBolivia! && _userMeta.departamentoUniversidad!.isNotEmpty, _errores["universidades"]!, "universidades"),
-                        _crearCampoSelectorMulti('¿Sobre qué aspectos te gustaría recibir información?(selecciona todas que aplican)', _userMeta.recibirInformacion!, "", "recibirInformacion"),
+                        _crearCampoSelectorMulti('Seleccioná hasta dos carreras que te gustaría estudiar(en orden de importancia)', _userMeta.carreras!, _errores["carreras"]!, "carreras"),
+                        _crearCampoSelectorSimple('Seleccioná la universidad dónde te gustaría estudiar (en orden de importancia)', _userMeta.universidad!, _errores["universidad"]!, "universidad"),
+                        _crearCampoSelectorMulti('¿Sobre qué aspectos te gustaría recibir información?(seleccioná todas las que aplican)', _userMeta.recibirInformacion!, "", "recibirInformacion"),
                         _crearBoton(),
                       ]
                     )
@@ -379,6 +289,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
       ),
     );
   }
+  /*
   Widget _crearCampoSelectorMultiOpcional(String label, bool condicion, String error, String campo){
     List<ValueItem> opciones = [];
     List<ValueItem> opcionesSeleccionadas = [];
@@ -497,6 +408,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
       ),
     );
   }
+  */
   Widget _crearCampoSelectorMulti(String label, dynamic valor, String error, String campo){
     List<ValueItem> opciones = [];
     List<ValueItem> opcionesSeleccionadas = [];
@@ -514,17 +426,9 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
       opcionesSeleccionadas = _armarSelectedOptions("informacionCarrera");
     }
     if(campo == "recibirInformacion"){
-      opciones =  [
-        ValueItem(label: 'Orientación Vocacional'),
-        ValueItem(label: 'Carreras (planes de estudio)'),
-        ValueItem(label: 'Concursos académicos'),
-        ValueItem(label: 'Doble titulación'),
-        ValueItem(label: 'Intercambio estudiantil'),
-        ValueItem(label: 'Ferias cientificas y/o emprendiemiento'),
-        ValueItem(label: 'Actividades deportivas y culturales de la U'),
-        ValueItem(label: 'Financiamiento/créditos/becas'),
-        ValueItem(label: 'Programas de Postgrado'),
-      ];
+      for (var item in _opcionesRecibirInformacion) {
+        opciones.add(ValueItem(label: item));
+      }
       opcionesSeleccionadas = _armarSelectedOptions("recibirInformacion");
     }
     return Container(
@@ -549,9 +453,6 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                 if (campo == "carreras") {
                    _onOptionSelectedCarrera(selectedOptions);
                 }
-                if (campo == "informacionCarrera") {
-                   _onOptionSelectedinformacionCarrera(selectedOptions);
-                }
                 if (campo == "recibirInformacion") {
                    _onOptionSelectedInfo(selectedOptions);
                 }
@@ -559,6 +460,62 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
               options: opciones,
               hint: "- Seleccionar -",
               selectionType: SelectionType.multi,
+              chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.verde2),
+              selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.verde2),
+              selectedOptionTextColor: AppColorStyles.oscuro1,
+              selectedOptionBackgroundColor: AppColorStyles.verdeFondo,
+              optionTextStyle: AppTextStyles.parrafo(color: AppColorStyles.verde2),
+              borderRadius: 14,
+              borderColor: AppColorStyles.blancoFondo,
+              selectedOptions: opcionesSeleccionadas,
+            ),
+          ),
+          if (error.isNotEmpty)
+          Container(
+            margin: EdgeInsets.only(top: 8),
+            child: Text(
+              error,
+              style: TextStyle(color: Colors.red),
+              textAlign: TextAlign.start,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _crearCampoSelectorSimple(String label, dynamic valor, String error, String campo){
+    List<ValueItem> opciones = [];
+    List<ValueItem> opcionesSeleccionadas = [];
+    if(campo == "universidad"){
+      opciones = _buildValueItems("universidad");
+      opcionesSeleccionadas = _armarSelectedOptions("universidad");
+    }
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            label,
+            style: TextStyle(
+              color: AppColorStyles.gris1,
+              fontSize: 12.0,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          SizedBox(height: 8.0),
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 8),
+            decoration: AppDecorationStyle.campoContainerForm(),
+            child: MultiSelectDropDown(
+              onOptionSelected: (selectedOptions) {
+                if (campo == "universidad") {
+                  _onOptionSelectedUniversidad(selectedOptions);
+                }
+              },
+              options: opciones,
+              hint: "- Seleccionar -",
+              selectionType: SelectionType.single,
               chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.verde2),
               selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.verde2),
               selectedOptionTextColor: AppColorStyles.oscuro1,
@@ -594,20 +551,6 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
       ];
       opcionesSeleccionadas = _armarSelectedOptions("aplicacionTest");
     }
-    if(campo == "departamentoUniversidad"){
-      opciones = [
-        ValueItem(label: 'CHUQUISACA', value: '1'),
-        ValueItem(label: 'LA PAZ', value: '2'),
-        ValueItem(label: 'ORURO', value: '4'),
-        ValueItem(label: 'TARIJA', value: '6'),
-        ValueItem(label: 'SANTA CRUZ', value: '7'),
-        ValueItem(label: 'PANDO', value: '9'),
-        ValueItem(label: 'COCHABAMBA', value: '11'),
-        ValueItem(label: 'POTOSÍ', value: '12'),
-        ValueItem(label: 'BENI', value: '13'),
-      ];
-      opcionesSeleccionadas = _armarSelectedOptions("departamentoUniversidad");
-    }
     return Visibility(
       visible: condicion,
       child: Container(
@@ -635,9 +578,6 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                       onOptionSelected: (selectedOptions) {
                         if (campo == "aplicacionTest") {
                           _onOptionSelectedDonde(selectedOptions);
-                        }
-                        if (campo == "departamentoUniversidad") {
-                          _onOptionSelectedDepartamento(selectedOptions);
                         }
                       },
                       options: opciones,
@@ -707,9 +647,6 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                   if(campo == "testVocacional"){
                     _userMeta.testVocacional = selected; 
                   }
-                  if(campo == "estudiarEnBolivia"){
-                    _userMeta.estudiarEnBolivia = selected; 
-                  }
                   setState(() {});
                 },
                 shape: RoundedRectangleBorder(
@@ -740,9 +677,6 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                   if(campo == "testVocacional"){
                     _userMeta.testVocacional = !selected; 
                   }
-                  if(campo == "estudiarEnBolivia"){
-                    _userMeta.estudiarEnBolivia = !selected; 
-                  }
                   setState(() {});
                 },
                 shape: RoundedRectangleBorder(
@@ -763,7 +697,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
     return Container( 
         margin: EdgeInsets.symmetric(vertical: 15),
         child: Text(
-          '¿Qué piensas estudiar? Seleccioná tus preferencias.',
+          '¿Qué pensás estudiar? Seleccioná tus preferencias.',
           style: TextStyle(
             color: AppColorStyles.oscuro1,
             fontSize: 15,
@@ -793,11 +727,12 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
         );  
       }
     }
-    if(tipo == "universidades"){
+    if(tipo == "universidad"){
       for (var item in _universidades) {
         res.add(
           ValueItem(
-            label: item.nombre!
+            label: item.nombre!,
+            value: item.id!.toString()
           )
         );
       }

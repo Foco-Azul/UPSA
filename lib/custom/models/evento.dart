@@ -24,7 +24,8 @@ class Evento {
     this.inscritos,
     this.inscripciones,
     this.noticias,
-    this.seguidores
+    this.seguidores,
+    this.entradas,
   });
 
   int? id;
@@ -43,7 +44,8 @@ class Evento {
   List<Noticia>? noticias;
   List<Inscripcion>? inscripciones;
   List<int>? seguidores;
-
+  List<Map<String, dynamic>>? entradas;
+  
   static List<Evento> armarEventosPopulateFechaOriginal(String str) {
     List<Evento> res = [];
     final jsonData = json.decode(str);
@@ -77,8 +79,8 @@ class Evento {
         publicacion: FuncionUpsa.armarFechaPublicacion(item['attributes']["publishedAt"]), 
         imagen: item['attributes']["imagen"]['data'] != null ? item['attributes']["imagen"]['data']['attributes']['url'] : "/uploads/default_02263f0f89.png", 
         imagenes: FuncionUpsa.armarGaleriaImagenes(item['attributes']["imagenes"]['data'], item['attributes']["imagen"]['data']),
-        fechaDeInicio: FuncionUpsa.armarfechaDeInicioFinConHora(item['attributes']["fechaDeInicio"]), 
-        fechaDeFin: FuncionUpsa.armarfechaDeInicioFinConHora(item['attributes']["fechaDeFin"]),
+        fechaDeInicio: FuncionUpsa.armarFechaDeInicioFin(item['attributes']["fechaDeInicio"]), 
+        fechaDeFin: FuncionUpsa.armarFechaDeInicioFin(item['attributes']["fechaDeFin"]),
         descripcion: item['attributes']["descripcion"], 
         etiquetas: Etiqueta.armarEtiquetas(item['attributes']["etiquetas"]['data']),
       );
@@ -96,8 +98,8 @@ class Evento {
       publicacion: FuncionUpsa.armarFechaPublicacion(data['attributes']["publishedAt"]), 
       imagen: data['attributes']["imagen"]['data'] != null ? data['attributes']["imagen"]['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",  
       imagenes: FuncionUpsa.armarGaleriaImagenes(data['attributes']["imagenes"]['data'], data['attributes']["imagen"]['data']),
-      fechaDeInicio: FuncionUpsa.armarfechaDeInicioFinConHora(data['attributes']["fechaDeInicio"]), 
-      fechaDeFin: FuncionUpsa.armarfechaDeInicioFinConHora(data['attributes']["fechaDeFin"]),
+      fechaDeInicio: FuncionUpsa.armarFechaDeInicioFin(data['attributes']["fechaDeInicio"]), 
+      fechaDeFin: FuncionUpsa.armarFechaDeInicioFin(data['attributes']["fechaDeFin"]),
       descripcion: data['attributes']["descripcion"], 
       etiquetas: Etiqueta.armarEtiquetas(data['attributes']["etiquetas"]['data']),
     );
@@ -112,8 +114,8 @@ class Evento {
       publicacion: FuncionUpsa.armarFechaPublicacion(data['attributes']["publishedAt"]), 
       imagen: data['attributes']["imagen"]['data'] != null ? data['attributes']["imagen"]['data']['attributes']['url'] : "/uploads/default_02263f0f89.png", 
       imagenes: FuncionUpsa.armarGaleriaImagenes(data['attributes']["imagenes"]['data'], data['attributes']["imagen"]['data']),
-      fechaDeInicio: FuncionUpsa.armarfechaDeInicioFinConHora(data['attributes']["fechaDeInicio"]), 
-      fechaDeFin: FuncionUpsa.armarfechaDeInicioFinConHora(data['attributes']["fechaDeFin"]),
+      fechaDeInicio: FuncionUpsa.armarFechaDeInicioFin(data['attributes']["fechaDeInicio"]), 
+      fechaDeFin: FuncionUpsa.armarFechaDeInicioFin(data['attributes']["fechaDeFin"]),
       descripcion: data['attributes']["descripcion"], 
       etiquetas: Etiqueta.armarEtiquetas(data['attributes']["etiquetas"]['data']),
       calendario: FuncionUpsa.armarFechaCalendarioConHora(data['attributes']["calendario"]), 

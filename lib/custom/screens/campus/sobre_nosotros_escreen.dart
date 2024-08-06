@@ -27,7 +27,7 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
   int _currentPage = 0;
   String _backUrl = "";
   SobreNosotros _sobreNosotros = SobreNosotros();
-  List<List<dynamic>> _desplegables = [];
+  final List<List<dynamic>> _desplegables = [];
   @override
   void initState() {
     super.initState();
@@ -50,7 +50,7 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
   }
   void _modificarListaDesplegables(){
     List<dynamic> aux = [];
-    var aux2;
+    Map<String, Object> aux2;
     aux2 = {
       "headerValue": "Objetivos",
       "expandedValue": _sobreNosotros.objetivo!,

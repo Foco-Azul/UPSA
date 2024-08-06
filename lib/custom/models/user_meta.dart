@@ -2,10 +2,7 @@ import 'dart:convert';
 import 'package:flutkit/custom/models/carrera.dart';
 import 'package:flutkit/custom/models/colegio.dart';
 import 'package:flutkit/custom/models/universidad.dart';
-// getting a single user from json
-UserMeta singleUserMetaFromJson(String str) => UserMeta.fromJsonMeta(json.decode(str));
-
-UserMeta getSingleUserMetaFronJson(String str) => UserMeta.fromJsonMeta(json.decode(str));
+import 'package:flutkit/custom/utils/funciones.dart';
 
 // user class
 class UserMeta {
@@ -16,19 +13,17 @@ class UserMeta {
   String? fechaDeNacimiento;
   String? celular1;
   bool? testVocacional;
-  bool? estudiarEnBolivia;
-  String? informacionCarrera;
-  String? departamentoUniversidad;
   String? aplicacionTest;
   List<Map<String, dynamic>>? recibirInformacion;
   Map<String, dynamic>? promocion;
   Colegio? colegio;
   List<int>? intereses;
   List<Carrera>? carreras;
-  List<Universidad>? universidades;
+  Universidad? universidad;
   String? avatar;
   Map<String, dynamic>? carreraSugerida;
-  String? universidadExtranjera;
+  String? curso;
+  List<Map<String, dynamic>>? insignias;
 
   UserMeta({
     this.id,
@@ -38,39 +33,19 @@ class UserMeta {
     this.fechaDeNacimiento,
     this.celular1,
     this.testVocacional,
-    this.estudiarEnBolivia,
-    this.informacionCarrera,
-    this.departamentoUniversidad,
     this.recibirInformacion,
     this.intereses,
     this.promocion,
     this.carreras,
-    this.universidades,
+    this.universidad,
     this.aplicacionTest,
     this.avatar,
     this.carreraSugerida,
     this.colegio,
-    this.universidadExtranjera
+    this.curso,
+    this.insignias,
   });
 
-  factory UserMeta.fromJsonMeta(Map<String, dynamic> json) => UserMeta(
-    id: json['data']['id'],
-    nombres: json['data']['attributes']["nombres"] ?? "",
-    apellidos: json['data']['attributes']["apellidos"] ?? "",
-    cedulaDeIdentidad: json['data']['attributes']["cedulaDeIdentidad"] ?? "",
-    fechaDeNacimiento: json['data']['attributes']["fechaDeNacimiento"] ?? "",
-    celular1: json['data']['attributes']["celular1"] != null ? json['data']['attributes']["celular1"].toString() : "",
-    promocion: _armarPromocion(json['data']['attributes']["promocion"]),
-    colegio: _armarColegio(json['data']['attributes']["colegio"]),
-    aplicacionTest: json['data']['attributes']["aplicacionTest"] ?? "",
-    carreraSugerida: _armarCarreraSugerida(json['data']['attributes']["carreraSugerida"]),
-    universidadExtranjera: json['data']['attributes']["universidadExtranjera"] ?? "",
-    testVocacional: json['data']['attributes']["testVocacional"],
-    estudiarEnBolivia: json['data']['attributes']["estudiarEnBolivia"],
-    departamentoUniversidad: json['data']['attributes']["departamentoUniversidad"] ?? "",
-    carreras: _armarCarreras(json['data']['attributes']["carreras"]),
-    informacionCarrera: json['data']['attributes']["informacionCarrera"] ?? "",
-  );
   static UserMeta armarUsuarioMetaPopulateConMetasParaFormularioPerfil(dynamic data) {
     UserMeta res = UserMeta();
     if(data != null){
@@ -78,10 +53,26 @@ class UserMeta {
         id: data["id"],
         nombres: data["nombres"],
         apellidos: data["apellidos"],
-        celular1: data["celular1"] ?? "",
+        celular1: data["celular1"] != null ? data["celular1"].toString() : "",
         cedulaDeIdentidad: data["cedulaDeIdentidad"] ?? "",
         fechaDeNacimiento: data["fechaDeNacimiento"] ?? "",
         colegio: _armarColegio(data["colegio"]),
+        curso: data["curso"] ?? "",
+      );
+    }
+    return res;
+  }
+  static UserMeta armarUsuarioMetaPopulateConMetasParaSolitudDeTestVocacional(dynamic data) {
+    UserMeta res = UserMeta();
+    if(data != null){
+      res = UserMeta(
+        id: data["id"],
+        nombres: data["nombres"],
+        apellidos: data["apellidos"],
+        celular1: data["celular1"] != null ? data["celular1"].toString() : "",
+        cedulaDeIdentidad: data["cedulaDeIdentidad"] ?? "",
+        fechaDeNacimiento: data["fechaDeNacimiento"] ?? "",
+        curso: data["curso"] ?? "",
       );
     }
     return res;
@@ -94,13 +85,19 @@ class UserMeta {
         testVocacional: data["testVocacional"] ?? "",
         aplicacionTest: data["aplicacionTest"] ?? "",
         carreras: _armarCarreras(data["carreras"]),
-        informacionCarrera: data["informacionCarrera"] ?? "",
-        estudiarEnBolivia: data["estudiarEnBolivia"] ?? true,
-        universidadExtranjera: data["universidadExtranjera"] ?? "",
-        departamentoUniversidad: data["departamentoUniversidad"] ?? "",
-        universidades: _armarUniversidades(data["universidades"]),
+        universidad: _armarUniversidad(data["universidad"]),
         carreraSugerida: _armarCarreraSugerida(data["carreraSugerida"]),
         recibirInformacion: _armarRecibirInformacion(data["recibirInformacion"]),
+      );
+    }
+    return res;
+  }
+  static Universidad _armarUniversidad(dynamic data){
+    Universidad res = Universidad();
+    if(data != null){
+      res = Universidad(
+        id: data["id"],
+        nombre: data["nombre"], 
       );
     }
     return res;
@@ -115,16 +112,35 @@ class UserMeta {
         avatar: data["avatar"] != null ? data["avatar"]["imagen"]["url"] : "/uploads/avatar_89f34d0255.png",
         colegio: _armarColegio(data["colegio"]),
         carreraSugerida: _armarCarreraSugerida(data["carreraSugerida"]),
+        insignias: _armarInsignias(data["insignias"]),
       );
+    }
+    return res;
+  }
+  static List<Map<String, dynamic>> _armarInsignias(dynamic data){
+    List<Map<String, dynamic>> res = [];
+    if(data != null){
+      for (var item in data) {
+        res.add(
+          {
+            "id": item["id"],
+            "nombre": item["nombre"],
+            "imagen": item["imagen"] != null ? item["imagen"]["url"] : "/uploads/avatar_89f34d0255.png",
+            "mensaje": item["mensaje"] ?? "",
+          }
+        );  
+      }
     }
     return res;
   }
   static Colegio _armarColegio(dynamic data){
     Colegio res = Colegio();
     if(data != null){
+      List<String> aux = FuncionUpsa.armarGaleriaDeImagenes("imagenesColegio", data["imagenes"]);
       res = Colegio(
         id: data["id"],
         nombre: data["nombre"],
+        imagenes: aux,
       );
     }
     return res;
@@ -186,6 +202,8 @@ class UserMeta {
     }
     return res;
   }
+
+  
   static Map<String, dynamic> _armarPromocion(Map<String, dynamic> data){
     Map<String, dynamic> res = {};
     if(data["data"] != null){
@@ -200,4 +218,5 @@ class UserMeta {
     "fechaDeNacimiento": fechaDeNacimiento,
     "celular1": celular1,
   };
+
 }

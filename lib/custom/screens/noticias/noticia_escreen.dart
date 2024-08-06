@@ -4,9 +4,11 @@ import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/categoria.dart';
 import 'package:flutkit/custom/models/etiqueta.dart';
 import 'package:flutkit/custom/models/noticia.dart';
+import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/screens/inicio/etiquetas_screen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -15,6 +17,7 @@ import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 
@@ -35,6 +38,10 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
   String _backUrl = "";
   Noticia _noticia = Noticia();
   List<Noticia> _otrasNoticias = [];
+  User _user = User();
+  bool _isLoggedIn = false;
+  int _currentPage = 0;
+  final PageController _pageController = PageController(initialPage: 0);
   
   @override
   void initState() {
@@ -54,11 +61,34 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
     
     _noticia = await ApiService().getNoticia(_idNoticia);
     _otrasNoticias = await ApiService().getOtrasNoticias(_idNoticia);
+    _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
+    if (_isLoggedIn) {
+      _user = Provider.of<AppNotifier>(context, listen: false).user;
+      if(_user.rolCustom! == "estudiante"){
+        _filtrarNoticias(_user.id!);
+      }
+    }else{
+      _filtrarNoticias(-1);
+    }
     setState(() {
       controller.uiLoading = false;
     });
   }
-
+  void _filtrarNoticias(int id){
+    List<Noticia> aux = [];
+    for (var item in _otrasNoticias) {
+      if(item.usuariosPermitidos!.isNotEmpty){
+        for (var item2 in item.usuariosPermitidos!) {
+          if(item2 == id){
+            aux.add(item);
+          }
+        }
+      }else{
+        aux.add(item);
+      }
+    }
+    _otrasNoticias = aux;
+  } 
   @override
   Widget build(BuildContext context) {
     if (controller.uiLoading) {
@@ -103,7 +133,8 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               _breadcrumbs(),
-              _bannerNoticia(),
+              _crearGaleriaImagenes(),
+              //_bannerNoticia(),
               _contenedorDescripcion(),
               _crearSeguimientoOpcional(_otrasNoticias.isNotEmpty),
             ],
@@ -169,6 +200,80 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
       );
     }
   } 
+  Widget _crearGaleriaImagenes(){
+    return Container(
+      margin: EdgeInsets.all(15), 
+      child: Stack(
+        alignment: AlignmentDirectional.center,
+        children: <Widget>[
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.3,
+            child: PageView(
+              pageSnapping: true,
+              physics: ClampingScrollPhysics(),
+              controller: _pageController,
+              onPageChanged: (int page) {
+                setState(() {
+                  _currentPage = page;
+                });
+              },
+              children: _crearGaleria().map((widget) {
+                return Container(
+                  child: widget,
+                );
+              }).toList(),
+            ),
+          ),
+          Positioned(
+            bottom: 10,
+            left: 10, // Añade esta línea para alinear a la izquierda
+            child: _buildPageIndicatorStatic(),
+          ),
+        ],
+      )
+    );
+  }
+   Widget _buildPageIndicatorStatic() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4), // Padding interno del contenedor
+          decoration: BoxDecoration(
+            color: AppColorStyles.verde2, // Color de fondo del contenedor
+            borderRadius: BorderRadius.circular(24.0), // Borde redondeado con radio de 24
+          ),
+          child: Text(
+            '${_currentPage + 1}/${_noticia.imagenes!.length}',
+            style: AppTextStyles.etiqueta(color: AppColorStyles.blancoFondo)
+          ),
+        ),
+      ],
+    );
+  }
+  List<Widget> _crearGaleria() {
+    return _noticia.imagenes!.map((url) {
+      return Container(
+        decoration: BoxDecoration(
+          color: customTheme.card,
+          borderRadius: BorderRadius.all(Radius.circular(24)),
+          boxShadow: [
+            BoxShadow(
+                color: customTheme.shadowColor.withAlpha(120),
+                blurRadius: 24,
+                spreadRadius: 4)
+          ]),
+        child: ClipRRect(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          child: Image.network(
+            _backUrl + url,
+            height: 240.0,
+            fit: BoxFit.fill,
+          ),
+        )
+      );
+    }).toList();
+  }
   Widget _crearSeguimientoOpcional(bool condicion){
     return Visibility(
       visible: condicion,
@@ -262,7 +367,7 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
           (index) {
             return InkWell(
               onTap: () {
-                Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
+                //Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
                 Navigator.push(context, MaterialPageRoute(builder: (context) => EtiquetasScreen(etiqueta: etiquetas[index].nombre!,)));
               },
               child: Text(

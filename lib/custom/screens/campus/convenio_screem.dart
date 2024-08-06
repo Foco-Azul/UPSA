@@ -253,13 +253,11 @@ class _ConvenioScreenState extends State<ConvenioScreen> {
                           ),
                         SizedBox(width: 4.0),
                         Expanded(
-                          child: Container(
-                            child: Text(
-                              enlaces[index]["nombre"]!,
-                              style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
-                              textAlign: TextAlign.left, // O TextAlign.justify para justificar el texto
-                              overflow: TextOverflow.visible, // O TextOverflow.clip / TextOverflow.ellipsis según tus necesidades
-                            ),
+                          child: Text(
+                            enlaces[index]["nombre"]!,
+                            style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
+                            textAlign: TextAlign.left, // O TextAlign.justify para justificar el texto
+                            overflow: TextOverflow.visible, // O TextOverflow.clip / TextOverflow.ellipsis según tus necesidades
                           ),
                         ),
                       ],

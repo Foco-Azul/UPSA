@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutkit/custom/models/categoria.dart';
+import 'package:flutkit/custom/models/colegio.dart';
 import 'package:flutkit/custom/models/etiqueta.dart';
 import 'package:flutkit/custom/utils/funciones.dart';
     
@@ -14,6 +15,9 @@ class Noticia {
     this.notaCompleta,
     this.descripcion,
     this.etiquetas,
+    this.colegios,
+    this.imagenes,
+    this.usuariosPermitidos,
   });
 
   int? id;
@@ -21,9 +25,12 @@ class Noticia {
   Categoria? categoria;
   String? publicacion;
   String? imagen;
+  List<String>? imagenes;
   String? notaCompleta;
   String? descripcion;
   List<Etiqueta>? etiquetas;
+  List<Colegio>? colegios;
+  List<int>? usuariosPermitidos;
 
   static List<Noticia> armarNoticiasPopulate(String str) {
     List<Noticia> res = [];
@@ -39,11 +46,43 @@ class Noticia {
         notaCompleta: item['attributes']["notaCompleta"], 
         descripcion: item['attributes']["descripcion"], 
         etiquetas: Etiqueta.armarEtiquetas(item['attributes']["etiquetas"]['data']),
+        colegios: _armarColegios(item['attributes']["colegios"]['data']),
+        usuariosPermitidos: armarListaDeEnteros(item['attributes']["colegios"]['data']),
       );
       res.add(aux);
     }
     return res;
   }
+  static List<int> armarListaDeEnteros(dynamic data){
+    List<int> res = [];
+    if(data != null){
+      for (var item in data) {
+        if(item["attributes"]["usersMeta"]["data"] !=  null){
+          for (var item2 in item["attributes"]["usersMeta"]["data"]) {
+            int aux = item2["attributes"]["user"]["data"] != null ? item2["attributes"]["user"]["data"]["id"] : -1;
+            if(aux != -1){
+              res.add(aux);
+            }
+          }
+        }
+      }
+    }
+    return res;
+  }
+  static List<Colegio> _armarColegios(dynamic data){
+    List<Colegio> res = [];
+    if(data != null){
+      for (var item in data) {
+        Colegio aux = Colegio(
+          id: item["id"],
+          nombre: item["attributes"]["nombre"],
+        );
+        res.add(aux);
+      }
+    }
+    return res;
+  }
+
   static Noticia armarNoticiaPopulate(String str) {
     final jsonData = json.decode(str);
     final Map<String, dynamic> data = jsonData['data'];
@@ -53,7 +92,8 @@ class Noticia {
       categoria: Categoria.armarCategoria(data['attributes']["categoria"]["data"]),
       publicacion: FuncionUpsa.armarFechaPublicacion(data['attributes']["publishedAt"]), 
       imagen: data['attributes']["imagen"]['data'] != null ? data['attributes']["imagen"]['data']['attributes']['url'] : "/uploads/default_02263f0f89.png", 
-      notaCompleta: data['attributes']["notaCompleta"], 
+      imagenes: FuncionUpsa.armarGaleriaImagenes(data['attributes']["imagenes"]['data'], data['attributes']["imagen"]['data']),
+      notaCompleta: data['attributes']["notaCompleta"] ?? "", 
       descripcion: data['attributes']["descripcion"], 
       etiquetas: Etiqueta.armarEtiquetas(data['attributes']["etiquetas"]['data']),
     );
@@ -65,6 +105,7 @@ class Noticia {
         id: item["id"],
         titulo: item['attributes']["titulo"],
         imagen: item['attributes']["imagen"]['data'] != null ? item['attributes']["imagen"]['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",
+        usuariosPermitidos: armarListaDeEnteros(item['attributes']["colegios"]['data']),
       );
       res.add(aux);
     }

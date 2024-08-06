@@ -12,16 +12,13 @@ import 'package:flutkit/custom/screens/inicio/etiquetas_screen.dart';
 import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
-import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
-import 'package:flutkit/helpers/widgets/my_button.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutkit/custom/controllers/login_controller.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
-import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -48,7 +45,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
   bool _isLoggedIn = false;
   bool _ingresoMostrado = false;
   bool _inscrito = false;
-  bool _siguiendo = false;
+  //bool _siguiendo = false;
   Inscripcion _inscripcion = Inscripcion();
   
   @override
@@ -66,15 +63,20 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
     if (_isLoggedIn) {
       _user = Provider.of<AppNotifier>(context, listen: false).user;
-      if (_concurso.seguidores!.contains(_user.id)) {
-        _siguiendo =  true;
-      }
-      for (var item in _concurso.inscripciones!) {
-        if(item.user == _user.id){
-          _inscrito =  true;
-          _inscripcion =  item;
+      if(_user.rolCustom! == "estudiante" || true){
+        _filtrarNoticias(_user.id!);
+        if (_concurso.seguidores!.contains(_user.id)) {
+          //_siguiendo =  true;
+        }
+        for (var item in _concurso.inscripciones!) {
+          if(item.user == _user.id){
+            _inscrito =  true;
+            _inscripcion =  item;
+          }
         }
       }
+    }else{
+      _filtrarNoticias(-1);
     }
     await dotenv.load(fileName: ".env");
     Timer(Duration(milliseconds: 1000), () {});
@@ -85,6 +87,22 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
       });
      });
   }
+  void _filtrarNoticias(int id){
+    List<Noticia> aux = [];
+    for (var item in _concurso.noticias!) {
+      if(item.usuariosPermitidos!.isNotEmpty){
+        for (var item2 in item.usuariosPermitidos!) {
+          if(item2 == id){
+            aux.add(item);
+          }
+        }
+      }else{
+        aux.add(item);
+      }
+    }
+    _concurso.noticias = aux;
+  } 
+  /*
   void _seguirActividad() async {
     _concurso.seguidores!.add(_user.id!);
     await ApiService().setConcursoSeguidores(_concurso.id!, _concurso.seguidores!);
@@ -121,7 +139,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
     Navigator.pop(context);
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => super.widget));
   }
-  
+  */
   @override
   Widget build(BuildContext context) {
     if (controller.uiLoading) {
@@ -268,7 +286,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
   }
   Widget _crearIngresoOpcional(bool condicion){
     return Visibility(
-      visible: condicion,
+      visible: (_isLoggedIn && _user.rolCustom == "estudiante" && _user.estado! == "Completado") && condicion,
       child: Container(
         padding: EdgeInsets.all(15), // Añade un padding si es necesario
         margin: EdgeInsets.all(15), // Añade un padding si es necesario
@@ -343,7 +361,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Calendario de actividades",
+              "Info",
               style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1)
             ),
             ListView.builder(
@@ -360,9 +378,18 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
                         _concurso.calendario![index]["titulo"]!,
                         style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.verde1),
                       ),
-                      SizedBox(height: 4.0),
+                      Visibility(
+                        visible: calendarios[index]["descripcion"].toString().isNotEmpty,
+                        child: Container(
+                          margin: EdgeInsets.symmetric(vertical: 5),
+                          child: Text(
+                            calendarios[index]["descripcion"]!,
+                            style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
+                          ),
+                        )
+                      ),
                       Text(
-                        calendarios[index]["fechaDeInicio"]!+(calendarios[index]["fechaDeFin"]!.toString().isNotEmpty ? " - " : "")+calendarios[index]["fechaDeFin"]!+(calendarios[index]["horaDeInicio"]!.toString().isNotEmpty || calendarios[index]["horaDeInicio"]!.toString().isNotEmpty ? "\n" : "") +calendarios[index]["horaDeInicio"]! + (calendarios[index]["horaDeFin"]!.toString().isNotEmpty ? " - " : "")+calendarios[index]["horaDeFin"]!, 
+                        calendarios[index]["horaDeInicio"]!.toString().isNotEmpty ? calendarios[index]["fechaDeInicio"]! + " - " + calendarios[index]["horaDeInicio"] : calendarios[index]["fechaDeInicio"], 
                         style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
                       ),
                     ],
@@ -391,14 +418,14 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
             ),
             _crearEtiquetas(),
             _crearEnlaceExterno(),
-            //_botonesOpcionales((_isLoggedIn && _user.estado! == "Completado"), (!_inscrito && ((_concurso.capacidad!-_concurso.inscritos!) > 0 || _concurso.capacidad! == -1)), _inscrito, _siguiendo),
+            //_botonesOpcionales((_isLoggedIn && _user.rolCustom == "estudiante" && _user.estado! == "Completado"), (!_inscrito && ((_concurso.capacidad!-_concurso.inscritos!) > 0 || _concurso.capacidad! == -1)), _inscrito, _siguiendo),
           ],
         ),
       );
   }
   Widget _crearEnlaceExterno(){
     return Visibility(
-      visible: _concurso.enlaceExterno!.isNotEmpty,
+      visible: (_isLoggedIn && _user.rolCustom == "estudiante" && _user.estado! == "Completado") && _concurso.enlaceExterno!.isNotEmpty,
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 15),
         alignment: Alignment.centerLeft,
@@ -428,6 +455,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
       )
     );
   }
+  /*
   Widget _botonesOpcionales(bool condicion, condicionInscribirse, condicionInscrito, condicionSeguir){
     return Visibility(
       visible: condicion,
@@ -532,6 +560,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
       )
     );
   }
+  */
   Widget _crearFechasInicioFin(String inicio, String fin){
     return Container(
       margin: EdgeInsets.all(15),
@@ -660,6 +689,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
     }
     return masNoticias;
   }
+  /*
   void _showBottomSheet(context) {
     showModalBottomSheet(
       context: context,
@@ -716,6 +746,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
       }
     );
   }
+  */
   Widget _mostrarIngreso(){
     return
       Center(
@@ -746,7 +777,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
           (index) {
             return InkWell(
               onTap: () {
-                Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
+                //Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
                 Navigator.push(context, MaterialPageRoute(builder: (context) => EtiquetasScreen(etiqueta: etiquetas[index].nombre!,)));
               },
               child: Text(

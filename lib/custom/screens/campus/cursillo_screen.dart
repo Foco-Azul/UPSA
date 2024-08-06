@@ -3,8 +3,10 @@ import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/categoria.dart';
 import 'package:flutkit/custom/models/cursillo.dart';
+import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutkit/custom/controllers/login_controller.dart';
@@ -12,6 +14,7 @@ import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 
@@ -36,6 +39,7 @@ class _CursilloScreenState extends State<CursilloScreen> {
   final List<int> _cursillos = [];
   int _anterior = -1;
   int _siguiente = -1;
+  bool _isLoggedIn = false;
   @override
   void initState() {
     super.initState();
@@ -50,6 +54,11 @@ class _CursilloScreenState extends State<CursilloScreen> {
     setState(() {
       controller.uiLoading = true;
     });
+    _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
+    if (_isLoggedIn) {
+      User user = Provider.of<AppNotifier>(context, listen: false).user;
+      await ApiService().setUserCursillosVistos(user.id!, _id);
+    }
     _cursillo = await ApiService().getCursilloPopulate(_id);
     _cursillosData = await ApiService().getCursillosPopulate();
     _armarProximos();
