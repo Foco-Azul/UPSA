@@ -3,7 +3,6 @@ import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/carrera_upsa.dart';
 import 'package:flutkit/custom/theme/styles.dart';
-import 'package:flutkit/custom/utils/funciones.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
@@ -27,11 +26,9 @@ class _CarreraScreenState extends State<CarreraScreen> {
   late ProfileController controller;
   late LoginController loginController;
   late Timer timerAnimation;
-  String text = "La Doble Titulación de Arquitectura con la Università degli Studi di Genova (UNIGE) beneficia a los estudiantes de la UPSA que han culminado el séptimo semestre, eso los habilita para estudiar en la mencionada universidad italiana durante un año, luego de lo cual deben elaborar un proyecto que les permite obtener el título italiano de Licenciatura. Al retornar a Bolivia concluyen con el proceso de graduación para la Licenciatura en Arquitectura en la UPSA. Como profesional licenciado en Arquitectura podrás participar en la estructuración del hábitat en forma científica, responsable y funcional. Dado que la formación en Arquitectura integra conocimientos y habilidades tecnológicas, sociales y artísticas, con un alto sentido crítico, podrás responder en forma adecuada a los desafíos urbanísticos y la complejidad de las tareas que te plantea la profesión. Estarás en condiciones de proponer proyectos que resuelvan el requerimiento en forma efectiva, factible y al mismo tiempo atractiva, ya sea como profesional independiente, como empresario de la construcción o en una empresa o institución. Podrás desarrollar avalúos, peritajes técnicos, investigación urbana, patrimonial, tecnológica, así como organizar y liderar actividades de impacto social y ambiental.";
   int _id = -1;
   CarreraUpsa _carreraUpsa = CarreraUpsa();
   String _backUrl = "";
-  List<List<Map<String, dynamic>>> _dataParaDesplegable = [];
 
   @override
   void initState() {
@@ -49,7 +46,6 @@ class _CarreraScreenState extends State<CarreraScreen> {
     await dotenv.load(fileName: ".env");
     _backUrl = dotenv.get('backUrl');
     _carreraUpsa = await ApiService().getCarreraUpsa(_id);
-    _dataParaDesplegable = FuncionUpsa.armarListaParaDesplegablesPlanDeEstudios(_carreraUpsa.planEstudios!);
     setState(() {
       controller.uiLoading = false;
     });
@@ -93,8 +89,7 @@ class _CarreraScreenState extends State<CarreraScreen> {
               _facultadNombre(),
               _bannerCarrera(),
               _descripcionCarrera(),
-              _pestanias(), 
-              _crearPlanDeEstudios(),
+              _crearLista(),
               _crearMasInformacion(),
             ],
           ),
@@ -159,12 +154,86 @@ class _CarreraScreenState extends State<CarreraScreen> {
       );
     }
   } 
+  Widget _crearLista(){
+    return Container(
+      padding: EdgeInsets.all(15.0),
+      margin: EdgeInsets.all(15.0),
+      decoration: AppDecorationStyle.tarjeta(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            children: List.generate(_carreraUpsa.masInformacion!.length, (index) {
+              return Container(
+                margin: EdgeInsets.symmetric(vertical: 8.0), // Ajusta los valores del margen según sea necesario
+                child: Column(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 5),
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        _carreraUpsa.masInformacion![index]["titulo"],
+                        style: TextStyle(
+                          color: AppColorStyles.oscuro1,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        softWrap: true, // Permite el salto de línea automático
+                      ),
+                    ),
+                    Container(
+                      alignment: Alignment.centerLeft,
+                      margin: EdgeInsets.symmetric(vertical: 5),
+                      child: Text(
+                        _carreraUpsa.masInformacion![index]["titulo"],
+                        style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
+                        softWrap: true, // Permite el salto de línea automático
+                      ),
+                    ),
+                  ], 
+                ),
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
   Widget _crearMasInformacion(){
     return Container(
       margin: EdgeInsets.all(15.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Visibility(
+            visible: _carreraUpsa.pdf!.isNotEmpty,
+            child: Container(
+              margin: EdgeInsets.only(bottom: 30),
+              alignment: Alignment.centerLeft,
+              child: ElevatedButton(
+                onPressed: () async {
+                  if(_carreraUpsa.pdf!.isNotEmpty){
+                    await launchUrl(Uri.parse(_backUrl+_carreraUpsa.pdf!),mode: LaunchMode.externalApplication,);
+                  }
+                },
+                style: AppDecorationStyle.botonContacto(),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.article_outlined,
+                      color: AppColorStyles.blancoFondo,
+                    ),
+                    SizedBox(width: 8.0),
+                    Text(
+                      'Descargar PDF',
+                      style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           Text(
             "Más información", // Primer texto
             style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1),
@@ -207,150 +276,13 @@ class _CarreraScreenState extends State<CarreraScreen> {
       ),
     );
   }
-  Widget _crearDesplegable(List<Map<String, dynamic>> data) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 15.0),
-      decoration: AppDecorationStyle.desplegable(),
-      child: ExpansionPanelList(
-        expansionCallback: (int index, bool isExpanded) {
-          setState(() {
-            data[index]["isExpanded"] = isExpanded;
-          });
-        },
-        children: data.map<ExpansionPanel>((dynamic item) {
-          return ExpansionPanel(
-            backgroundColor: AppColorStyles.blancoFondo,
-            headerBuilder: (BuildContext context, bool isExpanded) {
-              return ListTile(
-                title: Text(item["headerValue"], style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.gris2)),
-              );
-            },
-            body: Container(
-              padding: EdgeInsets.all(15.0),
-              alignment: Alignment.centerLeft,
-              child: Text(
-                item["expandedValue"],
-                style: AppTextStyles.parrafo(),
-              ),
-            ),
-            isExpanded: item["isExpanded"],
-          );
-        }).toList(),
-      ),
-    );
-  }
-  Widget _crearListaDesplegables() {
-    return Column(
-      children: List.generate(_dataParaDesplegable.length, (index) {
-        return _crearDesplegable(_dataParaDesplegable[index]);
-      }),
-    );
-  }
-  Widget _crearPlanDeEstudios(){
-    return Container(
-      margin: EdgeInsets.all(15.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Plan de estudios", // Primer texto
-            style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1),
-          ),
-          _crearListaDesplegables(),
-        ],
-      ),
-    );
-  }
-  Widget getTabContent(String text) {
-    switch (text) {
-      case "Campo Laboral":
-        return Container(
-          padding: EdgeInsets.all(15),
-          child : Text( 
-            _carreraUpsa.campoLaboral!, 
-            style: AppTextStyles.parrafo()
-          ),
-        );
-      case "Perfil del postulante":
-        return Container(
-          padding: EdgeInsets.all(15),
-          child : Text( 
-            _carreraUpsa.perfilPostulante!, 
-            style: AppTextStyles.parrafo()
-          ),
-        );
-      case "Objetivos":
-        return Container(
-          padding: EdgeInsets.all(15),
-          child : Text( 
-            _carreraUpsa.objetivos!, 
-            style: AppTextStyles.parrafo()
-          ),
-        );
-      default:
-        return Container(
-          padding: EdgeInsets.all(15),
-          child : Text("", 
-          style: AppTextStyles.parrafo()
-          ),
-        );
-    }
-  }
-  Widget _pestanias(){
-    return DefaultTabController(
-      length: 3,
-      initialIndex: 0,
-      child: Column(
-        //mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          TabBar(
-            isScrollable: true,
-            tabs: [
-              Tab(
-                child: Text(
-                  "Campo Laboral",
-                  style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.verde1),
-                ),
-              ),
-              Tab(
-                child: Text(
-                  "Perfil del postulante",
-                  style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.verde1),
-                ),
-              ),
-              Tab(
-                child: Text(
-                  "Objetivos",
-                  style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.verde1),
-                ),
-              ),
-            ],
-            tabAlignment: TabAlignment.start,
-            indicator: UnderlineTabIndicator(
-              borderSide: BorderSide(color: AppColorStyles.verde1, width: 2.0),
-            ),
-          ),
-          SizedBox( 
-            height: MediaQuery.of(context).size.height * 0.3,
-            child: TabBarView(
-              children: <Widget>[
-                getTabContent('Campo Laboral'),
-                getTabContent('Perfil del postulante'),
-                getTabContent('Objetivos'),
-              ],
-            ),
-          )
-        ]
-      )
-    );
-  }
   Widget _descripcionCarrera() {
     return Container(
       margin: EdgeInsets.all(15),
       padding: EdgeInsets.all(15),
       decoration: AppDecorationStyle.tarjeta(),
       child: Text(
-        text,
+        _carreraUpsa.descripcion!,
         style: AppTextStyles.parrafo(),
       ),
     );

@@ -124,7 +124,7 @@ class AppColorStyles {
   static const Color verde2 = Color(0xFF005A41);
   static const Color verdeFondo = Color(0xFFF4FBF9);
   static const Color blancoFondo = Color(0xFFFFFFFF);
-}
+} 
 class AppIconStyles {
   static IconData? icono({String nombre = "circle"}) {
     final Map<String, IconData?> iconMap = {
@@ -151,6 +151,18 @@ class AppIconStyles {
       "psychology_outlined": Icons.psychology_outlined,
     };
     return iconMap[nombre];
+  }
+}
+
+class AppColorCustom {
+  static Color color({String nombre = "A_6E51D9"}) {
+    final Map<String, Color> colorMap = {
+      "A_6E51D9": Color(0xFF6E51D9),
+      "B_A08AE5": Color(0xFFA08AE5),
+      "C_D2FF58": Color(0xFFD2FF58),
+      "D_B0E212": Color(0xFFB0E212),
+    };
+    return colorMap[nombre] ?? Color(0xFF6E51D9);
   }
 }
 class AppBanderaStyles {

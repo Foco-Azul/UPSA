@@ -6,10 +6,10 @@ import 'dart:convert';
 import 'package:flutkit/custom/models/avatar.dart';
 import 'package:flutkit/custom/models/carrera_upsa.dart';
 import 'package:flutkit/custom/models/club.dart';
+import 'package:flutkit/custom/models/configuracion.dart';
 import 'package:flutkit/custom/models/contacto.dart';
 import 'package:flutkit/custom/models/convenio.dart';
 import 'package:flutkit/custom/models/cursillo.dart';
-import 'package:flutkit/custom/models/facultad.dart';
 import 'package:flutkit/custom/models/matriculate.dart';
 import 'package:flutkit/custom/models/resultado.dart';
 import 'package:flutkit/custom/models/sobre_nosotros.dart';
@@ -17,13 +17,11 @@ import 'package:flutkit/custom/models/user_meta.dart';
 import 'package:flutkit/custom/utils/funciones.dart';
 import 'package:flutkit/custom/models/campus.dart';
 import 'package:flutkit/custom/models/carrera.dart';
-import 'package:flutkit/custom/models/categoria.dart';
 import 'package:flutkit/custom/models/colegio.dart';
 import 'package:flutkit/custom/models/concurso.dart';
 import 'package:flutkit/custom/models/evento.dart';
 import 'package:flutkit/custom/models/interes.dart';
 import 'package:flutkit/custom/models/noticia.dart';
-import 'package:flutkit/custom/models/promocion.dart';
 import 'package:flutkit/custom/models/universidad.dart';
 import 'package:flutkit/custom/utils/generadores.dart';
 import 'package:flutter/material.dart';
@@ -102,7 +100,7 @@ class ApiService {
     User res = User();
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse("${dotenv.get('baseUrl')}${dotenv.get('usersRegisterEndpoint')}/$id/");
+      var url = Uri.parse("${dotenv.get('baseUrl')}${dotenv.get('usersRegisterEndpoint')}/$id/?populate=*");
       var response = await http.get(
         url,
         headers: {
@@ -119,35 +117,6 @@ class ApiService {
       }
     } catch (e) {
       print('Error en getUsuarioPopulate: $e');
-      return res;
-    }
-  }
-  Future<List<User>> getUsers(String email, String pass) async {
-    List<User> res = [];
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse(dotenv.get('baseUrl') + dotenv.get('usersEndpoint'));
-      var response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          "Authorization": "Bearer ${dotenv.get('accesToken')}"
-          }, 
-        body: json.encode({ 
-          "identifier": email, 
-          "password": pass 
-          }),
-      );
-      if (response.statusCode == 200) {
-        res = User.armarUsuarios(response.body);
-        return res;
-      } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en  getUsers: $error');
-        return res;
-      }
-    } catch (e) {
-      print('Error en getUsers: $e');
       return res;
     }
   }
@@ -201,72 +170,7 @@ class ApiService {
     }
     return null;
   }
-  Future<List<Map<String, dynamic>>> getActividadesSeguidosForUserNotPopulate(int userId) async {
-    List<Map<String, dynamic>> res = [];
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/users/$userId?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        var actividades;
-        actividades = json.decode(response.body)["eventos"];
-        if(actividades != null){
-          for (var evento in actividades) {
-            Map<String, dynamic> aux = {
-              "id": evento["id"],
-              "titulo": evento["titulo"],
-              "actividad": "evento",
-            };
-            res.add(aux);
-          }
-        }
-        actividades = json.decode(response.body)["concursos"];
-        if(actividades != null){
-          for (var evento in actividades) {
-            Map<String, dynamic> aux = {
-              "id": evento["id"],
-              "titulo": evento["titulo"],
-              "actividad": "concurso",
-            };
-            res.add(aux);
-          }
-        }
-        return res;
-      } else {
-        print(jsonDecode(response.body)["error"]["message"]);
-        return res;
-      }
-    } catch (e) {
-      print(e);
-      return res;
-    }
-  }
-  Future<bool> setActividadesSeguidos(int idUser, List<Map<String, dynamic>> actividadesSeguidos, String actividad) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/users/$idUser');
-      var response = await http.put(url,
-        headers: {
-          'Content-Type': 'application/json',
-          "Authorization": "Bearer ${dotenv.get('accesToken')}"
-        },
-        body: json.encode(
-        {
-          actividad: actividadesSeguidos.map((actividad) => actividad["id"]).toList()
-        }
-      )
-      );
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<String> pedirTokenUser (int userId) async {
+  Future<String> pedirTokenUser(int userId) async {
     await dotenv.load(fileName: ".env");
     try {
       var url = Uri.parse('${dotenv.get('baseUrl')}/users/$userId');
@@ -327,32 +231,7 @@ class ApiService {
       throw Exception(e);
     }
   }
-  Future<bool> actualizarCompletadoUser(int id, bool estaCompletado) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse("${dotenv.get('baseUrl')}/users/$id");
-      var response = await http.put(url,
-        headers: {
-          'Content-Type': 'application/json',
-          "Authorization": "Bearer ${dotenv.get('accesToken')}"
-        },
-        body: json.encode(
-          {
-            "completada": estaCompletado
-          }
-        )
-      );
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        throw Exception(error);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<int> _getIdUserMeta (int id) async{
+  Future<int> _getIdUserMeta(int id) async{
     await dotenv.load(fileName: ".env");
     try {
       var url = Uri.parse('${dotenv.get('baseUrl')}/users/$id?populate=*');
@@ -360,139 +239,6 @@ class ApiService {
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
         return jsonDecode(response.body)["userMeta"]["id"];
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<List<int>> getEventosSeguidos(int userId) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/users/$userId?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        List<int> eventos = _crearListaEnteros(response.body, "eventos");
-        return eventos;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<List<Map<String,dynamic>>> getConcursosSeguidos(int userId) async {
-    List<Map<String,dynamic>> res = [];
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/users/$userId?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        res = _crearActividadesSeguidos(response.body, "concursos");
-        return res;
-      } else {
-        print('Error en getConcursosSeguidos: '+jsonDecode(response.body)['error']['message']);
-        return res;
-      }
-    } catch (e) {
-      print('Error en getConcursosSeguidos: $e');
-      return res;
-    }
-  }
-  Future<bool> setEventosSeguidos(int idUser, List<int> eventosId) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/users/$idUser');
-      var response = await http.put(url,
-        headers: {
-          'Content-Type': 'application/json',
-          "Authorization": "Bearer ${dotenv.get('accesToken')}"
-        },
-        body: json.encode(
-          {
-            "eventos": eventosId
-          }
-        )
-      );
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<int> _getActividadId(int idInscripcion, String actividad) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/inscripcions/$idInscripcion?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        int evento = jsonDecode(response.body)["data"]["attributes"][actividad]?["data"]?["id"];
-        return evento;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<List<Map<String, dynamic>>> _getActividadesInscritosId2(int userId) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/users/$userId?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        List<Map<String, dynamic>> actividades = [];
-        var jsonData = json.decode(response.body)["inscripciones"];
-        if(jsonData != null){
-          for (var inscripcion in jsonData) {
-            Map<String, dynamic> aux = {
-              "id": inscripcion["id"],
-              "qr": inscripcion["qr"],
-            };
-            actividades.add(aux);
-          }
-        }
-        return actividades;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<List<int>> _getActividadesInscritosId(int userId) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/users/$userId?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        List<int> eventos = _crearListaEnteros(response.body, "inscripciones");
-        return eventos;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<List<Map<String,dynamic>>> getClubesSeguidos(int userId) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/users/$userId?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        List<Map<String,dynamic>> concursosSeguidos = _crearActividadesSeguidos(response.body, "clubes");
-        return concursosSeguidos;
       } else {
         throw Exception(jsonDecode(response.body)["error"]["message"]);
       }
@@ -877,101 +623,6 @@ class ApiService {
   //ACTIVIDADES FIN
 
   //INSCRIPCIONES INICIO
-  Future<Map<String, dynamic>> _getInscripcionForId(int idInscripcion) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/inscripcions/$idInscripcion?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        Map<String, dynamic> inscripcion = (json.decode(response.body))["data"]["attributes"];
-        return inscripcion;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<Map<String, dynamic>> _getEventoForId(int idInscripcion) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/inscripcions/$idInscripcion?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        Map<String, dynamic> inscripcion = (json.decode(response.body))["data"]["attributes"]["evento"]["data"];
-        return inscripcion;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<int> crearInscripcionEvento(int idUser, int idEvento) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      DateTime now = DateTime.now();
-      DateTime utcPlus4 = now.add(Duration(hours: 4));
-      String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(utcPlus4);
-
-      int hash = formattedDate.hashCode.abs(); // Convertir la fecha en un número
-      String code = hash.toRadixString(36).toUpperCase(); // Convertir el número en una cadena en base 36
-      var url = Uri.parse(dotenv.get('baseUrl') + "/inscripcions");
-      var response = await http.post(url,
-          headers: {
-            'Content-Type': 'application/json',
-            "Authorization": "Bearer ${dotenv.get('accesToken')}"
-          },
-          body: json.encode({
-            "data": {"user": idUser, "evento": idEvento, "fecha": formattedDate, "qr": "Evento-UPSA-$code$idUser$idEvento"}
-          }));
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body)["data"]["id"];
-      } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        throw Exception(error);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<int> _getEventoId(int idInscripcion) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/inscripcions/$idInscripcion?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        int evento = jsonDecode(response.body)["data"]["attributes"]["evento"]?["data"]?["id"];
-        return evento;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    } 
-  }
-  Future<String> getQrEvento(int idInscripcion) async {
-    String res = "";
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/inscripcions/$idInscripcion?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        res = jsonDecode(response.body)["data"]["attributes"]["qr"];
-        return res;
-      } else {
-        print('Error en getQrEvento: '+jsonDecode(response.body)['error']['message']);
-        return res;
-      }
-    } catch (e) {
-      print('Error en getQrEvento: $e');
-      return res;
-    }
-  }
   Future<void> marcarAsistencia(int idInscripcion) async {
     await dotenv.load(fileName: ".env");
     try {
@@ -993,34 +644,6 @@ class ApiService {
         //return true;
       } else {
         throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<int> crearInscripcionConcurso(int idUser, int id) async {
-    await dotenv.load(fileName: ".env");
-    try {
-      DateTime now = DateTime.now();
-      DateTime utcPlus4 = now.add(Duration(hours: 4));
-      String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(utcPlus4);
-
-      int hash = formattedDate.hashCode.abs(); // Convertir la fecha en un número
-      String code = hash.toRadixString(36).toUpperCase(); // Convertir el número en una cadena en base 36
-      var url = Uri.parse('${dotenv.get('baseUrl')}/inscripcions');
-      var response = await http.post(url,
-          headers: {
-            'Content-Type': 'application/json',
-            "Authorization": "Bearer ${dotenv.get('accesToken')}"
-          },
-          body: json.encode({
-            "data": {"user": idUser, "concurso": id, "fecha": formattedDate, "qr": "Concurso-UPSA-$code$idUser$id"}
-          }));
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body)["data"]["id"];
-      } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        throw Exception(error);
       }
     } catch (e) {
       throw Exception(e);
@@ -1266,9 +889,10 @@ class ApiService {
   }
   Future<List<Evento>> getEventos() async {
     List<Evento> res = [];
+    String fechaActual = obtenerFechaActual();
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200&filters[\$or][0][fechaDeInicio][\$gte]=$fechaActual&filters[\$or][1][fechaDeFin][\$gte]=$fechaActual');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -1337,9 +961,10 @@ class ApiService {
   }
   Future<List<Map<String,dynamic>>> getEventosUltimas(int cantidad) async {
     List<Map<String,dynamic>> res = [];
+    String fechaActual = obtenerFechaActual();
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=$cantidad');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=$cantidad&filters[\$or][0][fechaDeInicio][\$gte]=$fechaActual&filters[\$or][1][fechaDeFin][\$gte]=$fechaActual');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -1499,9 +1124,10 @@ class ApiService {
   //CLUBES INICIO
   Future<List<Club>> getClubes() async {
     List<Club> res = [];
+    String fechaActual = obtenerFechaActual();
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/clubes/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/clubes/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200&filters[\$or][0][fechaDeInicio][\$gte]=$fechaActual&filters[\$or][1][fechaDeFin][\$gte]=$fechaActual');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -1517,30 +1143,12 @@ class ApiService {
       return res;
     }
   }
-  Future<Club> getClub(int eventoId) async {
-    Club res = Club();
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/clubes/$eventoId?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        res = Club.armarClubPopulate(response.body);
-        return res;
-      } else {
-        print('Error en getClub: '+jsonDecode(response.body)['error']['message']);
-        return res;
-      }
-    } catch (e) {
-      print('Error en getClub: $e');
-      return res;
-    }
-  }
   Future<List<Map<String,dynamic>>> getClubesUltimas(int cantidad) async {
     List<Map<String,dynamic>> res = [];
+    String fechaActual = obtenerFechaActual();
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/clubes/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=$cantidad');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/clubes/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=$cantidad&filters[\$or][0][fechaDeInicio][\$gte]=$fechaActual&filters[\$or][1][fechaDeFin][\$gte]=$fechaActual');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -1716,25 +1324,6 @@ class ApiService {
     }
   }
   //CONVENIO  FIN
-
-  //PROMOCION  INICIO
-  Future<List<Promocion>> getPromociones() async {
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/promociones/?populate=*&sort=id:desc');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        List<Promocion> promociones = PromocionesFromJson(response.body);
-        return promociones;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  //PROMOCION FIN
 
   //COLEGIO INICIO
   Future<List<Colegio>> getColegios() async {
@@ -1945,19 +1534,24 @@ class ApiService {
     }
   }
   Future<List<Concurso>> getConcursos() async {
+    List<Concurso> res = [];
+    String fechaActual = obtenerFechaActual();
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200&filters[\$or][0][fechaDeInicio][\$gte]=$fechaActual&filters[\$or][1][fechaDeFin][\$gte]=$fechaActual');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
-        List<Concurso> concursos = Concurso.armarConcursosPopulate(response.body);
-        return concursos;
+        res = Concurso.armarConcursosPopulate(response.body);
+        return res;
       } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getConcursos: $e');
+        return  res;
       }
     } catch (e) {
-      throw Exception(e);
+      print('Error en getConcursos: $e');
+      return res;
     }
   }
   Future<Concurso> getConcurso(int id) async {
@@ -1978,9 +1572,10 @@ class ApiService {
   }
   Future<List<Map<String,dynamic>>> getConcursosUltimas(int cantidad) async {
     List<Map<String,dynamic>> res = [];
+    String fechaActual = obtenerFechaActual();
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=$cantidad');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=$cantidad&filters[\$or][0][fechaDeInicio][\$gte]=$fechaActual&filters[\$or][1][fechaDeFin][\$gte]=$fechaActual');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -2064,35 +1659,12 @@ class ApiService {
   }
   //SOBRE NOSOTROS FIN
 
-  //FACULTADES INICIO 
-  Future<List<Facultad>> getFacultades() async {
-    List<Facultad> res = [];
-    await dotenv.load(fileName: ".env");
-    try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/facultades/?populate=*');
-      var response = await http.get(url,
-          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        res = FacultadesFromJson(response.body);
-        return res;
-      } else {
-        String e = jsonDecode(response.body)['error']['message'];
-        print('Error en getFacultades: $e');
-        return res;
-      }
-    } catch (e) {
-      print('Error en getFacultades: $e');
-      return res;
-    }
-  }
-  //FACULTADES FIN
-
   //CURSILLO INICIO 
   Future<List<Cursillo>> getCursillosPopulate() async {
     List<Cursillo> res = [];
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/cursillos/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/cursillos/?populate=*&filters[activo][\$eq]=true&pagination[pageSize]=200');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -2233,6 +1805,30 @@ class ApiService {
   //BORRAME INICIO 
 
   //BORRAME FIN
+
+  //CONFIGURACION INICIO 
+  Future<Configuracion> getConfiguracion() async {
+    Configuracion res = Configuracion();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/configuracion/');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = Configuracion.armarConfiguracion(response.body);
+        return res;
+      }else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getConfiguracion: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getConfiguracion: $e');
+      return res;
+    }
+  }
+  
+  //CONFIGURACION FIN
 
   //RETROALIMENTACION INICIO 
   Future<String> crearRetroalimentacion(Map<String, dynamic> data, int userId, int actividadId, String tipo) async {
@@ -2464,34 +2060,6 @@ class ApiService {
   //AVATAR FIN
 
   //EXTRAS INICIO
-  Future<List<Map<String, dynamic>>> getActividadesInscritosForUserNotPopulate(int idUser) async {
-    List<Map<String, dynamic>> res = [];
-    try {
-      List<int> idInscripciones = await _getActividadesInscritosId(idUser);
-      idInscripciones.forEach((idInscripcion) async {
-        var inscripcion = await _getInscripcionForId(idInscripcion);
-        if(inscripcion["evento"]["data"] !=  null){
-           Map<String, dynamic> aux = {
-            "id": inscripcion["evento"]["data"]["id"], 
-            "titulo": inscripcion["evento"]["data"]["attributes"]["titulo"], 
-            "actividad": "evento"
-            };
-            res.add(aux);
-        }
-        if(inscripcion["concurso"]["data"] !=  null){
-           Map<String, dynamic> aux = {
-            "id": inscripcion["concurso"]["data"]["id"], 
-            "titulo": inscripcion["concurso"]["data"]["attributes"]["titulo"], 
-            "actividad": "concurso"
-            };
-            res.add(aux);
-        }
-      });
-      return res;
-    } catch (e) {
-      return res;
-    }
-  }
   Future<bool> reenviarToken(int userId, String email) async {
     String token = await pedirTokenUser(userId);
     return await enviarCorreo({"codigoDeVerificacion":token}, "Código de verificación", email);
@@ -2503,99 +2071,6 @@ class ApiService {
     }else{
       return false;
     }
-  }
-  List<Map<String,dynamic>> _crearActividadesSeguidos(String dataString, String key) {
-    List<Map<String,dynamic>> res = [];
-    final jsonData = json.decode(dataString);
-    List<dynamic> actividades = jsonData[key];
-    for (var item in actividades) {
-      if (item['id'] != null) {
-        Map<String, dynamic> aux = {"id": item['id']};
-        res.add(aux);
-      }
-    }
-    return res;
-  }
-  List<int> _crearListaEnteros(String dataString, String key) {
-    List<int> res = [];
-    final jsonData = json.decode(dataString);
-    List<dynamic> actividades = jsonData[key];
-
-    for (var item in actividades) {
-      if (item['id'] != null) {
-        int id = item['id'];
-        res.add(id);
-      }
-    }
-  
-    return res;
-  }
-  Future<Map<int, int>> getEventosInscritos(int userId) async {
-    Map<int, int> res = {};
-    try {
-      List<int> inscripciones = await _getActividadesInscritosId(userId);
-      inscripciones.forEach((inscripcion) async {
-        int? idEvento = await _getEventoId(inscripcion);
-        res[idEvento] = inscripcion;
-            });
-      return res;
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<List<Map<String, dynamic>>> getConcursosInscritos(int userId) async {
-    List<Map<String, dynamic>> res = [];
-    try {
-      List<Map<String, dynamic>> inscripciones = await _getActividadesInscritosId2(userId);
-      inscripciones.forEach((inscripcion) async {
-        if (inscripcion["qr"].contains("Concurso-")) {
-          int? idEvento = await _getActividadId(inscripcion["id"], "concurso");
-          var aux = {
-            "idInscripcion": inscripcion["id"],
-            "qr": inscripcion["qr"],
-            "id":idEvento
-          };
-          res.add(aux);
-        }
-      });
-      return res;
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  Future<List<Evento>> getEventosPorIds(List<int> idsEventos) async {
-    List<Evento> res = [];
-    for (var item in idsEventos) {
-        Evento evento =await getEvento(item);
-        res.add(evento);
-    }
-    return res;
-  }
-  Future<List<Noticia>> getNoticiasRelacionadasConActividad(List<int> idsNoticias) async {
-    List<Noticia> res = [];
-    idsNoticias.forEach((idNoticia) async {
-      Noticia noticia = await getNoticia(idNoticia);
-      res.add(noticia);
-    });
-    return res;
-  }
-  Future<List<Noticia>> getNoticiasPorIdsCategorias(List<Categoria> categorias) async {
-    List<Noticia> res = [];
-    for (var categoria in categorias) {
-        for (var lista in categoria.idsContenido!) {
-          Noticia noticia =await getNoticia(lista);
-          res.add(noticia);
-        }
-    }
-    return res;
-  }
-  Future<List<Noticia>> getNoticiasPorIdsCategoria(List<int> idsNoticias) async {
-    List<Noticia> res = [];
-    for (var item in idsNoticias) {
-        Noticia noticia =await getNoticia(item);
-        res.add(noticia);
-    }
-    return res;
   }
   String capitalizeEachWord(String s) {
     if (s.isEmpty) return s;
@@ -2631,20 +2106,12 @@ class ApiService {
     DateFormat formato = DateFormat('yyyy-MM-dd');
     return formato.format(ahora);
   }
-String obtenerFechaActualMasUno() {
+  String obtenerFechaActualMasUno() {
   DateTime ahora = DateTime.now();
   DateTime fechaMasUno = ahora.add(Duration(days: 1));
   DateFormat formato = DateFormat('yyyy-MM-dd');
   return formato.format(fechaMasUno);
 }
-  Future<List<Concurso>> getConcursosPorIds(List<int> idsConcursos) async {
-    List<Concurso> res = [];
-    for (var item in idsConcursos) {
-        Concurso concurso =await getConcurso(item);
-        res.add(concurso);
-    }
-    return res;
-  }
   Future<List<Map<String, dynamic>>> getContenido() async {
     List<Map<String, dynamic>> res = [];
     List<Map<String, dynamic>> aux = [];
@@ -2657,27 +2124,6 @@ String obtenerFechaActualMasUno() {
     aux = await getNoticiasUltimas(5);
     res.addAll(aux);
     return res;
-  }
-  Future<List<Map<String, dynamic>>> getClubesInscritos(int userId) async {
-    List<Map<String, dynamic>> res = [];
-    try {
-      List<Map<String, dynamic>> inscripciones = await _getActividadesInscritosId2(userId);
-      inscripciones.forEach((inscripcion) async {
-        if (inscripcion["qr"].contains("Club-")) {
-          int? idEvento = await _getActividadId(inscripcion["id"], "club");
-          var aux = {
-            "idInscripcion": inscripcion["id"],
-            "qr": inscripcion["qr"],
-            "id":idEvento
-          };
-          res.add(aux);
-        }
-      });
-      return res;
-    } catch (e) {
-      print('Error en getClubesInscritos: $e');
-      return res;
-    }
   }
   //EXTRAS FIN
   
@@ -2694,12 +2140,12 @@ String obtenerFechaActualMasUno() {
     // Realizar la solicitud con dio
     try {
       Response response = await Dio().post(
-        'https://upsa.focoazul.com/upload',
+        'https://nibu.upsa.edu.bo/upload',
         data: formData,
         options: Options(
           headers: {
             'Content-Type': 'multipart/form-data',
-            'Authorization': 'Bearer 4ef15e28c1a0d4938ce4e52d0a4843399e4283410d8b12306e3134a6cfee6e4ca7bdb2c65694fd5c037e332e5683d60cfbe32c2850068682d3eaddab77de21e01ddc88c3ace56b9c48034ad61b29090d94c983fa2885c589b609de75bbe3fdf2c67faf39233468c53b6077220f7c2de14f4666b9b37e639e022b129190371ebe',
+            'Authorization': 'Bearer 4',
           },
         ),
       );
@@ -2715,7 +2161,7 @@ String obtenerFechaActualMasUno() {
   Future<bool> setUserMetaFotoPerfil(int userId, File file) async {
     var request = http.MultipartRequest(
       'PUT',
-      Uri.parse('https://upsa.focoazul.com/api/user-metas/31'),
+      Uri.parse('https://nibu.upsa.edu.bo/api/user-metas/31'),
     );
     var stream = http.ByteStream(file.openRead());
     stream.cast();
@@ -2730,7 +2176,7 @@ String obtenerFechaActualMasUno() {
     request.files.add(multipartFileSign);
     var emptyData = jsonEncode({});
     request.fields['data'] = emptyData;
-    String token = '4ef15e28c1a0d4938ce4e52d0a4843399e4283410d8b12306e3134a6cfee6e4ca7bdb2c65694fd5c037e332e5683d60cfbe32c2850068682d3eaddab77de21e01ddc88c3ace56b9c48034ad61b29090d94c983fa2885c589b609de75bbe3fdf2c67faf39233468c53b6077220f7c2de14f4666b9b37e639e022b129190371ebe'; // Reemplaza con tu token Bearer
+    String token = '4'; // Reemplaza con tu token Bearer
     request.headers.addAll({
       'Authorization': 'Bearer $token',
     });

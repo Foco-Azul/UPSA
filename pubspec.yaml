@@ -1,5 +1,5 @@
 name: flutkit
-description: A new Flutter project.
+description: Una aplicación de la UPSA.
 
 
 # The following line prevents the package from being accidentally published to
@@ -16,8 +16,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 6.1.0
-versionCode: 4
+version: 1.0.0
+versionCode: 1
 
 environment:
   sdk: '>=2.17.3 <3.0.0'
@@ -66,7 +66,7 @@ dependencies:
   flashy_tab_bar2: ^0.0.6
   blur: ^3.1.0
 #  google_mobile_ads: ^3.0.0
-  flutter_blurhash: ^0.7.0
+  flutter_blurhash: ^0.7.0 
   firebase_core: ^2.30.1
   firebase_messaging: ^14.9.1
   flutter_dotenv: ^5.1.0
@@ -86,7 +86,7 @@ dependencies:
   youtube_player_flutter: ^9.0.1
   photo_view: ^0.15.0
   dio: ^5.4.3+1
-  easy_search_bar: ^2.5.0
+  flutter_app_info: ^1.1.2
 #  flutx: ^0.2.0-rc.1
 #  flutx: ^0.1.2
 
@@ -115,168 +115,9 @@ flutter:
     - .env
 
     - lib/custom/assets/images/
-    # Map Styles
-    - assets/map/
-
-    # Profiles
-    - assets/images/profile/
-
-    # Shopping
-    - assets/images/apps/shopping/
-    - assets/images/apps/shopping/product/
-    - assets/images/apps/shopping/offer/
-    - assets/images/apps/shopping/camera/
-    - assets/images/apps/shopping/vector/
-
-    # Shopping2
-    - assets/images/apps/shopping2/icons/
-    - assets/images/apps/shopping2/images/
-
-    # Brand
-    - assets/brand/
-
-    # Hotel
-    - assets/images/apps/hotel/
-
-    # Places
-    - assets/images/place/
-
-    # Music
-    - assets/images/apps/music/
-
-    # Food
-    - assets/images/apps/food/
-
-    # Estate
-    - assets/images/apps/estate/
-
-    # Course
-    - assets/images/apps/course/
-
-    # Chat
-    - assets/images/apps/chat/
-
-    # Social
-    - assets/images/apps/social/
-
-    # Other
-    - assets/images/all/
-
-    # Event
-    - assets/images/apps/event/
-
-    # Avatars
-    - assets/images/profile/
-
-    ###################---------------------- Full Apps -------------------------#################
-
-    ## Animations
-
-    # Shopping
-    # Shopping Manager
-    - assets/full_apps/animations/shopping/data/
-    - assets/images/full_apps/shopping/
-    - assets/images/full_apps/shopping/icons/
-    - assets/full_apps/animations/shopping_manager/data/
-
-    # Rental Service
-    - assets/full_apps/animations/rental_service/data/
-    - assets/images/full_apps/rental_service/images/
-    - assets/images/full_apps/rental_service/icons/
-
-    # NFT
-    - assets/full_apps/animations/nft/data/
-    - assets/images/full_apps/nft/images/
-    - assets/images/full_apps/nft/icons/
-
-
-    ## m3
-
-    # Cookify
-    - assets/full_apps/m3/cookify/data/
-
-    # Dating
-    - assets/full_apps/m3/dating/data/
-
-    # Estate
-    - assets/full_apps/m3/estate/data/
-
-    # HomeMade
-    - assets/full_apps/m3/homemade/data/
-
-    # Learning
-    - assets/full_apps/m3/learning/data/
-
-    # Plant
-    - assets/images/full_apps/plant/images/
-    - assets/full_apps/animations/plant/data/
-
-
-
-    ## Other
-
-    # Dating
-    - assets/full_apps/others/dating/data/
-
-    # Fitness
-    - assets/images/apps/fitness/images/
-    - assets/full_apps/others/fitness/data/
-
-    # HomeMade
-    - assets/full_apps/others/homemade/data/
-
-    # Muvi
-    - assets/full_apps/others/muvi/data/
-
-
-    ###################---------------------- Custom Apps -------------------------#################
-
-    # Grocery
-    - assets/images/apps/grocery/
-
-
-    # Homemade
-    - assets/images/apps/homemade/
-    - assets/images/apps/homemade/products/
-    - assets/images/apps/homemade/category/
-    - assets/images/apps/homemade/shop/
-
-    # Dating
-    - assets/images/apps/dating/
-
-    # Muvi
-    - assets/images/apps/muvi/
-
-    # CustomApps
-    - assets/images/apps/cookify/
-    - assets/images/apps/grocery/
-    - assets/images/apps/medicare/
-
-    # Learning  (Material Design 3)
-    - assets/images/apps/learning/images/
-    - assets/images/apps/learning/icons/
-
-    # Illustration
-    - assets/illustration/food/
-    - assets/illustration/shopping/
-    - assets/illustration/hotel/
-    - assets/illustration/music/
-
-    # Month backgrounds
-    - assets/images/month_background/
-
+    
     # Languages
     - assets/lang/
-
-    # Icons
-    - assets/icons/
-
-    # Rive Animations
-    - assets/animations/rive/
-
-    # Other
-    - assets/other/
-
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

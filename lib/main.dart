@@ -1,4 +1,3 @@
-import 'package:flutkit/custom/screens/bienvenida/bienvenida_screen.dart';
 import 'package:flutkit/custom/utils/push_notifications_service.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +9,6 @@ import 'package:flutkit/helpers/localizations/app_localization_delegate.dart';
 import 'package:flutkit/helpers/localizations/language.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -19,15 +17,12 @@ Future<void> main() async {
   await PushNotificationService.initializeApp();
   AppTheme.init();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  bool? esNuevo = prefs.getBool('esNuevo') ?? true;
-  Widget initialScreen = esNuevo == true ? WelcomeScreen() : HomesScreen();
   runApp(
     MultiProvider( 
       providers:[
         ChangeNotifierProvider<AppNotifier>(create: (context) => AppNotifier()),
       ],
-      child: MyApp(initialScreen: initialScreen),
+      child: MyApp(initialScreen: HomesScreen()),
     )
   ); 
 } 
@@ -43,7 +38,7 @@ class MyApp extends StatelessWidget {
           navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
           theme: AppTheme.theme,
-          title: "UPSA",
+          title: "NIBU",
           home: initialScreen, // Ruta inicial
           builder: (context, child) {
             return Directionality(

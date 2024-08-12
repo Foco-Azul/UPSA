@@ -122,7 +122,7 @@ class _TestVocacionalScreenState extends State<TestVocacionalScreen> {
           ),
           centerTitle: true,
           title: Text(
-            "Test vocacional",
+            "Solicitud de inscripción",
             style: AppTitleStyles.principal()
           ),
         ),

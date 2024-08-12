@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
-import 'package:flutkit/custom/models/noticia.dart';
+import 'package:flutkit/custom/controllers/profile_controller.dart';
+import 'package:flutkit/custom/models/configuracion.dart';
 import 'package:flutkit/custom/models/resultado.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/screens/actividades/actividades_inicio.dart';
@@ -7,8 +10,10 @@ import 'package:flutkit/custom/screens/actividades/calendario_screen.dart';
 import 'package:flutkit/custom/screens/actividades/club_screen.dart';
 import 'package:flutkit/custom/screens/actividades/concurso_escreen.dart';
 import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
+import 'package:flutkit/custom/screens/bienvenida/bienvenida_screen.dart';
 import 'package:flutkit/custom/screens/campus/campus_inicio.dart';
 import 'package:flutkit/custom/screens/campus/matriculate_screem.dart';
+import 'package:flutkit/custom/screens/inicio/actualizacion_screen.dart';
 import 'package:flutkit/custom/screens/inicio/inicio_screen.dart';
 import 'package:flutkit/custom/screens/inicio/notificaciones_screen.dart';
 import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
@@ -23,7 +28,11 @@ import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app_info/flutter_app_info.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomesScreen extends StatefulWidget {
   final int indice;
@@ -53,11 +62,40 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
   bool _buscando =  false;
   User _user = User();
   bool _isLoggedIn = false;
+  late ProfileController controller;
+  Configuracion _configuracion = Configuracion();
 
   @override
   void initState() {
     super.initState();
     selectedIndex = widget.indice;
+    controller = ProfileController();
+    _cargarDatos();
+  }
+
+  void _cargarDatos() async{
+    setState(() {
+      controller.uiLoading = true;
+    });
+    _configuracion = await ApiService().getConfiguracion();
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String version = prefs.getString('version') ?? "";
+    AppInfoData info = await AppInfoData.get(); 
+    if (_configuracion.version!.isNotEmpty && _configuracion.version!.split('+')[0][0] != info.package.version.major.toString()) {
+      Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => ActualizacionScreen(isAndroid: info.platform.isAndroid, android: _configuracion.android!, ios: _configuracion.ios!,)),(Route<dynamic> route) => false);
+    }
+    await prefs.setString('version', info.package.version.toString());
+    if(version.isEmpty){
+      Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => WelcomeScreen()),(Route<dynamic> route) => false);
+    }else{
+      if(version.split('+')[0][0] != info.package.version.major.toString()){
+        Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => WelcomeScreen()),(Route<dynamic> route) => false);
+      }
+    }
+    setState(() {
+      controller.uiLoading = false;
+    });
   }
 
   void _filtrarNoticias(int id){
@@ -76,90 +114,101 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AppNotifier>(
-      builder: (context, value, child) {
-        isDark = AppTheme.themeType == ThemeType.dark;
-        textDirection = AppTheme.textDirection;
-        theme = AppTheme.theme;
-        customTheme = AppTheme.customTheme;
-        return Theme(
-          data: theme,
-          child: Scaffold(
-            backgroundColor: AppColorStyles.verdeFondo,
-            key: _drawerKey,
-            appBar: _buildAppBarContent(selectedIndex),
-            body: Stack(
-              children: [
-                bottomBarPages[selectedIndex],
-                _crearPopupBusquedas(),
-              ],
-            ),
-            bottomNavigationBar: FlashyTabBar(
-              iconSize: 24,
-              backgroundColor: AppColorStyles.blancoFondo,
-              selectedIndex: selectedIndex,
-              animationDuration: Duration(milliseconds: 500),
-              showElevation: true,
-              items: [
-                FlashyTabBarItem(
-                  inactiveColor: AppColorStyles.verde1,
-                  activeColor: AppColorStyles.verde1,
-                  icon: Icon(Icons.home_sharp),
-                  title: Text(
-                    'Inicio',
-                    style: AppTextStyles.bottomMenu()
-                  ),
-                ),
-                FlashyTabBarItem(
-                  inactiveColor: AppColorStyles.verde1,
-                  activeColor: AppColorStyles.verde1,
-                  icon: Icon(Icons.emoji_events_sharp),
-                  title: Text(
-                    'Actividades',
-                    style: AppTextStyles.bottomMenu()
-                  ),
-                ),
-                FlashyTabBarItem(
-                  inactiveColor: AppColorStyles.verde1,
-                  activeColor: AppColorStyles.verde1,
-                  icon: Icon(Icons.local_library_sharp),
-                  title: Text(
-                    'Campus',
-                    style: AppTextStyles.bottomMenu()
-                  ),
-                ),
-                FlashyTabBarItem(
-                  inactiveColor: AppColorStyles.verde1,
-                  activeColor: AppColorStyles.verde1,
-                  icon: Icon(Icons.push_pin_sharp),
-                  title: Text(
-                    'Noticias',
-                    style: AppTextStyles.bottomMenu()
-                  ),
-                ),
-                FlashyTabBarItem(
-                  inactiveColor: AppColorStyles.verde1,
-                  activeColor: AppColorStyles.verde1,
-                  icon: Icon(Icons.account_circle_sharp),
-                  title: Text(
-                    'Mi perfil',
-                    style: AppTextStyles.bottomMenu()
-                  ),
-                ),
-              ],
-              onItemSelected: (index) {
-                setState(() {
-                  selectedIndex = index;
-                  _searchController.clear();
-                  _showPopup = false;
-                  _buscando = false;
-                });
-              },
-            ),
+    if (controller.uiLoading) {
+      return Scaffold(
+        body: Container(
+          margin: MySpacing.top(MySpacing.safeAreaTop(context) + 20),
+          child: LoadingEffect.getSearchLoadingScreen(
+            context,
           ),
-        );
-      },
-    );
+        ),
+      );
+    } else {
+      return Consumer<AppNotifier>(
+        builder: (context, value, child) {
+          isDark = AppTheme.themeType == ThemeType.dark;
+          textDirection = AppTheme.textDirection;
+          theme = AppTheme.theme;
+          customTheme = AppTheme.customTheme;
+          return Theme(
+            data: theme,
+            child: Scaffold(
+              backgroundColor: AppColorStyles.verdeFondo,
+              key: _drawerKey,
+              appBar: _buildAppBarContent(selectedIndex),
+              body: Stack(
+                children: [
+                  bottomBarPages[selectedIndex],
+                  _crearPopupBusquedas(),
+                ],
+              ),
+              bottomNavigationBar: FlashyTabBar(
+                iconSize: 24,
+                backgroundColor: AppColorStyles.blancoFondo,
+                selectedIndex: selectedIndex,
+                animationDuration: Duration(milliseconds: 500),
+                showElevation: true,
+                items: [
+                  FlashyTabBarItem(
+                    inactiveColor: AppColorStyles.verde1,
+                    activeColor: AppColorStyles.verde1,
+                    icon: Icon(Icons.home_sharp),
+                    title: Text(
+                      'Inicio',
+                      style: AppTextStyles.bottomMenu()
+                    ),
+                  ),
+                  FlashyTabBarItem(
+                    inactiveColor: AppColorStyles.verde1,
+                    activeColor: AppColorStyles.verde1,
+                    icon: Icon(Icons.emoji_events_sharp),
+                    title: Text(
+                      'Actividades',
+                      style: AppTextStyles.bottomMenu()
+                    ),
+                  ),
+                  FlashyTabBarItem(
+                    inactiveColor: AppColorStyles.verde1,
+                    activeColor: AppColorStyles.verde1,
+                    icon: Icon(Icons.local_library_sharp),
+                    title: Text(
+                      'Campus',
+                      style: AppTextStyles.bottomMenu()
+                    ),
+                  ),
+                  FlashyTabBarItem(
+                    inactiveColor: AppColorStyles.verde1,
+                    activeColor: AppColorStyles.verde1,
+                    icon: Icon(Icons.push_pin_sharp),
+                    title: Text(
+                      'Noticias',
+                      style: AppTextStyles.bottomMenu()
+                    ),
+                  ),
+                  FlashyTabBarItem(
+                    inactiveColor: AppColorStyles.verde1,
+                    activeColor: AppColorStyles.verde1,
+                    icon: Icon(Icons.account_circle_sharp),
+                    title: Text(
+                      'Mi perfil',
+                      style: AppTextStyles.bottomMenu()
+                    ),
+                  ),
+                ],
+                onItemSelected: (index) {
+                  setState(() {
+                    selectedIndex = index;
+                    _searchController.clear();
+                    _showPopup = false;
+                    _buscando = false;
+                  });
+                },
+              ),
+            ),
+          );
+        },
+      );
+    }
   }
   Widget _crearPopupBusquedas(){
     return Visibility(

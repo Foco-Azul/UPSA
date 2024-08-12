@@ -1,20 +1,12 @@
-import 'package:flutkit/custom/auth/register_screen.dart';
-import 'package:flutkit/custom/auth/registro_carrera.dart';
-import 'package:flutkit/custom/auth/registro_intereses.dart';
-import 'package:flutkit/custom/auth/registro_perfil.dart';
-import 'package:flutkit/custom/auth/validar_email.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
-import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class RecuperarContraseniaScreen extends StatefulWidget {
   static const namedRoute = "login2-screen";
@@ -34,7 +26,6 @@ class _RecuperarContraseniaScreenState extends State<RecuperarContraseniaScreen>
   String _errorCodigoDeVerificacion = "";
   String _errorPassword = "";
   Validacion validacion = Validacion();
-  late SharedPreferences _prefs;
   String _paso = "email";
   User _user = User();
   
@@ -114,50 +105,6 @@ class _RecuperarContraseniaScreenState extends State<RecuperarContraseniaScreen>
             ],
           ),
         )
-      ),
-    );
-  }
-  Widget _crearOlvideMiContrasenia(){
-    return GestureDetector(
-      onTap: () {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Register2Screen()));
-      },
-      child: Container(
-        margin: EdgeInsets.only(top: 15),
-        child: Center(
-          child: RichText(
-            text: TextSpan(children: const <TextSpan>[
-              TextSpan(
-                  text: "¿Olvidaste tu contraseña? ",
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: AppColorStyles.gris1)),
-              TextSpan(
-                  text: " Recuperar contraseña",
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColorStyles.verde2)),
-            ]),
-          ),
-        ),
-      ),
-    );
-  }
-  Widget _crearTextoInferior(){
-    return GestureDetector(
-      onTap: () {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Register2Screen()));
-      },
-      child: Container(
-        margin: EdgeInsets.only(top: 15),
-        child: Center(
-          child: RichText(
-            text: TextSpan(children: const <TextSpan>[
-              TextSpan(
-                  text: "¿No tienes una cuenta? ",
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: AppColorStyles.gris1)),
-              TextSpan(
-                  text: " Registrarse",
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColorStyles.verde2)),
-            ]),
-          ),
-        ),
       ),
     );
   }

@@ -6,7 +6,6 @@
 import 'dart:convert';
 
 import 'package:flutkit/custom/models/notificacion.dart';
-import 'package:flutkit/custom/models/user_meta.dart';
 import 'package:flutkit/helpers/extensions/theme_extension.dart';
 import 'package:flutkit/helpers/localizations/language.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';

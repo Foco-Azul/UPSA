@@ -25,26 +25,20 @@ class CarreraUpsa {
     this.nombre,
     this.descripcion,
     this.imagen,
-    this.campoLaboral,
-    this.perfilPostulante,
-    this.objetivos,
-    this.masInformacion,
     this.enlaceExterno,
-    this.planEstudios,
     this.categoria,
+    this.masInformacion,
+    this.pdf,
   });
 
   int? id;
   String? nombre;
   String? descripcion;
   String? imagen;
-  String? campoLaboral;
-  String? perfilPostulante;
-  String? objetivos;
-  String? masInformacion;
   String? enlaceExterno;
-  List<Map<String, dynamic>>? planEstudios;
   Categoria? categoria;
+  List<dynamic>? masInformacion;
+  String? pdf;
 
   factory CarreraUpsa.fromJson(Map<String, dynamic> json) {
     return CarreraUpsa(
@@ -61,28 +55,11 @@ class CarreraUpsa {
       nombre: data['attributes']["nombre"],
       descripcion: data['attributes']["descripcion"],
       imagen: data['attributes']["imagen"]['data'] != null ? data['attributes']["imagen"]['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",  
-      campoLaboral: data['attributes']["campoLaboral"],
-      perfilPostulante: data['attributes']["perfilPostulante"],
-      objetivos: data['attributes']["objetivos"],
-      masInformacion: data['attributes']["masInformacion"],
       enlaceExterno: data['attributes']["enlaceExterno"],
       categoria: Categoria.armarCategoria(data['attributes']["categoria"]["data"]),
-      planEstudios: _armarPlanDeEstudios(data['attributes']["planEstudios"]),
+      masInformacion: data['attributes']["masInformacion"] ?? [],
+      pdf: data['attributes']["pdf"]['data'] != null ? data['attributes']["pdf"]['data']['attributes']['url'] : "",  
     );
-  }
-  static List<Map<String, dynamic>> _armarPlanDeEstudios(List<dynamic>? data){
-    List<Map<String, dynamic>> res = [];
-    if(data != null){
-      for (var item in data) {
-        Map<String, dynamic> aux = {
-          "id": item["id"],
-          "semestre": item["semestre"],
-          "descripcion": item["descripcion"],
-        };
-        res.add(aux);
-      }
-    }
-    return res;
   }
   static List<CarreraUpsa> armarCarrerasUpsaPopulate(String str) {
     List<CarreraUpsa> res = [];

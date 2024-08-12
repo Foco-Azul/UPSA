@@ -10,6 +10,7 @@ import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
 import 'package:flutkit/custom/screens/campus/cursillo_screen.dart';
 import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
+import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/helpers/widgets/my_text.dart';
@@ -96,8 +97,11 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
           actions: [
             IconButton(
               icon: Icon(Icons.delete_sweep, size: 30),
-              onPressed: () {
-                
+              onPressed: () async{
+                await _prefs.setStringList('notificaciones', []);
+                _notificaciones.clear();
+                MensajeTemporalInferior().mostrarMensaje(context,"Se eliminarón las notificaciones con éxito.", "exito");
+                setState(() {});
               },
             ),
           ]
@@ -150,11 +154,9 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
         }else{
           if(item.tipoNotificacion == "contenidoApp"){
             if(item.tipoContenido == "noticia"){
-              Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 3,)),(Route<dynamic> route) => false);
               Navigator.push(context, MaterialPageRoute(builder: (context) => NoticiaScreen(idNoticia: item.id!,)));
             }
             if(item.tipoContenido == "cursillo"){
-              Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 2,)),(Route<dynamic> route) => false);
               Navigator.push(context, MaterialPageRoute(builder: (context) => CursilloScreen(id: item.id!,)));
             }
           }

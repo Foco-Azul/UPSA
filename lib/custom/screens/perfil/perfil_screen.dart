@@ -74,11 +74,9 @@ class _PerfilScreenState extends State<PerfilScreen> {
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
     if(_isLoggedIn){
       _user = Provider.of<AppNotifier>(context, listen: false).user;
-      if(_user.rolCustom! == "estudiante"){
-        _user = await ApiService().getUserPopulateConMetasActividades(_user.id!);
-        _userMeta = _user.userMeta!;
-        _avatares = await ApiService().getAvataresPopulate(_user.id!);
-      }
+      _user = await ApiService().getUserPopulateConMetasActividades(_user.id!);
+      _userMeta = _user.userMeta!;
+      _avatares = await ApiService().getAvataresPopulate(_user.id!);
     }
 
     setState(() {
@@ -148,8 +146,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
           padding: MySpacing.fromLTRB(15, 10, 15, 15),
           children: [
             _cabeceraPerfil(),
-            _crearInsignias(),
             _carreraSugerida(),
+            _crearInsignias(),
             _misActividades(),
             _miPromo(),
             _ajustes(),
@@ -276,31 +274,69 @@ class _PerfilScreenState extends State<PerfilScreen> {
         _userMeta.insignias!.add(_userMeta.insignias![0]);
       }
       */
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: _userMeta.insignias!.map((insignia) {
-            return Container(
-              margin: EdgeInsets.symmetric(horizontal: 4.0, vertical: 15),
-              child: SizedBox(
-                width: 65,
-                height: 65,
-                child: InkWell(
-                  onTap: () {
-                    _mostrarInsignia(insignia);
-                  },
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(50),
-                    child: Image.network(
-                      _backUrl + insignia["imagen"]!,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
+      return Container(
+        padding: MySpacing.fromLTRB(15, 15, 15, 15),
+        margin: MySpacing.symmetric(vertical: 15),
+        decoration: BoxDecoration(
+          color: AppColorStyles.blancoFondo, // Fondo blanco
+          borderRadius: BorderRadius.circular(5), // Bordes redondeados de 5
+          boxShadow: [
+            AppSombra.tarjeta(),
+          ],
         ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.badge_outlined, // Cambia el icono según lo que necesites
+                  size: 20,
+                  color: AppColorStyles.verde1
+                ),
+                SizedBox(width: 8),
+                Text(
+                  "MIS INSIGNIAS",
+                  style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+                ),
+              ],
+            ),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: _userMeta.insignias!.map((insignia) {
+                  return Column(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(right: 4.0, left: 4, top: 15, bottom: 5),
+                        child: SizedBox(
+                          width: 75,
+                          height: 75,
+                          child: InkWell(
+                            onTap: () {
+                              _mostrarInsignia(insignia);
+                            },
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(50),
+                              child: Image.network(
+                                _backUrl + insignia["imagen"]!,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Text(
+                        insignia["nombreCorto"],
+                        style: AppTextStyles.etiqueta(color: AppColorStyles.gris2),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
+            )
+          ]
+        )
       );
     }else{
       return Container();
@@ -312,7 +348,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          backgroundColor: AppColorStyles.verde1,
+          backgroundColor: AppColorCustom.color(nombre: data["colorFondo"]),
           insetPadding: EdgeInsets.all(0),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero), // Quita el borderRadius
           child: Container(
@@ -676,7 +712,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   ),
                   SizedBox(width: 8),
                   Text(
-                    "Ver actividades pasadas",
+                    "Ver todas mis actividades",
                     style: AppTextStyles.botonSinFondo(color: AppColorStyles.gris2)
                   ),
                 ],

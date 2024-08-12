@@ -66,7 +66,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       _errores["apellidos"] = validacion.validarNombres(_userMeta.apellidos, true);
       _errores["cedulaDeIdentidad"] = validacion.validarNumerosPositivos(_userMeta.cedulaDeIdentidad, true, true);
       _errores["celular1"] = validacion.validarCelular(_userMeta.celular1, true);
-      if (_userMeta.colegio!.nombre!.isNotEmpty){
+      if (_userMeta.colegio!.id! != -1){
         _errores["colegio"] = "";
       }else{
         _errores["colegio"] = "Selecciona una opción";
@@ -146,18 +146,6 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       });
     }
   }
-  void _onOptionSelected(List<ValueItem> selectedOptions) {
-    if(selectedOptions.isNotEmpty){
-      _userMeta.colegio = Colegio(
-        id :int.parse(selectedOptions[0].value!),
-        nombre: selectedOptions[0].label,
-      );
-    }else{
-      _userMeta.colegio = Colegio();
-    }
-    setState(() {
-    });
-  }
   List<ValueItem> _armarSelectedOptions(String  tipo){
     List<ValueItem> res = [];
     if(tipo == "curso"){
@@ -172,6 +160,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       if(_userMeta.colegio!.nombre!.isNotEmpty){
         ValueItem aux = ValueItem(
           label: _userMeta.colegio!.nombre!,
+          value: _userMeta.colegio!.id.toString(),
         );
         res.add(aux);
       }
@@ -186,6 +175,18 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
     }
     setState(() {});
   }
+  void _onOptionSelectedColegio(List<ValueItem> selectedOptions) {
+    if(selectedOptions.isNotEmpty){
+      _userMeta.colegio = Colegio(
+        id: int.parse(selectedOptions[0].value!),
+        nombre: selectedOptions[0].label,
+      );
+    }else{
+      _userMeta.colegio = Colegio();
+    }
+    setState(() {});
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -258,7 +259,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
     }
     if(campo == "colegio"){
       for (var item in _colegios) {
-        opciones.add(ValueItem(label: item.nombre!));
+        opciones.add(ValueItem(label: item.nombre!, value: item.id!.toString()));
       }
       opcionesSeleccionadas = _armarSelectedOptions("colegio");
     }
@@ -274,6 +275,9 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
               onOptionSelected: (selectedOptions) {
                 if (campo == "curso") {
                   _onOptionSelectedCurso(selectedOptions);
+                }
+                if (campo == "colegio") {
+                  _onOptionSelectedColegio(selectedOptions);
                 }
               },
               options: opciones,
@@ -367,46 +371,6 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
           style: AppTextStyles.botonMayor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
         ),
       ),
-    );
-  }
-  Widget _crearCampoSelector(){
-    return  Container(
-      margin: EdgeInsets.only(top: 16, bottom: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[                                                             
-          Container(
-            decoration: AppDecorationStyle.campoContainerForm(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                MultiSelectDropDown(
-                  onOptionSelected: _onOptionSelected,
-                  options: _buildValueItems(),
-                  hint: "Colegio",
-                  selectionType: SelectionType.single,
-                  chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.verde2),
-                  selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.verde2),
-                  selectedOptionTextColor: AppColorStyles.oscuro1,
-                  selectedOptionBackgroundColor: AppColorStyles.verdeFondo,
-                  optionTextStyle: AppTextStyles.parrafo(color: AppColorStyles.verde2),
-                  borderRadius: 14,
-                  borderColor: AppColorStyles.blancoFondo,
-                ),
-              ],
-            ),
-          ),
-          if (_errores["colegio"]!.isNotEmpty)     
-          Container(
-            margin: EdgeInsets.only(top: 8),
-            child: Text(
-              _errores["colegio"]!,
-              style: TextStyle(color: Colors.red),
-              textAlign: TextAlign.start,
-            ),
-          ),
-        ]
-      )
     );
   }
   Widget _crearCampoConError2(String error, String value, String labelText, String hintText, String campo){
@@ -530,13 +494,5 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
         style: AppTitleStyles.onboarding(color: AppColorStyles.verde1),
       ),
     );
-  }
-  List<ValueItem> _buildValueItems() {
-    return _colegios.map((colegio) {
-      return ValueItem(
-        label: colegio.nombre!,
-        value: colegio.id.toString(),
-      );
-    }).toList();
   }
 }

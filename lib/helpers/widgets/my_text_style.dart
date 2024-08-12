@@ -24,7 +24,7 @@ enum MyTextType {
   labelSmall,
 }
 
-// TextStyle
+// TextStyle 
 typedef TextStyle GoogleFontFunction({
   TextStyle? textStyle,
   Color? color,

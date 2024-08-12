@@ -318,13 +318,14 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
                   ),
                 ),
               ),
+              /*
               SizedBox(width: 8.0),
               Container(
                 alignment: Alignment.centerLeft,
                 child: ElevatedButton(
                   onPressed: () async {
                     if(_matriculate.enlaceFormulario!.isNotEmpty){
-                      await launchUrl(Uri.parse(_matriculate.enlaceFormulario!),mode: LaunchMode.inAppWebView);
+                      await launchUrl(Uri.parse(_matriculate.enlaceFormulario!),mode: LaunchMode.externalApplication);
                     }
                   },
                   style: AppDecorationStyle.botonContacto(),
@@ -334,6 +335,7 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
                   ),
                 ),
               )
+              */
             ]
           )
         ],

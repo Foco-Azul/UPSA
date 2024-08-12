@@ -2,7 +2,6 @@
 
 import 'package:flutkit/custom/auth/login_screen.dart';
 import 'package:flutkit/custom/auth/register_screen.dart';
-import 'package:flutkit/custom/models/sobre_nosotros.dart';
 import 'package:flutkit/custom/screens/campus/sobre_nosotros_escreen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';

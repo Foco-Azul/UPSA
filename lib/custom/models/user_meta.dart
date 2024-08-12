@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutkit/custom/models/carrera.dart';
 import 'package:flutkit/custom/models/colegio.dart';
 import 'package:flutkit/custom/models/universidad.dart';
@@ -127,6 +126,8 @@ class UserMeta {
             "nombre": item["nombre"],
             "imagen": item["imagen"] != null ? item["imagen"]["url"] : "/uploads/avatar_89f34d0255.png",
             "mensaje": item["mensaje"] ?? "",
+            "colorFondo": item["colorFondo"] ?? "A_6E51D9",
+            "nombreCorto": item["nombreCorto"] ?? "",
           }
         );  
       }
@@ -162,20 +163,6 @@ class UserMeta {
     }
     return res;
   }
-  static List<Universidad> _armarUniversidades(List<dynamic>? data){
-    List<Universidad> res = [];
-    if(data != null){
-      for (var item in data) {
-        Universidad aux = Universidad(
-          id: item["id"],
-          nombre: item["nombre"],
-          idDepartamento: item["idDepartamento"] 
-        );
-        res.add(aux);
-      }
-    }
-    return res;
-  }
   static List<Carrera> _armarCarreras(List<dynamic>? data){
     List<Carrera> res = [];
     if(data != null){
@@ -204,13 +191,6 @@ class UserMeta {
   }
 
   
-  static Map<String, dynamic> _armarPromocion(Map<String, dynamic> data){
-    Map<String, dynamic> res = {};
-    if(data["data"] != null){
-      res = {"id": data["data"]["id"], "nombre": data["data"]["attributes"]["nombre"]};
-    }
-    return res;
-  }
   Map<String, dynamic> toJson() => {
     "nombres": nombres,
     "apellidos": apellidos,

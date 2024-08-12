@@ -1,23 +1,16 @@
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
-import 'package:flutkit/custom/models/evento.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
-import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
-import 'package:flutkit/helpers/theme/theme_type.dart';
-import 'package:flutkit/helpers/widgets/my_button.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:multi_dropdown/models/value_item.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
 import 'package:qrscan/qrscan.dart' as scanner;
 
 class LectorQRScreen extends StatefulWidget {
@@ -31,12 +24,10 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
   late ThemeData theme;
   late CustomTheme customTheme;
   late ProfileController controller;
-  final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
   bool isDark = false;
   TextDirection textDirection = TextDirection.ltr;
   final TextEditingController _outputController = TextEditingController();
   int selectedValue = 0;
-  List<Evento> _eventos = [];
   List<Map<String, dynamic>> _actividades = [];
   String _tipoSeleccionado = "";
   int _idSeleccionado = -1;
@@ -93,14 +84,6 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
   void _marcarAsistencia(int inscripcionId) async{
     await ApiService().marcarAsistencia(inscripcionId);
   }
-  Evento? obtenerEventoPorId() {
-    try {
-      return _eventos.firstWhere((evento) => evento.id! == selectedValue);
-    } catch (e) {
-      return null;
-    }
-  }
-
 
   void _escanearEntrada() async {
     await Permission.camera.request();
@@ -212,20 +195,24 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
   
   void _datosDeLaEntrada(String caso, String titulo, Map<String, dynamic> entrada) {
     String texto = "";
+    Color fondo = AppColorStyles.verdeFondo;
     if(caso == "noValido"){
       texto = "Error, este QR no es valido"; 
+      fondo = Colors.red;
     }
     if(caso == "escaneado"){
       texto = "Error, este QR ya fue escaneado"; 
+      fondo = Colors.red;
     }
     if(caso == "valido"){
       texto = "Exito, el QR se escaneo correctamente"; 
+      fondo = AppColorStyles.verde2;
     }
     showModalBottomSheet(
       context: context,
       builder: (BuildContext buildContext) {
         return Container(
-          color: AppColorStyles.verdeFondo,
+          color: fondo,
           width: double.infinity,
           height: 400,
           padding: EdgeInsets.all(15),
@@ -235,7 +222,7 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
                 margin: EdgeInsets.symmetric(vertical: 15),
                 child: Text(
                   texto,
-                  style: AppTitleStyles.subtitulo(),
+                  style: AppTitleStyles.tarjeta(color: AppColorStyles.blancoFondo),
                 ),
               ),
               if(caso == "valido" || caso == "escaneado")
@@ -247,10 +234,10 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
                       text: TextSpan(children: <TextSpan>[
                         TextSpan(
                             text: "Actividad: ",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal, color: AppColorStyles.gris1)),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColorStyles.verdeFondo)),
                         TextSpan(
                             text: titulo,
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: AppColorStyles.verde2)),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.blancoFondo)),
                       ]),
                     ),
                     SizedBox(height: 10,),
@@ -258,21 +245,32 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
                       text: TextSpan(children: <TextSpan>[
                         TextSpan(
                             text: "QR: ",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal, color: AppColorStyles.gris1)),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColorStyles.verdeFondo)),
                         TextSpan(
                             text: entrada["qr"],
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: AppColorStyles.verde2)),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.blancoFondo)),
                       ]),
                     ),
                     SizedBox(height: 10,),
                     RichText(
                       text: TextSpan(children: <TextSpan>[
                         TextSpan(
-                            text: "Estudiante: ",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal, color: AppColorStyles.gris1)),
+                            text: "Nombre completo: ",
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColorStyles.verdeFondo)),
                         TextSpan(
                             text: entrada["nombres"]+" "+entrada["apellidos"],
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: AppColorStyles.verde2)),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.blancoFondo)),
+                      ]),
+                    ),
+                    SizedBox(height: 10,),
+                    RichText(
+                      text: TextSpan(children: <TextSpan>[
+                        TextSpan(
+                            text: "Carnet: ",
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColorStyles.verdeFondo)),
+                        TextSpan(
+                            text: entrada["cedulaDeIdentidad"],
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.blancoFondo)),
                       ]),
                     ),
                     SizedBox(height: 10,),
@@ -280,10 +278,10 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
                       text: TextSpan(children: <TextSpan>[
                         TextSpan(
                             text: "Correo: ",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal, color: AppColorStyles.gris1)),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColorStyles.verdeFondo)),
                         TextSpan(
                             text: entrada["email"],
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: AppColorStyles.verde2)),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.blancoFondo)),
                       ]),
                     ),
                   ],

@@ -1,7 +1,5 @@
 import 'dart:convert';
-
 import 'package:flutkit/custom/models/categoria.dart';
-import 'package:flutkit/custom/models/evento.dart';
 import 'package:flutkit/custom/models/noticia.dart';
 import 'package:intl/intl.dart';
 
@@ -30,6 +28,7 @@ class FuncionUpsa {
             "email": item["attributes"]["user"]["data"] != null ? item["attributes"]["user"]["data"]["attributes"]["email"] : "",
             "nombres": item["attributes"]["user"]["data"] != null ? (item["attributes"]["user"]["data"]["attributes"]["userMeta"]["data"] != null ? item["attributes"]["user"]["data"]["attributes"]["userMeta"]["data"]["attributes"]["nombres"] : "") : "",
             "apellidos": item["attributes"]["user"]["data"] != null ? (item["attributes"]["user"]["data"]["attributes"]["userMeta"]["data"] != null ? item["attributes"]["user"]["data"]["attributes"]["userMeta"]["data"]["attributes"]["apellidos"] : "") : "",
+            "cedulaDeIdentidad": item["attributes"]["user"]["data"] != null ? (item["attributes"]["user"]["data"]["attributes"]["userMeta"]["data"] != null ? item["attributes"]["user"]["data"]["attributes"]["userMeta"]["data"]["attributes"]["cedulaDeIdentidad"] : "") : "",
           }
         );
       }

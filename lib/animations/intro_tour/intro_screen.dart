@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutkit/animations/intro_tour/intro_controller.dart';
 import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutter/material.dart';

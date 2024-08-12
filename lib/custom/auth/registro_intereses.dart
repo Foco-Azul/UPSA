@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutkit/custom/models/interes.dart';
 import 'package:flutkit/custom/models/user_meta.dart';
 import 'package:flutkit/custom/theme/styles.dart';

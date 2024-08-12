@@ -34,12 +34,12 @@ class PushNotificationService{
 
     // Convierte la notificación a JSON antes de guardarla
     String notificacionJson = json.encode(notificacion.toJson());
-    notificacionesCadenas.add(notificacionJson);
+    notificacionesCadenas.insert(0, notificacionJson);
 
     await prefs.setStringList('notificaciones', notificacionesCadenas);
 
     navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => HomesScreen(indice: 0,)),(Route<dynamic> route) => false);
-    navigatorKey.currentState!.pushReplacement(MaterialPageRoute(builder: (context) => NotificacionesScreen()));
+    navigatorKey.currentState!.push(MaterialPageRoute(builder: (context) => NotificacionesScreen()));
   }
   static Future _onMessageHandler(RemoteMessage message) async {
     //print('onMessage Handler ${message.messageId}');
@@ -58,12 +58,12 @@ class PushNotificationService{
 
     // Convierte la notificación a JSON antes de guardarla
     String notificacionJson = json.encode(notificacion.toJson());
-    notificacionesCadenas.add(notificacionJson);
+    notificacionesCadenas.insert(0, notificacionJson);
 
     await prefs.setStringList('notificaciones', notificacionesCadenas);
 
     navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => HomesScreen(indice: 0,)),(Route<dynamic> route) => false);
-    navigatorKey.currentState!.pushReplacement(MaterialPageRoute(builder: (context) => NotificacionesScreen()));
+    navigatorKey.currentState!.push(MaterialPageRoute(builder: (context) => NotificacionesScreen()));
   }
   static Future _onMessageOpenApp(RemoteMessage message) async {
     //print('onMessageOpenApp Handler ${message.messageId}');
@@ -82,12 +82,12 @@ class PushNotificationService{
 
     // Convierte la notificación a JSON antes de guardarla
     String notificacionJson = json.encode(notificacion.toJson());
-    notificacionesCadenas.add(notificacionJson);
+    notificacionesCadenas.insert(0, notificacionJson);
 
     await prefs.setStringList('notificaciones', notificacionesCadenas);
 
     navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => HomesScreen(indice: 0,)),(Route<dynamic> route) => false);
-    navigatorKey.currentState!.pushReplacement(MaterialPageRoute(builder: (context) => NotificacionesScreen()));
+    navigatorKey.currentState!.push(MaterialPageRoute(builder: (context) => NotificacionesScreen()));
   }
   static Future initializeApp() async {
     await Firebase.initializeApp();
