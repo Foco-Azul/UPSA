@@ -11,7 +11,9 @@ import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/screens/inicio/etiquetas_screen.dart';
 import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
+import 'package:flutkit/custom/utils/funciones.dart';
 import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/widgets/my_button.dart';
@@ -50,6 +52,7 @@ class _ClubScreenState extends State<ClubScreen> {
   bool _siguiendo = false;
   bool _habilitado = false;
   Inscripcion _inscripcion = Inscripcion();
+  late AnimacionCarga _animacionCarga;
   
   @override
   void initState() {
@@ -58,6 +61,7 @@ class _ClubScreenState extends State<ClubScreen> {
     theme = AppTheme.theme;
     customTheme = AppTheme.customTheme;
     controller = ProfileController();
+    _animacionCarga = AnimacionCarga(context: context);
     _cargarDatos();
   }
   
@@ -71,7 +75,11 @@ class _ClubScreenState extends State<ClubScreen> {
         if (_club.seguidores!.contains(_user.id)) {
           _siguiendo =  true;
         }
-        if (_club.usuariosHabilitados!.contains(_user.id)) {
+        if(_club.usuariosHabilitados!.isNotEmpty){
+          if (_club.usuariosHabilitados!.contains(_user.id)) {
+            _habilitado =  true;
+          }
+        }else{
           _habilitado =  true;
         }
         for (var item in _club.inscripciones!) {
@@ -85,13 +93,10 @@ class _ClubScreenState extends State<ClubScreen> {
       _filtrarNoticias(-1);
     }
     await dotenv.load(fileName: ".env");
-    Timer(Duration(milliseconds: 1000), () {});
     _backUrl = dotenv.get('backUrl');
-    Timer(Duration(seconds: 1), () {
-      setState(() {
-        controller.uiLoading = false;
-      });
-     });
+    setState(() {
+      controller.uiLoading = false;
+    });
   }
   void _filtrarNoticias(int id){
     List<Noticia> aux = [];
@@ -109,20 +114,25 @@ class _ClubScreenState extends State<ClubScreen> {
     _club.noticias = aux;
   } 
   void _seguirActividad() async {
+    _animacionCarga.setMostrar(true);
     _club.seguidores!.add(_user.id!);
     await ApiService().setClubSeguidores(_club.id!, _club.seguidores!);
     setState(() {    
       _siguiendo = true;
     });
+    _animacionCarga.setMostrar(false);
   }
   void _dejarDeSeguirActividad() async {
+    _animacionCarga.setMostrar(true);
     _club.seguidores!.remove(_user.id!);
     await ApiService().setEventoSeguidores(_user.id!, _club.seguidores!);
     setState(() {
       _siguiendo = false;
     });
+    _animacionCarga.setMostrar(false);
   }
   void _inscribirseActividad() async {
+    _animacionCarga.setMostrar(true);
     _club = await ApiService().getClubPopulateConInscripcionesSeguidores(_id);
     if(_club.capacidad! > -1){
       if(_club.inscritos! < _club.capacidad!){
@@ -141,6 +151,7 @@ class _ClubScreenState extends State<ClubScreen> {
         MensajeTemporalInferior().mostrarMensaje(context,"¡Inscrito! Presenta el código QR para ingresar al club. Tus inscripciones las podrás ver en sus mismos club y en tu perfil.", "exito");
       });
     }
+    _animacionCarga.setMostrar(false);
     Navigator.pop(context);
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => super.widget));
   }
@@ -190,7 +201,7 @@ class _ClubScreenState extends State<ClubScreen> {
             children: <Widget>[
               _breadcrumbs(),
               _crearGaleriaImagenes(), 
-              _crearFechasInicioFin(_club.fechaDeInicio!, _club.fechaDeFin!),
+              _crearFechasInicioFin(FuncionUpsa.armarFechaDeInicioFin(_club.fechaDeInicio!), FuncionUpsa.armarFechaDeInicioFin(_club.fechaDeFin!)),
               _contenedorDescripcion(),
               _crearCalendarioOpcional(_club.calendario!.isNotEmpty),
               _crearIngresoOpcional(_inscrito),
@@ -455,12 +466,22 @@ class _ClubScreenState extends State<ClubScreen> {
               style: AppTextStyles.parrafo()
             ),
             _crearEtiquetas(),
-            _botonesOpcionales((_isLoggedIn && _user.rolCustom == "estudiante" && _user.estado! == "Completado"), (!_inscrito && ((_club.capacidad!-_club.inscritos!) > 0 || _club.capacidad! == -1)), _inscrito, _siguiendo),
+            Visibility(
+              visible: _inscrito,
+              child: Container(
+                margin: EdgeInsets.only(bottom: 15),
+                child: Text(
+                  "Inscrito",
+                  style: AppTextStyles.parrafo(),
+                ),
+              ), 
+            ),
+            _botonesOpcionales((_isLoggedIn && _user.rolCustom == "estudiante" && _user.estado! == "Completado" && _habilitado && FuncionUpsa.diferenciaDeFechas(_club.fechaDeFin!, "", "fechaActual") > 0), (!_inscrito && ((_club.capacidad!-_club.inscritos!) > 0 || _club.capacidad! == -1)), _siguiendo),
           ],
         ),
       );
   }
-  Widget _botonesOpcionales(bool condicion, condicionInscribirse, condicionInscrito, condicionSeguir){
+  Widget _botonesOpcionales(bool condicion, condicionInscribirse, condicionSeguir){
     return Visibility(
       visible: condicion,
       child: SingleChildScrollView(
@@ -468,42 +489,13 @@ class _ClubScreenState extends State<ClubScreen> {
         child: Row(
           children: [
             Visibility(
-              visible: condicionInscrito,
-              child: Container(
-                margin: EdgeInsets.only(right: 15),
-                alignment: Alignment.centerLeft,
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: AppDecorationStyle.botonContacto(color: AppColorStyles.blancoFondo),
-                  child: Row(
-                    children: [
-                      Icon(LucideIcons.logIn, color: AppColorStyles.verde2), // Icono a la izquierda
-                      SizedBox(width: 8.0), // Espacio entre el icono y el texto
-                      Text(
-                        'Inscritó',
-                        style: AppTextStyles.botonMenor(color: AppColorStyles.verde2), // Estilo del texto del botón
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
               visible: condicionInscribirse,
               child: Container(
                 margin: EdgeInsets.only(right: 15),
                 alignment: Alignment.centerLeft,
                 child: ElevatedButton(
                   onPressed: () {
-                    bool bandera = false;
-                    for (var item in _user.actividadesInscritas!) {
-                      if(item["id"] == _id){
-                        bandera = true;
-                      }
-                    }
-                    if (!bandera) {
-                      _showBottomSheet(context);
-                    }
+                    _showBottomSheet(context);
                   },
                   style: AppDecorationStyle.botonContacto(),
                   child: Row(
@@ -520,7 +512,7 @@ class _ClubScreenState extends State<ClubScreen> {
               ),
             ),
             Visibility(
-              visible: condicionSeguir && false,
+              visible: condicionSeguir,
               child: Container(
                 margin: EdgeInsets.only(right: 15),
                 alignment: Alignment.centerLeft,
@@ -543,7 +535,7 @@ class _ClubScreenState extends State<ClubScreen> {
               ),
             ),
             Visibility(
-              visible: !condicionSeguir && false,
+              visible: !condicionSeguir,
               child: Container(
                 margin: EdgeInsets.only(right: 15),
                 alignment: Alignment.centerLeft,
@@ -719,9 +711,12 @@ class _ClubScreenState extends State<ClubScreen> {
                           ),
                         )
                       ),
-                      Text(
-                        calendarios[index]["horaDeInicio"]!.toString().isNotEmpty ? calendarios[index]["fechaDeInicio"]! + " - " + calendarios[index]["horaDeInicio"] : calendarios[index]["fechaDeInicio"], 
-                        style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
+                      Visibility(
+                        visible: calendarios[index]["horaDeInicio"]!.toString().isNotEmpty || calendarios[index]["fechaDeInicio"]!.toString().isNotEmpty,
+                        child: Text(
+                          calendarios[index]["horaDeInicio"]!.toString().isNotEmpty ? calendarios[index]["fechaDeInicio"]! + " - " + calendarios[index]["horaDeInicio"] : calendarios[index]["fechaDeInicio"], 
+                          style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
+                        ),
                       ),
                     ],
                   ),

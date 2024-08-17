@@ -86,7 +86,7 @@ class _CampusScreenState extends State<CampusScreen> {
                 },
               ),
               _buildPulsableContainer(context,
-                'Convenios',
+                'Internacionalización',
                 LucideIcons.heartHandshake,
                 () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => ConvenioScreen()));

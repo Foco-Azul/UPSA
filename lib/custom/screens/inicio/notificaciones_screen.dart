@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:flutkit/custom/auth/registro_carrera.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/notificacion.dart';
 import 'package:flutkit/custom/screens/actividades/club_screen.dart';
@@ -14,7 +15,6 @@ import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/helpers/widgets/my_text.dart';
-import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -116,11 +116,24 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
   }
   Widget _crearListaTarjetas() {
     List<Widget> tarjetas = _notificaciones.map((item) => _crearTarjeta(item)).toList();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min, // Para que el Column se ajuste al tamaño de su contenido
-      children: tarjetas,
-    );
+    if(tarjetas.isNotEmpty){
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min, // Para que el Column se ajuste al tamaño de su contenido
+        children: tarjetas,
+      );
+    }else{
+      return Container(
+        decoration: AppDecorationStyle.tarjeta(),
+        padding: EdgeInsets.all(15),
+        margin: EdgeInsets.all(15),
+        alignment: Alignment.center,
+        child: Text(
+          "No tienes notificaciones",
+          style: AppTextStyles.menor(color: AppColorStyles.gris1),
+        ),
+      );
+    }
   }
   Widget _navegacion(String tipo) {
     return Center(
@@ -158,6 +171,9 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
             }
             if(item.tipoContenido == "cursillo"){
               Navigator.push(context, MaterialPageRoute(builder: (context) => CursilloScreen(id: item.id!,)));
+            }
+            if(item.tipoContenido == "formulario de preferencias"){
+              Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroCarrera()));
             }
           }
         }

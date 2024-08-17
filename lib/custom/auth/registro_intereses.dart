@@ -4,8 +4,8 @@ import 'package:flutkit/custom/models/interes.dart';
 import 'package:flutkit/custom/models/user_meta.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
+import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
-import 'package:flutkit/custom/widgets/progress_custom.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
@@ -30,20 +30,23 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
   Validacion validacion = Validacion();
   final UserMeta _userMeta = UserMeta();
   User _user = User();
-  int _isInProgress = -1;
   final Map<String, String> _errores = {
     "intereses": "",
   };
   List<String> selectedChoices = [];
   List<Interes> _intereses = [];
+  late AnimacionCarga _animacionCarga;
+
   @override
   void initState() {
     super.initState();
     customTheme = AppTheme.customTheme;
     theme = AppTheme.theme;
     controller = ProfileController();
+    _animacionCarga = AnimacionCarga(context: context);
     cargarDatos();
   }
+
   void cargarDatos() async{
      _user = Provider.of<AppNotifier>(context, listen: false).user;
     _intereses = await ApiService().getIntereses();
@@ -54,37 +57,32 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
   }
   void _validarCampos(){
     setState(() {
+      _userMeta.intereses!.isEmpty ? _errores["intereses"] = "Selecciona uno o más intereses" : _errores["intereses"] = "";
     });
-
     if (_errores["intereses"]!.isEmpty) {
       _registrarIntereses();
     }
   }
   void _registrarIntereses() async {
     try {
-      setState(() {
-        _isInProgress = 0;
-      });
+      _animacionCarga.setMostrar(true);
       bool bandera = await ApiService().registrarIntereses(_userMeta, _user.id!);
       if(!bandera) {
         setState(() {
           _errores["error"] = "Algo salio mal, intentalo màs tarde";
-          _isInProgress = -1;
         });
       } else {
         _user.estado = "Completado";
         Provider.of<AppNotifier>(context, listen: false).setUser(_user);
-        setState(() {
-          _isInProgress = -1;
-        });
+        _animacionCarga.setMostrar(false);
         MensajeTemporalInferior().mostrarMensaje(context,"Completaste tu cuenta con exito.", "exito");
         Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
       }
     } on Exception catch (e) {
+      _animacionCarga.setMostrar(false);
       setState(() {
         _errores["error"] = e.toString().substring(11);
         print(e);
-        _isInProgress = -1;
       });
     }
   }
@@ -124,21 +122,29 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
                     _crearTitulo(),
                     _crearDescripcion(),
                     _crearIntereses(),
+                    _crearError(),
                     _crearBoton(),
                   ]
                 )
-              ),
-              if (_isInProgress == 0)
-              Positioned.fill(
-                child: ProgressEspera(
-                  theme: theme, // Pasar el tema como argumento
-                ),
               ),
             ]
           ),
         )
       );
     } 
+  }
+
+  Widget _crearError() {
+    return Visibility(
+      visible: _errores["intereses"]!.isNotEmpty,
+      child: Container(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          _errores["intereses"]!,
+          style: TextStyle(color: Colors.red),
+        ),
+      )
+    );
   }
   Widget _crearIntereses(){
     return Container(
@@ -166,13 +172,16 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
     );
   }
   Widget _crearDescripcion(){
-    return Text(
-      'Juramos, es la última pantalla.',
-      style: TextStyle(
-        color: AppColorStyles.oscuro1,
-        fontSize: 15,
-        fontWeight: FontWeight.normal,
-      ),
+    return Container(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        'Juramos, es la última pantalla.',
+        style: TextStyle(
+          color: AppColorStyles.oscuro1,
+          fontSize: 15,
+          fontWeight: FontWeight.normal,
+        ),
+      )
     );
   }
   Widget _crearTitulo() {

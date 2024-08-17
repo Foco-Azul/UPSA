@@ -380,19 +380,6 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
       ),
     );
   }
-  Widget _bannerNoticia() {
-    return Container(
-      margin: EdgeInsets.all(15), // Margen de 8.0 en todos los lados
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(10.0), // Radio del borde
-        child: Image.network(
-          _backUrl+_noticia.imagen!,
-          height: 240.0,
-          fit: BoxFit.cover, // Ajuste de la imagen
-        ),
-      ),
-    );
-  }
   Widget _breadcrumbs() {
     Categoria categoria = _noticia.categoria!;
     return Center(

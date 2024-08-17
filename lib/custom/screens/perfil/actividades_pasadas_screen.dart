@@ -75,7 +75,7 @@ class _ActividadesPasadasScreenState extends State<ActividadesPasadasScreen> {
           ),
           centerTitle: true,
           title: Text(
-            "Actividades pasadas",
+            "Todas mis actividades",
             style: AppTitleStyles.principal()
           ),
         ),
@@ -193,10 +193,13 @@ class _ActividadesPasadasScreenState extends State<ActividadesPasadasScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Título
-              Text(
-                actividad["titulo"],
-                style: AppTitleStyles.tarjetaMenor()
-              ),
+              Container(
+                margin: EdgeInsets.only(bottom: 10),
+                child: Text(
+                  actividad["titulo"],
+                  style: AppTitleStyles.tarjetaMenor()
+                ),
+              ), 
               Row(
                 children: [
                   InkWell(

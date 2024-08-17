@@ -3,7 +3,7 @@ import 'package:flutkit/custom/models/colegio.dart';
 import 'package:flutkit/custom/models/user_meta.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
-import 'package:flutkit/custom/widgets/progress_custom.dart';
+import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/helpers/widgets/my_button.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:intl/intl.dart';
@@ -31,7 +31,6 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
   Validacion validacion = Validacion();
   UserMeta _userMeta = UserMeta();
   User _user = User();
-  int _isInProgress = -1;
   final Map<String, String> _errores = {
     "nombres": "",
     "apellidos": "",
@@ -42,6 +41,9 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
     "curso": "",
   };
   List<Colegio> _colegios = [];
+  late AnimacionCarga _animacionCarga;
+  DateTime selectedDate = DateTime.now();
+
   @override
   void initState() {
     super.initState();
@@ -49,6 +51,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
     theme = AppTheme.theme;
     controller = ProfileController();
     selectedDate = DateTime.now();
+    _animacionCarga = AnimacionCarga(context: context);
     cargarDatos();
   }
   void cargarDatos() async{
@@ -89,32 +92,26 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
   }
   void _registrarEstudiante() async {
     try {
-      setState(() {
-        _isInProgress = 0;
-      });
+      _animacionCarga.setMostrar(true);
       bool bandera = await ApiService().registrarPerfil(_userMeta, _user.id!);
       if(!bandera) {
         setState(() {
           _errores["error"] = "Algo salio mal, intentalo màs tarde";
-          _isInProgress = -1;
         });
       } else {
         _user.estado = "Perfil parte 1";
         Provider.of<AppNotifier>(context, listen: false).setUser(_user);
-        setState(() {
-          _isInProgress = -1;
-        });
+        _animacionCarga.setMostrar(false);
         Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
         Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroCarrera()));
       }
     } on Exception catch (e) { 
+      _animacionCarga.setMostrar(false);
       setState(() {
-        _isInProgress = -1;
         _errores["error"] = e.toString().substring(11);
       });
     }
   }
-  DateTime selectedDate = DateTime.now();
   _pickDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
         locale: const Locale("es"),
@@ -233,12 +230,6 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
                     _crearBoton(),
                   ]
                 )
-              ),
-              if (_isInProgress == 0)
-              Positioned.fill(
-                child: ProgressEspera(
-                  theme: theme, // Pasar el tema como argumento
-                ),
               ),
             ]
           ),
@@ -360,7 +351,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
     return Container(
       width: double.infinity,
       height: 50,
-      margin: EdgeInsets.symmetric(vertical: 15),
+      margin: EdgeInsets.only(top: 15, bottom: 60),
       child: ElevatedButton(
         onPressed: () {
          _validarCampos();
@@ -478,7 +469,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
   }
   Widget _crearDescripcion(){
     return Text(
-      'Tus datos permitirán que podás inscribirte en nuestros eventos, becas, test vocacionales, entre otros.',
+      'Tus datos permitirán que podás inscribirte en nuestros eventos, test vocacionales, entre otros.',
       style: TextStyle(
         color: AppColorStyles.oscuro1,
         fontSize: 15,

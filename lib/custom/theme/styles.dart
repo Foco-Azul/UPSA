@@ -47,6 +47,7 @@ class AppTitleStyles {
       fontSize: 16.0,
       fontWeight: FontWeight.w500,
       color: color,
+      decoration: TextDecoration.none,
     );
   }
 }

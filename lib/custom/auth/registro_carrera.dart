@@ -4,7 +4,7 @@ import 'package:flutkit/custom/models/universidad.dart';
 import 'package:flutkit/custom/models/user_meta.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
-import 'package:flutkit/custom/widgets/progress_custom.dart';
+import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
 import 'package:provider/provider.dart';
@@ -30,7 +30,6 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
   Validacion validacion = Validacion();
   UserMeta _userMeta = UserMeta();
   User _user = User();
-  int _isInProgress = -1;
   final Map<String, String> _errores = {
     "carreras": "",
     "informacionCarrera": "",
@@ -42,14 +41,18 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
   List<Carrera> _carreras = [];
   List<Universidad> _universidades = [];
   List<String> _opcionesRecibirInformacion = [];
+  late AnimacionCarga _animacionCarga;
+
   @override
   void initState() {
     super.initState();
     customTheme = AppTheme.customTheme;
     theme = AppTheme.theme;
     controller = ProfileController();
+    _animacionCarga = AnimacionCarga(context: context);
     cargarDatos();
   }
+
   void cargarDatos() async{
     _user = Provider.of<AppNotifier>(context, listen: false).user;
     _user = await ApiService().getUserPopulateConMetasParaFormularioCarrera(_user.id!);
@@ -81,34 +84,30 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
   }
   void _registrarCarrera() async {
     try {
-      setState(() {
-        _isInProgress = 0;
-      });
+      _animacionCarga.setMostrar(true);
       bool bandera = await ApiService().registrarCarrera(_userMeta, _user);
       if(!bandera) {
         setState(() {
           _errores["error"] = "Algo salio mal, intentalo màs tarde";
-          _isInProgress = -1;
         });
       } else {
+        _animacionCarga.setMostrar(false);
         if(_user.estado == "Completado"){
           setState(() {
-            _isInProgress = -1;
           });
           Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
         }else{
           _user.estado = "Perfil parte 2";
           Provider.of<AppNotifier>(context, listen: false).setUser(_user);
           setState(() {
-            _isInProgress = -1;
           });
           Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
           Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroIntereses()));
         }
       }
     } on Exception catch (e) {
+      _animacionCarga.setMostrar(false);
       setState(() {
-        _isInProgress = -1;
         _errores["error"] = e.toString().substring(11);
       });
     }
@@ -258,12 +257,6 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                     )
                   )
                 ]
-              ),
-              if (_isInProgress == 0)
-              Positioned.fill(
-                child: ProgressEspera(
-                  theme: theme, // Pasar el tema como argumento
-                ),
               ),
             ]
           )

@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:ui';
 import 'package:flutkit/custom/auth/validar_email.dart';
 import 'package:flutkit/custom/theme/styles.dart';
+import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:flutkit/custom/auth/login_screen.dart';
@@ -11,8 +11,6 @@ import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
-import 'package:flutkit/helpers/widgets/my_spacing.dart';
-import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -46,11 +44,14 @@ class _Register2ScreenState extends State<Register2Screen> {
     "apellidos": "",
   };
   late SharedPreferences _prefs;
+  late AnimacionCarga _animacionCarga;
+
   @override
   void initState() {
     super.initState();
     customTheme = AppTheme.customTheme;
     theme = AppTheme.theme;
+    _animacionCarga = AnimacionCarga(context: context);
     _cargarDatos();
   }
   void _cargarDatos() async{
@@ -72,7 +73,7 @@ class _Register2ScreenState extends State<Register2Screen> {
   }
   void _signup() async {
     try {
-      showPopup(context);
+      _animacionCarga.setMostrar(true);
       _data["username"] = _data["email"]!;
       _data["codigoDeVerificacion"] = generador.generarCodigoDeVerificacion();
       _data["tokenDispositivo"] = _prefs.getString('tokenDispositivo') ?? "";
@@ -81,10 +82,12 @@ class _Register2ScreenState extends State<Register2Screen> {
         // navigate to the dashboard.
         Provider.of<AppNotifier>(context, listen: false).login();
         Provider.of<AppNotifier>(context, listen: false).setUser(createduser);
+        _animacionCarga.setMostrar(false);
         Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4)),(Route<dynamic> route) => false);
         Navigator.push(context,MaterialPageRoute(builder: (context) => ValidarEmail()));
       }else{
         _error["error"] = "Ya existe una cuenta con el mismo correo electronico.";
+        _animacionCarga.setMostrar(false);
         Navigator.of(context).pop();
       }
     } on Exception catch (e) {
@@ -95,6 +98,7 @@ class _Register2ScreenState extends State<Register2Screen> {
           _error["error"] = "Algo salio mal";
         }
       });
+      _animacionCarga.setMostrar(false);
       Navigator.of(context).pop();
     }
   }
@@ -286,38 +290,6 @@ class _Register2ScreenState extends State<Register2Screen> {
           ),
         ),
       ],
-    );
-  }
-  void showPopup(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Stack(
-          children: [
-            BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(
-                color: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.5),
-              ),
-            ),
-            Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      theme.colorScheme.primary,
-                    ),
-                  ),
-                  MySpacing.width(20),
-                  MyText.bodyMedium("Espera por favor...",
-                      fontWeight: 600, letterSpacing: 0.3)
-                ],
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }

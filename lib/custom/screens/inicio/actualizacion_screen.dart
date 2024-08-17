@@ -1,21 +1,5 @@
-
-import 'package:flutkit/custom/controllers/profile_controller.dart';
-import 'package:flutkit/custom/models/categoria.dart';
-import 'package:flutkit/custom/models/user.dart';
-import 'package:flutkit/custom/screens/actividades/club_screen.dart';
-import 'package:flutkit/custom/screens/actividades/concurso_escreen.dart';
-import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
-import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
-import 'package:flutkit/custom/utils/server.dart';
-import 'package:flutkit/helpers/theme/app_notifier.dart';
-import 'package:flutkit/helpers/theme/app_theme.dart';
-import 'package:flutkit/helpers/widgets/my_spacing.dart';
-import 'package:flutkit/helpers/widgets/my_text.dart';
-import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ActualizacionScreen extends StatefulWidget {
@@ -44,62 +28,96 @@ class _ActualizacionScreenState extends State<ActualizacionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColorStyles.verdeFondo,
+      appBar: AppBar(
+        backgroundColor: AppColorStyles.verdeFondo,
+        centerTitle: true,
+        title: Text(
+          "Actualizacción de app",
+          style: AppTitleStyles.principal()
+        ),
+      ),
       body: ListView(
         children: [
-          _crearContenido(
-            'lib/custom/assets/images/logo.png',
-            'Tenemos una nueva version de la app UPSA',
-            'Actualizá la app para disfrutar de todos los beneficios.'
-          ),
+          _crearTarjeta(),
         ],
       )
     );
   }
-
-  Widget _crearContenido(String imagen, String titulo, String descripcion){
+  Widget _crearTarjeta(){
     return Container(
-      margin: EdgeInsets.only(left: 15, right: 15, top: 100),
+      padding: EdgeInsets.all(15.0),
+      margin: EdgeInsets.all(15.0),
+      decoration: AppDecorationStyle.tarjeta(),
       child: Column(
-        children: <Widget>[
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              SizedBox(
-                height: 250.0,
-                child: Image.asset(
-                  imagen,
-                  fit: BoxFit.cover,
-                ),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.app_shortcut_outlined, // Reemplaza con el icono que desees
+                color: AppColorStyles.verde1, // Ajusta el color si es necesario
+              ), 
+              SizedBox(width: 4.0), // Espaciado entre el icono y el texto
+              Text(
+                "Nueva versión DE NIBU disponbile".toUpperCase(), // Primer texto
+                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
               ),
-              SizedBox(
-                height: 20,
-              ),
-              Text(titulo, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: AppColorStyles.verde1, height: 1,), textAlign: TextAlign.center,),
-              SizedBox(
-                height: 20,
-              ),
-              Text(descripcion, style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15, color: AppColorStyles.gris1, height: 1.5), textAlign: TextAlign.center),
-              GestureDetector(
-                onTap: () async{
-                  // Acción que deseas realizar al pulsar el Container
-                  if(_isAndroid){
-                    await launchUrl(Uri.parse(_android), mode: LaunchMode.externalApplication,);
-                  }else{
-                    await launchUrl(Uri.parse(_ios), mode: LaunchMode.externalApplication,);
-                  }
-                },
-                child: Container(
-                  margin: EdgeInsets.symmetric(vertical: 15),
-                  child: SizedBox(
-                    width: 315.0,
-                    child: Image.asset(
-                      _isAndroid ? "lib/custom/assets/images/google_play.png" : "lib/custom/assets/images/app_store.png",
-                      fit: BoxFit.contain,
-                    ),
+            ]
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 15.0, bottom: 10), // Ajusta los valores del margen según sea necesario
+            child: Column(
+              children: [
+                Container(
+                  alignment: Alignment.centerLeft,
+                  child:  Text(
+                    'Actualizá para contar con las siguientes novedades.',
+                    style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
                   ),
                 ),
+                Container(
+                  margin: EdgeInsets.only(top: 4,),
+                  child: Divider(),
+                ),
+                Container(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '1. Momentum\n2. Impulso\n3. Torque',
+                    style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(top: 4),
+                  child: Divider(),
+                ),
+              ]
+            ),
+          ),
+          Container(
+            alignment: Alignment.centerLeft,
+            child: ElevatedButton(
+              onPressed: () async{
+                // Acción que deseas realizar al pulsar el Container
+                if(_isAndroid){
+                  await launchUrl(Uri.parse(_android), mode: LaunchMode.externalApplication,);
+                }else{
+                  await launchUrl(Uri.parse(_ios), mode: LaunchMode.externalApplication,);
+                }
+              },
+              style: AppDecorationStyle.botonContacto(),
+              child: IntrinsicWidth(
+                child: Row(
+                  children: [
+                    Icon(Icons.get_app_outlined, color: AppColorStyles.blancoFondo), // Icono a la izquierda
+                    SizedBox(width: 8.0), // Espacio entre el icono y el texto
+                    Text(
+                      _isAndroid ? 'Actualizar en Google Play' : 'Actualizar en App Store',
+                      style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                    ),
+                  ],
+                ),
               )
-            ],
+            ),
           ),
         ],
       ),

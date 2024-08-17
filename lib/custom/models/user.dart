@@ -18,6 +18,7 @@ class User {
     this.dispositivos,
     this.solicitudesDeTestVocacional,
     this.retroalimentaciones,
+    this.solicitudesDeInscripciones,
   });
 
   int? id;
@@ -33,6 +34,7 @@ class User {
   List<Map<String, dynamic>>? actividadesInscritas;
   List<Map<String, dynamic>>? actividadesSeguidas;
   List<int>? solicitudesDeTestVocacional;
+  List<int>? solicitudesDeInscripciones;
   List<Map<String, dynamic>>? retroalimentaciones;
 
   static User fromJson(Map<String, dynamic> json){
@@ -143,7 +145,19 @@ class User {
       rolCustom: data["rolCustom"],
       username: data["username"],
       email: data["email"],
-      solicitudesDeTestVocacional: _armarSolicitudesDeTestVocacional(data["solicitudesDeTestVocacional"]),
+      solicitudesDeTestVocacional: _armarListaDeIds(data["solicitudesDeTestVocacional"]),
+    );
+  }
+  static User armarUsuarioPopulateConMetasParaSolitudDeInscripcion(String str) {
+    final jsonData = json.decode(str);
+    final Map<String, dynamic> data = jsonData;
+    return User(
+      id: data["id"],
+      estado: data["estado"],
+      rolCustom: data["rolCustom"],
+      username: data["username"],
+      email: data["email"],
+      solicitudesDeInscripciones: _armarListaDeIds(data["solicitudesDeInscripciones"]),
     );
   }
   static User armarUsuarioPopulateParaRetroalimentacion(String str) {
@@ -234,7 +248,7 @@ class User {
     }
     return res;
   }
-  static List<int> _armarSolicitudesDeTestVocacional(List<dynamic>? data){
+  static List<int> _armarListaDeIds(List<dynamic>? data){
     List<int> res = [];
     if(data != null){
       for (var item in data) {

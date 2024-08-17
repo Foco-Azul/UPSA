@@ -1,6 +1,6 @@
 import 'package:flutkit/custom/auth/registro_perfil.dart';
 import 'package:flutkit/custom/theme/styles.dart';
-import 'package:flutkit/custom/widgets/efecto_carga.dart';
+import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutter/material.dart';
@@ -24,13 +24,13 @@ class _ValidarEmailState extends State<ValidarEmail> {
   String _errorToken = "";
   User _user = User();
   bool _errorVerificacion = false;
+  late AnimacionCarga _animacionCarga;
+
   @override
   void initState() {
     super.initState();
+    _animacionCarga = AnimacionCarga(context: context);
     _user = Provider.of<AppNotifier>(context, listen: false).user;
-    armarInformacion();
-  }
-  void armarInformacion(){
   }
   
   void verificarCodigo(String verificationCode){
@@ -43,20 +43,22 @@ class _ValidarEmailState extends State<ValidarEmail> {
     }
   }
   void reenviarToken() async{  
+    _animacionCarga.setMostrar(true);
     bool bandera = await ApiService().reenviarToken(_user.id!, _user.email!);
     if(bandera){
       MensajeTemporalInferior().mostrarMensaje(context,"Correo enviado satisfactoriamente.", "exito");
     }
     setState(() {
     });
+    _animacionCarga.setMostrar(false);
   }
   void verificarCuenta() async{
+    _animacionCarga.setMostrar(true);
     if(_token.isEmpty){
       setState(() {
         _errorToken = "El código es requerido.";
       });
     }else{
-      EfectoCarga.showPopup(context);
       User user = Provider.of<AppNotifier>(context, listen: false).user;
       bool bandera = await ApiService().verificarCuenta(user.id!, _token);
       if(bandera){
@@ -73,6 +75,7 @@ class _ValidarEmailState extends State<ValidarEmail> {
         });
       }
     }
+    _animacionCarga.setMostrar(false);
   }
   @override
   Widget build(BuildContext context) {

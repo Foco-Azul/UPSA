@@ -10,6 +10,7 @@ import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
+import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/homes/homes_screen.dart';
@@ -50,12 +51,15 @@ class _TestVocacionalScreenState extends State<TestVocacionalScreen> {
   Validacion validacion = Validacion();
   bool _bandera = false;
   bool _permitido = false;
+  late AnimacionCarga _animacionCarga;
+
   @override
   void initState() {
     super.initState();
     theme = AppTheme.theme;
     customTheme = AppTheme.customTheme;
     controller = ProfileController();
+    _animacionCarga = AnimacionCarga(context: context);
     _cargarDatos();
   }
   void _cargarDatos() async {
@@ -74,7 +78,7 @@ class _TestVocacionalScreenState extends State<TestVocacionalScreen> {
       controller.uiLoading = false;
     });
   }
-  void _validarCamposLogin(){
+  void _validarCampos(){
     setState(() {
       _formDataError["errorFechas"] = _formData["fechas"]!.isEmpty ? "Este campo es requerido" : "";
       _formDataError["errorTelefono"] = validacion.validarCelular(_formData["telefono"], true);
@@ -85,6 +89,7 @@ class _TestVocacionalScreenState extends State<TestVocacionalScreen> {
     }
   }
   void _crearSolicitudDeTestVocacional() async{
+    _animacionCarga.setMostrar(true);
     String respuesta = await ApiService().crearSolicitudDeTestVocacional(_formData, _user.id!);
     if(respuesta == "exito"){
       _bandera = true;
@@ -94,6 +99,7 @@ class _TestVocacionalScreenState extends State<TestVocacionalScreen> {
     }
     setState(() {
     });
+    _animacionCarga.setMostrar(false);
   }
   @override
   Widget build(BuildContext context) {
@@ -256,7 +262,7 @@ class _TestVocacionalScreenState extends State<TestVocacionalScreen> {
               child: Container(
                 margin: EdgeInsets.symmetric(vertical: 10.0), // Ajusta los valores del margen según sea necesario
                 child: Text(
-                  "Gracias por contactarte con la UPSA.",
+                  "Solicitud enviada exitosamente.",
                   style: AppTextStyles.parrafo(),
                 ),
               ),
@@ -470,7 +476,7 @@ class _TestVocacionalScreenState extends State<TestVocacionalScreen> {
                   alignment: Alignment.centerLeft,
                   child: ElevatedButton(
                     onPressed: () {
-                      _validarCamposLogin();
+                      _validarCampos();
                     },
                     style: AppDecorationStyle.botonContacto(),
                     child: Text(

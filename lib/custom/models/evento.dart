@@ -26,6 +26,7 @@ class Evento {
     this.noticias,
     this.seguidores,
     this.entradas,
+    this.activo,
   });
 
   int? id;
@@ -45,6 +46,7 @@ class Evento {
   List<Inscripcion>? inscripciones;
   List<int>? seguidores;
   List<Map<String, dynamic>>? entradas;
+  bool? activo;
   
   static List<Evento> armarEventosPopulateFechaOriginal(String str) {
     List<Evento> res = [];
@@ -114,8 +116,8 @@ class Evento {
       publicacion: FuncionUpsa.armarFechaPublicacion(data['attributes']["publishedAt"]), 
       imagen: data['attributes']["imagen"]['data'] != null ? data['attributes']["imagen"]['data']['attributes']['url'] : "/uploads/default_02263f0f89.png", 
       imagenes: FuncionUpsa.armarGaleriaImagenes(data['attributes']["imagenes"]['data'], data['attributes']["imagen"]['data']),
-      fechaDeInicio: FuncionUpsa.armarFechaDeInicioFin(data['attributes']["fechaDeInicio"]), 
-      fechaDeFin: FuncionUpsa.armarFechaDeInicioFin(data['attributes']["fechaDeFin"]),
+      fechaDeInicio: data['attributes']["fechaDeInicio"], 
+      fechaDeFin: data['attributes']["fechaDeFin"],
       descripcion: data['attributes']["descripcion"], 
       etiquetas: Etiqueta.armarEtiquetas(data['attributes']["etiquetas"]['data']),
       calendario: FuncionUpsa.armarFechaCalendarioConHora(data['attributes']["calendario"]), 
@@ -124,6 +126,7 @@ class Evento {
       inscripciones: Inscripcion.armarInscripciones(data['attributes']['inscripciones']['data'], data["id"], "evento"),
       seguidores: FuncionUpsa.armarSeguidores(data['attributes']['usuarios']['data']),
       noticias: Noticia.armarNoticiasRelacionadas(data['attributes']['noticias']['data']),
+      activo: data['attributes']["activo"] ?? false,
     );
   }
 

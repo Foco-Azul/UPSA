@@ -6,6 +6,7 @@ import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
+import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/homes/homes_screen.dart';
@@ -48,12 +49,15 @@ class _ContactoScreenState extends State<ContactoScreen> {
   };
   Validacion validacion = Validacion();
   bool _bandera = false;
+  late AnimacionCarga _animacionCarga;
+
   @override
   void initState() {
     super.initState();
     theme = AppTheme.theme;
     customTheme = AppTheme.customTheme;
     controller = ProfileController();
+    _animacionCarga = AnimacionCarga(context: context);
     _cargarDatos();
   }
   void _cargarDatos() async {
@@ -81,6 +85,7 @@ class _ContactoScreenState extends State<ContactoScreen> {
     }
   }
   void _crearRegistroContacto() async{
+    _animacionCarga.setMostrar(true);
     String respuesta = await ApiService().crearContacto(_formData);
     if(respuesta == "exito"){
       _bandera = true;
@@ -90,6 +95,7 @@ class _ContactoScreenState extends State<ContactoScreen> {
     }
     setState(() {
     });
+    _animacionCarga.setMostrar(false);
   }
   @override
   Widget build(BuildContext context) {

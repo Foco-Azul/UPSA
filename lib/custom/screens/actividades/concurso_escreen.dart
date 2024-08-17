@@ -11,7 +11,9 @@ import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/screens/inicio/etiquetas_screen.dart';
 import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
+import 'package:flutkit/custom/utils/funciones.dart';
 import 'package:flutkit/custom/utils/server.dart';
+//import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
@@ -47,6 +49,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
   bool _inscrito = false;
   //bool _siguiendo = false;
   Inscripcion _inscripcion = Inscripcion();
+  //late AnimacionCarga _animacionCarga;
   
   @override
   void initState() {
@@ -55,6 +58,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
     theme = AppTheme.theme;
     customTheme = AppTheme.customTheme;
     controller = ProfileController();
+    //_animacionCarga = AnimacionCarga(context: context);
     _cargarDatos();
   }
   
@@ -79,13 +83,10 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
       _filtrarNoticias(-1);
     }
     await dotenv.load(fileName: ".env");
-    Timer(Duration(milliseconds: 1000), () {});
     _backUrl = dotenv.get('backUrl');
-    Timer(Duration(seconds: 1), () {
-      setState(() {
-        controller.uiLoading = false;
-      });
-     });
+    setState(() {
+      controller.uiLoading = false;
+    });
   }
   void _filtrarNoticias(int id){
     List<Noticia> aux = [];
@@ -185,7 +186,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
             children: <Widget>[
               _breadcrumbs(),
               _crearGaleriaImagenes(),
-              _crearFechasInicioFin(_concurso.fechaDeInicio!, _concurso.fechaDeFin!),
+              _crearFechasInicioFin(FuncionUpsa.armarFechaDeInicioFin(_concurso.fechaDeInicio!), FuncionUpsa.armarFechaDeInicioFin(_concurso.fechaDeFin!)),
               _contenedorDescripcion(),
               _crearCalendarioOpcional(_concurso.calendario!.isNotEmpty),
               _crearIngresoOpcional(_inscrito),
@@ -388,9 +389,12 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
                           ),
                         )
                       ),
-                      Text(
-                        calendarios[index]["horaDeInicio"]!.toString().isNotEmpty ? calendarios[index]["fechaDeInicio"]! + " - " + calendarios[index]["horaDeInicio"] : calendarios[index]["fechaDeInicio"], 
-                        style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
+                      Visibility(
+                        visible: calendarios[index]["horaDeInicio"]!.toString().isNotEmpty || calendarios[index]["fechaDeInicio"]!.toString().isNotEmpty,
+                        child: Text(
+                          calendarios[index]["horaDeInicio"]!.toString().isNotEmpty ? calendarios[index]["fechaDeInicio"]! + " - " + calendarios[index]["horaDeInicio"] : calendarios[index]["fechaDeInicio"], 
+                          style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
+                        ),
                       ),
                     ],
                   ),

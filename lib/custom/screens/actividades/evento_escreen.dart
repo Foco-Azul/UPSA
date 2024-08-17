@@ -12,7 +12,9 @@ import 'package:flutkit/custom/screens/actividades/retroalimentacion_screen.dart
 import 'package:flutkit/custom/screens/inicio/etiquetas_screen.dart';
 import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
+import 'package:flutkit/custom/utils/funciones.dart';
 import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/widgets/my_button.dart';
@@ -48,6 +50,7 @@ class _EventoScreenState extends State<EventoScreen> {
   bool _inscrito = false;
   bool _siguiendo = false;
   Inscripcion _inscripcion = Inscripcion();
+  late AnimacionCarga _animacionCarga;
  
   @override
   void initState() {
@@ -56,6 +59,7 @@ class _EventoScreenState extends State<EventoScreen> {
     theme = AppTheme.theme;
     customTheme = AppTheme.customTheme;
     controller = ProfileController();
+    _animacionCarga = AnimacionCarga(context: context);
     _cargarDatos();
   }
   
@@ -80,13 +84,10 @@ class _EventoScreenState extends State<EventoScreen> {
       _filtrarNoticias(-1);
     }
     await dotenv.load(fileName: ".env");
-    Timer(Duration(milliseconds: 1000), () {});
     _backUrl = dotenv.get('backUrl');
-    Timer(Duration(seconds: 1), () {
-      setState(() {
-        controller.uiLoading = false;
-      });
-     });
+    setState(() {
+      controller.uiLoading = false;
+    });
   }
   void _filtrarNoticias(int id){
     List<Noticia> aux = [];
@@ -104,20 +105,25 @@ class _EventoScreenState extends State<EventoScreen> {
     _evento.noticias = aux;
   } 
   void _seguirActividad() async {
+    _animacionCarga.setMostrar(true);
     _evento.seguidores!.add(_user.id!);
     await ApiService().setEventoSeguidores(_evento.id!, _evento.seguidores!);
     setState(() {    
       _siguiendo = true;
     });
+    _animacionCarga.setMostrar(false);
   }
   void _dejarDeSeguirActividad() async {
+    _animacionCarga.setMostrar(true);
     _evento.seguidores!.remove(_user.id!);
     await ApiService().setEventoSeguidores(_user.id!, _evento.seguidores!);
     setState(() {
       _siguiendo = false;
     });
+    _animacionCarga.setMostrar(false);
   }
   void _inscribirseActividad() async {
+    _animacionCarga.setMostrar(true);
     _evento = await ApiService().getEventoPopulateConInscripcionesSeguidores(_id);
     if(_evento.capacidad! > -1){
       if(_evento.inscritos! < _evento.capacidad!){
@@ -136,6 +142,7 @@ class _EventoScreenState extends State<EventoScreen> {
         MensajeTemporalInferior().mostrarMensaje(context,"¡Inscrito! Presenta el código QR para ingresar al evento. Tus inscripciones las podrás ver en sus mismos eventos y en tu perfil.", "exito");
       });
     }
+    _animacionCarga.setMostrar(false);
     Navigator.pop(context);
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => super.widget));
   }
@@ -185,7 +192,7 @@ class _EventoScreenState extends State<EventoScreen> {
             children: <Widget>[
               _breadcrumbs(),
               _crearGaleriaImagenes(),
-              _crearFechasInicioFin(_evento.fechaDeInicio!, _evento.fechaDeFin!),
+              _crearFechasInicioFin(FuncionUpsa.armarFechaDeInicioFin(_evento.fechaDeInicio!), FuncionUpsa.armarFechaDeInicioFin(_evento.fechaDeFin!)),
               _contenedorRetroalimentacion(),
               _contenedorDescripcion(),
               _crearCalendarioOpcional(_evento.calendario!.isNotEmpty),
@@ -257,7 +264,7 @@ class _EventoScreenState extends State<EventoScreen> {
   
   Widget _contenedorRetroalimentacion(){
     return Visibility(
-      visible: (_isLoggedIn && _user.rolCustom == "estudiante" && _user.estado! == "Completado") && _inscrito && _inscripcion.asistencia!,
+      visible: (_isLoggedIn && _user.rolCustom == "estudiante" && _user.estado! == "Completado") && _inscrito && _inscripcion.asistencia! && FuncionUpsa.diferenciaDeFechas(_evento.fechaDeFin!, "", "fechaActual") >= -7 && FuncionUpsa.diferenciaDeFechas(_evento.fechaDeFin!, "", "fechaActual") < 0,
       child: Container(
         padding: EdgeInsets.all(15.0),
         margin: EdgeInsets.all(15.0),
@@ -489,39 +496,28 @@ class _EventoScreenState extends State<EventoScreen> {
               style: AppTextStyles.parrafo()
             ),
             _crearEtiquetas(),
-            _botonesOpcionales((_isLoggedIn && _user.rolCustom == "estudiante" && _user.estado! == "Completado"), (!_inscrito && ((_evento.capacidad!-_evento.inscritos!) > 0 || _evento.capacidad! == -1)), _inscrito, _siguiendo),
+            Visibility(
+              visible: _inscrito && FuncionUpsa.diferenciaDeFechas(_evento.fechaDeFin!, "", "fechaActual") > 0,
+              child: Container(
+                margin: EdgeInsets.only(bottom: 15),
+                child: Text(
+                  "Inscrito",
+                  style: AppTextStyles.parrafo(),
+                ),
+              ), 
+            ),
+            _botonesOpcionales((_isLoggedIn && _user.rolCustom == "estudiante" && _user.estado! == "Completado" && FuncionUpsa.diferenciaDeFechas(_evento.fechaDeFin!, "", "fechaActual") > 0), (!_inscrito && ((_evento.capacidad!-_evento.inscritos!) > 0 || _evento.capacidad! == -1)), _siguiendo),
           ],
         ),
       );
   }
-  Widget _botonesOpcionales(bool condicion, condicionInscribirse, condicionInscrito, condicionSeguir){
+  Widget _botonesOpcionales(bool condicion, condicionInscribirse, condicionSeguir){
     return Visibility(
       visible: condicion,
       child: SingleChildScrollView(
       scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            Visibility(
-              visible: condicionInscrito,
-              child: Container(
-                margin: EdgeInsets.only(right: 15),
-                alignment: Alignment.centerLeft,
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: AppDecorationStyle.botonContacto(color: AppColorStyles.blancoFondo),
-                  child: Row(
-                    children: [
-                      Icon(LucideIcons.logIn, color: AppColorStyles.verde2), // Icono a la izquierda
-                      SizedBox(width: 8.0), // Espacio entre el icono y el texto
-                      Text(
-                        'Inscritó',
-                        style: AppTextStyles.botonMenor(color: AppColorStyles.verde2), // Estilo del texto del botón
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
             Visibility(
               visible: condicionInscribirse,
               child: Container(
@@ -731,7 +727,7 @@ class _EventoScreenState extends State<EventoScreen> {
               itemCount: calendarios.length,
               itemBuilder: (BuildContext context, int index) {
                 return Container(
-                  padding: EdgeInsets.only(top: 12, bottom: 12),
+                  padding: EdgeInsets.symmetric(vertical: 5),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -749,9 +745,12 @@ class _EventoScreenState extends State<EventoScreen> {
                           ),
                         )
                       ),
-                      Text(
-                        calendarios[index]["horaDeInicio"]!.toString().isNotEmpty ? calendarios[index]["fechaDeInicio"]! + " - " + calendarios[index]["horaDeInicio"] : calendarios[index]["fechaDeInicio"], 
-                        style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
+                      Visibility(
+                        visible: calendarios[index]["horaDeInicio"]!.toString().isNotEmpty || calendarios[index]["fechaDeInicio"]!.toString().isNotEmpty,
+                        child: Text(
+                          calendarios[index]["horaDeInicio"]!.toString().isNotEmpty ? calendarios[index]["fechaDeInicio"]! + " - " + calendarios[index]["horaDeInicio"] : calendarios[index]["fechaDeInicio"], 
+                          style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
+                        ),
                       ),
                     ],
                   ),

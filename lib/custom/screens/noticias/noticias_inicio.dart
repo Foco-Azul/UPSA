@@ -146,56 +146,69 @@ class _NoticiasScreenState extends State<NoticiasScreen> {
         );
   }
   Widget generarContenidoApp(String contenido, List<dynamic> contenidos) {
-    return Expanded(
-      child: ListView.builder(
-        itemCount: contenidos.length,
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () {
-              if(contenido == "Noticias"){
-                Navigator.push(context, MaterialPageRoute(builder: (context) => NoticiaScreen(idNoticia: contenidos[index].id!,)));
-              }
-            },
-            child: Container(
-              padding: EdgeInsets.all(15),
-              margin: EdgeInsets.all(15),
-              decoration: AppDecorationStyle.tarjeta(),
-              child: Row(
-                children: [
-                  // Imagen a la izquierda
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.25,
-                    height: MediaQuery.of(context).size.height * 0.10,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(5), // Radio del borde
-                      child: Image.network(_backUrl + contenidos[index].imagen!, fit: BoxFit.cover),
+    if(contenidos.isNotEmpty){
+      return Expanded(
+        child: ListView.builder(
+          itemCount: contenidos.length,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: () {
+                if(contenido == "Noticias"){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => NoticiaScreen(idNoticia: contenidos[index].id!,)));
+                }
+              },
+              child: Container(
+                padding: EdgeInsets.all(15),
+                margin: EdgeInsets.all(15),
+                decoration: AppDecorationStyle.tarjeta(),
+                child: Row(
+                  children: [
+                    // Imagen a la izquierda
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.25,
+                      height: MediaQuery.of(context).size.height * 0.10,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(5), // Radio del borde
+                        child: Image.network(_backUrl + contenidos[index].imagen!, fit: BoxFit.cover),
+                      ),
                     ),
-                  ),
-                  SizedBox(width: 15),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          contenidos[index].titulo!, 
-                          style: AppTitleStyles.tarjetaMenor()
-                        ),
-                        Text(
-                          contenidos[index].descripcion!.replaceAll('\n', ''),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.menor(color: AppColorStyles.oscuro2)
-                        ),
-                      ],
+                    SizedBox(width: 15),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            contenidos[index].titulo!, 
+                            style: AppTitleStyles.tarjetaMenor()
+                          ),
+                          Text(
+                            contenidos[index].descripcion!.replaceAll('\n', ''),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.menor(color: AppColorStyles.oscuro2)
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-      ),
-    );
+            );
+          },
+        ),
+      );
+     }else{
+      return Container(
+        decoration: AppDecorationStyle.tarjeta(),
+        padding: EdgeInsets.all(15),
+        margin: EdgeInsets.all(15),
+        alignment: Alignment.center,
+        child: Text(
+          "En este momento no contamos con ninguna noticia",
+          style: AppTextStyles.menor(color: AppColorStyles.gris1),
+        ),
+      );
+    }  
   }
   _crearCategorias(String contenido, List<Categoria> categorias) {
     List<Widget> choices = [];

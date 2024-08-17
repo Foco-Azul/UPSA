@@ -108,7 +108,7 @@ class UserMeta {
         id: data["id"],
         nombres: data["nombres"],
         apellidos: data["apellidos"],
-        avatar: data["avatar"] != null ? data["avatar"]["imagen"]["url"] : "/uploads/avatar_89f34d0255.png",
+        avatar: data["avatar"] != null ? data["avatar"]["imagen"]["url"] : "/uploads/default_02263f0f89.png",
         colegio: _armarColegio(data["colegio"]),
         carreraSugerida: _armarCarreraSugerida(data["carreraSugerida"]),
         insignias: _armarInsignias(data["insignias"]),

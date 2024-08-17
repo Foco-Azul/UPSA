@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0
+version: 1.0.1
 versionCode: 1
 
 environment:
@@ -104,6 +104,52 @@ dev_dependencies:
 # The following section is specific to Flutter.
 flutter:
 
+  fonts:
+    - family: InterTight
+      fonts:
+        - asset: lib/custom/assets/fonts/InterTight-Black.ttf
+          weight: 900
+        - asset: lib/custom/assets/fonts/InterTight-BlackItalic.ttf
+          weight: 900
+          style: italic
+        - asset: lib/custom/assets/fonts/InterTight-Bold.ttf
+          weight: 700
+        - asset: lib/custom/assets/fonts/InterTight-BoldItalic.ttf
+          weight: 700
+          style: italic
+        - asset: lib/custom/assets/fonts/InterTight-ExtraBold.ttf
+          weight: 800
+        - asset: lib/custom/assets/fonts/InterTight-ExtraBoldItalic.ttf
+          weight: 800
+          style: italic
+        - asset: lib/custom/assets/fonts/InterTight-ExtraLight.ttf
+          weight: 200
+        - asset: lib/custom/assets/fonts/InterTight-ExtraLightItalic.ttf
+          weight: 200
+          style: italic
+        - asset: lib/custom/assets/fonts/InterTight-Italic.ttf
+          style: italic
+        - asset: lib/custom/assets/fonts/InterTight-Light.ttf
+          weight: 300
+        - asset: lib/custom/assets/fonts/InterTight-LightItalic.ttf
+          weight: 300
+          style: italic
+        - asset: lib/custom/assets/fonts/InterTight-Medium.ttf
+          weight: 500
+        - asset: lib/custom/assets/fonts/InterTight-MediumItalic.ttf
+          weight: 500
+          style: italic
+        - asset: lib/custom/assets/fonts/InterTight-Regular.ttf
+        - asset: lib/custom/assets/fonts/InterTight-SemiBold.ttf
+          weight: 600
+        - asset: lib/custom/assets/fonts/InterTight-SemiBoldItalic.ttf
+          weight: 600
+          style: italic
+        - asset: lib/custom/assets/fonts/InterTight-Thin.ttf
+          weight: 100
+        - asset: lib/custom/assets/fonts/InterTight-ThinItalic.ttf
+          weight: 100
+          style: italic
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

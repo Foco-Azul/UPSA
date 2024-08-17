@@ -13,7 +13,7 @@ if (flutterRoot == null) {
 
 def flutterVersionCode = '1'
 
-def flutterVersionName = '1.0.0'
+def flutterVersionName = '1.0.1'
 
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'

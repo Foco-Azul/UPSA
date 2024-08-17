@@ -278,7 +278,7 @@ class AppTheme {
   static final ThemeData lightTheme = ThemeData(
     /// Brightness
     brightness: Brightness.light,
-
+    fontFamily: "InterTight",
     /// Primary Color
     primaryColor: Color(0xff3C4EC5),
     scaffoldBackgroundColor: Color(0xffffffff),

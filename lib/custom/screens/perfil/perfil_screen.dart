@@ -20,6 +20,7 @@ import 'package:flutkit/custom/screens/campus/test_vocacional_screen.dart';
 import 'package:flutkit/custom/screens/perfil/actividades_pasadas_screen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
@@ -57,6 +58,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
   final MensajeTemporalInferior _mensajeTemporalInferior = MensajeTemporalInferior();
   List<Avatar> _avatares = [];
   late SharedPreferences _prefs;
+  late AnimacionCarga _animacionCarga;
   
   @override
   void initState() {
@@ -65,6 +67,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
     customTheme = AppTheme.customTheme;
     loginController = LoginController();
     controller = ProfileController();
+    _animacionCarga = AnimacionCarga(context: context);
     _cargarDatos();
   }
 
@@ -266,7 +269,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
       child: Image.asset('lib/custom/assets/images/bienvenida_1.png', fit: BoxFit.cover),
     );
   }
-
   Widget _crearInsignias(){
     if(_user.rolCustom == "estudiante" && _userMeta.insignias!.isNotEmpty){
       /*
@@ -631,10 +633,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
               margin: EdgeInsets.symmetric(vertical: 5),
               child: GestureDetector(
                 onTap: () async{
-                    _user = await ApiService().getUserPopulateConMetasActividades(_user.id!);
-                    Provider.of<AppNotifier>(context, listen: false).setUser(_user);
-                    MensajeTemporalInferior().mostrarMensaje(context,"Se sincronizó tus datos con exito.", "exito");
-                    Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
+                  _animacionCarga.setMostrar(true);
+                  _user = await ApiService().getUserPopulateConMetasActividades(_user.id!);
+                  Provider.of<AppNotifier>(context, listen: false).setUser(_user);
+                  MensajeTemporalInferior().mostrarMensaje(context,"Se sincronizó tus datos con exito.", "exito");
+                  Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
+                  _animacionCarga.setMostrar(false);
                 },
                 child: Text(
                   "Sincronizar datos",
@@ -650,14 +654,17 @@ class _PerfilScreenState extends State<PerfilScreen> {
             margin: EdgeInsets.symmetric(vertical: 5),
             child: GestureDetector(
               onTap: () async{
+                _animacionCarga.setMostrar(true);
                 _prefs = await SharedPreferences.getInstance();
                 String tokenDispositivo = _prefs.getString('tokenDispositivo') ?? "";
                 if(_user.dispositivos!.contains(tokenDispositivo)){
                   _user.dispositivos!.remove(tokenDispositivo);
                   await ApiService().actualizarUsuarioTokens(_user.id!, _user.dispositivos!);
                 }
+                await _prefs.setStringList('notificaciones', []);
                 _mensajeTemporalInferior.mostrarMensaje(context,"Se cerró tu cuenta con exito.", "exito");
                 loginController.logout(context);
+                _animacionCarga.setMostrar(false);
               },
               child: Text(
                 "Cerrar sesión",

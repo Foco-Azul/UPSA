@@ -8,6 +8,7 @@ import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
+import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
@@ -34,12 +35,14 @@ class _Login2ScreenState extends State<Login2Screen> {
   String _errorPassword = "";
   Validacion validacion = Validacion();
   late SharedPreferences _prefs;
+  late AnimacionCarga _animacionCarga;
   
   @override
   void initState() {
     super.initState();
     customTheme = AppTheme.customTheme;
     theme = AppTheme.theme;
+    _animacionCarga = AnimacionCarga(context: context);
   }
   void _validarCamposLogin(){
     setState(() {
@@ -51,6 +54,7 @@ class _Login2ScreenState extends State<Login2Screen> {
     }
   }
   void _login() async {
+    _animacionCarga.setMostrar(true);
     _prefs = await SharedPreferences.getInstance();
     String tokenDispositivo = _prefs.getString('tokenDispositivo') ?? "";
     User user = await ApiService().login(_email, _password, tokenDispositivo);
@@ -87,6 +91,7 @@ class _Login2ScreenState extends State<Login2Screen> {
           break;
       }
     }
+    _animacionCarga.setMostrar(false);
   }
   @override
   Widget build(BuildContext context) {

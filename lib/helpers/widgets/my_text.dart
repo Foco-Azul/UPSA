@@ -465,6 +465,7 @@ class MyText extends StatelessWidget {
       textDirection: textDirection,
       // textDirection: textDirection ?? MyAppTheme.textDirection,
       textHeightBehavior: textHeightBehavior,
+      // ignore: deprecated_member_use
       textScaleFactor: textScaleFactor,
       textWidthBasis: textWidthBasis,
       key: key,

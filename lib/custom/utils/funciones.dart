@@ -99,25 +99,29 @@ class FuncionUpsa {
     }
     return res;
   }
-  static String _armarFechaLiteral(String fecha) {
-    // Dividir la cadena en año, mes y día
-    List<String> partes = fecha.split('-');
-    if (partes.length != 3) {
-      throw ArgumentError('La fecha debe estar en formato YYYY-MM-DD');
-    }
+  static String _armarFechaLiteral(String? fecha) {
+    if(fecha != null){
+      // Dividir la cadena en año, mes y día
+      List<String> partes = fecha.split('-');
+      if (partes.length != 3) {
+        throw ArgumentError('La fecha debe estar en formato YYYY-MM-DD');
+      }
 
-    // Convertir el mes a nombre
-    List<String> meses = [
-      '', 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
-    ];
-    int mes = int.tryParse(partes[1]) ?? 0;
-    if (mes < 1 || mes > 12) {
-      throw ArgumentError('El mes debe estar entre 1 y 12');
-    }
+      // Convertir el mes a nombre
+      List<String> meses = [
+        '', 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+      ];
+      int mes = int.tryParse(partes[1]) ?? 0;
+      if (mes < 1 || mes > 12) {
+        throw ArgumentError('El mes debe estar entre 1 y 12');
+      }
 
-    // Crear la fecha en el formato deseado
-    return '${int.parse(partes[2])} de ${meses[mes]}';
+      // Crear la fecha en el formato deseado
+      return '${int.parse(partes[2])} de ${meses[mes]}';
+    }else{
+      return "";
+    }
   }
   static List<Map<String, dynamic>> armarFechaCalendarioConHora(List<dynamic> data) {
     List<Map<String, dynamic>> res = [];
@@ -125,7 +129,7 @@ class FuncionUpsa {
       Map<String, dynamic> aux = {
         "titulo":item['titulo'],
         "descripcion": item["descripcion"] ?? "",
-        "fechaDeInicio":_armarFechaLiteral(item['fechaDeInicio']),
+        "fechaDeInicio": _armarFechaLiteral(item['fechaDeInicio']),
         "horaDeInicio": item['horaDeInicio'] != null ? DateFormat('HH:mm').format(DateFormat('HH:mm:ss.SSS').parseUTC(item["horaDeInicio"]).toLocal()) : "",
       };
       res.add(aux);
@@ -226,6 +230,16 @@ class FuncionUpsa {
           res.add(item["url"]);
         }
       }
+    }
+    return res;
+  }
+  static int diferenciaDeFechas(String data, String data2, String caso) {
+    int res = 0;
+    if (caso == 'fechaActual') {
+      DateTime fecha1 = DateTime.parse(data);
+      DateTime fechaActual = DateTime.now();
+      DateTime fechaActualSinHora = DateTime(fechaActual.year, fechaActual.month, fechaActual.day);
+      res = fecha1.difference(fechaActualSinHora).inDays;
     }
     return res;
   }

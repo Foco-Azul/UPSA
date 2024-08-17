@@ -388,6 +388,30 @@ class ApiService {
       return res;
     }
   }
+  Future<User> getUserPopulateParaSolitudDeInscripcion(int id) async {
+    User res = User();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}${dotenv.get('usersRegisterEndpoint')}/$id/?populate=*");
+      var response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          }, 
+      );
+      if (response.statusCode == 200) {
+        res = User.armarUsuarioPopulateConMetasParaSolitudDeInscripcion(response.body);
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en getUserPopulateParaSolitudDeInscripcion: $error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getUserPopulateParaSolitudDeInscripcion: $e');
+      return res;
+    }
+  }
   Future<User> getUserPopulateParaRetroalimentacion(int id) async {
     User res = User();
     await dotenv.load(fileName: ".env");
@@ -1292,11 +1316,12 @@ class ApiService {
         res = MatriculateFromJson(response.body);
         return res;
       } else {
-        print('Error en getClub: '+jsonDecode(response.body)['error']['message']);
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getMatriculate: $e');
         return res;
       }
     } catch (e) {
-      print('Error en getClub: $e');
+      print('Error en getMatriculate: $e');
       return res;
     }
   }
@@ -1908,6 +1933,43 @@ class ApiService {
     }
   }
   //SOLICITUD DE TEST VOCACIONAL FIN
+
+  //SOLICITUD DE INSCRIPCION INICIO 
+  Future<String> crearSolicitudDeInscripcion(Map<String, dynamic> data, int id) async {
+    String res = "fallo";
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}/solicitudes-de-inscripciones/");
+      var response = await http.post(url,
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+        },
+        body: json.encode(
+          {
+            "data":{
+              "fecha": data["fecha"], 
+              "telefono": int.tryParse(data["telefono"]!), 
+              "horario": data["horario"],
+              "usuario": id,
+            }
+          }
+        )
+      );
+      if (response.statusCode == 200) {
+        res = "exito";
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en crearSolicitudDeInscripcion$error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en crearSolicitudDeInscripcion$e');
+      return res;
+    }
+  }
+  //SOLICITUD DE INSCRIPCION FIN
 
   //HISTORIAL DE PREFERENCIAS INICIO 
   Future<void> crearHistorialDePreferencias(int id, UserMeta data) async {

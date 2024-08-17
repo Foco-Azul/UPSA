@@ -312,6 +312,7 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
         decoration: AppDecorationStyle.tarjeta(),
         padding: EdgeInsets.all(15),
         margin: EdgeInsets.all(15),
+        alignment: Alignment.center,
         child: Text(
           "En este momento no contamos con ninguna actividad",
           style: AppTextStyles.menor(color: AppColorStyles.gris1),

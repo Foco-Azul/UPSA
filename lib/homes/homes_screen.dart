@@ -1,4 +1,3 @@
-import 'dart:async';
 
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
@@ -29,8 +28,6 @@ import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_info/flutter_app_info.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -394,10 +391,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
             IconButton(
               icon: Icon(Icons.notifications_none_outlined, size: 30),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => NotificacionesScreen()),
-                );
+                Navigator.push(context,MaterialPageRoute(builder: (context) => NotificacionesScreen()),);
               },
             ),
           ],
