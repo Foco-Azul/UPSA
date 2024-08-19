@@ -11,6 +11,7 @@ import 'package:flutkit/custom/models/contacto.dart';
 import 'package:flutkit/custom/models/convenio.dart';
 import 'package:flutkit/custom/models/cursillo.dart';
 import 'package:flutkit/custom/models/matriculate.dart';
+import 'package:flutkit/custom/models/quiz_preguntas.dart';
 import 'package:flutkit/custom/models/resultado.dart';
 import 'package:flutkit/custom/models/sobre_nosotros.dart';
 import 'package:flutkit/custom/models/user_meta.dart';
@@ -1830,6 +1831,102 @@ class ApiService {
   //BORRAME INICIO 
 
   //BORRAME FIN
+  
+  //QUIZ RESPUESTAS INICIO 
+  Future<String> crearQuizRespuesta(List<Map<String, dynamic>> data, int userId, int idQuiz) async {
+    String res = "fallo";
+    List<Map<String, dynamic>> aux = [];
+    for (var item in data) {
+      if(item["opciones"].length > 0){
+        String aux2 = "";
+        for (var item2 in item["opciones"]) {
+          if(item["respuestaSeleccionada"] == item2["id"]){
+            aux2 = item2["opcion"];
+          }
+        }
+        aux.add(
+          {
+            "label": item["label"],
+            "value": aux2,
+          }
+        );
+      }
+    }
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}/respuestas-de-quizzes/");
+      var response = await http.post(url,
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+        },
+        body: json.encode(
+          {
+            "data":{
+              "respuestas": aux, 
+              "quizzes": idQuiz,
+              "usuario": userId,
+            }
+          }
+        )
+      );
+      if (response.statusCode == 200) {
+        res = "exito";
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  crearQuizRespuesta: $error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en  crearQuizRespuesta: $e');
+      return res;
+    }
+  }
+  //QUIZ RESPUESTAS FIN
+
+  //QUIZ PREGUNTAS INICIO 
+  Future<List<QuizPregunta>> getQuizzesPreguntas() async {
+    List<QuizPregunta> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/quizzes/?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = QuizPregunta.armarQuizPreguntasPopulate(response.body);
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getQuizzesPreguntas: $e');
+        return  res;
+      }
+    } catch (e) {
+      print('Error en getQuizzesPreguntas: $e');
+      return res;
+    }
+  }
+  Future<QuizPregunta> getQuizPopulateParaLLenar(int id) async {
+    QuizPregunta res = QuizPregunta();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/quizzes/$id/?populate[campos][populate][0]=opciones');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = QuizPregunta.armarQuizPreguntaPopulateParaLlenar(response.body);
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getQuizPopulateParaLLenar: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getQuizPopulateParaLLenar: $e');
+      return res;
+    }
+  }
+  //QUIZ PREGUNTAS FIN
 
   //CONFIGURACION INICIO 
   Future<Configuracion> getConfiguracion() async {

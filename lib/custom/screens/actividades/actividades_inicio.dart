@@ -3,15 +3,18 @@ import 'package:flutkit/custom/models/categoria.dart';
 import 'package:flutkit/custom/models/club.dart';
 import 'package:flutkit/custom/models/concurso.dart';
 import 'package:flutkit/custom/models/evento.dart';
+import 'package:flutkit/custom/models/quiz_preguntas.dart';
 import 'package:flutkit/custom/screens/actividades/club_screen.dart';
 import 'package:flutkit/custom/screens/actividades/concurso_escreen.dart';
 import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
+import 'package:flutkit/custom/screens/actividades/quiz_screen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ActividadesScreen extends StatefulWidget {
@@ -38,6 +41,10 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
   List<Concurso> _concursos =  [];
   List<Concurso> _concursosCategorizados = [];
   List<Categoria> _concursosCategorias = [];
+
+  List<QuizPregunta> _quizPregunta =  [];
+  List<QuizPregunta> _quizPreguntaCategorizados = [];
+  List<Categoria> _quizPreguntaCategorias = [];
   
   @override
   void initState() {
@@ -67,6 +74,10 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
     _concursos = await ApiService().getConcursos();
     _concursosCategorizados = _concursos;
     _concursosCategorias = _crearCategoriasActividad("Concursos");
+
+    _quizPregunta = await ApiService().getQuizzesPreguntas();
+    _quizPreguntaCategorizados = _quizPregunta;
+    //_quizPreguntaCategorias = _crearCategoriasActividad("Concursos");
     
     setState(() {
       controller.uiLoading = false;
@@ -233,6 +244,10 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
       categorias = _concursosCategorias;
       actividades = _concursosCategorizados;
     }
+    if(actividad == "Quiz"){
+      categorias = _quizPreguntaCategorias;
+      actividades = _quizPreguntaCategorizados;
+    }
     return Scaffold(
           backgroundColor: AppColorStyles.verdeFondo,
           body: Column(
@@ -266,6 +281,9 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
                 if(actividad == "Concursos"){
                   Navigator.push(context, MaterialPageRoute(builder: (context) => ConcursoScreen(id: actividades[index].id!,)));
                 }
+                if(actividad == "Quiz"){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => QuizScreen(id: actividades[index].id!,)));
+                }
               },
               child: Container(
                 padding: EdgeInsets.all(15),
@@ -274,7 +292,9 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
                 child: Row(
                   children: [
                     // Imagen a la izquierda
-                    SizedBox(
+                    if(actividad != 'Quiz')
+                    Container(
+                      margin: EdgeInsets.only(right: 15),
                       width: MediaQuery.of(context).size.width * 0.25,
                       height: MediaQuery.of(context).size.height * 0.10,
                       child: ClipRRect(
@@ -282,7 +302,6 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
                         child: Image.network(_backUrl + actividades[index].imagen!, fit: BoxFit.cover),
                       ),
                     ),
-                    SizedBox(width: 15),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

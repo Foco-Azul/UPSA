@@ -5,6 +5,7 @@ import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
+import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/homes/homes_screen.dart';
@@ -59,6 +60,8 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
   Validacion validacion = Validacion();
   bool _bandera = false;
   bool _llenado = false;
+  late AnimacionCarga _animacionCarga;
+
   @override
   void initState() {
     super.initState();
@@ -68,6 +71,7 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
     theme = AppTheme.theme;
     customTheme = AppTheme.customTheme;
     controller = ProfileController();
+    _animacionCarga = AnimacionCarga(context: context);
     _cargarDatos();
   }
   void _cargarDatos() async {
@@ -106,6 +110,7 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
     }
   }
   void _crearRetroalimentacion() async{
+    _animacionCarga.setMostrar(true);
     String respuesta = await ApiService().crearRetroalimentacion(_formData, _user.id!, _id, _tipo);
     if(respuesta == "exito"){
       _bandera = true;
@@ -113,6 +118,7 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
     }else{
       MensajeTemporalInferior().mostrarMensaje(context,"Algo salio mal.", "error");
     }
+    _animacionCarga.setMostrar(false);
     setState(() {
     });
   }
@@ -384,7 +390,7 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
                       ),
                     ],
                   ),
-                   if (_formDataError["errorRelevancia"]!.isNotEmpty)
+                  if (_formDataError["errorRelevancia"]!.isNotEmpty)
                     Container(
                       margin: EdgeInsets.only(top: 8),
                       width: double.infinity,

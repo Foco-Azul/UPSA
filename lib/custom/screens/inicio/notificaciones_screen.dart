@@ -10,6 +10,7 @@ import 'package:flutkit/custom/screens/actividades/concurso_escreen.dart';
 import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
 import 'package:flutkit/custom/screens/campus/cursillo_screen.dart';
 import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
+import 'package:flutkit/custom/screens/perfil/perfil_screen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
@@ -174,6 +175,9 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
             }
             if(item.tipoContenido == "formulario de preferencias"){
               Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroCarrera()));
+            }
+            if(item.tipoContenido == "nueva insignia"){
+              Navigator.push(context, MaterialPageRoute(builder: (context) => PerfilScreen()));
             }
           }
         }
