@@ -15,7 +15,7 @@
     <application
         android:name="${applicationName}"
         android:label="NIBU"
-        android:icon="@mipmap/logo">
+        android:icon="@mipmap/ic_launcher">
 
         <!-- Place your Google Map API KEY here at value -->
         <meta-data android:name="com.google.android.geo.API_KEY"
