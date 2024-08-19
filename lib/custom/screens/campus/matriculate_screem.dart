@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/auth/login_screen.dart';
 import 'package:flutkit/custom/auth/registro_carrera.dart';
@@ -8,7 +7,6 @@ import 'package:flutkit/custom/auth/validar_email.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/matriculate.dart';
 import 'package:flutkit/custom/models/user.dart';
-import 'package:flutkit/custom/screens/campus/contacto_screem.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
@@ -21,7 +19,6 @@ import 'package:flutkit/custom/controllers/login_controller.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -40,7 +37,6 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
   late ProfileController controller;
   late LoginController loginController;
   Matriculate _matriculate = Matriculate();
-  String _backUrl= "";
   bool _isLoggedIn = false;
   User _user = User();
   final Map<String, dynamic> _formData = {
@@ -80,7 +76,6 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
       }
     }
     await dotenv.load(fileName: ".env");
-    _backUrl = dotenv.get('backUrl');
     _matriculate = await ApiService().getMatriculate();
     _modificarListaMasInformacion();
     setState(() {
