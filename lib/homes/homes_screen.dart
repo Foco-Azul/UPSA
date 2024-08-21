@@ -391,8 +391,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
             IconButton(
               icon: Icon(Icons.notifications_none_outlined, size: 30, color: AppColorStyles.altTexto1,),
               onPressed: () {
-                //Navigator.push(context,MaterialPageRoute(builder: (context) => NotificacionesScreen()),);
-                Navigator.push(context,MaterialPageRoute(builder: (context) => RetroalimentacionScreen(id:1, titulo: "hola", tipo: "evento",)),);
+                Navigator.push(context,MaterialPageRoute(builder: (context) => NotificacionesScreen()),);
               },
             ),
           ],
