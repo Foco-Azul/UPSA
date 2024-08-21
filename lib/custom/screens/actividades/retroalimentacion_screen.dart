@@ -1,5 +1,10 @@
 import 'dart:async';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
+import 'package:flutkit/custom/auth/login_screen.dart';
+import 'package:flutkit/custom/auth/registro_carrera.dart';
+import 'package:flutkit/custom/auth/registro_intereses.dart';
+import 'package:flutkit/custom/auth/registro_perfil.dart';
+import 'package:flutkit/custom/auth/validar_email.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/theme/styles.dart';
@@ -17,7 +22,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
-
 
 class RetroalimentacionScreen extends StatefulWidget {
   const RetroalimentacionScreen({Key? key, this.id=-1, this.titulo="", this.tipo=""}) : super(key: key);
@@ -100,10 +104,10 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
       _formDataError["errorRelevancia"] = _formData["relevancia"]! == -1 ? "Este campo es requerido" : "";
       _formDataError["errorCalidad"] = _formData["calidad"]! == -1 ? "Este campo es requerido" : "";
       _formDataError["errorOrganizacion"] = _formData["organizacion"]! == -1 ? "Este campo es requerido" : "";
-      _formDataError["errorQueTeGustoMas"] = _formData["queTeGustoMas"]!.isEmpty ? "Este campo es requerido" : "";
-      _formDataError["errorQueTeGustoMenos"] = _formData["queTeGustoMenos"]!.isEmpty ? "Este campo es requerido" : "";
-      _formDataError["errorComoPodriamosMejorar"] = _formData["comoPodriamosMejorar"]!.isEmpty ? "Este campo es requerido" : "";
-      _formDataError["errorComentario"] = _formData["comentario"]!.isEmpty ? "Este campo es requerido" : "";
+      //_formDataError["errorQueTeGustoMas"] = _formData["queTeGustoMas"]!.isEmpty ? "Este campo es requerido" : "";
+      //_formDataError["errorQueTeGustoMenos"] = _formData["queTeGustoMenos"]!.isEmpty ? "Este campo es requerido" : "";
+      //_formDataError["errorComoPodriamosMejorar"] = _formData["comoPodriamosMejorar"]!.isEmpty ? "Este campo es requerido" : "";
+      //_formDataError["errorComentario"] = _formData["comentario"]!.isEmpty ? "Este campo es requerido" : "";
     });
     if(_formDataError["errorRelevancia"]!.isEmpty && _formDataError["errorCalidad"]!.isEmpty && _formDataError["errorOrganizacion"]!.isEmpty && _formDataError["errorQueTeGustoMas"]!.isEmpty && _formDataError["errorQueTeGustoMenos"]!.isEmpty && _formDataError["errorComoPodriamosMejorar"]!.isEmpty && _formDataError["errorComentario"]!.isEmpty){
       _crearRetroalimentacion();
@@ -135,9 +139,9 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           leading: IconButton(
             icon: Icon(
               LucideIcons.chevronLeft,
@@ -163,14 +167,14 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
         ),
         bottomNavigationBar: FlashyTabBar(
           iconSize: 24,
-          backgroundColor: AppColorStyles.blancoFondo,
+          backgroundColor: AppColorStyles.blanco,
           selectedIndex: 1,
           animationDuration: Duration(milliseconds: 500),
           showElevation: true,
           items: [
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.home_sharp),
               title: Text(
                 'Inicio',
@@ -178,8 +182,8 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.emoji_events_sharp),
               title: Text(
                 'Actividades',
@@ -187,8 +191,8 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.local_library_sharp),
               title: Text(
                 'Campus',
@@ -196,8 +200,8 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.push_pin_sharp),
               title: Text(
                 'Noticias',
@@ -205,8 +209,8 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.account_circle_sharp),
               title: Text(
                 'Mi perfil',
@@ -259,11 +263,70 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
           ),
           Visibility(
             visible: !_isLoggedIn,
-            child: Text(
-              "Ingresá con tu cuenta",
-              style: AppTextStyles.parrafo(),
-            ) 
+            child: Column(
+              children: [
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 10.0), // Ajusta los valores del margen según sea necesario
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Ingresa con tu cuenta para enviar tu reseña.",
+                    style: AppTextStyles.parrafo(),
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 15),
+                  alignment: Alignment.centerLeft,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => Login2Screen()));
+                    },
+                    style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
+                    child: Text(
+                      'Ingresar',
+                      style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
+                    ),
+                  ),
+                )
+              ],
+            )
           ),
+          if(_isLoggedIn && _user.estado! != "Completado")
+          Column(
+            children: [
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 10.0), // Ajusta los valores del margen según sea necesario
+                child: Text(
+                  "Completá tu perfil para solicitar un Test vocacional.",
+                  style: AppTextStyles.parrafo(),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 15),
+                alignment: Alignment.centerLeft,
+                child: ElevatedButton(
+                  onPressed: () {
+                    if(_user.estado == "Nuevo"){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => ValidarEmail()));
+                    }
+                    if(_user.estado == "Verificado"){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroPerfil()));
+                    }
+                    if(_user.estado == "Perfil parte 1"){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroCarrera()));
+                    }
+                    if(_user.estado == "Perfil parte 2"){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroIntereses()));
+                    } 
+                  },
+                  style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
+                  child: Text(
+                    'Completar perfil',
+                    style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
+                  ),
+                ),
+              )
+            ],
+          )
         ],
       );
     }else{
@@ -276,12 +339,12 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
               children: [
                 Icon(
                   Icons.task_alt_outlined, // Reemplaza con el icono que desees
-                  color: AppColorStyles.verde1, // Ajusta el color si es necesario
+                  color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
                 ), 
                 SizedBox(width: 4.0), // Espaciado entre el icono y el texto
                 Text(
                   "Calificación".toUpperCase(), // Primer texto
-                  style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+                  style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
                 ),
               ]
             ),
@@ -308,7 +371,7 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
                           value: 1,
                           visualDensity: VisualDensity.compact,
                           groupValue: int.tryParse(_formData["relevancia"].toString()),
-                          fillColor: MaterialStateProperty.all(AppColorStyles.verde1),
+                          fillColor: MaterialStateProperty.all(AppColorStyles.altTexto1),
                           onChanged: (int? value) {
                             setState(() {
                               _formData["relevancia"] = value!;
@@ -325,7 +388,7 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
                         child: Radio(
                           value: 2,
                           visualDensity: VisualDensity.compact,
-                          fillColor: MaterialStateProperty.all(AppColorStyles.verde1),
+                          fillColor: MaterialStateProperty.all(AppColorStyles.altTexto1),
                           groupValue: int.tryParse(_formData["relevancia"].toString()),
                           onChanged: (int? value) {
                             setState(() {
@@ -343,7 +406,7 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
                         child: Radio(
                           value: 3,
                           visualDensity: VisualDensity.compact,
-                          fillColor: MaterialStateProperty.all(AppColorStyles.verde1),
+                          fillColor: MaterialStateProperty.all(AppColorStyles.altTexto1),
                           groupValue: int.tryParse(_formData["relevancia"].toString()),
                           onChanged: (int? value) {
                             setState(() {
@@ -361,7 +424,7 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
                         child: Radio(
                           value: 4,
                           visualDensity: VisualDensity.compact,
-                          fillColor: MaterialStateProperty.all(AppColorStyles.verde1),
+                          fillColor: MaterialStateProperty.all(AppColorStyles.altTexto1),
                           groupValue: int.tryParse(_formData["relevancia"].toString()),
                           onChanged: (int? value) {
                             setState(() {
@@ -379,7 +442,7 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
                         child: Radio(
                           value: 5,
                           visualDensity: VisualDensity.compact,
-                          fillColor: MaterialStateProperty.all(AppColorStyles.verde1),
+                          fillColor: MaterialStateProperty.all(AppColorStyles.altTexto1),
                           groupValue: int.tryParse(_formData["relevancia"].toString()),
                           onChanged: (int? value) {
                             setState(() {
@@ -425,7 +488,7 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
                         child: Radio(
                           value: 1,
                           visualDensity: VisualDensity.compact,
-                          fillColor: MaterialStateProperty.all(AppColorStyles.verde1),
+                          fillColor: MaterialStateProperty.all(AppColorStyles.altTexto1),
                           groupValue: int.tryParse(_formData["calidad"].toString()),
                           onChanged: (int? value) {
                             setState(() {
@@ -443,7 +506,7 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
                         child: Radio(
                           value: 2,
                           visualDensity: VisualDensity.compact,
-                          fillColor: MaterialStateProperty.all(AppColorStyles.verde1),
+                          fillColor: MaterialStateProperty.all(AppColorStyles.altTexto1),
                           groupValue: int.tryParse(_formData["calidad"].toString()),
                           onChanged: (int? value) {
                             setState(() {
@@ -461,7 +524,7 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
                         child: Radio(
                           value: 3,
                           visualDensity: VisualDensity.compact,
-                          fillColor: MaterialStateProperty.all(AppColorStyles.verde1),
+                          fillColor: MaterialStateProperty.all(AppColorStyles.altTexto1),
                           groupValue: int.tryParse(_formData["calidad"].toString()),
                           onChanged: (int? value) {
                             setState(() {
@@ -479,7 +542,7 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
                         child: Radio(
                           value: 4,
                           visualDensity: VisualDensity.compact,
-                          fillColor: MaterialStateProperty.all(AppColorStyles.verde1),
+                          fillColor: MaterialStateProperty.all(AppColorStyles.altTexto1),
                           groupValue: int.tryParse(_formData["calidad"].toString()),
                           onChanged: (int? value) {
                             setState(() {
@@ -497,7 +560,7 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
                         child: Radio(
                           value: 5,
                           visualDensity: VisualDensity.compact,
-                          fillColor: MaterialStateProperty.all(AppColorStyles.verde1),
+                          fillColor: MaterialStateProperty.all(AppColorStyles.altTexto1),
                           groupValue: int.tryParse(_formData["calidad"].toString()),
                           onChanged: (int? value) {
                             setState(() {
@@ -543,7 +606,7 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
                         child: Radio(
                           value: 1,
                           visualDensity: VisualDensity.compact,
-                          fillColor: MaterialStateProperty.all(AppColorStyles.verde1),
+                          fillColor: MaterialStateProperty.all(AppColorStyles.altTexto1),
                           groupValue: int.tryParse(_formData["organizacion"].toString()),
                           onChanged: (int? value) {
                             setState(() {
@@ -561,7 +624,7 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
                         child: Radio(
                           value: 2,
                           visualDensity: VisualDensity.compact,
-                          fillColor: MaterialStateProperty.all(AppColorStyles.verde1),
+                          fillColor: MaterialStateProperty.all(AppColorStyles.altTexto1),
                           groupValue: int.tryParse(_formData["organizacion"].toString()),
                           onChanged: (int? value) {
                             setState(() {
@@ -579,7 +642,7 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
                         child: Radio(
                           value: 3,
                           visualDensity: VisualDensity.compact,
-                          fillColor: MaterialStateProperty.all(AppColorStyles.verde1),
+                          fillColor: MaterialStateProperty.all(AppColorStyles.altTexto1),
                           groupValue: int.tryParse(_formData["organizacion"].toString()),
                           onChanged: (int? value) {
                             setState(() {
@@ -597,7 +660,7 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
                         child: Radio(
                           value: 4,
                           visualDensity: VisualDensity.compact,
-                          fillColor: MaterialStateProperty.all(AppColorStyles.verde1),
+                          fillColor: MaterialStateProperty.all(AppColorStyles.altTexto1),
                           groupValue: int.tryParse(_formData["organizacion"].toString()),
                           onChanged: (int? value) {
                             setState(() {
@@ -615,7 +678,7 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
                         child: Radio(
                           value: 5,
                           visualDensity: VisualDensity.compact,
-                          fillColor: MaterialStateProperty.all(AppColorStyles.verde1),
+                          fillColor: MaterialStateProperty.all(AppColorStyles.altTexto1),
                           groupValue: int.tryParse(_formData["organizacion"].toString()),
                           onChanged: (int? value) {
                             setState(() {
@@ -643,12 +706,12 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
               children: [
                 Icon(
                   Icons.live_help_outlined, // Reemplaza con el icono que desees
-                  color: AppColorStyles.verde1, // Ajusta el color si es necesario
+                  color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
                 ), 
                 SizedBox(width: 4.0), // Espaciado entre el icono y el texto
                 Text(
                   "Preguntas".toUpperCase(), // Primer texto
-                  style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+                  style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
                 ),
               ]
             ),
@@ -767,10 +830,10 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
                 onPressed: () {
                   _validarCamposLogin();
                 },
-                style: AppDecorationStyle.botonContacto(),
+                style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
                 child: Text(
                   'Enviar',
-                  style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                  style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
                 ),
               ),
             )

@@ -9,6 +9,7 @@ import 'package:flutkit/custom/screens/actividades/calendario_screen.dart';
 import 'package:flutkit/custom/screens/actividades/club_screen.dart';
 import 'package:flutkit/custom/screens/actividades/concurso_escreen.dart';
 import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
+import 'package:flutkit/custom/screens/actividades/retroalimentacion_screen.dart';
 import 'package:flutkit/custom/screens/bienvenida/bienvenida_screen.dart';
 import 'package:flutkit/custom/screens/campus/campus_inicio.dart';
 import 'package:flutkit/custom/screens/campus/matriculate_screem.dart';
@@ -94,7 +95,6 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
       controller.uiLoading = false;
     });
   }
-
   void _filtrarNoticias(int id){
     List<Resultado> aux = [];
     for (var item in _resultados) {
@@ -130,7 +130,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
           return Theme(
             data: theme,
             child: Scaffold(
-              backgroundColor: AppColorStyles.verdeFondo,
+              backgroundColor: AppColorStyles.altFondo1,
               key: _drawerKey,
               appBar: _buildAppBarContent(selectedIndex),
               body: Stack(
@@ -141,14 +141,14 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
               ),
               bottomNavigationBar: FlashyTabBar(
                 iconSize: 24,
-                backgroundColor: AppColorStyles.blancoFondo,
+                backgroundColor: AppColorStyles.blanco,
                 selectedIndex: selectedIndex,
                 animationDuration: Duration(milliseconds: 500),
                 showElevation: true,
                 items: [
                   FlashyTabBarItem(
-                    inactiveColor: AppColorStyles.verde1,
-                    activeColor: AppColorStyles.verde1,
+                    inactiveColor: AppColorStyles.altTexto1,
+                    activeColor: AppColorStyles.altTexto1,
                     icon: Icon(Icons.home_sharp),
                     title: Text(
                       'Inicio',
@@ -156,8 +156,8 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
                     ),
                   ),
                   FlashyTabBarItem(
-                    inactiveColor: AppColorStyles.verde1,
-                    activeColor: AppColorStyles.verde1,
+                    inactiveColor: AppColorStyles.altTexto1,
+                    activeColor: AppColorStyles.altTexto1,
                     icon: Icon(Icons.emoji_events_sharp),
                     title: Text(
                       'Actividades',
@@ -165,8 +165,8 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
                     ),
                   ),
                   FlashyTabBarItem(
-                    inactiveColor: AppColorStyles.verde1,
-                    activeColor: AppColorStyles.verde1,
+                    inactiveColor: AppColorStyles.altTexto1,
+                    activeColor: AppColorStyles.altTexto1,
                     icon: Icon(Icons.local_library_sharp),
                     title: Text(
                       'Campus',
@@ -174,8 +174,8 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
                     ),
                   ),
                   FlashyTabBarItem(
-                    inactiveColor: AppColorStyles.verde1,
-                    activeColor: AppColorStyles.verde1,
+                    inactiveColor: AppColorStyles.altTexto1,
+                    activeColor: AppColorStyles.altTexto1,
                     icon: Icon(Icons.push_pin_sharp),
                     title: Text(
                       'Noticias',
@@ -183,8 +183,8 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
                     ),
                   ),
                   FlashyTabBarItem(
-                    inactiveColor: AppColorStyles.verde1,
-                    activeColor: AppColorStyles.verde1,
+                    inactiveColor: AppColorStyles.altTexto1,
+                    activeColor: AppColorStyles.altTexto1,
                     icon: Icon(Icons.account_circle_sharp),
                     title: Text(
                       'Mi perfil',
@@ -215,7 +215,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
         child: Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
-          color: AppColorStyles.verdeFondo,
+          color: AppColorStyles.altFondo1,
           child: ListView(
             children: [
               if (_buscando)
@@ -258,7 +258,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
         children: [
           MyText(
             tipo.toUpperCase(),
-            style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+            style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1)
           ),
         ],
       ),
@@ -287,7 +287,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
         margin: EdgeInsets.all(15), // Añadir margen superior si es necesario
         padding: EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: AppColorStyles.blancoFondo, // Fondo blanco
+          color: AppColorStyles.blanco, // Fondo blanco
           borderRadius: BorderRadius.circular(5), // Bordes redondeados de 5
           boxShadow: [
             AppSombra.tarjeta(),
@@ -322,7 +322,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
     switch (selectedIndex) {
       case 0:
         return AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           actions: [
             Expanded(
               child: Container (
@@ -380,7 +380,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
               ),
             ),
             IconButton(
-              icon: Icon(Icons.today, size: 30),
+              icon: Icon(Icons.today, size: 30, color: AppColorStyles.altTexto1,),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -389,16 +389,17 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
               },
             ),
             IconButton(
-              icon: Icon(Icons.notifications_none_outlined, size: 30),
+              icon: Icon(Icons.notifications_none_outlined, size: 30, color: AppColorStyles.altTexto1,),
               onPressed: () {
-                Navigator.push(context,MaterialPageRoute(builder: (context) => NotificacionesScreen()),);
+                //Navigator.push(context,MaterialPageRoute(builder: (context) => NotificacionesScreen()),);
+                Navigator.push(context,MaterialPageRoute(builder: (context) => RetroalimentacionScreen(id:1, titulo: "hola", tipo: "evento",)),);
               },
             ),
           ],
         );
       case 1:
         return AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           title: Text('Actividades', style: AppTitleStyles.principal()),
           centerTitle: true,
           actions: [
@@ -412,19 +413,19 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
         );
       case 2:
         return AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           title: Text('Campus', style: AppTitleStyles.principal()),
           centerTitle: true,
         );
       case 3:
         return AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           title: Text('Noticias', style: AppTitleStyles.principal()),
           centerTitle: true,
         );
       case 4:
         return AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           title: Text('Mi perfil', style: AppTitleStyles.principal()),
           centerTitle: true,
         );

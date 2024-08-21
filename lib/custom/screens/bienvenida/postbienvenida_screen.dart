@@ -21,9 +21,9 @@ class _PostBienvenidaScreenState extends State<PostBienvenidaScreen>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColorStyles.verdeFondo,
+      backgroundColor: AppColorStyles.altFondo1,
       appBar: AppBar(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         actions: [
           InkWell(
             onTap: () {
@@ -34,9 +34,9 @@ class _PostBienvenidaScreenState extends State<PostBienvenidaScreen>{
               child: Text(
                 'Saltar',
                 style: TextStyle(
-                  color: AppColorStyles.oscuro1,
+                  color: AppColorStyles.gris2,
                   fontSize: 14,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
             ),
@@ -59,42 +59,42 @@ class _PostBienvenidaScreenState extends State<PostBienvenidaScreen>{
           width: double.infinity,
           padding: EdgeInsets.all(15),
           decoration: BoxDecoration(
-            color: AppColorStyles.verde2, // Establece el color de fondo
+            color: AppColorStyles.altTexto1, // Establece el color de fondo
             borderRadius: BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min, // Hace que el Column se adapte al tamaño de su contenido
             children: [
               Container(
-                margin: EdgeInsets.symmetric(vertical: 20),
+                margin: EdgeInsets.only(top: 50, bottom: 20),
                 child: Icon(
                   Icons.rocket, // Icono que deseas mostrar
-                  color: AppColorStyles.blancoFondo, // Color del icono
+                  color: AppColorStyles.blanco, // Color del icono
                   size: 50, // Tamaño del icono
                 ),
               ),
               Text(
                 'Despegando',
-                style: AppTitleStyles.onboarding(color: AppColorStyles.blancoFondo),
+                style: AppTitleStyles.onboarding(color: AppColorStyles.blanco),
               ),
               SizedBox(height: 15,),
               Text(
                 'Iniciá tu carrera universitaria junto a la UPSA.',
-                style: TextStyle(fontWeight: FontWeight.normal, fontSize: 15, color: AppColorStyles.blancoFondo),
+                style: TextStyle(fontWeight: FontWeight.normal, fontSize: 15, color: AppColorStyles.blanco),
                 textAlign: TextAlign.center,
               ),
-              _crearBoton("Registrar mi cuenta", "signup", AppColorStyles.verde1, AppColorStyles.blancoFondo),
-              _crearBoton("Iniciar Sesión", "login",AppColorStyles.blancoFondo, AppColorStyles.verde1),
+              _crearBoton("Registrar mi cuenta", "signup", AppColorStyles.oscuro1, AppColorStyles.altVerde1),
+              _crearBoton("Iniciar Sesión", "login",AppColorStyles.oscuro1, AppColorStyles.altFondo1),
               Container(
                 margin: MySpacing.only(top: 50, bottom: 15, left: 60, right: 60),
                 child: Text.rich(
                   TextSpan(
                     text: 'Al registrar tu cuenta, aceptás nuestros ',
-                    style: TextStyle(fontWeight: FontWeight.normal, height: 1.3, fontSize: 10, color: AppColorStyles.blancoFondo),
+                    style: TextStyle(fontWeight: FontWeight.normal, height: 1.3, fontSize: 10, color: AppColorStyles.blanco),
                     children: <TextSpan>[
                       TextSpan(
                         text: 'Términos de uso',
-                        style: TextStyle(decoration: TextDecoration.underline, decorationColor: AppColorStyles.blancoFondo,  decorationThickness: 2),
+                        style: TextStyle(decoration: TextDecoration.underline, decorationColor: AppColorStyles.blanco,  decorationThickness: 2),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
                             Navigator.push(context, MaterialPageRoute(builder: (context) => SobreNosotrosScreen()));
@@ -105,7 +105,7 @@ class _PostBienvenidaScreenState extends State<PostBienvenidaScreen>{
                       ),
                       TextSpan(
                         text: 'Políticas de privacidad',
-                        style: TextStyle(decoration: TextDecoration.underline, decorationColor: AppColorStyles.blancoFondo, decorationThickness: 2),
+                        style: TextStyle(decoration: TextDecoration.underline, decorationColor: AppColorStyles.blanco, decorationThickness: 2),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
                             Navigator.push(context, MaterialPageRoute(builder: (context) => SobreNosotrosScreen()));

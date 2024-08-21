@@ -94,12 +94,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4), // Padding interno del contenedor
           decoration: BoxDecoration(
-            color: AppColorStyles.verde2, // Color de fondo del contenedor
+            color: AppColorStyles.altTexto1, // Color de fondo del contenedor
             borderRadius: BorderRadius.circular(24.0), // Borde redondeado con radio de 24
           ),
           child: Text(
             '${_currentPage + 1}/$numPages',
-            style: AppTextStyles.etiqueta(color: AppColorStyles.blancoFondo)
+            style: AppTextStyles.etiqueta(color: AppColorStyles.blanco)
           ),
         ),
       ],
@@ -144,7 +144,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
   Widget _buildBody() {
     if(_isLoggedIn){
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         body: ListView(
           padding: MySpacing.fromLTRB(15, 10, 15, 15),
           children: [
@@ -176,42 +176,42 @@ class _PerfilScreenState extends State<PerfilScreen> {
           width: double.infinity,
           padding: EdgeInsets.all(15),
           decoration: BoxDecoration(
-            color: AppColorStyles.verde2, // Establece el color de fondo
+            color: AppColorStyles.altTexto1, // Establece el color de fondo
             borderRadius: BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min, // Hace que el Column se adapte al tamaño de su contenido
             children: [
               Container(
-                margin: EdgeInsets.symmetric(vertical: 20),
+                margin: EdgeInsets.only(top: 20, bottom: 20),
                 child: Icon(
                   Icons.rocket, // Icono que deseas mostrar
-                  color: AppColorStyles.blancoFondo, // Color del icono
+                  color: AppColorStyles.blanco, // Color del icono
                   size: 50, // Tamaño del icono
                 ),
               ),
               Text(
                 'Despegando',
-                style: AppTitleStyles.onboarding(color: AppColorStyles.blancoFondo),
+                style: AppTitleStyles.onboarding(color: AppColorStyles.blanco),
               ),
               SizedBox(height: 15,),
               Text(
                 'Iniciá tu carrera universitaria junto a la UPSA.',
-                style: TextStyle(fontWeight: FontWeight.normal, fontSize: 15, color: AppColorStyles.blancoFondo),
+                style: TextStyle(fontWeight: FontWeight.normal, fontSize: 15, color: AppColorStyles.blanco),
                 textAlign: TextAlign.center,
               ),
-              _crearBoton("Registrar mi cuenta", "signup", AppColorStyles.verde1, AppColorStyles.blancoFondo),
-              _crearBoton("Iniciar Sesión", "login",AppColorStyles.blancoFondo, AppColorStyles.verde1),
+              _crearBoton("Registrar mi cuenta", "signup", AppColorStyles.oscuro1, AppColorStyles.altVerde1),
+              _crearBoton("Iniciar Sesión", "login",AppColorStyles.oscuro1, AppColorStyles.altFondo1),
               Container(
                 margin: MySpacing.only(top: 50, bottom: 15, left: 60, right: 60),
                 child: Text.rich(
                   TextSpan(
                     text: 'Al registrar tu cuenta, aceptás nuestros ',
-                    style: TextStyle(fontWeight: FontWeight.normal, height: 1.3, fontSize: 10, color: AppColorStyles.blancoFondo),
+                    style: TextStyle(fontWeight: FontWeight.normal, height: 1.3, fontSize: 10, color: AppColorStyles.blanco),
                     children: <TextSpan>[
                       TextSpan(
                         text: 'Términos de uso',
-                        style: TextStyle(decoration: TextDecoration.underline, decorationColor: AppColorStyles.blancoFondo,  decorationThickness: 2),
+                        style: TextStyle(decoration: TextDecoration.underline, decorationColor: AppColorStyles.blanco,  decorationThickness: 2),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
                             Navigator.push(context, MaterialPageRoute(builder: (context) => SobreNosotrosScreen()));
@@ -222,7 +222,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                       ),
                       TextSpan(
                         text: 'Políticas de privacidad',
-                        style: TextStyle(decoration: TextDecoration.underline, decorationColor: AppColorStyles.blancoFondo, decorationThickness: 2),
+                        style: TextStyle(decoration: TextDecoration.underline, decorationColor: AppColorStyles.blanco, decorationThickness: 2),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
                             Navigator.push(context, MaterialPageRoute(builder: (context) => SobreNosotrosScreen()));
@@ -280,7 +280,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
         padding: MySpacing.fromLTRB(15, 15, 15, 15),
         margin: MySpacing.symmetric(vertical: 15),
         decoration: BoxDecoration(
-          color: AppColorStyles.blancoFondo, // Fondo blanco
+          color: AppColorStyles.blanco, // Fondo blanco
           borderRadius: BorderRadius.circular(5), // Bordes redondeados de 5
           boxShadow: [
             AppSombra.tarjeta(),
@@ -294,12 +294,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 Icon(
                   Icons.badge_outlined, // Cambia el icono según lo que necesites
                   size: 20,
-                  color: AppColorStyles.verde1
+                  color: AppColorStyles.altTexto1
                 ),
                 SizedBox(width: 8),
                 Text(
                   "MIS INSIGNIAS",
-                  style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+                  style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1)
                 ),
               ],
             ),
@@ -369,12 +369,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
                     SizedBox(height: 20), // Espacio entre la imagen y el primer texto
                     Text(
                       data["nombre"]!, // Asumiendo que hay un campo "titulo" en los datos
-                      style: AppTitleStyles.tarjeta(color: AppColorStyles.blancoFondo)
+                      style: AppTitleStyles.tarjeta(color: AppColorStyles.blanco)
                     ),
                     SizedBox(height: 10), // Espacio entre el primer y segundo texto
                     Text(
                       data["mensaje"]!, // Asumiendo que hay un campo "descripcion" en los datos
-                      style: AppTextStyles.parrafo(color: AppColorStyles.blancoFondo),
+                      style: AppTextStyles.parrafo(color: AppColorStyles.blanco),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -383,7 +383,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   top: 40.0,
                   right: 20.0,
                   child: IconButton(
-                    icon: Icon(Icons.close, color: AppColorStyles.blancoFondo, size: 30),
+                    icon: Icon(Icons.close, color: AppColorStyles.blanco, size: 30),
                     onPressed: () {
                       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
                       Navigator.of(context).pop();
@@ -411,8 +411,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   textAlign: TextAlign.center,
                 ),
               ),
-              SizedBox(
-                height: 400, // Ajusta la altura según tus necesidades
+              Expanded(
                 child: SingleChildScrollView(
                   child: _armarAvatares(),
                 ),
@@ -423,6 +422,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
       },
     );
   }
+
   Widget _armarAvatares(){
     List<Widget> avatares = _avatares.map((item) => _crearAvatar(item)).toList();
     return Wrap(
@@ -464,12 +464,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 Icon(
                   LucideIcons.camera, // Cambia el icono según lo que necesites
                   size: 20,
-                  color: AppColorStyles.verde1
+                  color: AppColorStyles.altTexto1
                 ),
                 SizedBox(width: 8),
                 Text(
                   "MI PROMO",
-                  style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+                  style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1)
                 ),
               ],
             ),
@@ -538,7 +538,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
       padding: MySpacing.fromLTRB(15, 15, 15, 15),
       margin: MySpacing.symmetric(vertical: 15),
       decoration: BoxDecoration(
-        color: AppColorStyles.blancoFondo, // Fondo blanco
+        color: AppColorStyles.blanco, // Fondo blanco
         borderRadius: BorderRadius.circular(5), // Bordes redondeados de 5
         boxShadow: [
           AppSombra.tarjeta(),
@@ -553,12 +553,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
               Icon(
                 LucideIcons.settings, // Cambia el icono según lo que necesites
                 size: 20,
-                color: AppColorStyles.verde1
+                color: AppColorStyles.altTexto1
               ),
               SizedBox(width: 8),
               Text(
                 "AJUSTES",
-                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+                style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1)
               ),
             ],
           ),
@@ -693,12 +693,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 Icon(
                   LucideIcons.trophy, // Cambia el icono según lo que necesites
                   size: 20,
-                  color: AppColorStyles.verde1,
+                  color: AppColorStyles.altTexto1,
                 ),
                 SizedBox(width: 8),
                 Text(
                   "MIS ACTIVIDADES",
-                  style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+                  style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1)
                 ),
               ],
             ),
@@ -852,7 +852,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
         padding: MySpacing.fromLTRB(15, 15, 15, 15),
         margin: MySpacing.symmetric(vertical: 15),
         decoration: BoxDecoration(
-          color: AppColorStyles.blancoFondo, // Fondo blanco
+          color: AppColorStyles.blanco, // Fondo blanco
           borderRadius: BorderRadius.circular(5), // Bordes redondeados de 5
           boxShadow: [
             AppSombra.tarjeta(),
@@ -867,12 +867,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 Icon(
                   LucideIcons.bookMarked, // Cambia el icono según lo que necesites
                   size: 20,
-                  color: AppColorStyles.verde1,
+                  color: AppColorStyles.altTexto1,
                 ),
                 SizedBox(width: 8),
                 Text(
                   "CARRERA SUGERIDA",
-                  style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+                  style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
                 ),
               ],
             ),
@@ -886,7 +886,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 },
                 child: Text(
                   _userMeta.carreraSugerida!["nombre"],
-                  style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1),
+                  style: AppTitleStyles.tarjeta(color: AppColorStyles.altTexto1),
                 ),
               ),
             ),
@@ -918,7 +918,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
             ),
             SizedBox(height: 4),
             Text(
-              "De acuerdo a lo seleccionado en las preferencias del formulario de registro. Si aún estás indeciso/a sobre cuál estudiar, contáctanos para agendar un test vocacional en la UPSA.",
+              "Lo hacemos a partir de los datos ingresados en tu formulario de registro. Si aún estás indeciso/a sobre cuál estudiar, contactanos para agendar un test vocacional en la UPSA.",
               style: AppTextStyles.menor(color: AppColorStyles.gris2)
             ),
             Container(
@@ -1009,12 +1009,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   },
                   child: Container(
                     decoration: BoxDecoration(
-                      color: AppColorStyles.blancoFondo,
+                      color: AppColorStyles.blanco,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.edit,
-                      color: AppColorStyles.verde1,
+                      color: AppColorStyles.altTexto1,
                       size: 15,
                     ),
                   ),

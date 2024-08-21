@@ -73,7 +73,7 @@ class _ConvenioScreenState extends State<ConvenioScreen> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
           leading: IconButton(
             icon: Icon(
@@ -84,7 +84,7 @@ class _ConvenioScreenState extends State<ConvenioScreen> {
               Navigator.of(context).pop();
             },
           ),
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           centerTitle: true,
           title: Text(
             _convenio.titulo!,
@@ -103,14 +103,14 @@ class _ConvenioScreenState extends State<ConvenioScreen> {
         ),
         bottomNavigationBar: FlashyTabBar(
           iconSize: 24,
-          backgroundColor: AppColorStyles.blancoFondo,
+          backgroundColor: AppColorStyles.blanco,
           selectedIndex: 2,
           animationDuration: Duration(milliseconds: 500),
           showElevation: true,
           items: [
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.home_sharp),
               title: Text(
                 'Inicio',
@@ -118,8 +118,8 @@ class _ConvenioScreenState extends State<ConvenioScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.emoji_events_sharp),
               title: Text(
                 'Actividades',
@@ -127,8 +127,8 @@ class _ConvenioScreenState extends State<ConvenioScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.local_library_sharp),
               title: Text(
                 'Campus',
@@ -136,8 +136,8 @@ class _ConvenioScreenState extends State<ConvenioScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.push_pin_sharp),
               title: Text(
                 'Noticias',
@@ -145,8 +145,8 @@ class _ConvenioScreenState extends State<ConvenioScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.account_circle_sharp),
               title: Text(
                 'Mi perfil',
@@ -180,12 +180,12 @@ class _ConvenioScreenState extends State<ConvenioScreen> {
             children: [
               Icon(
                 AppIconStyles.icono(nombre: icono), // Reemplaza con el icono que desees
-                color: AppColorStyles.verde1, // Ajusta el color si es necesario
+                color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
               ), 
               SizedBox(width: 4.0), // Espaciado entre el icono y el texto
               Text(
                 titulo.toUpperCase(), // Primer texto
-                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+                style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
               ),
             ]
           ),
@@ -207,7 +207,7 @@ class _ConvenioScreenState extends State<ConvenioScreen> {
                       if(enlaces[index].icono != "sin icono")
                       Icon(
                         AppIconStyles.icono(nombre: enlaces[index].icono!), // Reemplaza con el icono que desees
-                        color: AppColorStyles.verde1, // Ajusta el color si es necesario
+                        color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
                       ),
                       SizedBox(width: 4.0),
                       Text(
@@ -226,48 +226,45 @@ class _ConvenioScreenState extends State<ConvenioScreen> {
   }
   Widget _crearEnlacesPaises(List<dynamic>? enlaces){
     if(enlaces != null){
-      return Container(
-        decoration: AppDecorationStyle.tarjeta(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(
-              children: List.generate(enlaces.length, (index) {
-                return GestureDetector(
-                  onTap: () async {
-                    if(enlaces[index]["enlace"]!.isNotEmpty){
-                      if (!await launchUrl(
-                        Uri.parse(enlaces[index]["enlace"]!),
-                        mode: LaunchMode.externalApplication,
-                      )){}
-                    }
-                  },
-                  child: Container(
-                    margin: EdgeInsets.symmetric(vertical: 8.0), // Ajusta los valores del margen según sea necesario
-                    child: Row(
-                      children: [
-                        if (enlaces[index]["icono"] != "sin icono")
-                          Icon(
-                            AppIconStyles.icono(nombre: enlaces[index]["icono"]!), // Reemplaza con el icono que desees
-                            color: AppColorStyles.verde1, // Ajusta el color si es necesario
-                          ),
-                        SizedBox(width: 4.0),
-                        Expanded(
-                          child: Text(
-                            enlaces[index]["nombre"]!,
-                            style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
-                            textAlign: TextAlign.left, // O TextAlign.justify para justificar el texto
-                            overflow: TextOverflow.visible, // O TextOverflow.clip / TextOverflow.ellipsis según tus necesidades
-                          ),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            children: List.generate(enlaces.length, (index) {
+              return GestureDetector(
+                onTap: () async {
+                  if(enlaces[index]["enlace"]!.isNotEmpty){
+                    if (!await launchUrl(
+                      Uri.parse(enlaces[index]["enlace"]!),
+                      mode: LaunchMode.externalApplication,
+                    )){}
+                  }
+                },
+                child: Container(
+                  margin: EdgeInsets.symmetric(vertical: 8.0), // Ajusta los valores del margen según sea necesario
+                  child: Row(
+                    children: [
+                      if (enlaces[index]["icono"] != "sin icono")
+                        Icon(
+                          AppIconStyles.icono(nombre: enlaces[index]["icono"]!), // Reemplaza con el icono que desees
+                          color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
                         ),
-                      ],
-                    ),
+                      SizedBox(width: 4.0),
+                      Expanded(
+                        child: Text(
+                          enlaces[index]["nombre"]!,
+                          style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
+                          textAlign: TextAlign.left, // O TextAlign.justify para justificar el texto
+                          overflow: TextOverflow.visible, // O TextOverflow.clip / TextOverflow.ellipsis según tus necesidades
+                        ),
+                      ),
+                    ],
                   ),
-                );
-              }),
-            ),
-          ],
-        ),
+                ),
+              );
+            }),
+          ),
+        ],
       );
     }else{
       return Container();
@@ -281,7 +278,7 @@ class _ConvenioScreenState extends State<ConvenioScreen> {
         children: [
           Text(
             "Países con convenios", // Primer texto
-            style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1),
+            style: AppTitleStyles.tarjeta(color: AppColorStyles.altTexto1),
           ),
           Text(
             _convenio.paisesConvenio!,
@@ -311,7 +308,7 @@ class _ConvenioScreenState extends State<ConvenioScreen> {
         },
         children: data.map<ExpansionPanel>((dynamic item) {
           return ExpansionPanel(
-            backgroundColor: AppColorStyles.blancoFondo,
+            backgroundColor: AppColorStyles.blanco,
             headerBuilder: (BuildContext context, bool isExpanded) {
               return ListTile(
                 title: Text(AppBanderaStyles.bandera(pais: item["bandera"])+item["headerValue"], style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.gris2)),
@@ -340,12 +337,12 @@ class _ConvenioScreenState extends State<ConvenioScreen> {
             children: [
               Icon(
                 AppIconStyles.icono(nombre: icono), // Reemplaza con el icono que desees
-                color: AppColorStyles.verde1, // Ajusta el color si es necesario
+                color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
               ), 
               SizedBox(width: 4.0), // Espaciado entre el icono y el texto
               Text(
                 titulo.toUpperCase(), // Primer texto
-                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+                style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
               ),
             ]
           ),

@@ -33,6 +33,7 @@ class _CampusScreenState extends State<CampusScreen> {
   Campus _campus = Campus();
   String _backUrl= "";
   late ProfileController controller;
+  
   @override
   void initState() {
     super.initState();
@@ -64,7 +65,7 @@ class _CampusScreenState extends State<CampusScreen> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         body: SingleChildScrollView(
           child: Column(
             children: <Widget>[
@@ -141,6 +142,7 @@ class _CampusScreenState extends State<CampusScreen> {
       );
     }
   }
+
   Widget _crearDescripcion(){
     return Container(
       margin: MySpacing.symmetric(horizontal: 16, vertical: 16),
@@ -190,12 +192,12 @@ class _CampusScreenState extends State<CampusScreen> {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4), // Padding interno del contenedor
           decoration: BoxDecoration(
-            color: AppColorStyles.verde2, // Color de fondo del contenedor
+            color: AppColorStyles.altTexto1, // Color de fondo del contenedor
             borderRadius: BorderRadius.circular(24.0), // Borde redondeado con radio de 24
           ),
           child: Text(
             '${_currentPage + 1}/${_campus.imagenes!.length}',
-            style: AppTextStyles.etiqueta(color: AppColorStyles.blancoFondo)
+            style: AppTextStyles.etiqueta(color: AppColorStyles.blanco)
           ),
         ),
       ],
@@ -238,7 +240,7 @@ class _CampusScreenState extends State<CampusScreen> {
               texto,
               style: AppTitleStyles.tarjeta()
             ),
-            Icon(icono, size: 30.0, color: AppColorStyles.verde1,)
+            Icon(icono, size: 30.0, color: AppColorStyles.altTexto1,)
           ],
         ),
       ),

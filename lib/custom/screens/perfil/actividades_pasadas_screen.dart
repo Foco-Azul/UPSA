@@ -64,9 +64,9 @@ class _ActividadesPasadasScreenState extends State<ActividadesPasadasScreen> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           leading: IconButton(
             icon: Icon(Icons.arrow_back_ios_new),
             onPressed: () {
@@ -101,12 +101,12 @@ class _ActividadesPasadasScreenState extends State<ActividadesPasadasScreen> {
                 Icon(
                   LucideIcons.trophy, // Cambia el icono según lo que necesites
                   size: 20,
-                  color: AppColorStyles.verde1,
+                  color: AppColorStyles.altTexto1,
                 ),
                 SizedBox(width: 8),
                 Text(
                   "MIS ACTIVIDADES",
-                  style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+                  style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1)
                 ),
               ],
             ),

@@ -49,6 +49,7 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
       _focusedDay = focusedDay;
     }); 
   }
+  
   @override
   Widget build(BuildContext context) {
     if (controller.uiLoading) {
@@ -62,9 +63,9 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           leading: IconButton(
             icon: Icon(
               LucideIcons.chevronLeft,
@@ -90,14 +91,14 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
         ),
         bottomNavigationBar: FlashyTabBar(
           iconSize: 24,
-          backgroundColor: AppColorStyles.blancoFondo,
+          backgroundColor: AppColorStyles.blanco,
           selectedIndex: 1,
           animationDuration: Duration(milliseconds: 500),
           showElevation: true,
           items: [
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.home_sharp),
               title: Text(
                 'Inicio',
@@ -105,8 +106,8 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.emoji_events_sharp),
               title: Text(
                 'Actividades',
@@ -114,8 +115,8 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.local_library_sharp),
               title: Text(
                 'Campus',
@@ -123,8 +124,8 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.push_pin_sharp),
               title: Text(
                 'Noticias',
@@ -132,8 +133,8 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.account_circle_sharp),
               title: Text(
                 'Mi perfil',
@@ -191,7 +192,7 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
                       child: Text(
                         (DateTime.parse(actividadesFiltradas[index]["fecha"]).day).toString(),
                         style: TextStyle(
-                          color: AppColorStyles.blancoFondo,
+                          color: AppColorStyles.blanco,
                           fontSize: 17,
                           fontWeight: FontWeight.w500,
                         ),

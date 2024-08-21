@@ -76,7 +76,7 @@ class _CursillosInicioState extends State<CursillosInicio> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
           leading: IconButton(
             icon: Icon(Icons.arrow_back_ios_new),
@@ -84,7 +84,7 @@ class _CursillosInicioState extends State<CursillosInicio> {
               Navigator.of(context).pop();
             },
           ),
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           centerTitle: true,
           title: MyText(
             "Cursillos",
@@ -102,14 +102,14 @@ class _CursillosInicioState extends State<CursillosInicio> {
         ),
         bottomNavigationBar: FlashyTabBar(
           iconSize: 24,
-          backgroundColor: AppColorStyles.blancoFondo,
+          backgroundColor: AppColorStyles.blanco,
           selectedIndex: 2,
           animationDuration: Duration(milliseconds: 500),
           showElevation: true,
           items: [
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.home_sharp),
               title: Text(
                 'Inicio',
@@ -117,8 +117,8 @@ class _CursillosInicioState extends State<CursillosInicio> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.emoji_events_sharp),
               title: Text(
                 'Actividades',
@@ -126,8 +126,8 @@ class _CursillosInicioState extends State<CursillosInicio> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.local_library_sharp),
               title: Text(
                 'Campus',
@@ -135,8 +135,8 @@ class _CursillosInicioState extends State<CursillosInicio> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.push_pin_sharp),
               title: Text(
                 'Noticias',
@@ -144,8 +144,8 @@ class _CursillosInicioState extends State<CursillosInicio> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.account_circle_sharp),
               title: Text(
                 'Mi perfil',
@@ -189,13 +189,13 @@ class _CursillosInicioState extends State<CursillosInicio> {
             children: [
               Icon(
                 AppIconStyles.icono(nombre: categoria.icono!), // Reemplaza con el icono que desees
-                color: AppColorStyles.verde1, // Ajusta el color si es necesario
+                color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
               ), 
               SizedBox(width: 10.0), // Espaciado entre el icono y el texto
               Flexible(
                 child: Text(
                   categoria.nombre!.toUpperCase(), // Primer texto
-                  style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+                  style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
                   softWrap: true,
                   overflow: TextOverflow.visible,
                 ),

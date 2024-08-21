@@ -40,6 +40,7 @@ class _CursilloScreenState extends State<CursilloScreen> {
   int _anterior = -1;
   int _siguiente = -1;
   bool _isLoggedIn = false;
+  
   @override
   void initState() {
     super.initState();
@@ -50,6 +51,7 @@ class _CursilloScreenState extends State<CursilloScreen> {
     _id = widget.id;
     _cargarDatos();
   }
+  
   void _cargarDatos() async {
     setState(() {
       controller.uiLoading = true;
@@ -127,14 +129,14 @@ class _CursilloScreenState extends State<CursilloScreen> {
               Navigator.of(context).pop();
             },
           ),
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           centerTitle: true, // Centra el título del AppBar
           title: Text(
             _cursillo.categoria!.nombre!,
             style: AppTitleStyles.principal(),
           ),
         ) : null,
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         body: SingleChildScrollView(
           child: Container(
             margin: EdgeInsets.all(15),
@@ -149,14 +151,14 @@ class _CursilloScreenState extends State<CursilloScreen> {
         ),
         bottomNavigationBar: !_isPlayerInFullScreen ? FlashyTabBar(
           iconSize: 24,
-          backgroundColor: AppColorStyles.blancoFondo,
+          backgroundColor: AppColorStyles.blanco,
           selectedIndex: 2,
           animationDuration: Duration(milliseconds: 500),
           showElevation: true,
           items: [
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.home_sharp),
               title: Text(
                 'Inicio',
@@ -164,8 +166,8 @@ class _CursilloScreenState extends State<CursilloScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.emoji_events_sharp),
               title: Text(
                 'Actividades',
@@ -173,8 +175,8 @@ class _CursilloScreenState extends State<CursilloScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.local_library_sharp),
               title: Text(
                 'Campus',
@@ -182,8 +184,8 @@ class _CursilloScreenState extends State<CursilloScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.push_pin_sharp),
               title: Text(
                 'Noticias',
@@ -191,8 +193,8 @@ class _CursilloScreenState extends State<CursilloScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.account_circle_sharp),
               title: Text(
                 'Mi perfil',
@@ -207,13 +209,14 @@ class _CursilloScreenState extends State<CursilloScreen> {
       );
     }
   } 
+  
   Widget _descripcion(){
     return
       Container(
         padding: EdgeInsets.all(15),
         margin: EdgeInsets.symmetric(vertical: 15),
         decoration: BoxDecoration(
-          color: AppColorStyles.blancoFondo, // Fondo blanco
+          color: AppColorStyles.blanco, // Fondo blanco
           borderRadius: BorderRadius.circular(5), // Bordes redondeados de 5
           boxShadow: [
             AppSombra.tarjeta(),
@@ -224,7 +227,7 @@ class _CursilloScreenState extends State<CursilloScreen> {
           children: [
             Text(
               _cursillo.titulo!,
-              style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1),
+              style: AppTitleStyles.tarjeta(color: AppColorStyles.altTexto1),
             ),
             SizedBox(height: 10,),
             Text(
@@ -260,7 +263,7 @@ class _CursilloScreenState extends State<CursilloScreen> {
                     ),
                     Text(
                       'Anterior',
-                      style: AppTextStyles.botonMenor(color: AppColorStyles.oscuro1),
+                      style: AppTextStyles.botonMenor(),
                     )
                   ]
                 ),
@@ -280,7 +283,7 @@ class _CursilloScreenState extends State<CursilloScreen> {
                   children: [
                     Text(
                       'Próximo',
-                      style: AppTextStyles.botonMenor(color: AppColorStyles.oscuro1),
+                      style: AppTextStyles.botonMenor(),
                     ),
                     Icon(Icons.arrow_right_alt_outlined, color: AppColorStyles.oscuro1),
                   ]

@@ -81,7 +81,7 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
     } else {
       return Scaffold(
         appBar: AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           leading: IconButton(
             icon: Icon(Icons.arrow_back_ios_new),
             onPressed: () {
@@ -94,7 +94,7 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
             style: AppTitleStyles.principal()
           ),
         ),
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         body: SingleChildScrollView(
           child: Column(
             children: <Widget>[
@@ -107,14 +107,14 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
         ),
         bottomNavigationBar: FlashyTabBar(
           iconSize: 24,
-          backgroundColor: AppColorStyles.blancoFondo,
+          backgroundColor: AppColorStyles.blanco,
           selectedIndex: 2,
           animationDuration: Duration(milliseconds: 500),
           showElevation: true,
           items: [
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.home_sharp),
               title: Text(
                 'Inicio',
@@ -122,8 +122,8 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.emoji_events_sharp),
               title: Text(
                 'Actividades',
@@ -131,8 +131,8 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.local_library_sharp),
               title: Text(
                 'Campus',
@@ -140,8 +140,8 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.push_pin_sharp),
               title: Text(
                 'Noticias',
@@ -149,8 +149,8 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.account_circle_sharp),
               title: Text(
                 'Mi perfil',
@@ -220,7 +220,7 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
         },
         children: data.map<ExpansionPanel>((dynamic item) {
           return ExpansionPanel(
-            backgroundColor: AppColorStyles.blancoFondo,
+            backgroundColor: AppColorStyles.blanco,
             headerBuilder: (BuildContext context, bool isExpanded) {
               return ListTile(
                 title: Text(item["headerValue"], style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.gris2)),
@@ -254,31 +254,31 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
                 Tab(
                   child: Text(
                     "Misión",
-                    style: AppTextStyles.botonMayor(color: AppColorStyles.verde1)
+                    style: AppTextStyles.botonMayor(color: AppColorStyles.altTexto1)
                   ),
                 ),
                 Tab(
                   child: Text(
                     "Visión",
-                    style: AppTextStyles.botonMayor(color: AppColorStyles.verde1)
+                    style: AppTextStyles.botonMayor(color: AppColorStyles.altTexto1)
                   ),
                 ),
                 Tab(
                   child: Text(
                     "Valores",
-                    style: AppTextStyles.botonMayor(color: AppColorStyles.verde1)
+                    style: AppTextStyles.botonMayor(color: AppColorStyles.altTexto1)
                   ),
                 ),
                 Tab(
                   child: Text(
                     "Comunidad",
-                    style: AppTextStyles.botonMayor(color: AppColorStyles.verde1)
+                    style: AppTextStyles.botonMayor(color: AppColorStyles.altTexto1)
                   ),
                 ),
               ],
               tabAlignment: TabAlignment.start,
               indicator: UnderlineTabIndicator(
-                borderSide: BorderSide(color: AppColorStyles.verde1, width: 2.0),
+                borderSide: BorderSide(color: AppColorStyles.altTexto1, width: 2.0),
               ),
             ),
             SizedBox( 
@@ -341,7 +341,7 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
         padding: EdgeInsets.all(15.0),
         margin: EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: AppColorStyles.blancoFondo, // Fondo blanco
+          color: AppColorStyles.blanco, // Fondo blanco
           borderRadius: BorderRadius.circular(5), // Bordes redondeados de 5
           boxShadow: [
             AppSombra.tarjeta(),
@@ -388,12 +388,12 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4), // Padding interno del contenedor
           decoration: BoxDecoration(
-            color: AppColorStyles.verde2, // Color de fondo del contenedor
+            color: AppColorStyles.altTexto1, // Color de fondo del contenedor
             borderRadius: BorderRadius.circular(24.0), // Borde redondeado con radio de 24
           ),
           child: Text(
             '${_currentPage + 1}/${_sobreNosotros.imagenes!.length}',
-            style: AppTextStyles.etiqueta(color: AppColorStyles.blancoFondo)
+            style: AppTextStyles.etiqueta(color: AppColorStyles.blanco)
           ),
         ),
       ],

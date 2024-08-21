@@ -92,9 +92,9 @@ class _EtiquetasScreenState extends State<EtiquetasScreen> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           leading: IconButton(
             icon: Icon(Icons.arrow_back_ios_new),
             onPressed: () {
@@ -130,12 +130,12 @@ class _EtiquetasScreenState extends State<EtiquetasScreen> {
         children: [
           MyText(
             tipo.toUpperCase(),
-            style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+            style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1)
           ),
-          Icon(LucideIcons.dot, color: AppColorStyles.verde1),
+          Icon(LucideIcons.dot, color: AppColorStyles.altTexto1),
           MyText(
             categoria.toUpperCase(),
-            style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+            style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1)
           ),
         ],
       ), 
@@ -162,7 +162,7 @@ class _EtiquetasScreenState extends State<EtiquetasScreen> {
         margin: EdgeInsets.all(15), // Añadir margen superior si es necesario
         padding: EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: AppColorStyles.blancoFondo, // Fondo blanco
+          color: AppColorStyles.blanco, // Fondo blanco
           borderRadius: BorderRadius.circular(5), // Bordes redondeados de 5
           boxShadow: [
             AppSombra.tarjeta(),

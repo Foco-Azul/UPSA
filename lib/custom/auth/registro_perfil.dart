@@ -54,6 +54,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
     _animacionCarga = AnimacionCarga(context: context);
     cargarDatos();
   }
+  
   void cargarDatos() async{
     _user = Provider.of<AppNotifier>(context, listen: false).user;
     _user = await ApiService().getUserPopulateConMetasParaFormularioPerfil(_user.id!);
@@ -123,13 +124,13 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: AppColorStyles.verde2, // header background color
-              onPrimary: AppColorStyles.oscuro1, // header text color
-              onSurface: AppColorStyles.verde2, // body text color
+              primary: AppColorStyles.altVerde1, // header background color
+              onPrimary: AppColorStyles.blanco, // header text color
+              onSurface: AppColorStyles.altTexto1, // body text color
             ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
-                foregroundColor: AppColorStyles.verde2, // button text color
+                foregroundColor: AppColorStyles.altTexto1, // button text color
               ),
             ),
           ),
@@ -184,7 +185,6 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
     setState(() {});
   }
 
-
   @override
   Widget build(BuildContext context) {
     if (controller.uiLoading) {
@@ -198,9 +198,9 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           leading: IconButton(
             icon: Icon(
               LucideIcons.chevronLeft,
@@ -274,13 +274,13 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
               options: opciones,
               hint: label,
               selectionType: SelectionType.single,
-              chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.verde2),
-              selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.verde2),
+              chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.altTexto1),
+              selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.altTexto1),
               selectedOptionTextColor: AppColorStyles.oscuro1,
-              selectedOptionBackgroundColor: AppColorStyles.verdeFondo,
-              optionTextStyle: AppTextStyles.parrafo(color: AppColorStyles.verde2),
+              selectedOptionBackgroundColor: AppColorStyles.altFondo1,
+              optionTextStyle: AppTextStyles.parrafo(color: AppColorStyles.altTexto1),
               borderRadius: 14,
-              borderColor: AppColorStyles.blancoFondo,
+              borderColor: AppColorStyles.blanco,
               selectedOptions: opcionesSeleccionadas,
             ),
           ),
@@ -324,11 +324,11 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
                   },
                   elevation: 0,
                   borderRadiusAll: 4,
-                  backgroundColor: AppColorStyles.verde1,
+                  backgroundColor: AppColorStyles.altTexto1,
                   child: Icon(
                     LucideIcons.calendar,
                     size: 20,
-                    color: AppColorStyles.blancoFondo,
+                    color: AppColorStyles.blanco,
                   ),
                 ),
               ),
@@ -356,10 +356,10 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
         onPressed: () {
          _validarCampos();
         },
-        style: AppDecorationStyle.botonBienvenida(),
+        style: AppDecorationStyle.botonBienvenida(colorFondo: AppColorStyles.altVerde1),
         child: Text(
           'Continuar',
-          style: AppTextStyles.botonMayor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.oscuro1),  // Estilo del texto del botón
         ),
       ),
     );
@@ -468,12 +468,16 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
     );
   }
   Widget _crearDescripcion(){
-    return Text(
-      'Tus datos permitirán que podás inscribirte en nuestros eventos, test vocacionales, entre otros.',
-      style: TextStyle(
-        color: AppColorStyles.oscuro1,
-        fontSize: 15,
-        fontWeight: FontWeight.normal,
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 15),
+      alignment: Alignment.centerLeft,
+      child: Text(
+        'Registrar tus datos aquí te permitirá inscribirte fácilmente a nuestros talleres, clubes y eventos especiales. ',
+        style: TextStyle(
+          color: AppColorStyles.oscuro1,
+          fontSize: 15,
+          fontWeight: FontWeight.normal,
+        ),
       ),
     );
   }
@@ -482,7 +486,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       alignment: Alignment.centerLeft,
       child: Text(
         "Llenemos tu perfil",
-        style: AppTitleStyles.onboarding(color: AppColorStyles.verde1),
+        style: AppTitleStyles.onboarding(color: AppColorStyles.altTexto1),
       ),
     );
   }

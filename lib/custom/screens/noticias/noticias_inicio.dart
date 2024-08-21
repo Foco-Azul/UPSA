@@ -29,8 +29,8 @@ class _NoticiasScreenState extends State<NoticiasScreen> {
   List<Noticia> _noticias = [];
   List<Noticia> _noticiasCategorizados = [];
   List<Categoria> _noticiasCategorias = [];
-
   String _backUrl = "";
+  
   @override
   void initState() {
     super.initState();
@@ -117,11 +117,12 @@ class _NoticiasScreenState extends State<NoticiasScreen> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         body: getTabContent('Noticias'),
       );
     }
   }
+  
   Widget getTabContent(String contenido) {
     List<Categoria> categorias = [];
     List<dynamic> contenidos = [];
@@ -130,7 +131,7 @@ class _NoticiasScreenState extends State<NoticiasScreen> {
       contenidos = _noticiasCategorizados;
     }
     return Scaffold(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -225,11 +226,11 @@ class _NoticiasScreenState extends State<NoticiasScreen> {
           showCheckmark: false,
           avatar: Icon(
             AppIconStyles.icono(nombre: categorias[index].icono!), 
-            color: categorias[index].activo! ? AppColorStyles.blancoFondo : AppColorStyles.gris1
+            color: categorias[index].activo! ? AppColorStyles.blanco : AppColorStyles.gris2
           ),
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          selectedColor: AppColorStyles.verde2, 
-          backgroundColor: AppColorStyles.blancoFondo,
+          selectedColor: AppColorStyles.altTexto1, 
+          backgroundColor: AppColorStyles.blanco,
           label: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -237,7 +238,7 @@ class _NoticiasScreenState extends State<NoticiasScreen> {
                 style: TextStyle(
                   fontSize: 8, 
                   fontWeight: FontWeight.bold,
-                  color: categorias[index].activo! ? AppColorStyles.blancoFondo : AppColorStyles.gris1
+                  color: categorias[index].activo! ? AppColorStyles.blanco : AppColorStyles.gris2
                 ),
               )
             ],
@@ -262,7 +263,7 @@ class _NoticiasScreenState extends State<NoticiasScreen> {
           },
           shape: RoundedRectangleBorder(
             side: BorderSide(
-              color: AppColorStyles.blancoFondo, // Color del borde
+              color: AppColorStyles.blanco, // Color del borde
               width: 1.0, // Ancho del borde
             ),
             borderRadius: BorderRadius.circular(4), // Radio de borde
@@ -282,7 +283,7 @@ class _NoticiasScreenState extends State<NoticiasScreen> {
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
             margin: const EdgeInsets.all(8.0),
             decoration: BoxDecoration(
-              color: AppColorStyles.blancoFondo,
+              color: AppColorStyles.blanco,
               borderRadius: BorderRadius.circular(5), 
               boxShadow: [
                 AppSombra.categoria(),

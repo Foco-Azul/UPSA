@@ -21,7 +21,7 @@ class AnimacionCarga {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
               child: Container(
-                color: AppColorStyles.verdeFondo.withOpacity(0.5), // Color semi-transparente
+                color: AppColorStyles.altFondo1.withOpacity(0.5), // Color semi-transparente
               ),
             ),
           ),
@@ -35,12 +35,12 @@ class AnimacionCarga {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(AppColorStyles.verde1),
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColorStyles.altTexto1),
                   ),
                   SizedBox(width: 20,),
                   Text(
                     "Espera por favor...",
-                    style: AppTitleStyles.subtitulo(color: AppColorStyles.verde1),
+                    style: AppTitleStyles.subtitulo(color: AppColorStyles.altTexto1),
                     ),
                 ],
               ),

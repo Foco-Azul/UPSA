@@ -105,9 +105,9 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           leading: IconButton(
             icon: Icon(
               LucideIcons.chevronLeft,
@@ -134,14 +134,14 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
         ),
         bottomNavigationBar: FlashyTabBar(
           iconSize: 24,
-          backgroundColor: AppColorStyles.blancoFondo,
+          backgroundColor: AppColorStyles.blanco,
           selectedIndex: 4,
           animationDuration: Duration(milliseconds: 500),
           showElevation: true,
           items: [
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.home_sharp),
               title: Text(
                 'Inicio',
@@ -149,8 +149,8 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.emoji_events_sharp),
               title: Text(
                 'Actividades',
@@ -158,8 +158,8 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.local_library_sharp),
               title: Text(
                 'Campus',
@@ -167,8 +167,8 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.push_pin_sharp),
               title: Text(
                 'Noticias',
@@ -176,8 +176,8 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.account_circle_sharp),
               title: Text(
                 'Mi perfil',
@@ -195,7 +195,7 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
   
   void _datosDeLaEntrada(String caso, String titulo, Map<String, dynamic> entrada) {
     String texto = "";
-    Color fondo = AppColorStyles.verdeFondo;
+    Color fondo = AppColorStyles.altFondo1;
     if(caso == "noValido"){
       texto = "Error, este QR no es valido"; 
       fondo = Colors.red;
@@ -206,7 +206,7 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
     }
     if(caso == "valido"){
       texto = "Exito, el QR se escaneo correctamente"; 
-      fondo = AppColorStyles.verde2;
+      fondo = AppColorStyles.altTexto1;
     }
     showModalBottomSheet(
       context: context,
@@ -222,7 +222,7 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
                 margin: EdgeInsets.symmetric(vertical: 15),
                 child: Text(
                   texto,
-                  style: AppTitleStyles.tarjeta(color: AppColorStyles.blancoFondo),
+                  style: AppTitleStyles.tarjeta(color: AppColorStyles.blanco),
                 ),
               ),
               if(caso == "valido" || caso == "escaneado")
@@ -234,10 +234,10 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
                       text: TextSpan(children: <TextSpan>[
                         TextSpan(
                             text: "Actividad: ",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColorStyles.verdeFondo)),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColorStyles.altFondo1)),
                         TextSpan(
                             text: titulo,
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.blancoFondo)),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.blanco)),
                       ]),
                     ),
                     SizedBox(height: 10,),
@@ -245,10 +245,10 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
                       text: TextSpan(children: <TextSpan>[
                         TextSpan(
                             text: "QR: ",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColorStyles.verdeFondo)),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColorStyles.altFondo1)),
                         TextSpan(
                             text: entrada["qr"],
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.blancoFondo)),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.blanco)),
                       ]),
                     ),
                     SizedBox(height: 10,),
@@ -256,10 +256,10 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
                       text: TextSpan(children: <TextSpan>[
                         TextSpan(
                             text: "Nombre completo: ",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColorStyles.verdeFondo)),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColorStyles.altFondo1)),
                         TextSpan(
                             text: entrada["nombres"]+" "+entrada["apellidos"],
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.blancoFondo)),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.blanco)),
                       ]),
                     ),
                     SizedBox(height: 10,),
@@ -267,10 +267,10 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
                       text: TextSpan(children: <TextSpan>[
                         TextSpan(
                             text: "Carnet: ",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColorStyles.verdeFondo)),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColorStyles.altFondo1)),
                         TextSpan(
                             text: entrada["cedulaDeIdentidad"],
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.blancoFondo)),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.blanco)),
                       ]),
                     ),
                     SizedBox(height: 10,),
@@ -278,10 +278,10 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
                       text: TextSpan(children: <TextSpan>[
                         TextSpan(
                             text: "Correo: ",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColorStyles.verdeFondo)),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColorStyles.altFondo1)),
                         TextSpan(
                             text: entrada["email"],
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.blancoFondo)),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.blanco)),
                       ]),
                     ),
                   ],
@@ -311,7 +311,7 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
         style: AppDecorationStyle.botonBienvenida(),
         child: Text(
           'Escanear entrada',
-          style: AppTextStyles.botonMayor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+          style: AppTextStyles.botonMayor(color: AppColorStyles.blanco), // Estilo del texto del botón
         ),
       ),
     );
@@ -363,13 +363,13 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
               options: opciones,
               hint: "- Seleccionar -",
               selectionType: SelectionType.single,
-              chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.verde2),
-              selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.verde2),
+              chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.altTexto1),
+              selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.altTexto1),
               selectedOptionTextColor: AppColorStyles.oscuro1,
-              selectedOptionBackgroundColor: AppColorStyles.verdeFondo,
-              optionTextStyle: AppTextStyles.parrafo(color: AppColorStyles.verde2),
+              selectedOptionBackgroundColor: AppColorStyles.altFondo1,
+              optionTextStyle: AppTextStyles.parrafo(color: AppColorStyles.altTexto1),
               borderRadius: 14,
-              borderColor: AppColorStyles.blancoFondo,
+              borderColor: AppColorStyles.blanco,
             ),
           ),
           if (_error.isNotEmpty)

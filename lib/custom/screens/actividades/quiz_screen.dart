@@ -1,5 +1,10 @@
 import 'dart:async';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
+import 'package:flutkit/custom/auth/login_screen.dart';
+import 'package:flutkit/custom/auth/registro_carrera.dart';
+import 'package:flutkit/custom/auth/registro_intereses.dart';
+import 'package:flutkit/custom/auth/registro_perfil.dart';
+import 'package:flutkit/custom/auth/validar_email.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/quiz_preguntas.dart';
 import 'package:flutkit/custom/models/user.dart';
@@ -98,9 +103,9 @@ class _QuizScreenState extends State<QuizScreen> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
-           backgroundColor: AppColorStyles.verdeFondo,
+           backgroundColor: AppColorStyles.altFondo1,
           leading: IconButton(
             icon: Icon(
               LucideIcons.chevronLeft,
@@ -134,14 +139,14 @@ class _QuizScreenState extends State<QuizScreen> {
         ),
         bottomNavigationBar: FlashyTabBar(
           iconSize: 24,
-          backgroundColor: AppColorStyles.blancoFondo,
+          backgroundColor: AppColorStyles.blanco,
           selectedIndex: 1,
           animationDuration: Duration(milliseconds: 500),
           showElevation: true,
           items: [
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.home_sharp),
               title: Text(
                 'Inicio',
@@ -149,8 +154,8 @@ class _QuizScreenState extends State<QuizScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.emoji_events_sharp),
               title: Text(
                 'Actividades',
@@ -158,8 +163,8 @@ class _QuizScreenState extends State<QuizScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.local_library_sharp),
               title: Text(
                 'Campus',
@@ -167,8 +172,8 @@ class _QuizScreenState extends State<QuizScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.push_pin_sharp),
               title: Text(
                 'Noticias',
@@ -176,8 +181,8 @@ class _QuizScreenState extends State<QuizScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.account_circle_sharp),
               title: Text(
                 'Mi perfil',
@@ -222,10 +227,69 @@ class _QuizScreenState extends State<QuizScreen> {
         children: [
           Visibility(
             visible: !_isLoggedIn,
-            child: Text(
-              "Ingresá con tu cuenta",
-              style: AppTextStyles.parrafo(),
-            ) 
+            child: Column(
+              children: [
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 10.0), // Ajusta los valores del margen según sea necesario
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Ingresa con tu cuenta para responder el Quiz.",
+                    style: AppTextStyles.parrafo(),
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 15),
+                  alignment: Alignment.centerLeft,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => Login2Screen()));
+                    },
+                    style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
+                    child: Text(
+                      'Ingresar',
+                      style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
+                    ),
+                  ),
+                )
+              ],
+            )
+          ),
+          if(_isLoggedIn && _user.estado! != "Completado")
+          Column(
+            children: [
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 10.0), // Ajusta los valores del margen según sea necesario
+                child: Text(
+                  "Completá tu perfil para solicitar un Test vocacional.",
+                  style: AppTextStyles.parrafo(),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 15),
+                alignment: Alignment.centerLeft,
+                child: ElevatedButton(
+                  onPressed: () {
+                    if(_user.estado == "Nuevo"){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => ValidarEmail()));
+                    }
+                    if(_user.estado == "Verificado"){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroPerfil()));
+                    }
+                    if(_user.estado == "Perfil parte 1"){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroCarrera()));
+                    }
+                    if(_user.estado == "Perfil parte 2"){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroIntereses()));
+                    } 
+                  },
+                  style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
+                  child: Text(
+                    'Completar perfil',
+                    style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
+                  ),
+                ),
+              )
+            ],
           ),
           Visibility(
             visible: _bandera,
@@ -248,10 +312,10 @@ class _QuizScreenState extends State<QuizScreen> {
               onPressed: () {
                 _validarCampos();
               },
-              style: AppDecorationStyle.botonContacto(),
+              style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
               child: Text(
                 'Enviar',
-                style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
               ),
             ),
           )
@@ -276,7 +340,7 @@ class _QuizScreenState extends State<QuizScreen> {
           alignment: Alignment.centerLeft,
           child: Text(
             data['label'],
-            style: (data["opciones"].length > 0) ? AppTextStyles.parrafo(color: AppColorStyles.gris1) : AppTextStyles.etiqueta(color: AppColorStyles.verde2)
+            style: (data["opciones"].length > 0) ? AppTextStyles.parrafo(color: AppColorStyles.gris1) : AppTextStyles.etiqueta(color: AppColorStyles.altTexto1)
           ),
         ),
         if(data["opciones"].length > 0)
@@ -327,7 +391,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 value: int.tryParse(data["id"].toString())!,
                 visualDensity: VisualDensity.compact,
                 groupValue: int.tryParse(campo["respuestaSeleccionada"].toString()),
-                fillColor: MaterialStateProperty.all(AppColorStyles.verde1),
+                fillColor: MaterialStateProperty.all(AppColorStyles.altTexto1),
                 onChanged: (int? value) {
                   setState(() {
                     for (var item in _quizPregunta.campos!) {

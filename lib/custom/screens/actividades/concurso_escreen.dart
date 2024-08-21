@@ -113,7 +113,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
   }
   void _dejarDeSeguirActividad() async {
     _concurso.seguidores!.remove(_user.id!);
-    await ApiService().setConcursoSeguidores(_user.id!, _concurso.seguidores!);
+    await ApiService().setConcursoSeguidores(_concurso.id!, _concurso.seguidores!);
     setState(() {
       _siguiendo = false;
     });
@@ -141,6 +141,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => super.widget));
   }
   */
+  
   @override
   Widget build(BuildContext context) {
     if (controller.uiLoading) {
@@ -154,9 +155,9 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
-           backgroundColor: AppColorStyles.verdeFondo,
+           backgroundColor: AppColorStyles.altFondo1,
           leading: IconButton(
             icon: Icon(
               LucideIcons.chevronLeft,
@@ -196,14 +197,14 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
         ),
         bottomNavigationBar: FlashyTabBar(
           iconSize: 24,
-          backgroundColor: AppColorStyles.blancoFondo,
+          backgroundColor: AppColorStyles.blanco,
           selectedIndex: 1,
           animationDuration: Duration(milliseconds: 500),
           showElevation: true,
           items: [
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.home_sharp),
               title: Text(
                 'Inicio',
@@ -211,8 +212,8 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.emoji_events_sharp),
               title: Text(
                 'Actividades',
@@ -220,8 +221,8 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.local_library_sharp),
               title: Text(
                 'Campus',
@@ -229,8 +230,8 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.push_pin_sharp),
               title: Text(
                 'Noticias',
@@ -238,8 +239,8 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.account_circle_sharp),
               title: Text(
                 'Mi perfil',
@@ -265,7 +266,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
           children: [
             Text(
               "Seguimiento",
-              style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1)
+              style: AppTitleStyles.tarjeta(color: AppColorStyles.altTexto1)
             ),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -299,7 +300,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
               children: [
                 Text(
                   "Ingreso",
-                  style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1)
+                  style: AppTitleStyles.tarjeta(color: AppColorStyles.altTexto1)
                 ),
                 SizedBox(width: 8), // Espacio entre el texto y el icono
                 Row(
@@ -316,12 +317,12 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
                           Icon(
                             _ingresoMostrado ? Icons.remove_red_eye_outlined : Icons.visibility_off_outlined,
                             size: 24,
-                            color: AppColorStyles.verde1,
+                            color: AppColorStyles.altTexto1,
                           ),
                           SizedBox(width: 8.0), // Espacio entre el icono y el texto
                           Text(
                             _ingresoMostrado ? 'Clic para ocultar' : 'Click para mostrar', // Texto que cambia según _ingresoMostrado
-                            style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.verde1)
+                            style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.altTexto1)
                           ),
                         ],
                       ),
@@ -363,7 +364,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
           children: [
             Text(
               "Info",
-              style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1)
+              style: AppTitleStyles.tarjeta(color: AppColorStyles.altTexto1)
             ),
             ListView.builder(
               shrinkWrap: true,
@@ -377,7 +378,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
                     children: [
                       Text(
                         _concurso.calendario![index]["titulo"]!,
-                        style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.verde1),
+                        style: AppTitleStyles.tarjetaMenor(),
                       ),
                       Visibility(
                         visible: calendarios[index]["descripcion"].toString().isNotEmpty,
@@ -440,18 +441,18 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
                 mode: LaunchMode.externalApplication,
               )) {}
           },
-          style: AppDecorationStyle.botonContacto(),
+          style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 LucideIcons.link2,
-                color: AppColorStyles.blancoFondo
+                color: AppColorStyles.altTexto1
               ),
               SizedBox(width: 8.0), // Espacio entre el icono y el texto
               Text(
                 'Más información',
-                style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
               ),
             ],
           ),
@@ -474,14 +475,14 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
                 alignment: Alignment.centerLeft,
                 child: ElevatedButton(
                   onPressed: () {},
-                  style: AppDecorationStyle.botonContacto(color: AppColorStyles.blancoFondo),
+                  style: AppDecorationStyle.botonContacto(color: AppColorStyles.blanco),
                   child: Row(
                     children: [
-                      Icon(LucideIcons.logIn, color: AppColorStyles.verde2), // Icono a la izquierda
+                      Icon(LucideIcons.logIn, color: AppColorStyles.altTexto1), // Icono a la izquierda
                       SizedBox(width: 8.0), // Espacio entre el icono y el texto
                       Text(
                         'Inscritó',
-                        style: AppTextStyles.botonMenor(color: AppColorStyles.verde2), // Estilo del texto del botón
+                        style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
                       ),
                     ],
                   ),
@@ -502,11 +503,11 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
                   style: AppDecorationStyle.botonContacto(),
                   child: Row(
                     children: [
-                      Icon(LucideIcons.logIn, color: AppColorStyles.blancoFondo), // Icono a la izquierda
+                      Icon(LucideIcons.logIn, color: AppColorStyles.blanco), // Icono a la izquierda
                       SizedBox(width: 8.0), // Espacio entre el icono y el texto
                       Text(
                         'Inscribirse',
-                        style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                        style: AppTextStyles.botonMenor(color: AppColorStyles.blanco), // Estilo del texto del botón
                       )
                     ]
                   ),
@@ -525,11 +526,11 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
                   style: AppDecorationStyle.botonContacto(),
                   child: Row(
                     children: [
-                      Icon(LucideIcons.bellRing, color: AppColorStyles.blancoFondo), // Icono a la izquierda
+                      Icon(LucideIcons.bellRing, color: AppColorStyles.blanco), // Icono a la izquierda
                       SizedBox(width: 8.0), // Espacio entre el icono y el texto
                       Text(
                         'Dejar de seguir',
-                        style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                        style: AppTextStyles.botonMenor(color: AppColorStyles.blanco), // Estilo del texto del botón
                       ),
                     ]
                   )
@@ -548,11 +549,11 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
                   style: AppDecorationStyle.botonContacto(),
                   child: Row(
                     children: [
-                      Icon(LucideIcons.bellRing, color: AppColorStyles.blancoFondo),// Icono a la izquierda
+                      Icon(LucideIcons.bellRing, color: AppColorStyles.blanco),// Icono a la izquierda
                       SizedBox(width: 8.0), // Espacio entre el icono y el texto
                       Text(
                         'Seguir',
-                        style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                        style: AppTextStyles.botonMenor(color: AppColorStyles.blanco), // Estilo del texto del botón
                       ),
                     ]
                   )
@@ -576,7 +577,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
             children: [
               Text(
                 "INICIA",
-                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+                style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1)
               ),
               Text(
                 inicio,
@@ -590,7 +591,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
             children: [
               Text(
                 "FINALIZA",
-                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+                style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1)
               ),
               Text(
                 fin,
@@ -642,12 +643,12 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4), // Padding interno del contenedor
           decoration: BoxDecoration(
-            color: AppColorStyles.verde2, // Color de fondo del contenedor
+            color: AppColorStyles.altTexto1, // Color de fondo del contenedor
             borderRadius: BorderRadius.circular(24.0), // Borde redondeado con radio de 24
           ),
           child: Text(
             '${_currentPage + 1}/${_concurso.imagenes!.length}',
-            style: AppTextStyles.etiqueta(color: AppColorStyles.blancoFondo)
+            style: AppTextStyles.etiqueta(color: AppColorStyles.blanco)
           ),
         ),
       ],
@@ -786,7 +787,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
               },
               child: Text(
                 "#${etiquetas[index].nombre}",
-                style: AppTextStyles.parrafo(color: AppColorStyles.verde1),
+                style: AppTextStyles.parrafo(color: AppColorStyles.altTexto1),
               ),
             );
           },

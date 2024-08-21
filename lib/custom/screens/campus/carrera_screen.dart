@@ -11,6 +11,7 @@ import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CarreraScreen extends StatefulWidget {
@@ -39,6 +40,7 @@ class _CarreraScreenState extends State<CarreraScreen> {
     _id = widget.id;
     _cargarDatos();
   }
+  
   void _cargarDatos() async {
     setState(() {
       controller.uiLoading = true;
@@ -50,7 +52,6 @@ class _CarreraScreenState extends State<CarreraScreen> {
       controller.uiLoading = false;
     });
   }
-  
 
   @override
   Widget build(BuildContext context) {
@@ -65,9 +66,18 @@ class _CarreraScreenState extends State<CarreraScreen> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
+          leading: IconButton(
+            icon: Icon(
+              LucideIcons.chevronLeft,
+              color: AppColorStyles.oscuro1
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
           centerTitle: true,
           title: Center(
             child: Padding(
@@ -96,14 +106,14 @@ class _CarreraScreenState extends State<CarreraScreen> {
         ),
         bottomNavigationBar: FlashyTabBar(
           iconSize: 24,
-          backgroundColor: AppColorStyles.blancoFondo,
+          backgroundColor: AppColorStyles.blanco,
           selectedIndex: 2,
           animationDuration: Duration(milliseconds: 500),
           showElevation: true,
           items: [
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.home_sharp),
               title: Text(
                 'Inicio',
@@ -111,8 +121,8 @@ class _CarreraScreenState extends State<CarreraScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.emoji_events_sharp),
               title: Text(
                 'Actividades',
@@ -120,8 +130,8 @@ class _CarreraScreenState extends State<CarreraScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.local_library_sharp),
               title: Text(
                 'Campus',
@@ -129,8 +139,8 @@ class _CarreraScreenState extends State<CarreraScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.push_pin_sharp),
               title: Text(
                 'Noticias',
@@ -138,8 +148,8 @@ class _CarreraScreenState extends State<CarreraScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.account_circle_sharp),
               title: Text(
                 'Mi perfil',
@@ -155,48 +165,51 @@ class _CarreraScreenState extends State<CarreraScreen> {
     }
   } 
   Widget _crearLista(){
-    return Container(
-      padding: EdgeInsets.all(15.0),
-      margin: EdgeInsets.all(15.0),
-      decoration: AppDecorationStyle.tarjeta(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Column(
-            children: List.generate(_carreraUpsa.masInformacion!.length, (index) {
-              return Container(
-                margin: EdgeInsets.symmetric(vertical: 8.0), // Ajusta los valores del margen según sea necesario
-                child: Column(
-                  children: [
-                    Container(
-                      margin: EdgeInsets.symmetric(vertical: 5),
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        _carreraUpsa.masInformacion![index]["titulo"],
-                        style: TextStyle(
-                          color: AppColorStyles.oscuro1,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+    return Visibility(
+      visible: _carreraUpsa.masInformacion!.isNotEmpty,
+      child: Container(
+        padding: EdgeInsets.all(15.0),
+        margin: EdgeInsets.all(15.0),
+        decoration: AppDecorationStyle.tarjeta(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Column(
+              children: List.generate(_carreraUpsa.masInformacion!.length, (index) {
+                return Container(
+                  margin: EdgeInsets.symmetric(vertical: 8.0), // Ajusta los valores del margen según sea necesario
+                  child: Column(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.symmetric(vertical: 5),
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          _carreraUpsa.masInformacion![index]["titulo"],
+                          style: TextStyle(
+                            color: AppColorStyles.oscuro1,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          softWrap: true, // Permite el salto de línea automático
                         ),
-                        softWrap: true, // Permite el salto de línea automático
                       ),
-                    ),
-                    Container(
-                      alignment: Alignment.centerLeft,
-                      margin: EdgeInsets.symmetric(vertical: 5),
-                      child: Text(
-                        _carreraUpsa.masInformacion![index]["titulo"],
-                        style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
-                        softWrap: true, // Permite el salto de línea automático
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        margin: EdgeInsets.symmetric(vertical: 5),
+                        child: Text(
+                          _carreraUpsa.masInformacion![index]["titulo"],
+                          style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
+                          softWrap: true, // Permite el salto de línea automático
+                        ),
                       ),
-                    ),
-                  ], 
-                ),
-              );
-            }),
-          ),
-        ],
-      ),
+                    ], 
+                  ),
+                );
+              }),
+            ),
+          ],
+        ),
+      )
     );
   }
   Widget _crearMasInformacion(){
@@ -222,12 +235,12 @@ class _CarreraScreenState extends State<CarreraScreen> {
                   children: [
                     Icon(
                       Icons.article_outlined,
-                      color: AppColorStyles.blancoFondo,
+                      color: AppColorStyles.blanco,
                     ),
                     SizedBox(width: 8.0),
                     Text(
                       'Descargar PDF',
-                      style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo),
+                      style: AppTextStyles.botonMenor(color: AppColorStyles.blanco),
                     ),
                   ],
                 ),
@@ -236,7 +249,7 @@ class _CarreraScreenState extends State<CarreraScreen> {
           ),
           Text(
             "Más información", // Primer texto
-            style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1),
+            style: AppTitleStyles.tarjeta(color: AppColorStyles.altTexto1),
           ),
           SizedBox(height: 15,),
           Text(
@@ -261,12 +274,12 @@ class _CarreraScreenState extends State<CarreraScreen> {
                 children: [
                   Icon(
                     Icons.link_outlined,
-                    color: AppColorStyles.blancoFondo,
+                    color: AppColorStyles.blanco,
                   ),
                   SizedBox(width: 8.0),
                   Text(
                     'Ir a la pagina web',
-                    style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo),
+                    style: AppTextStyles.botonMenor(color: AppColorStyles.blanco),
                   ),
                 ],
               ),

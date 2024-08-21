@@ -117,14 +117,22 @@ class AppTextStyles {
   }
 }
 class AppColorStyles {
-  static const Color oscuro1 = Color(0xFF1C1B1F);
-  static const Color oscuro2 = Color(0xFF464646);
+  static const Color oscuro1 = Color(0xFF2D2D2D);
+  static const Color oscuro2 = Color(0xFF535353);
   static const Color gris1 = Color(0xFF858585);
   static const Color gris2 = Color(0xFFA09CAB);
+
   static const Color verde1 = Color(0xFF003400);
   static const Color verde2 = Color(0xFF005A41);
-  static const Color verdeFondo = Color(0xFFF4FBF9);
+  static const Color verdeFondo = Color(0xFFF2FBF9);
   static const Color blancoFondo = Color(0xFFFFFFFF);
+
+  static const Color altFondo1 = Color(0xFFF5F5F5);
+  static const Color altTexto1 = Color(0xFF2D1B89);
+  static const Color altVerde1 = Color(0xFF9DBB1D);
+  static const Color altVerde2 = Color(0xFFBBE01E);
+  static const Color altFondo2 = Color(0xFFDACFFF);
+  static const Color blanco = Color(0xFFFFFFFF); 
 } 
 class AppIconStyles {
   static IconData? icono({String nombre = "circle"}) {
@@ -154,7 +162,6 @@ class AppIconStyles {
     return iconMap[nombre];
   }
 }
-
 class AppColorCustom {
   static Color color({String nombre = "A_6E51D9"}) {
     final Map<String, Color> colorMap = {
@@ -262,7 +269,7 @@ class AppBanderaStyles {
   }
 }
 class AppDecorationStyle {
-  static BoxDecoration campoContainer({Color color = AppColorStyles.blancoFondo}) {
+  static BoxDecoration campoContainer({Color color = AppColorStyles.blanco}) {
     return BoxDecoration(
       color: color,
       boxShadow: [
@@ -275,7 +282,7 @@ class AppDecorationStyle {
       borderRadius: BorderRadius.circular(5.0), // Bordes redondeados del Container
     );
   }
-  static BoxDecoration campoContainerForm({Color color = AppColorStyles.blancoFondo}) {
+  static BoxDecoration campoContainerForm({Color color = AppColorStyles.blanco}) {
     return BoxDecoration(
       color: color,
       boxShadow: [
@@ -285,7 +292,7 @@ class AppDecorationStyle {
     );
   }
   static BoxDecoration tarjeta({
-    Color color = AppColorStyles.blancoFondo,
+    Color color = AppColorStyles.blanco,
     BorderRadius? borderRadius,
     }) {
       return BoxDecoration(
@@ -296,7 +303,7 @@ class AppDecorationStyle {
         ],
       );
     }
-  static BoxDecoration desplegable({Color color = AppColorStyles.blancoFondo}) {
+  static BoxDecoration desplegable({Color color = AppColorStyles.blanco}) {
     return BoxDecoration(
       color: color, // Fondo blanco
       borderRadius: BorderRadius.circular(12), // Bordes redondeados de 5
@@ -310,18 +317,18 @@ class AppDecorationStyle {
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(5.0),
         borderSide: BorderSide(
-          color: AppColorStyles.verde2, // Color del borde
+          color: AppColorStyles.altTexto1, // Color del borde
           width: 1.0, // Ancho del borde
         ),
       ),
       hintText: hintText,
       labelText: labelText,
       floatingLabelBehavior: FloatingLabelBehavior.auto,
-      labelStyle: AppTextStyles.parrafo(color: AppColorStyles.verde2),
+      labelStyle: AppTextStyles.parrafo(color: AppColorStyles.altTexto1),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(5.0),
         borderSide: BorderSide(
-          color: AppColorStyles.verde2, // Color del borde cuando está enfocado
+          color: AppColorStyles.altTexto1, // Color del borde cuando está enfocado
           width: 2.0, // Ancho del borde cuando está enfocado
         ),
       ),
@@ -335,11 +342,11 @@ class AppDecorationStyle {
       hintText: hintText,
       labelText: labelText,
       floatingLabelBehavior: FloatingLabelBehavior.auto,
-      labelStyle: AppTextStyles.parrafo(color: AppColorStyles.verde2),
+      labelStyle: AppTextStyles.parrafo(color: AppColorStyles.altTexto1),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(5.0),
         borderSide: BorderSide(
-          color: AppColorStyles.verde2, // Color del borde cuando está enfocado
+          color: AppColorStyles.altTexto1, // Color del borde cuando está enfocado
           width: 2.0, // Ancho del borde cuando está enfocado
         ),
       ),
@@ -349,22 +356,22 @@ class AppDecorationStyle {
     return InputDecoration(
       contentPadding: EdgeInsets.all(15),
       enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: AppColorStyles.blancoFondo),
+        borderSide: BorderSide(color: AppColorStyles.blanco),
       ),
       hintText: hintText,
       labelText: labelText,
       floatingLabelBehavior: FloatingLabelBehavior.auto,
-      labelStyle: AppTextStyles.parrafo(color: AppColorStyles.verde2),
+      labelStyle: AppTextStyles.parrafo(color: AppColorStyles.altTexto1),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14.0),
         borderSide: BorderSide(
-          color: AppColorStyles.verde2, // Color del borde cuando está enfocado
+          color: AppColorStyles.altTexto1, // Color del borde cuando está enfocado
           width: 2.0, // Ancho del borde cuando está enfocado
         ),
       ),
     );
   }
-  static ButtonStyle botonContacto({Color color = AppColorStyles.verde2}) {
+  static ButtonStyle botonContacto({Color color = AppColorStyles.altTexto1}) {
     return ButtonStyle(
       backgroundColor: MaterialStateProperty.all<Color>(color), // Color de fondo del botón
       padding: MaterialStateProperty.all<EdgeInsetsGeometry>(EdgeInsets.symmetric(vertical: 9.0, horizontal: 15)), // Padding interno del botón
@@ -378,7 +385,7 @@ class AppDecorationStyle {
   }
   static ButtonStyle botonCursillo() {
     return ButtonStyle(
-      backgroundColor: MaterialStateProperty.all<Color>(AppColorStyles.verdeFondo), // Color de fondo del botón
+      backgroundColor: MaterialStateProperty.all<Color>(AppColorStyles.altFondo2), // Color de fondo del botón
       padding: MaterialStateProperty.all<EdgeInsetsGeometry>(EdgeInsets.symmetric(vertical: 9.0, horizontal: 15)), // Padding interno del botón
       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
         RoundedRectangleBorder(
@@ -387,7 +394,7 @@ class AppDecorationStyle {
       ),
     );
   }
-  static ButtonStyle botonBienvenida({colorFondo = AppColorStyles.verde1}) {
+  static ButtonStyle botonBienvenida({colorFondo = AppColorStyles.altTexto1}) {
     return ButtonStyle(
       backgroundColor: MaterialStateProperty.all<Color>(colorFondo), // Color de fondo del botón
       shape: MaterialStateProperty.all<RoundedRectangleBorder>(

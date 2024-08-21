@@ -77,12 +77,13 @@ class _ValidarEmailState extends State<ValidarEmail> {
     }
     _animacionCarga.setMostrar(false);
   }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColorStyles.verdeFondo,
+      backgroundColor: AppColorStyles.altFondo1,
       appBar: AppBar(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         leading: IconButton(
           icon: Icon(
             LucideIcons.chevronLeft,
@@ -94,7 +95,8 @@ class _ValidarEmailState extends State<ValidarEmail> {
         ),
       ),
       body: Container(
-        margin: EdgeInsets.only(right: 15, left: 15, bottom: 50),
+        margin: EdgeInsets.only(right: 15, left: 15, bottom: 80),
+        alignment: Alignment.topCenter,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -108,6 +110,7 @@ class _ValidarEmailState extends State<ValidarEmail> {
       ),
     );
   }
+  
   Widget _textoFooter(){
     return GestureDetector(
       onTap: () {
@@ -120,8 +123,8 @@ class _ValidarEmailState extends State<ValidarEmail> {
                 text: "¿No recibiste un código? ",
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: AppColorStyles.gris1)),
             TextSpan(
-                text: " Envialo de nuevo",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColorStyles.verde2)),
+                text: "Envialo de nuevo",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColorStyles.altTexto1)),
           ]),
         ),
       ),
@@ -136,10 +139,10 @@ class _ValidarEmailState extends State<ValidarEmail> {
         onPressed: () {
           verificarCuenta();
         },
-        style: AppDecorationStyle.botonBienvenida(),
+        style: AppDecorationStyle.botonBienvenida(colorFondo: AppColorStyles.altVerde1),
         child: Text(
           'Continuar',
-          style: AppTextStyles.botonMayor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.oscuro1),  // Estilo del texto del botón
         ),
       ),
     );
@@ -153,7 +156,7 @@ class _ValidarEmailState extends State<ValidarEmail> {
         fieldWidth: 50.0,
         borderRadius: BorderRadius.circular(14), // Ajusta el radio de borde para que sea más cuadrado
         keyboardType: TextInputType.number,
-        focusedBorderColor: AppColorStyles.verde2, 
+        focusedBorderColor: AppColorStyles.altTexto1, 
         onSubmit: (String verificationCode) {
           verificarCodigo(verificationCode);
         },
@@ -166,18 +169,19 @@ class _ValidarEmailState extends State<ValidarEmail> {
       child: Column(
         children: <Widget>[
           Center(
-            child: MyText.bodySmall(
+            child: Text(
               "Verificá tu correo ingresando el código enviado a: ",
               style: AppTextStyles.parrafo(),
               textAlign: TextAlign.center,
             ),
           ),
           Center(
-            child: MyText.bodySmall(
+            child: Text(
               _user.email!,
               style: TextStyle(
                 fontSize: 15,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
+                color: AppColorStyles.altTexto1
               ),
               textAlign: TextAlign.center,
             ),
@@ -202,7 +206,7 @@ class _ValidarEmailState extends State<ValidarEmail> {
       child: Center(
         child: MyText.titleLarge(
           "Verifiquemos que no sos un robot",
-          style: AppTitleStyles.onboarding(color: AppColorStyles.verde1),
+          style: AppTitleStyles.onboarding(color: AppColorStyles.altTexto1),
           textAlign: TextAlign.center,
         ),
       ),

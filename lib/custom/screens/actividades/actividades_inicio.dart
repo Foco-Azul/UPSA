@@ -14,7 +14,6 @@ import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ActividadesScreen extends StatefulWidget {
@@ -167,13 +166,13 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
       );
     } else {
       return Scaffold(
-      backgroundColor: AppColorStyles.verdeFondo,
+      backgroundColor: AppColorStyles.altFondo1,
       body: DefaultTabController(
         length: 4,
         initialIndex: 0,
         child: Scaffold(
           appBar: AppBar(
-            backgroundColor: AppColorStyles.verdeFondo,
+            backgroundColor: AppColorStyles.altFondo1,
             automaticallyImplyLeading: false,
             flexibleSpace: Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -184,31 +183,31 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
                     Tab(
                       child: Text(
                         "Eventos",
-                        style: AppTextStyles.botonMayor(color: AppColorStyles.verde1)
+                        style: AppTextStyles.botonMayor(color: AppColorStyles.altTexto1)
                       ),
                     ),
                     Tab(
                       child: Text(
                         "Clubes",
-                        style: AppTextStyles.botonMayor(color: AppColorStyles.verde1)
+                        style: AppTextStyles.botonMayor(color: AppColorStyles.altTexto1)
                       ),
                     ),
                     Tab(
                       child: Text(
                         "Concursos",
-                        style: AppTextStyles.botonMayor(color: AppColorStyles.verde1)
+                        style: AppTextStyles.botonMayor(color: AppColorStyles.altTexto1)
                       ),
                     ),
                     Tab(
                       child: Text(
                         "Quiz",
-                        style: AppTextStyles.botonMayor(color: AppColorStyles.verde1)
+                        style: AppTextStyles.botonMayor(color: AppColorStyles.altTexto1)
                       ),
                     ),
                   ],
                   tabAlignment: TabAlignment.start,
                   indicator: UnderlineTabIndicator(
-                    borderSide: BorderSide(color: AppColorStyles.verde1, width: 2.0),
+                    borderSide: BorderSide(color: AppColorStyles.altTexto1, width: 2.0),
                   ),
                 )
               ],
@@ -249,7 +248,7 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
       actividades = _quizPreguntaCategorizados;
     }
     return Scaffold(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -354,11 +353,11 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
           showCheckmark: false,
           avatar: Icon(
             AppIconStyles.icono(nombre: categorias[index].icono!), 
-            color: categorias[index].activo! ? AppColorStyles.blancoFondo : AppColorStyles.gris1
+            color: categorias[index].activo! ? AppColorStyles.blanco : AppColorStyles.gris2
           ),
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          selectedColor: AppColorStyles.verde2, 
-          backgroundColor: AppColorStyles.blancoFondo,
+          selectedColor: AppColorStyles.altTexto1, 
+          backgroundColor: AppColorStyles.blanco,
           label: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -366,7 +365,7 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
                 style: TextStyle(
                   fontSize: 8, 
                   fontWeight: FontWeight.bold,
-                  color: categorias[index].activo! ? AppColorStyles.blancoFondo : AppColorStyles.gris1
+                  color: categorias[index].activo! ? AppColorStyles.blanco : AppColorStyles.gris2
                 ),
               )
             ],
@@ -419,7 +418,7 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
           },
           shape: RoundedRectangleBorder(
             side: BorderSide(
-              color: AppColorStyles.blancoFondo, // Color del borde
+              color: AppColorStyles.blanco, // Color del borde
               width: 1.0, // Ancho del borde
             ),
             borderRadius: BorderRadius.circular(4), // Radio de borde

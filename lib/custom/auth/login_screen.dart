@@ -44,6 +44,7 @@ class _Login2ScreenState extends State<Login2Screen> {
     theme = AppTheme.theme;
     _animacionCarga = AnimacionCarga(context: context);
   }
+
   void _validarCamposLogin(){
     setState(() {
       _errorEmail = validacion.validarCorreo(_email, true);
@@ -93,12 +94,13 @@ class _Login2ScreenState extends State<Login2Screen> {
     }
     _animacionCarga.setMostrar(false);
   }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColorStyles.verdeFondo,
+      backgroundColor: AppColorStyles.altFondo1,
       appBar: AppBar(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         leading: IconButton(
           icon: Icon(
             LucideIcons.chevronLeft,
@@ -142,7 +144,7 @@ class _Login2ScreenState extends State<Login2Screen> {
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: AppColorStyles.gris1)),
               TextSpan(
                   text: " Recuperar contraseña",
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColorStyles.verde2)),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColorStyles.altTexto1)),
             ]),
           ),
         ),
@@ -164,7 +166,7 @@ class _Login2ScreenState extends State<Login2Screen> {
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: AppColorStyles.gris1)),
               TextSpan(
                   text: " Registrarse",
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColorStyles.verde2)),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColorStyles.altTexto1)),
             ]),
           ),
         ),
@@ -178,7 +180,7 @@ class _Login2ScreenState extends State<Login2Screen> {
           alignment: Alignment.centerLeft, 
           child: Text(
             "Ingresa con tu email",
-            style: AppTitleStyles.onboarding(color: AppColorStyles.verde1),
+            style: AppTitleStyles.onboarding(color: AppColorStyles.altTexto1),
             textAlign: TextAlign.start,
           ),
         ),
@@ -203,10 +205,10 @@ class _Login2ScreenState extends State<Login2Screen> {
         onPressed: () {
           _validarCamposLogin();
         },
-        style: AppDecorationStyle.botonBienvenida(),
+        style: AppDecorationStyle.botonBienvenida(colorFondo: AppColorStyles.altVerde1),
         child: Text(
           'Ingresar',
-          style: AppTextStyles.botonMayor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.oscuro1), // Estilo del texto del botón
         ),
       ),
     );
@@ -260,11 +262,11 @@ class _Login2ScreenState extends State<Login2Screen> {
                 hintText: "Contraseña",
                 labelText:  "Contraseña",
                 floatingLabelBehavior: FloatingLabelBehavior.auto,
-                labelStyle: AppTextStyles.parrafo(color: AppColorStyles.verde2),
+                labelStyle: AppTextStyles.parrafo(color: AppColorStyles.altTexto1),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(5.0),
                   borderSide: BorderSide(
-                    color: AppColorStyles.verde2, // Color del borde cuando está enfocado
+                    color: AppColorStyles.altTexto1, // Color del borde cuando está enfocado
                     width: 2.0, // Ancho del borde cuando está enfocado
                   ),
                 ),

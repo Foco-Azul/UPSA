@@ -102,12 +102,13 @@ class _Register2ScreenState extends State<Register2Screen> {
       Navigator.of(context).pop();
     }
   }
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold (
-      backgroundColor: AppColorStyles.verdeFondo,
+      backgroundColor: AppColorStyles.altFondo1,
       appBar: AppBar(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         leading: IconButton(
           icon: Icon(
             LucideIcons.chevronLeft,
@@ -136,6 +137,7 @@ class _Register2ScreenState extends State<Register2Screen> {
       )
     );
   }
+
   Widget _crearTextoInferior(){
     return GestureDetector(
       onTap: () {
@@ -151,7 +153,7 @@ class _Register2ScreenState extends State<Register2Screen> {
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: AppColorStyles.gris1)),
               TextSpan(
                   text: " Ingresar",
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColorStyles.verde2)),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColorStyles.altTexto1)),
             ]),
           ),
         ),
@@ -167,10 +169,10 @@ class _Register2ScreenState extends State<Register2Screen> {
         onPressed: () {
          _validarCamposRegister();
         },
-        style: AppDecorationStyle.botonBienvenida(),
+        style: AppDecorationStyle.botonBienvenida(colorFondo: AppColorStyles.altVerde1),
         child: Text(
           'Continuar',
-          style: AppTextStyles.botonMayor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.oscuro1), // Estilo del texto del botón
         ),
       ),
     );
@@ -195,11 +197,11 @@ class _Register2ScreenState extends State<Register2Screen> {
                 hintText: "Contraseña",
                 labelText:  "Contraseña",
                 floatingLabelBehavior: FloatingLabelBehavior.auto,
-                labelStyle: AppTextStyles.parrafo(color: AppColorStyles.verde2),
+                labelStyle: AppTextStyles.parrafo(color: AppColorStyles.altTexto1),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(5.0),
                   borderSide: BorderSide(
-                    color: AppColorStyles.verde2, // Color del borde cuando está enfocado
+                    color: AppColorStyles.altTexto1, // Color del borde cuando está enfocado
                     width: 2.0, // Ancho del borde cuando está enfocado
                   ),
                 ),
@@ -268,14 +270,14 @@ class _Register2ScreenState extends State<Register2Screen> {
           alignment: Alignment.centerLeft, 
           child: Text(
             "Registremos tu cuenta",
-            style: AppTitleStyles.onboarding(color: AppColorStyles.verde1),
+            style: AppTitleStyles.onboarding(color: AppColorStyles.altTexto1),
             textAlign: TextAlign.start,
           ),
         ),
         Text(
           'Posterior a tu registro, llenarás tu perfil para recibir recomendaciones vocacionales de carreras a estudiar.',
           style: TextStyle(
-            color: AppColorStyles.oscuro1,
+            color: AppColorStyles.oscuro2,
             fontSize: 15,
             fontWeight: FontWeight.normal,
           ),

@@ -27,9 +27,9 @@ class _ActualizacionScreenState extends State<ActualizacionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColorStyles.verdeFondo,
+      backgroundColor: AppColorStyles.altFondo1,
       appBar: AppBar(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         centerTitle: true,
         title: Text(
           "Actualizacción de app",
@@ -55,12 +55,12 @@ class _ActualizacionScreenState extends State<ActualizacionScreen> {
             children: [
               Icon(
                 Icons.app_shortcut_outlined, // Reemplaza con el icono que desees
-                color: AppColorStyles.verde1, // Ajusta el color si es necesario
+                color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
               ), 
               SizedBox(width: 4.0), // Espaciado entre el icono y el texto
               Text(
                 "Nueva versión DE NIBU disponbile".toUpperCase(), // Primer texto
-                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+                style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
               ),
             ]
           ),
@@ -72,13 +72,14 @@ class _ActualizacionScreenState extends State<ActualizacionScreen> {
                   alignment: Alignment.centerLeft,
                   child:  Text(
                     'Actualizá para contar con las siguientes novedades.',
-                    style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
+                    style: AppTextStyles.parrafo(color: AppColorStyles.oscuro1),
                   ),
                 ),
                 Container(
                   margin: EdgeInsets.only(top: 4,),
                   child: Divider(),
                 ),
+                //LISTA DE NOVEDADES
                 Container(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -104,15 +105,15 @@ class _ActualizacionScreenState extends State<ActualizacionScreen> {
                   await launchUrl(Uri.parse(_ios), mode: LaunchMode.externalApplication,);
                 }
               },
-              style: AppDecorationStyle.botonContacto(),
+              style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
               child: IntrinsicWidth(
                 child: Row(
                   children: [
-                    Icon(Icons.get_app_outlined, color: AppColorStyles.blancoFondo), // Icono a la izquierda
+                    Icon(Icons.get_app_outlined, color: AppColorStyles.altTexto1), // Icono a la izquierda
                     SizedBox(width: 8.0), // Espacio entre el icono y el texto
                     Text(
                       _isAndroid ? 'Actualizar en Google Play' : 'Actualizar en App Store',
-                      style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                      style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
                     ),
                   ],
                 ),

@@ -63,6 +63,7 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
     _animacionCarga = AnimacionCarga(context: context);
     _cargarDatos();
   }
+  
   void _cargarDatos() async { 
     setState(() {
       controller.uiLoading = true;
@@ -119,6 +120,7 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
     }
     _matriculate.masInformacion = nuevoMasInformacion;
   }
+  
   @override
   Widget build(BuildContext context) {
     if (controller.uiLoading) {
@@ -132,9 +134,9 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
             leading: IconButton(
             icon: Icon(
               LucideIcons.chevronLeft,
@@ -162,14 +164,14 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
         ),
         bottomNavigationBar: FlashyTabBar(
           iconSize: 24,
-          backgroundColor: AppColorStyles.blancoFondo,
+          backgroundColor: AppColorStyles.blanco,
           selectedIndex: 2,
           animationDuration: Duration(milliseconds: 500),
           showElevation: true,
           items: [
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.home_sharp),
               title: Text(
                 'Inicio',
@@ -177,8 +179,8 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.emoji_events_sharp),
               title: Text(
                 'Actividades',
@@ -186,8 +188,8 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.local_library_sharp),
               title: Text(
                 'Campus',
@@ -195,8 +197,8 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.push_pin_sharp),
               title: Text(
                 'Noticias',
@@ -204,8 +206,8 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.account_circle_sharp),
               title: Text(
                 'Mi perfil',
@@ -239,7 +241,7 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
         },
         children: data.map<ExpansionPanel>((dynamic item) {
           return ExpansionPanel(
-            backgroundColor: AppColorStyles.blancoFondo,
+            backgroundColor: AppColorStyles.blanco,
             headerBuilder: (BuildContext context, bool isExpanded) {
               return ListTile(
                 title: Text(item["headerValue"], style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.gris2)),
@@ -267,7 +269,7 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
         children: [
           Text(
             "Más información", // Primer texto
-            style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1),
+            style: AppTitleStyles.tarjeta(color: AppColorStyles.altTexto1),
           ),
           _crearListaDesplegables(),
         ],
@@ -286,12 +288,12 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
             children: [
               Icon(
                 Icons.assignment_outlined, // Reemplaza con el icono que desees
-                color: AppColorStyles.verde1, // Ajusta el color si es necesario
+                color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
               ), 
               SizedBox(width: 4.0), // Espaciado entre el icono y el texto
               Text(
                 "Tu camino comienza aquí".toUpperCase(), // Primer texto
-                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+                style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
               ),
             ]
           ),
@@ -300,7 +302,7 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
             child: Column(
               children: [
                 Text(
-                  "Sabemos que elegir una universidad es una de las decisiones más importantes de tu vida. Por eso, te invitamos a visitar nuestra área de Admisiones y descubrir cómo la UPSA será donde alcancés tus metas.",
+                  _matriculate.comoMatricularse!,
                   style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
                 ),
               ]
@@ -321,7 +323,7 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
                   style: AppDecorationStyle.botonContacto(),
                   child: Text(
                     'Instructivo',
-                    style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                    style: AppTextStyles.botonMenor(color: AppColorStyles.blanco), // Estilo del texto del botón
                   ),
                 ),
               ),
@@ -338,7 +340,7 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
                   style: AppDecorationStyle.botonContacto(),
                   child: Text(
                     'Llenar formulario',
-                    style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                    style: AppTextStyles.botonMenor(color: AppColorStyles.blanco), // Estilo del texto del botón
                   ),
                 ),
               )
@@ -360,14 +362,21 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
               children: [
                 Icon(
                   Icons.person_search_outlined, // Reemplaza con el icono que desees
-                  color: AppColorStyles.verde1, // Ajusta el color si es necesario
+                  color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
                 ), 
                 SizedBox(width: 4.0), // Espaciado entre el icono y el texto
                 Text(
                   "visita de inscripción".toUpperCase(), // Primer texto
-                  style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+                  style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
                 ),
               ]
+            ),
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 10.0), // Ajusta los valores del margen según sea necesario
+              child: Text(
+                _matriculate.ayuda!,
+                style: AppTextStyles.parrafo(),
+              ),
             ),
             Visibility(
               visible: _bandera,
@@ -380,7 +389,7 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
               ),
             ),
             Visibility(
-              visible: !_permitido,
+              visible: _isLoggedIn && !_permitido,
               child: Container(
                 margin: EdgeInsets.symmetric(vertical: 10.0), // Ajusta los valores del margen según sea necesario
                 child: Text(
@@ -395,8 +404,9 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
                 children: [
                   Container(
                     margin: EdgeInsets.symmetric(vertical: 10.0), // Ajusta los valores del margen según sea necesario
+                    alignment: Alignment.centerLeft,
                     child: Text(
-                      "Inicia tu proceso de inscripción agendando una cita mediante el siguiente formulario.",
+                      "Ingresa con tu cuenta para agendar una cita.",
                       style: AppTextStyles.parrafo(),
                     ),
                   ),
@@ -407,10 +417,10 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
                       onPressed: () {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => Login2Screen()));
                       },
-                      style: AppDecorationStyle.botonContacto(),
+                      style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
                       child: Text(
                         'Ingresar',
-                        style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                        style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
                       ),
                     ),
                   )
@@ -445,10 +455,10 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroIntereses()));
                       } 
                     },
-                    style: AppDecorationStyle.botonContacto(),
+                    style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
                     child: Text(
                       'Completar perfil',
-                      style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                      style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
                     ),
                   ),
                 )
@@ -467,19 +477,19 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
               children: [
                 Icon(
                   Icons.person_search_outlined, // Reemplaza con el icono que desees
-                  color: AppColorStyles.verde1, // Ajusta el color si es necesario
+                  color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
                 ), 
                 SizedBox(width: 4.0), // Espaciado entre el icono y el texto
                 Text(
                   "visita de inscripción".toUpperCase(), // Primer texto
-                  style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+                  style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
                 ),
               ]
             ),
             Container(
               margin: EdgeInsets.symmetric(vertical: 10.0), // Ajusta los valores del margen según sea necesario
               child: Text(
-                "Inicia tu proceso de inscripción agendando una cita mediante el siguiente formulario.",
+                _matriculate.ayuda!,
                 style: AppTextStyles.parrafo(),
               ),
             ),
@@ -585,7 +595,7 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
                     style: AppDecorationStyle.botonContacto(),
                     child: Text(
                       'Enviar',
-                      style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                      style: AppTextStyles.botonMenor(color: AppColorStyles.blanco), // Estilo del texto del botón
                     ),
                   ),
                 )
@@ -608,12 +618,12 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
             children: [
               Icon(
                 Icons.rocket_launch_outlined, // Reemplaza con el icono que desees
-                color: AppColorStyles.verde1, // Ajusta el color si es necesario
+                color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
               ), 
               SizedBox(width: 4.0), // Espaciado entre el icono y el texto
               Text(
                 "Llegá lejos".toUpperCase(), // Primer texto
-                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+                style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
               ),
             ]
           ),
@@ -625,7 +635,7 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
                   children: [
                     Icon(
                       Icons.check, // Reemplaza con el icono que desees
-                      color: AppColorStyles.verde1, // Ajusta el color si es necesario
+                      color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
                     ),
                     SizedBox(width: 8.0),
                     Flexible(

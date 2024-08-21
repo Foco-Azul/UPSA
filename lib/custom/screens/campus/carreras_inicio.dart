@@ -30,6 +30,7 @@ class _CarrerasInicioState extends State<CarrerasInicio> {
   late Timer timerAnimation;
   List<CarreraUpsa> _carrerasUpsa = [];
   final List<Categoria> _categorias = [];
+  
   @override
   void initState() {
     super.initState();
@@ -38,6 +39,7 @@ class _CarrerasInicioState extends State<CarrerasInicio> {
     controller = ProfileController();
     _cargarDatos();
   }
+  
   void _cargarDatos() async {
     setState(() {
       controller.uiLoading = true;
@@ -62,6 +64,7 @@ class _CarrerasInicioState extends State<CarrerasInicio> {
       }
     }
   }
+  
   @override
   Widget build(BuildContext context) {
     if (controller.uiLoading) {
@@ -75,9 +78,9 @@ class _CarrerasInicioState extends State<CarrerasInicio> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           leading: IconButton(
             icon: Icon(
               LucideIcons.chevronLeft,
@@ -103,14 +106,14 @@ class _CarrerasInicioState extends State<CarrerasInicio> {
         ),
         bottomNavigationBar: FlashyTabBar(
           iconSize: 24,
-          backgroundColor: AppColorStyles.blancoFondo,
+          backgroundColor: AppColorStyles.blanco,
           selectedIndex: 2,
           animationDuration: Duration(milliseconds: 500),
           showElevation: true,
           items: [
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.home_sharp),
               title: Text(
                 'Inicio',
@@ -118,8 +121,8 @@ class _CarrerasInicioState extends State<CarrerasInicio> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.emoji_events_sharp),
               title: Text(
                 'Actividades',
@@ -127,8 +130,8 @@ class _CarrerasInicioState extends State<CarrerasInicio> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.local_library_sharp),
               title: Text(
                 'Campus',
@@ -136,8 +139,8 @@ class _CarrerasInicioState extends State<CarrerasInicio> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.push_pin_sharp),
               title: Text(
                 'Noticias',
@@ -145,8 +148,8 @@ class _CarrerasInicioState extends State<CarrerasInicio> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.account_circle_sharp),
               title: Text(
                 'Mi perfil',
@@ -181,13 +184,13 @@ class _CarrerasInicioState extends State<CarrerasInicio> {
             children: [
               Icon(
                 AppIconStyles.icono(nombre: categoria.icono!), // Reemplaza con el icono que desees
-                color: AppColorStyles.verde1, // Ajusta el color si es necesario
+                color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
               ),
               SizedBox(width: 10.0), // Espaciado entre el icono y el texto
               Flexible(
                 child: Text(
                   categoria.nombre!.toUpperCase(), // Primer texto
-                  style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+                  style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
                   softWrap: true,
                   overflow: TextOverflow.visible,
                 ),

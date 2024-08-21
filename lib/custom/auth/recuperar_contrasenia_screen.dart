@@ -21,7 +21,6 @@ class _RecuperarContraseniaScreenState extends State<RecuperarContraseniaScreen>
   String _email = "";
   String _codigoDeVerificacion = "";
   String _password = "";
-
   String _errorEmail = "";
   String _errorCodigoDeVerificacion = "";
   String _errorPassword = "";
@@ -35,6 +34,7 @@ class _RecuperarContraseniaScreenState extends State<RecuperarContraseniaScreen>
     customTheme = AppTheme.customTheme;
     theme = AppTheme.theme;
   }
+
   void _verificarCuentaPorEmail() async{
     _errorEmail = validacion.validarCorreo(_email, true);
     if(_errorEmail.isEmpty){
@@ -75,12 +75,13 @@ class _RecuperarContraseniaScreenState extends State<RecuperarContraseniaScreen>
     }
     setState(() {});
   }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColorStyles.verdeFondo,
+      backgroundColor: AppColorStyles.altFondo1,
       appBar: AppBar(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         leading: IconButton(
           icon: Icon(
             LucideIcons.chevronLeft,
@@ -115,7 +116,7 @@ class _RecuperarContraseniaScreenState extends State<RecuperarContraseniaScreen>
           alignment: Alignment.centerLeft, 
           child: Text(
             "Cambia tu contraseña",
-            style: AppTitleStyles.onboarding(color: AppColorStyles.verde1),
+            style: AppTitleStyles.onboarding(color: AppColorStyles.altTexto1),
             textAlign: TextAlign.start,
           ),
         ),
@@ -149,10 +150,10 @@ class _RecuperarContraseniaScreenState extends State<RecuperarContraseniaScreen>
             _actualizarContrasenia();
           }
         },
-        style: AppDecorationStyle.botonBienvenida(),
+        style: AppDecorationStyle.botonBienvenida(colorFondo: AppColorStyles.altVerde1),
         child: Text(
           texto,
-          style: AppTextStyles.botonMayor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.oscuro1), // Estilo del texto del botón
         ),
       ),
     );
@@ -214,11 +215,11 @@ class _RecuperarContraseniaScreenState extends State<RecuperarContraseniaScreen>
                 hintText: "Contraseña",
                 labelText:  "Contraseña",
                 floatingLabelBehavior: FloatingLabelBehavior.auto,
-                labelStyle: AppTextStyles.parrafo(color: AppColorStyles.verde2),
+                labelStyle: AppTextStyles.parrafo(color: AppColorStyles.altTexto1),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(5.0),
                   borderSide: BorderSide(
-                    color: AppColorStyles.verde2, // Color del borde cuando está enfocado
+                    color: AppColorStyles.altTexto1, // Color del borde cuando está enfocado
                     width: 2.0, // Ancho del borde cuando está enfocado
                   ),
                 ),

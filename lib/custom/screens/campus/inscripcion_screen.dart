@@ -108,9 +108,9 @@ class _TestVocacionalScreenState extends State<TestVocacionalScreen> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           leading: IconButton(
             icon: Icon(
               LucideIcons.chevronLeft,
@@ -136,14 +136,14 @@ class _TestVocacionalScreenState extends State<TestVocacionalScreen> {
         ),
         bottomNavigationBar: FlashyTabBar(
           iconSize: 24,
-          backgroundColor: AppColorStyles.blancoFondo,
+          backgroundColor: AppColorStyles.blanco,
           selectedIndex: 2,
           animationDuration: Duration(milliseconds: 500),
           showElevation: true,
           items: [
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.home_sharp),
               title: Text(
                 'Inicio',
@@ -151,8 +151,8 @@ class _TestVocacionalScreenState extends State<TestVocacionalScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.emoji_events_sharp),
               title: Text(
                 'Actividades',
@@ -160,8 +160,8 @@ class _TestVocacionalScreenState extends State<TestVocacionalScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.local_library_sharp),
               title: Text(
                 'Campus',
@@ -169,8 +169,8 @@ class _TestVocacionalScreenState extends State<TestVocacionalScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.push_pin_sharp),
               title: Text(
                 'Noticias',
@@ -178,8 +178,8 @@ class _TestVocacionalScreenState extends State<TestVocacionalScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.account_circle_sharp),
               title: Text(
                 'Mi perfil',
@@ -206,12 +206,12 @@ class _TestVocacionalScreenState extends State<TestVocacionalScreen> {
             children: [
               Icon(
                 Icons.assignment_outlined, // Reemplaza con el icono que desees
-                color: AppColorStyles.verde1, // Ajusta el color si es necesario
+                color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
               ), 
               SizedBox(width: 4.0), // Espaciado entre el icono y el texto
               Text(
                 "test de orientación vocacional".toUpperCase(), // Primer texto
-                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+                style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
               ),
             ]
           ),
@@ -242,12 +242,12 @@ class _TestVocacionalScreenState extends State<TestVocacionalScreen> {
               children: [
                 Icon(
                   Icons.person_search_outlined, // Reemplaza con el icono que desees
-                  color: AppColorStyles.verde1, // Ajusta el color si es necesario
+                  color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
                 ), 
                 SizedBox(width: 4.0), // Espaciado entre el icono y el texto
                 Text(
                   "Solicitar test".toUpperCase(), // Primer texto
-                  style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+                  style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
                 ),
               ]
             ),
@@ -292,7 +292,7 @@ class _TestVocacionalScreenState extends State<TestVocacionalScreen> {
                       style: AppDecorationStyle.botonContacto(),
                       child: Text(
                         'Ingresar',
-                        style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                        style: AppTextStyles.botonMenor(color: AppColorStyles.blanco), // Estilo del texto del botón
                       ),
                     ),
                   )
@@ -330,7 +330,7 @@ class _TestVocacionalScreenState extends State<TestVocacionalScreen> {
                     style: AppDecorationStyle.botonContacto(),
                     child: Text(
                       'Completar perfil',
-                      style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                      style: AppTextStyles.botonMenor(color: AppColorStyles.blanco), // Estilo del texto del botón
                     ),
                   ),
                 )
@@ -349,12 +349,12 @@ class _TestVocacionalScreenState extends State<TestVocacionalScreen> {
               children: [
                 Icon(
                   Icons.person_search_outlined, // Reemplaza con el icono que desees
-                  color: AppColorStyles.verde1, // Ajusta el color si es necesario
+                  color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
                 ), 
                 SizedBox(width: 4.0), // Espaciado entre el icono y el texto
                 Text(
                   "Solicitar test".toUpperCase(), // Primer texto
-                  style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+                  style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
                 ),
               ]
             ),
@@ -475,7 +475,7 @@ class _TestVocacionalScreenState extends State<TestVocacionalScreen> {
                     style: AppDecorationStyle.botonContacto(),
                     child: Text(
                       'Enviar',
-                      style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                      style: AppTextStyles.botonMenor(color: AppColorStyles.blanco), // Estilo del texto del botón
                     ),
                   ),
                 )

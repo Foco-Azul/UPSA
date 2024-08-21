@@ -110,9 +110,9 @@ class _ContactoScreenState extends State<ContactoScreen> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           leading: IconButton(
             icon: Icon(
               LucideIcons.chevronLeft,
@@ -141,14 +141,14 @@ class _ContactoScreenState extends State<ContactoScreen> {
         ),
         bottomNavigationBar: FlashyTabBar(
           iconSize: 24,
-          backgroundColor: AppColorStyles.blancoFondo,
+          backgroundColor: AppColorStyles.blanco,
           selectedIndex: 2,
           animationDuration: Duration(milliseconds: 500),
           showElevation: true,
           items: [
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.home_sharp),
               title: Text(
                 'Inicio',
@@ -156,8 +156,8 @@ class _ContactoScreenState extends State<ContactoScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.emoji_events_sharp),
               title: Text(
                 'Actividades',
@@ -165,8 +165,8 @@ class _ContactoScreenState extends State<ContactoScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.local_library_sharp),
               title: Text(
                 'Campus',
@@ -174,8 +174,8 @@ class _ContactoScreenState extends State<ContactoScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.push_pin_sharp),
               title: Text(
                 'Noticias',
@@ -183,8 +183,8 @@ class _ContactoScreenState extends State<ContactoScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.account_circle_sharp),
               title: Text(
                 'Mi perfil',
@@ -212,7 +212,7 @@ class _ContactoScreenState extends State<ContactoScreen> {
               margin: EdgeInsets.symmetric(vertical: 15.0), // Ajusta los valores del margen según sea necesario
               child: Text(
                 "Formulario de contacto".toUpperCase(), // Primer texto
-                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+                style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
               ),
             ),
             Container(
@@ -237,7 +237,7 @@ class _ContactoScreenState extends State<ContactoScreen> {
               margin: EdgeInsets.symmetric(vertical: 15.0), // Ajusta los valores del margen según sea necesario
               child: Text(
                 "Formulario de contacto".toUpperCase(), // Primer texto
-                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+                style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
               ),
             ),
             if(_contacto.descripcionFormularioContacto!.isNotEmpty && _contacto.descripcionFormularioContacto! != " ")
@@ -331,10 +331,10 @@ class _ContactoScreenState extends State<ContactoScreen> {
                     onPressed: () {
                       _validarCamposLogin();
                     },
-                    style: AppDecorationStyle.botonContacto(),
+                    style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
                     child: Text(
                       'Enviar',
-                      style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                      style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
                     ),
                   ),
                 )
@@ -365,7 +365,7 @@ class _ContactoScreenState extends State<ContactoScreen> {
         children: [
           Text(
             titulo.toUpperCase(), // Primer texto
-            style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+            style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
           ),
           //SizedBox(height: 10),
           Column(
@@ -385,7 +385,7 @@ class _ContactoScreenState extends State<ContactoScreen> {
                     children: [
                       Icon(
                         AppIconStyles.icono(nombre: aux[index]["icono"]), // Reemplaza con el icono que desees
-                        color: AppColorStyles.verde1, // Ajusta el color si es necesario
+                        color: AppColorStyles.oscuro2, // Ajusta el color si es necesario
                       ),
                       SizedBox(width: 4.0),
                       Text(

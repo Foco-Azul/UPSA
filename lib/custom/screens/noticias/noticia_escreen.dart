@@ -52,6 +52,7 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
     controller = ProfileController();
     _cargarDatos();
   }
+  
   void _cargarDatos() async {
     setState(() {
       controller.uiLoading = true;
@@ -89,6 +90,7 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
     }
     _otrasNoticias = aux;
   } 
+  
   @override
   Widget build(BuildContext context) {
     if (controller.uiLoading) {
@@ -102,9 +104,9 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
-           backgroundColor: AppColorStyles.verdeFondo,
+           backgroundColor: AppColorStyles.altFondo1,
           leading: IconButton(
             icon: Icon(
               LucideIcons.chevronLeft,
@@ -134,7 +136,6 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
             children: <Widget>[
               _breadcrumbs(),
               _crearGaleriaImagenes(),
-              //_bannerNoticia(),
               _contenedorDescripcion(),
               _crearSeguimientoOpcional(_otrasNoticias.isNotEmpty),
             ],
@@ -142,14 +143,14 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
         ),
         bottomNavigationBar: FlashyTabBar(
           iconSize: 24,
-          backgroundColor: AppColorStyles.blancoFondo,
+          backgroundColor: AppColorStyles.blanco,
           selectedIndex: 3,
           animationDuration: Duration(milliseconds: 500),
           showElevation: true,
           items: [
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.home_sharp),
               title: Text(
                 'Inicio',
@@ -157,8 +158,8 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.emoji_events_sharp),
               title: Text(
                 'Actividades',
@@ -166,8 +167,8 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.local_library_sharp),
               title: Text(
                 'Campus',
@@ -175,8 +176,8 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.push_pin_sharp),
               title: Text(
                 'Noticias',
@@ -184,8 +185,8 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.account_circle_sharp),
               title: Text(
                 'Mi perfil',
@@ -200,6 +201,7 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
       );
     }
   } 
+
   Widget _crearGaleriaImagenes(){
     return Container(
       margin: EdgeInsets.all(15), 
@@ -233,19 +235,19 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
       )
     );
   }
-   Widget _buildPageIndicatorStatic() {
+  Widget _buildPageIndicatorStatic() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4), // Padding interno del contenedor
           decoration: BoxDecoration(
-            color: AppColorStyles.verde2, // Color de fondo del contenedor
+            color: AppColorStyles.altTexto1, // Color de fondo del contenedor
             borderRadius: BorderRadius.circular(24.0), // Borde redondeado con radio de 24
           ),
           child: Text(
             '${_currentPage + 1}/${_noticia.imagenes!.length}',
-            style: AppTextStyles.etiqueta(color: AppColorStyles.blancoFondo)
+            style: AppTextStyles.etiqueta(color: AppColorStyles.blanco)
           ),
         ),
       ],
@@ -283,8 +285,8 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Seguimiento",
-              style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1)
+              "Más noticias",
+              style: AppTitleStyles.tarjeta(color: AppColorStyles.altTexto1)
             ),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -339,12 +341,12 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
                     children: [
                       Icon(
                         LucideIcons.externalLink,
-                        color: AppColorStyles.blancoFondo
+                        color: AppColorStyles.blanco
                       ),
                       SizedBox(width: 8.0), // Espacio entre el icono y el texto
                       Text(
                         'Ver nota completa',
-                        style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                        style: AppTextStyles.botonMenor(color: AppColorStyles.blanco), // Estilo del texto del botón
                       ),
                     ],
                   ),
@@ -372,7 +374,7 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
               },
               child: Text(
                 "#${etiquetas[index].nombre}",
-                style: AppTextStyles.parrafo(color: AppColorStyles.verde1),
+                style: AppTextStyles.parrafo(color: AppColorStyles.altTexto1),
               ),
             );
           },

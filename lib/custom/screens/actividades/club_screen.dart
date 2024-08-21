@@ -125,7 +125,7 @@ class _ClubScreenState extends State<ClubScreen> {
   void _dejarDeSeguirActividad() async {
     _animacionCarga.setMostrar(true);
     _club.seguidores!.remove(_user.id!);
-    await ApiService().setEventoSeguidores(_user.id!, _club.seguidores!);
+    await ApiService().setClubSeguidores(_club.id!, _club.seguidores!);
     setState(() {
       _siguiendo = false;
     });
@@ -169,9 +169,9 @@ class _ClubScreenState extends State<ClubScreen> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           leading: IconButton(
             icon: Icon(
               LucideIcons.chevronLeft,
@@ -211,14 +211,14 @@ class _ClubScreenState extends State<ClubScreen> {
         ),
         bottomNavigationBar: FlashyTabBar(
           iconSize: 24,
-          backgroundColor: AppColorStyles.blancoFondo,
+          backgroundColor: AppColorStyles.blanco,
           selectedIndex: 1,
           animationDuration: Duration(milliseconds: 500),
           showElevation: true,
           items: [
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.home_sharp),
               title: Text(
                 'Inicio',
@@ -226,8 +226,8 @@ class _ClubScreenState extends State<ClubScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.emoji_events_sharp),
               title: Text(
                 'Actividades',
@@ -235,8 +235,8 @@ class _ClubScreenState extends State<ClubScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.local_library_sharp),
               title: Text(
                 'Campus',
@@ -244,8 +244,8 @@ class _ClubScreenState extends State<ClubScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.push_pin_sharp),
               title: Text(
                 'Noticias',
@@ -253,8 +253,8 @@ class _ClubScreenState extends State<ClubScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.account_circle_sharp),
               title: Text(
                 'Mi perfil',
@@ -280,7 +280,7 @@ class _ClubScreenState extends State<ClubScreen> {
           children: [
             Text(
               "Seguimiento",
-              style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1)
+              style: AppTitleStyles.tarjeta(color: AppColorStyles.altTexto1)
             ),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -311,7 +311,7 @@ class _ClubScreenState extends State<ClubScreen> {
             children: [
               Text(
                 "INICIA",
-                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+                style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1)
               ),
               Text(
                 inicio,
@@ -325,7 +325,7 @@ class _ClubScreenState extends State<ClubScreen> {
             children: [
               Text(
                 "FINALIZA",
-                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+                style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1)
               ),
               Text(
                 fin,
@@ -384,7 +384,7 @@ class _ClubScreenState extends State<ClubScreen> {
               children: [
                 Text(
                   "Ingreso",
-                  style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1)
+                  style: AppTitleStyles.tarjeta(color: AppColorStyles.altTexto1)
                 ),
                 SizedBox(width: 8), // Espacio entre el texto y el icono
                 Row(
@@ -401,12 +401,12 @@ class _ClubScreenState extends State<ClubScreen> {
                           Icon(
                             _ingresoMostrado ? Icons.remove_red_eye_outlined : Icons.visibility_off_outlined,
                             size: 24,
-                            color: AppColorStyles.verde1,
+                            color: AppColorStyles.altTexto1,
                           ),
                           SizedBox(width: 8.0), // Espacio entre el icono y el texto
                           Text(
                             _ingresoMostrado ? 'Clic para ocultar' : 'Click para mostrar', // Texto que cambia según _ingresoMostrado
-                            style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.verde1)
+                            style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.altTexto1)
                           ),
                         ],
                       ),
@@ -472,7 +472,7 @@ class _ClubScreenState extends State<ClubScreen> {
                 margin: EdgeInsets.only(bottom: 15),
                 child: Text(
                   "Inscrito",
-                  style: AppTextStyles.parrafo(),
+                  style: AppTextStyles.parrafo(color: AppColorStyles.altTexto1),
                 ),
               ), 
             ),
@@ -497,14 +497,14 @@ class _ClubScreenState extends State<ClubScreen> {
                   onPressed: () {
                     _showBottomSheet(context);
                   },
-                  style: AppDecorationStyle.botonContacto(),
+                  style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
                   child: Row(
                     children: [
-                      Icon(LucideIcons.logIn, color: AppColorStyles.blancoFondo), // Icono a la izquierda
+                      Icon(LucideIcons.logIn, color: AppColorStyles.altTexto1), // Icono a la izquierda
                       SizedBox(width: 8.0), // Espacio entre el icono y el texto
                       Text(
                         'Inscribirse',
-                        style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                        style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
                       )
                     ]
                   ),
@@ -520,14 +520,14 @@ class _ClubScreenState extends State<ClubScreen> {
                   onPressed: () {
                     _dejarDeSeguirActividad();
                   },
-                  style: AppDecorationStyle.botonContacto(),
+                  style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
                   child: Row(
                     children: [
-                      Icon(LucideIcons.bellRing, color: AppColorStyles.blancoFondo), // Icono a la izquierda
+                      Icon(LucideIcons.bellRing, color: AppColorStyles.altTexto1), // Icono a la izquierda
                       SizedBox(width: 8.0), // Espacio entre el icono y el texto
                       Text(
                         'Dejar de seguir',
-                        style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                        style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
                       ),
                     ]
                   )
@@ -543,14 +543,14 @@ class _ClubScreenState extends State<ClubScreen> {
                   onPressed: () {
                     _seguirActividad();
                   },
-                  style: AppDecorationStyle.botonContacto(),
+                  style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
                   child: Row(
                     children: [
-                      Icon(LucideIcons.bellRing, color: AppColorStyles.blancoFondo),// Icono a la izquierda
+                      Icon(LucideIcons.bellRing, color: AppColorStyles.altTexto1),// Icono a la izquierda
                       SizedBox(width: 8.0), // Espacio entre el icono y el texto
                       Text(
                         'Seguir',
-                        style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                        style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
                       ),
                     ]
                   )
@@ -685,7 +685,7 @@ class _ClubScreenState extends State<ClubScreen> {
           children: [
             Text(
               "Info",
-              style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1)
+              style: AppTitleStyles.tarjeta(color: AppColorStyles.altTexto1)
             ),
             ListView.builder(
               shrinkWrap: true,
@@ -699,7 +699,7 @@ class _ClubScreenState extends State<ClubScreen> {
                     children: [
                       Text(
                         _club.calendario![index]["titulo"]!,
-                        style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.verde1),
+                        style: AppTitleStyles.tarjetaMenor(),
                       ),
                       Visibility(
                         visible: calendarios[index]["descripcion"].toString().isNotEmpty,
@@ -745,7 +745,7 @@ class _ClubScreenState extends State<ClubScreen> {
               },
               child: Text(
                 "#${etiquetas[index].nombre}",
-                style: AppTextStyles.parrafo(color: AppColorStyles.verde1),
+                style: AppTextStyles.parrafo(color: AppColorStyles.altTexto1),
               ),
             );
           },
@@ -783,12 +783,12 @@ class _ClubScreenState extends State<ClubScreen> {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4), // Padding interno del contenedor
           decoration: BoxDecoration(
-            color: AppColorStyles.verde2, // Color de fondo del contenedor
+            color: AppColorStyles.altTexto1, // Color de fondo del contenedor
             borderRadius: BorderRadius.circular(24.0), // Borde redondeado con radio de 24
           ),
           child: Text(
             '${_currentPage + 1}/${_club.imagenes!.length}',
-            style: AppTextStyles.etiqueta(color: AppColorStyles.blancoFondo)
+            style: AppTextStyles.etiqueta(color: AppColorStyles.blanco)
           ),
         ),
       ],

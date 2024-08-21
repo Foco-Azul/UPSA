@@ -32,6 +32,7 @@ class _InicioScreenState extends State<InicioScreen> {
   String _backUrl = "";
   User _user = User();
   bool _isLoggedIn = false;
+  
   @override
   void initState() {
     super.initState();
@@ -93,7 +94,7 @@ class _InicioScreenState extends State<InicioScreen> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         body: ListView(
           children: [
             _crearListaTarjetas(), 
@@ -102,6 +103,7 @@ class _InicioScreenState extends State<InicioScreen> {
       );
     }
   }
+
   Widget _crearListaTarjetas() {
     List<Widget> tarjetas = _contenido.map((item) => _crearTarjeta(item)).toList();
     return Column(
@@ -117,12 +119,12 @@ class _InicioScreenState extends State<InicioScreen> {
         children: [
           MyText(
             tipo.toUpperCase(),
-            style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+            style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1)
           ),
-          Icon(LucideIcons.dot, color: AppColorStyles.verde1),
+          Icon(LucideIcons.dot, color: AppColorStyles.altTexto1),
           MyText(
             categoria.toUpperCase(),
-            style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+            style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1)
           ),
         ],
       ),
@@ -148,7 +150,7 @@ class _InicioScreenState extends State<InicioScreen> {
         margin: EdgeInsets.all(15), // Añadir margen superior si es necesario
         padding: EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: AppColorStyles.blancoFondo, // Fondo blanco
+          color: AppColorStyles.blanco, // Fondo blanco
           borderRadius: BorderRadius.circular(5), // Bordes redondeados de 5
           boxShadow: [
             AppSombra.tarjeta(),

@@ -29,7 +29,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       margin: MySpacing.symmetric(horizontal: 4.0),
       height: 8.0,
       width: 8,
-      decoration: BoxDecoration(color: isActive ? AppColorStyles.verde2 : AppColorStyles.gris2,
+      decoration: BoxDecoration(color: isActive ? AppColorStyles.altVerde1 : AppColorStyles.gris2,
         borderRadius: BorderRadius.all(Radius.circular(4)),
       ),
     );
@@ -41,7 +41,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColorStyles.verdeFondo,
+      backgroundColor: AppColorStyles.altFondo1,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
@@ -62,10 +62,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           Provider.of<AppNotifier>(context, listen: false).setEsNuevo(false);
           Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => PostBienvenidaScreen()),(Route<dynamic> route) => false);
         },
-        style: AppDecorationStyle.botonBienvenida(),
+        style: AppDecorationStyle.botonBienvenida(colorFondo: AppColorStyles.altVerde1),
         child: Text(
           'Comencemos',
-          style: AppTextStyles.botonMayor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18, color: AppColorStyles.oscuro1), // Estilo del texto del botón
         ),
       ),
     );
@@ -95,17 +95,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           _crearContenido(
             'lib/custom/assets/images/bienvenida_1.png',
             'Conectate con tu nueva vida universitaria',
-            'Econtrá las últimas novedades, becas y eventos para bachilleres como vos.'
+            'Enterate de las novedades de la Universidad y participá de eventos para bachilleres como vos.'
           ),
           _crearContenido(
             'lib/custom/assets/images/bienvenida_2.png',
             'Participá junto a tu promo',
-            'Sus memorias aparecerán en tu perfil, junto a tus actividades a participar.'
+            'Accedé a las memorias fotográficas de tu Promo en la UPSA desde tu perfil.'
           ),
           _crearContenido(
             'lib/custom/assets/images/bienvenida_3.png',
             'Preparate para tu futuro',
-            'Junto a nuestros cursillos, quizzes e info de carreras, podrás estar mejor preparado para tu formación académica.'
+            'Accedé a nuestros cursillos en línea, quizzes especiales e info de carreras, para estar mejor preparado para tu formación académica.'
           ),
         ],
       ),
@@ -127,11 +127,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   fit: BoxFit.cover,
                 ),
               ),
-              Text(titulo, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: AppColorStyles.verde1, height: 1,), textAlign: TextAlign.center,),
+              Text(titulo, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: AppColorStyles.altTexto1, height: 1,), textAlign: TextAlign.center,),
               SizedBox(
                 height: 20,
               ),
-              Text(descripcion, style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15, color: AppColorStyles.gris1, height: 1.5), textAlign: TextAlign.center),
+              Text(descripcion, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 15, color: AppColorStyles.gris1, height: 1.5), textAlign: TextAlign.center),
             ],
           ),
         ],

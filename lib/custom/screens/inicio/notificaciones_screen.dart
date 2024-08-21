@@ -16,6 +16,7 @@ import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/helpers/widgets/my_text.dart';
+import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -81,9 +82,9 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           leading: IconButton(
             icon: Icon(Icons.arrow_back_ios_new),
             onPressed: () {
@@ -143,7 +144,7 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
         children: [
           MyText(
             tipo.toUpperCase(),
-            style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+            style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1)
           ),
         ],
       ),
@@ -179,24 +180,20 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
             if(item.tipoContenido == "nueva insignia"){
               Navigator.push(context, MaterialPageRoute(builder: (context) => PerfilScreen()));
             }
+          }else{
+            if(item.tipoNotificacion == "personalizado"){
+              if(item.tipoContenido == "nueva insignia"){
+                Navigator.push(context, MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)));
+              }
+            }
           }
         }
-        /*
-        switch (item['tipo']) {
-          case "Noticias":
-            Navigator.push(context, MaterialPageRoute(builder: (context) => NoticiaScreen(idNoticia: item.id!,)));
-            break;
-          default:
-            print("Error");
-            break;
-        }
-        */
       },
       child: Container(
         margin: EdgeInsets.all(15), // Añadir margen superior si es necesario
         padding: EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: AppColorStyles.blancoFondo, // Fondo blanco
+          color: AppColorStyles.blanco, // Fondo blanco
           borderRadius: BorderRadius.circular(5), // Bordes redondeados de 5
           boxShadow: [
             AppSombra.tarjeta(),

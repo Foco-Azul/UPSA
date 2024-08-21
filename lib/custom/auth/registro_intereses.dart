@@ -99,9 +99,9 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           leading: IconButton(
             icon: Icon(
               LucideIcons.chevronLeft,
@@ -163,25 +163,26 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
         onPressed: () {
          _validarCampos();
         },
-        style: AppDecorationStyle.botonBienvenida(),
+        style: AppDecorationStyle.botonBienvenida(colorFondo: AppColorStyles.altVerde1),
         child: Text(
           'Finalizar llenado',
-          style: AppTextStyles.botonMayor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.oscuro1),// Estilo del texto del botón
         ),
       ),
     );
   }
   Widget _crearDescripcion(){
     return Container(
+      margin: EdgeInsets.symmetric(vertical: 15),
       alignment: Alignment.centerLeft,
       child: Text(
-        'Juramos, es la última pantalla.',
+        'Te juramos que es el último paso.',
         style: TextStyle(
           color: AppColorStyles.oscuro1,
           fontSize: 15,
           fontWeight: FontWeight.normal,
         ),
-      )
+      ),
     );
   }
   Widget _crearTitulo() {
@@ -189,7 +190,7 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
       alignment: Alignment.centerLeft,
       child: Text(
         "¿Cuáles son tus intereses?",
-        style: AppTitleStyles.onboarding(color: AppColorStyles.verde1),
+        style: AppTitleStyles.onboarding(color: AppColorStyles.altTexto1),
       ),
     );
   }
@@ -197,19 +198,20 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
     List<Widget> choices = [];
     for (var item in _intereses) {
       choices.add(Container(
-        padding: MySpacing.only(left: 0, right: 8, bottom: 16),
+        margin: EdgeInsets.only(left: 0, right: 8, bottom: 16),
+        decoration: AppDecorationStyle.tarjeta(),
         child: ChoiceChip(
-          backgroundColor: AppColorStyles.blancoFondo,
+          backgroundColor: AppColorStyles.blanco,
           avatar: _userMeta.intereses!.contains(item.id!) ? Icon(Icons.check_circle_outline) : Icon(Icons.circle_outlined),
-          checkmarkColor: AppColorStyles.blancoFondo,
+          checkmarkColor: AppColorStyles.blanco,
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          selectedColor: AppColorStyles.verde2,
+          selectedColor: AppColorStyles.altTexto1,
           label: Text(
             item.nombre!,
             style: TextStyle(
               color: _userMeta.intereses!.contains(item.id!)
-              ? AppColorStyles.blancoFondo
-              : AppColorStyles.verde2
+              ? AppColorStyles.blanco
+              : AppColorStyles.gris1
             ),
           ),
           selected: _userMeta.intereses!.contains(item.id!),
@@ -222,7 +224,7 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
           },
           shape: RoundedRectangleBorder(
             side: BorderSide(
-              color: AppColorStyles.verde2, // Color del borde
+              color: AppColorStyles.altTexto1, // Color del borde
               width: 1.0, // Ancho del borde
             ),
             borderRadius: BorderRadius.circular(5), // Radio de borde

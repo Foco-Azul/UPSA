@@ -116,7 +116,7 @@ class _EventoScreenState extends State<EventoScreen> {
   void _dejarDeSeguirActividad() async {
     _animacionCarga.setMostrar(true);
     _evento.seguidores!.remove(_user.id!);
-    await ApiService().setEventoSeguidores(_user.id!, _evento.seguidores!);
+    await ApiService().setEventoSeguidores(_evento.id!, _evento.seguidores!);
     setState(() {
       _siguiendo = false;
     });
@@ -160,9 +160,9 @@ class _EventoScreenState extends State<EventoScreen> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
-           backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           leading: IconButton(
             icon: Icon(
               LucideIcons.chevronLeft,
@@ -203,14 +203,14 @@ class _EventoScreenState extends State<EventoScreen> {
         ),
         bottomNavigationBar: FlashyTabBar(
           iconSize: 24,
-          backgroundColor: AppColorStyles.blancoFondo,
+          backgroundColor: AppColorStyles.blanco,
           selectedIndex: 1,
           animationDuration: Duration(milliseconds: 500),
           showElevation: true,
           items: [
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.home_sharp),
               title: Text(
                 'Inicio',
@@ -218,8 +218,8 @@ class _EventoScreenState extends State<EventoScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.emoji_events_sharp),
               title: Text(
                 'Actividades',
@@ -227,8 +227,8 @@ class _EventoScreenState extends State<EventoScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.local_library_sharp),
               title: Text(
                 'Campus',
@@ -236,8 +236,8 @@ class _EventoScreenState extends State<EventoScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.push_pin_sharp),
               title: Text(
                 'Noticias',
@@ -245,8 +245,8 @@ class _EventoScreenState extends State<EventoScreen> {
               ),
             ),
             FlashyTabBarItem(
-              inactiveColor: AppColorStyles.verde1,
-              activeColor: AppColorStyles.verde1,
+              inactiveColor: AppColorStyles.altTexto1,
+              activeColor: AppColorStyles.altTexto1,
               icon: Icon(Icons.account_circle_sharp),
               title: Text(
                 'Mi perfil',
@@ -276,12 +276,12 @@ class _EventoScreenState extends State<EventoScreen> {
               children: [
                 Icon(
                   Icons.live_help_outlined, // Reemplaza con el icono que desees
-                  color: AppColorStyles.verde1, // Ajusta el color si es necesario
+                  color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
                 ), 
                 SizedBox(width: 4.0), // Espaciado entre el icono y el texto
                 Text(
                   "retroalimentación".toUpperCase(), // Primer texto
-                  style: AppTextStyles.etiqueta(color: AppColorStyles.verde1),
+                  style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
                 ),
               ]
             ),
@@ -290,8 +290,8 @@ class _EventoScreenState extends State<EventoScreen> {
               child: Column(
                 children: [
                   Text(
-                    "¿Que opinaste del evento? Dejanos tu opinión para que podamos mejorar nuestras actividades.",
-                    style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
+                    "¿Qué te pareció el evento? Dejanos tu opinión para que podamos mejorar.",
+                    style: AppTextStyles.parrafo(color: AppColorStyles.oscuro1),
                   ),
                 ]
               ),
@@ -302,10 +302,10 @@ class _EventoScreenState extends State<EventoScreen> {
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => RetroalimentacionScreen(id: _evento.id!, tipo: "evento", titulo: _evento.titulo!,)));
                 },
-                style: AppDecorationStyle.botonContacto(),
+                style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
                 child: Text(
-                  'Llenar retroalimentación',
-                  style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                  'Dejar reseña',
+                  style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
                 ),
               ),
             )
@@ -324,7 +324,7 @@ class _EventoScreenState extends State<EventoScreen> {
           children: [
             Text(
               "Seguimiento",
-              style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1)
+              style: AppTitleStyles.tarjeta(color: AppColorStyles.altTexto1)
             ),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -355,7 +355,7 @@ class _EventoScreenState extends State<EventoScreen> {
             children: [
               Text(
                 "INICIA",
-                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+                style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1)
               ),
               Text(
                 inicio,
@@ -369,7 +369,7 @@ class _EventoScreenState extends State<EventoScreen> {
             children: [
               Text(
                 "FINALIZA",
-                style: AppTextStyles.etiqueta(color: AppColorStyles.verde1)
+                style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1)
               ),
               Text(
                 fin,
@@ -428,7 +428,7 @@ class _EventoScreenState extends State<EventoScreen> {
               children: [
                 Text(
                   "Ingreso",
-                  style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1)
+                  style: AppTitleStyles.tarjeta(color: AppColorStyles.altTexto1)
                 ),
                 SizedBox(width: 8), // Espacio entre el texto y el icono
                 Row(
@@ -445,12 +445,12 @@ class _EventoScreenState extends State<EventoScreen> {
                           Icon(
                             _ingresoMostrado ? Icons.remove_red_eye_outlined : Icons.visibility_off_outlined,
                             size: 24,
-                            color: AppColorStyles.verde1,
+                            color: AppColorStyles.altTexto1,
                           ),
                           SizedBox(width: 8.0), // Espacio entre el icono y el texto
                           Text(
                             _ingresoMostrado ? 'Clic para ocultar' : 'Click para mostrar', // Texto que cambia según _ingresoMostrado
-                            style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.verde1)
+                            style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.altTexto1)
                           ),
                         ],
                       ),
@@ -502,7 +502,7 @@ class _EventoScreenState extends State<EventoScreen> {
                 margin: EdgeInsets.only(bottom: 15),
                 child: Text(
                   "Inscrito",
-                  style: AppTextStyles.parrafo(),
+                  style: AppTextStyles.parrafo(color: AppColorStyles.altTexto1),
                 ),
               ), 
             ),
@@ -529,14 +529,14 @@ class _EventoScreenState extends State<EventoScreen> {
                       _showBottomSheet(context);
                     }
                   },
-                  style: AppDecorationStyle.botonContacto(),
+                  style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
                   child: Row(
                     children: [
-                      Icon(LucideIcons.logIn, color: AppColorStyles.blancoFondo), // Icono a la izquierda
+                      Icon(LucideIcons.logIn, color: AppColorStyles.oscuro1), // Icono a la izquierda
                       SizedBox(width: 8.0), // Espacio entre el icono y el texto
                       Text(
                         'Inscribirse',
-                        style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                        style: AppTextStyles.botonMenor(), // Estilo del texto del botón
                       )
                     ]
                   ),
@@ -552,14 +552,14 @@ class _EventoScreenState extends State<EventoScreen> {
                   onPressed: () {
                     _dejarDeSeguirActividad();
                   },
-                  style: AppDecorationStyle.botonContacto(),
+                  style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
                   child: Row(
                     children: [
-                      Icon(LucideIcons.bellRing, color: AppColorStyles.blancoFondo), // Icono a la izquierda
+                      Icon(LucideIcons.bellRing, color: AppColorStyles.oscuro1), // Icono a la izquierda
                       SizedBox(width: 8.0), // Espacio entre el icono y el texto
                       Text(
                         'Dejar de seguir',
-                        style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                        style: AppTextStyles.botonMenor(), // Estilo del texto del botón
                       ),
                     ]
                   )
@@ -575,14 +575,14 @@ class _EventoScreenState extends State<EventoScreen> {
                   onPressed: () {
                     _seguirActividad();
                   },
-                  style: AppDecorationStyle.botonContacto(),
+                  style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
                   child: Row(
                     children: [
-                      Icon(LucideIcons.bellRing, color: AppColorStyles.blancoFondo),// Icono a la izquierda
+                      Icon(LucideIcons.bellRing, color: AppColorStyles.oscuro1),// Icono a la izquierda
                       SizedBox(width: 8.0), // Espacio entre el icono y el texto
                       Text(
                         'Seguir',
-                        style: AppTextStyles.botonMenor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+                        style: AppTextStyles.botonMenor(), // Estilo del texto del botón
                       ),
                     ]
                   )
@@ -719,7 +719,7 @@ class _EventoScreenState extends State<EventoScreen> {
           children: [
             Text(
               "Info",
-              style: AppTitleStyles.tarjeta(color: AppColorStyles.verde1)
+              style: AppTitleStyles.tarjeta(color: AppColorStyles.altTexto1)
             ),
             ListView.builder(
               shrinkWrap: true,
@@ -733,7 +733,7 @@ class _EventoScreenState extends State<EventoScreen> {
                     children: [
                       Text(
                         calendarios[index]["titulo"]!,
-                        style: AppTitleStyles.tarjetaMenor(color: AppColorStyles.verde1),
+                        style: AppTitleStyles.tarjetaMenor(),
                       ),
                       Visibility(
                         visible: calendarios[index]["descripcion"].toString().isNotEmpty,
@@ -779,7 +779,7 @@ class _EventoScreenState extends State<EventoScreen> {
               },
               child: Text(
                 "#${etiquetas[index].nombre}",
-                style: AppTextStyles.parrafo(color: AppColorStyles.verde1),
+                style: AppTextStyles.parrafo(color: AppColorStyles.altTexto1),
               ),
             );
           },
@@ -817,12 +817,12 @@ class _EventoScreenState extends State<EventoScreen> {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4), // Padding interno del contenedor
           decoration: BoxDecoration(
-            color: AppColorStyles.verde2, // Color de fondo del contenedor
+            color: AppColorStyles.altTexto1, // Color de fondo del contenedor
             borderRadius: BorderRadius.circular(24.0), // Borde redondeado con radio de 24
           ),
           child: Text(
             '${_currentPage + 1}/${_evento.imagenes!.length}',
-            style: AppTextStyles.etiqueta(color: AppColorStyles.blancoFondo)
+            style: AppTextStyles.etiqueta(color: AppColorStyles.blanco)
           ),
         ),
       ],

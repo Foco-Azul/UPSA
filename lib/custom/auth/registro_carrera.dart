@@ -222,9 +222,9 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
       );
     } else {
       return Scaffold(
-        backgroundColor: AppColorStyles.verdeFondo,
+        backgroundColor: AppColorStyles.altFondo1,
         appBar: AppBar(
-          backgroundColor: AppColorStyles.verdeFondo,
+          backgroundColor: AppColorStyles.altFondo1,
           leading: IconButton(
             icon: Icon(
               LucideIcons.chevronLeft,
@@ -274,134 +274,14 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
         onPressed: () {
          _validarCampos();
         },
-        style: AppDecorationStyle.botonBienvenida(),
+        style: AppDecorationStyle.botonBienvenida(colorFondo: AppColorStyles.altVerde1),
         child: Text(
           'Continuar',
-          style: AppTextStyles.botonMayor(color: AppColorStyles.blancoFondo), // Estilo del texto del botón
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.oscuro1), // Estilo del texto del botón
         ),
       ),
     );
   }
-  /*
-  Widget _crearCampoSelectorMultiOpcional(String label, bool condicion, String error, String campo){
-    List<ValueItem> opciones = [];
-    List<ValueItem> opcionesSeleccionadas = [];
-    if(campo == "universidades"){
-      opciones = _buildValueItems("universidades");
-      opcionesSeleccionadas = _armarSelectedOptions("universidades");
-    }
-    return Visibility(
-      visible: condicion,
-      child: Container(
-        margin: EdgeInsets.symmetric(vertical: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              margin: EdgeInsets.symmetric(vertical: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    label,
-                    style: TextStyle(
-                      color: AppColorStyles.gris1,
-                      fontSize: 12.0,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  SizedBox(height: 8.0),
-                  Container(
-                    decoration: AppDecorationStyle.campoContainerForm(),
-                    child: MultiSelectDropDown(
-                      onOptionSelected: (selectedOptions) {
-                        if (campo == "universidades") {
-                          _onOptionSelectedUniversidad(selectedOptions);
-                        }
-                      },
-                      options: opciones,
-                      hint: "- Seleccionar -",
-                      selectionType: SelectionType.multi,
-                      chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.verde2),
-                      selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.verde2),
-                      selectedOptionTextColor: AppColorStyles.oscuro1,
-                      selectedOptionBackgroundColor: AppColorStyles.verdeFondo,
-                      optionTextStyle: AppTextStyles.parrafo(color: AppColorStyles.verde2),
-                      borderRadius: 14,
-                      borderColor: AppColorStyles.blancoFondo,
-                      selectedOptions: opcionesSeleccionadas,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (error.isNotEmpty)
-            Container(
-              margin: EdgeInsets.only(top: 8),
-              child: Text(
-                error,
-                style: TextStyle(color: Colors.red),
-                textAlign: TextAlign.start,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-  Widget _crearCampoTextoOpcional(String label, String valor, bool condicion, String error, String campo){
-    return Visibility(
-      visible: condicion,
-      child: Container(
-        margin: EdgeInsets.only(top: 16, bottom: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              margin: EdgeInsets.symmetric(vertical: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    label,
-                    style: TextStyle(
-                      color: AppColorStyles.gris1,
-                      fontSize: 12.0,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  SizedBox(height: 8.0),
-                  Container(
-                    decoration: AppDecorationStyle.campoContainerForm(),
-                    child: TextFormField(
-                      initialValue: valor,
-                      onChanged: (value) {
-                        setState(() {
-                          _userMeta.universidadExtranjera = value;
-                        });
-                      },
-                      decoration: AppDecorationStyle.campoTextoForm(hintText: "", labelText: ""),
-                      style: AppTextStyles.parrafo(color: AppColorStyles.gris1)
-                    ),
-                  ),
-                ]
-              )
-            ),
-            if (error.isNotEmpty)
-            Container(
-              margin: EdgeInsets.only(top: 8),
-              child: Text(
-                error,
-                style: TextStyle(color: Colors.red),
-                textAlign: TextAlign.start,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-  */
   Widget _crearCampoSelectorMulti(String label, dynamic valor, String error, String campo){
     List<ValueItem> opciones = [];
     List<ValueItem> opcionesSeleccionadas = [];
@@ -434,7 +314,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
             style: TextStyle(
               color: AppColorStyles.gris1,
               fontSize: 12.0,
-              fontWeight: FontWeight.w400,
+              fontWeight: FontWeight.normal,
             ),
           ),
           SizedBox(height: 8.0),
@@ -453,13 +333,13 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
               options: opciones,
               hint: "- Seleccionar -",
               selectionType: SelectionType.multi,
-              chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.verde2),
-              selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.verde2),
+              chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.altTexto1),
+              selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.altTexto1),
               selectedOptionTextColor: AppColorStyles.oscuro1,
-              selectedOptionBackgroundColor: AppColorStyles.verdeFondo,
-              optionTextStyle: AppTextStyles.parrafo(color: AppColorStyles.verde2),
+              selectedOptionBackgroundColor: AppColorStyles.altFondo1,
+              optionTextStyle: AppTextStyles.parrafo(color: AppColorStyles.altTexto1),
               borderRadius: 14,
-              borderColor: AppColorStyles.blancoFondo,
+              borderColor: AppColorStyles.blanco,
               selectedOptions: opcionesSeleccionadas,
             ),
           ),
@@ -493,7 +373,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
             style: TextStyle(
               color: AppColorStyles.gris1,
               fontSize: 12.0,
-              fontWeight: FontWeight.w400,
+              fontWeight: FontWeight.normal,
             ),
           ),
           SizedBox(height: 8.0),
@@ -509,13 +389,13 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
               options: opciones,
               hint: "- Seleccionar -",
               selectionType: SelectionType.single,
-              chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.verde2),
-              selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.verde2),
+              chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.altTexto1),
+              selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.altTexto1),
               selectedOptionTextColor: AppColorStyles.oscuro1,
-              selectedOptionBackgroundColor: AppColorStyles.verdeFondo,
-              optionTextStyle: AppTextStyles.parrafo(color: AppColorStyles.verde2),
+              selectedOptionBackgroundColor: AppColorStyles.altFondo1,
+              optionTextStyle: AppTextStyles.parrafo(color: AppColorStyles.altTexto1),
               borderRadius: 14,
-              borderColor: AppColorStyles.blancoFondo,
+              borderColor: AppColorStyles.blanco,
               selectedOptions: opcionesSeleccionadas,
             ),
           ),
@@ -561,7 +441,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                     style: TextStyle(
                       color: AppColorStyles.gris1,
                       fontSize: 12.0,
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.normal,
                     ),
                   ),
                   SizedBox(height: 8.0),
@@ -576,13 +456,13 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                       options: opciones,
                       hint: "- Seleccionar -",
                       selectionType: SelectionType.single,
-                      chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.verde2),
-                      selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.verde2),
+                      chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.altTexto1),
+                      selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.altTexto1),
                       selectedOptionTextColor: AppColorStyles.oscuro1,
-                      selectedOptionBackgroundColor: AppColorStyles.verdeFondo,
-                      optionTextStyle: AppTextStyles.parrafo(color: AppColorStyles.verde2),
+                      selectedOptionBackgroundColor: AppColorStyles.altFondo1,
+                      optionTextStyle: AppTextStyles.parrafo(color: AppColorStyles.altTexto1),
                       borderRadius: 14,
-                      borderColor: AppColorStyles.blancoFondo,
+                      borderColor: AppColorStyles.blanco,
                       selectedOptions: opcionesSeleccionadas,
                     ),
                   ),
@@ -614,7 +494,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
             style: TextStyle(
               color: AppColorStyles.gris1,
               fontSize: 12.0,
-              fontWeight: FontWeight.w400,
+              fontWeight: FontWeight.normal,
             ),
           ),
           SizedBox(height: 8.0),
@@ -622,17 +502,17 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
             mainAxisAlignment: MainAxisAlignment.start, // Alinea los hijos a la izquierda
             children: [
               ChoiceChip(
-                backgroundColor: AppColorStyles.blancoFondo,
+                backgroundColor: AppColorStyles.blanco,
                 avatar: opcionValue1 ? Icon(Icons.check_circle_outline) : Icon(Icons.circle_outlined),
-                checkmarkColor: AppColorStyles.blancoFondo,
+                checkmarkColor: AppColorStyles.blanco,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                selectedColor: AppColorStyles.verde2,
+                selectedColor: AppColorStyles.altTexto1,
                 label: Text(
                   opcion1,
                   style: TextStyle(
                     color: opcionValue1
-                    ? AppColorStyles.blancoFondo
-                    : AppColorStyles.verde2
+                    ? AppColorStyles.blanco
+                    : AppColorStyles.altTexto1
                   ),
                 ),
                 selected: opcionValue1,
@@ -644,7 +524,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                 },
                 shape: RoundedRectangleBorder(
                   side: BorderSide(
-                    color: AppColorStyles.verde2, // Color del borde
+                    color: AppColorStyles.altTexto1, // Color del borde
                     width: 1.0, // Ancho del borde
                   ),
                   borderRadius: BorderRadius.circular(14), // Radio de borde
@@ -652,17 +532,17 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
               ),
               SizedBox(width: 8.0),
               ChoiceChip(
-                backgroundColor: AppColorStyles.blancoFondo,
+                backgroundColor: AppColorStyles.blanco,
                 avatar: !opcionValue2 ? Icon(Icons.check_circle_outline) : Icon(Icons.circle_outlined),
-                checkmarkColor: AppColorStyles.blancoFondo,
+                checkmarkColor: AppColorStyles.blanco,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                selectedColor: AppColorStyles.verde2,
+                selectedColor: AppColorStyles.altTexto1,
                 label: Text(
                   opcion2,
                   style: TextStyle(
                     color: !opcionValue2
-                    ? AppColorStyles.blancoFondo
-                    : AppColorStyles.verde2
+                    ? AppColorStyles.blanco
+                    : AppColorStyles.altTexto1
                   ),
                 ),
                 selected: !opcionValue2,
@@ -674,7 +554,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                 },
                 shape: RoundedRectangleBorder(
                   side: BorderSide(
-                    color: AppColorStyles.verde2, // Color del borde
+                    color: AppColorStyles.altTexto1, // Color del borde
                     width: 1.0, // Ancho del borde
                   ),
                   borderRadius: BorderRadius.circular(14), // Radio de borde
@@ -689,6 +569,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
   Widget _crearDescripcion(){
     return Container( 
         margin: EdgeInsets.symmetric(vertical: 15),
+        alignment: Alignment.centerLeft,
         child: Text(
           '¿Qué pensás estudiar? Seleccioná tus preferencias.',
           style: TextStyle(
@@ -704,7 +585,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
       alignment: Alignment.centerLeft,
       child: Text(
         "Tus preferencias de carrera",
-        style: AppTitleStyles.onboarding(color: AppColorStyles.verde1),
+        style: AppTitleStyles.onboarding(color: AppColorStyles.altTexto1),
       ),
     );
   }
