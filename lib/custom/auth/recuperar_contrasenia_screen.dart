@@ -70,7 +70,7 @@ class _RecuperarContraseniaScreenState extends State<RecuperarContraseniaScreen>
         MensajeTemporalInferior().mostrarMensaje(context,"Algo salió mal.", "error");
       }else{
         Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
-        MensajeTemporalInferior().mostrarMensaje(context,"Se actualizó tu contraseña con exito.", "exito");
+        MensajeTemporalInferior().mostrarMensaje(context,"Se actualizó tu contraseña con éxito.", "exito");
       }
     }
     setState(() {});

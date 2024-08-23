@@ -1,5 +1,6 @@
 
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
+import 'package:flutkit/custom/auth/registro_perfil.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/configuracion.dart';
 import 'package:flutkit/custom/models/resultado.dart';
@@ -9,7 +10,6 @@ import 'package:flutkit/custom/screens/actividades/calendario_screen.dart';
 import 'package:flutkit/custom/screens/actividades/club_screen.dart';
 import 'package:flutkit/custom/screens/actividades/concurso_escreen.dart';
 import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
-import 'package:flutkit/custom/screens/actividades/retroalimentacion_screen.dart';
 import 'package:flutkit/custom/screens/bienvenida/bienvenida_screen.dart';
 import 'package:flutkit/custom/screens/campus/campus_inicio.dart';
 import 'package:flutkit/custom/screens/campus/matriculate_screem.dart';
@@ -391,7 +391,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
             IconButton(
               icon: Icon(Icons.notifications_none_outlined, size: 30, color: AppColorStyles.altTexto1,),
               onPressed: () {
-                Navigator.push(context,MaterialPageRoute(builder: (context) => NotificacionesScreen()),);
+                Navigator.push(context,MaterialPageRoute(builder: (context) => RegistroPerfil()),);
               },
             ),
           ],

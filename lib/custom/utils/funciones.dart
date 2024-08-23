@@ -210,6 +210,15 @@ class FuncionUpsa {
     }
     return res;
   }
+  static Map<String, dynamic> armarOpcionesJson(String str){
+    Map<String, dynamic> res = {};
+    final jsonData = json.decode(str);
+    if(jsonData['data'] != null){
+      final Map<String, dynamic> data = jsonData['data'];
+      res = data;
+    }
+    return res;
+  }
   static List<int> armarListaEnterosDesdeJsonString(String tipo, String str){
     List<int> res = [];
     if(tipo == "cursillosVistos"){

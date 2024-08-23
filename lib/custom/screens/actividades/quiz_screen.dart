@@ -80,7 +80,7 @@ class _QuizScreenState extends State<QuizScreen> {
     String respuesta = await ApiService().crearQuizRespuesta(_quizPregunta.campos!, _user.id!, _quizPregunta.id!);
     if(respuesta == "exito"){
       _bandera = true;
-      MensajeTemporalInferior().mostrarMensaje(context,"Se envio con exito la Quiz.", "exito");
+      MensajeTemporalInferior().mostrarMensaje(context,"Se envio con éxito la Quiz.", "exito");
     }else{
       MensajeTemporalInferior().mostrarMensaje(context,"Algo salio mal.", "error");
     }
@@ -294,7 +294,7 @@ class _QuizScreenState extends State<QuizScreen> {
           Visibility(
             visible: _bandera,
             child: Text(
-              "Se envio con exito la Quiz.",
+              "Se envio con éxito la Quiz.",
               style: AppTextStyles.parrafo(),
             ) 
           ),

@@ -110,7 +110,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
     _userMeta.avatar = imagen;
     if(bandera){
       setState(() {
-        MensajeTemporalInferior().mostrarMensaje(context,"Se cambio tu avatar con exito.", "exito");
+        MensajeTemporalInferior().mostrarMensaje(context,"Se cambio tu avatar con éxito.", "exito");
       });
     }else{
       setState(() {
@@ -636,7 +636,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   _animacionCarga.setMostrar(true);
                   _user = await ApiService().getUserPopulateConMetasActividades(_user.id!);
                   Provider.of<AppNotifier>(context, listen: false).setUser(_user);
-                  MensajeTemporalInferior().mostrarMensaje(context,"Se sincronizó tus datos con exito.", "exito");
+                  MensajeTemporalInferior().mostrarMensaje(context,"Se sincronizó tus datos con éxito.", "exito");
                   Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
                   _animacionCarga.setMostrar(false);
                 },
@@ -662,7 +662,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   await ApiService().actualizarUsuarioTokens(_user.id!, _user.dispositivos!);
                 }
                 await _prefs.setStringList('notificaciones', []);
-                _mensajeTemporalInferior.mostrarMensaje(context,"Se cerró tu cuenta con exito.", "exito");
+                _mensajeTemporalInferior.mostrarMensaje(context,"Se cerró tu cuenta con éxito.", "exito");
                 loginController.logout(context);
                 _animacionCarga.setMostrar(false);
               },

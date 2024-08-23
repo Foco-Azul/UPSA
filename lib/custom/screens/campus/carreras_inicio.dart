@@ -222,9 +222,13 @@ class _CarrerasInicioState extends State<CarrerasInicio> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    carreras[index].nombre!,
-                    style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
+                  Flexible(
+                    child: Text(
+                      carreras[index].nombre!,
+                      style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
+                      softWrap: true,
+                      overflow: TextOverflow.visible, // Puedes ajustar esto a TextOverflow.ellipsis si prefieres truncar el texto
+                    ),
                   ),
                   if (index != carreras.length - 1)
                     Icon(LucideIcons.dot, color: AppColorStyles.oscuro2),

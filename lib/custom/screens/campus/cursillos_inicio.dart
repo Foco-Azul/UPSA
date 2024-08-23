@@ -227,9 +227,13 @@ class _CursillosInicioState extends State<CursillosInicio> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    cursillos[index].titulo!,
-                    style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
+                  Flexible(
+                    child: Text(
+                      cursillos[index].titulo!,
+                      style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
+                      softWrap: true,
+                      overflow: TextOverflow.visible, // Puedes ajustar esto a TextOverflow.ellipsis si prefieres truncar el texto
+                    ),
                   ),
                   if (index != cursillos.length - 1)
                     Icon(LucideIcons.dot, color: AppColorStyles.oscuro2),

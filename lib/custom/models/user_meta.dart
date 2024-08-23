@@ -23,6 +23,7 @@ class UserMeta {
   Map<String, dynamic>? carreraSugerida;
   String? curso;
   List<Map<String, dynamic>>? insignias;
+  String? promo;
 
   UserMeta({
     this.id,
@@ -43,6 +44,7 @@ class UserMeta {
     this.colegio,
     this.curso,
     this.insignias,
+    this.promo,
   });
 
   static UserMeta armarUsuarioMetaPopulateConMetasParaFormularioPerfil(dynamic data) {
@@ -57,6 +59,7 @@ class UserMeta {
         fechaDeNacimiento: data["fechaDeNacimiento"] ?? "",
         colegio: _armarColegio(data["colegio"]),
         curso: data["curso"] ?? "",
+        promo: data["promo"] ?? "",
       );
     }
     return res;

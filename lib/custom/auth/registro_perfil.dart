@@ -7,7 +7,6 @@ import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/helpers/widgets/my_button.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:intl/intl.dart';
-import 'package:multi_dropdown/multiselect_dropdown.dart';
 import 'package:provider/provider.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/user.dart';
@@ -18,6 +17,7 @@ import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutkit/loading_effect.dart';
+import 'package:search_choices/search_choices.dart';
 
 class RegistroPerfil extends StatefulWidget {
   @override
@@ -38,11 +38,12 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
     "fechaDeNacimiento": "",
     "celular1": "",
     "colegio": "",
-    "curso": "",
+    "promo": "",
   };
   List<Colegio> _colegios = [];
   late AnimacionCarga _animacionCarga;
   DateTime selectedDate = DateTime.now();
+  Map<String, dynamic> _campoPromo = {};
 
   @override
   void initState() {
@@ -59,6 +60,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
     _user = Provider.of<AppNotifier>(context, listen: false).user;
     _user = await ApiService().getUserPopulateConMetasParaFormularioPerfil(_user.id!);
     _colegios = await ApiService().getColegios();
+    _campoPromo = await ApiService().getCampoPersonalziadoJson(2); 
     _userMeta = _user.userMeta!;
     setState(() {
       controller.uiLoading = false;
@@ -80,14 +82,14 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       }else{
         _errores["fechaDeNacimiento"] = "";
       }
-      if (_userMeta.curso!.isNotEmpty){
-        _errores["curso"] = "";
+      if (_userMeta.promo!.isNotEmpty){
+        _errores["promo"] = "";
       }else{
-        _errores["curso"] = "Selecciona una opción";
+        _errores["promo"] = "Selecciona una opción";
       }
     });
 
-    if (_errores["nombres"]!.isEmpty && _errores["apellidos"]!.isEmpty && _errores["cedulaDeIdentidad"]!.isEmpty && _errores["celular1"]!.isEmpty && _errores["colegio"]!.isEmpty && _errores["curso"]!.isEmpty) {
+    if (_errores["nombres"]!.isEmpty && _errores["apellidos"]!.isEmpty && _errores["cedulaDeIdentidad"]!.isEmpty && _errores["celular1"]!.isEmpty && _errores["colegio"]!.isEmpty && _errores["promo"]!.isEmpty) {
       _registrarEstudiante();
     }
   }
@@ -144,46 +146,6 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       });
     }
   }
-  List<ValueItem> _armarSelectedOptions(String  tipo){
-    List<ValueItem> res = [];
-    if(tipo == "curso"){
-      if(_userMeta.curso!.isNotEmpty){
-        ValueItem aux = ValueItem(
-          label: _userMeta.curso!,
-        );
-        res.add(aux);
-      }
-    }
-    if(tipo == "colegio"){
-      if(_userMeta.colegio!.nombre!.isNotEmpty){
-        ValueItem aux = ValueItem(
-          label: _userMeta.colegio!.nombre!,
-          value: _userMeta.colegio!.id.toString(),
-        );
-        res.add(aux);
-      }
-    }
-    return res;
-  }
-  void _onOptionSelectedCurso(List<ValueItem> selectedOptions) {
-    if(selectedOptions.isNotEmpty){
-      _userMeta.curso = selectedOptions[0].label;
-    }else{
-      _userMeta.curso = "";
-    }
-    setState(() {});
-  }
-  void _onOptionSelectedColegio(List<ValueItem> selectedOptions) {
-    if(selectedOptions.isNotEmpty){
-      _userMeta.colegio = Colegio(
-        id: int.parse(selectedOptions[0].value!),
-        nombre: selectedOptions[0].label,
-      );
-    }else{
-      _userMeta.colegio = Colegio();
-    }
-    setState(() {});
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -225,7 +187,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
                     _crearCampoConIcono(),
                     _crearCampoConError2(_errores["celular1"]!, _userMeta.celular1!,"Número de teléfono", "", "celular1"),
                     _crearCampoConError(_errores["cedulaDeIdentidad"]!, _userMeta.cedulaDeIdentidad!, "Cédula de identidad", "", "cedulaDeIdentidad"),
-                    _crearCampoSelectorSimple('¿En que curso de secundaria estás?', _errores["curso"]!, "curso"),
+                    _crearCampoSelectorSimple(_campoPromo["attributes"]["label"], _errores["promo"]!, "promo"),
                     _crearCampoSelectorSimple('Colegio', _errores["colegio"]!, "colegio"),
                     _crearBoton(),
                   ]
@@ -237,22 +199,71 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       );
     } 
   }
+  
   Widget _crearCampoSelectorSimple(String label, String error, String campo){
-    List<ValueItem> opciones = [];
-    List<ValueItem> opcionesSeleccionadas = [];
+    List<DropdownMenuItem<dynamic>> items = [];
+    List<int> selectedItems = []; 
+    int pos = 0;
     if(campo == "curso"){
-      opciones =  [
-        ValueItem(label: '4º Secundaria'),
-        ValueItem(label: '5º Secundaria'),
-        ValueItem(label: '6º Secundaria'),
-      ];
-      opcionesSeleccionadas = _armarSelectedOptions("curso");
-    }
-    if(campo == "colegio"){
-      for (var item in _colegios) {
-        opciones.add(ValueItem(label: item.nombre!, value: item.id!.toString()));
+      items.add(
+        DropdownMenuItem(
+          value: "0-4º Secundaria", // El valor asociado a esta opción
+          child: Text('4º Secundaria', style: AppTextStyles.parrafo()), // Lo que se mostrará en el desplegable
+        ),
+      );
+      items.add(
+        DropdownMenuItem(
+          value: "1-5º Secundaria", // El valor asociado a esta opción
+          child: Text('5º Secundaria', style: AppTextStyles.parrafo()), // Lo que se mostrará en el desplegable
+        ),
+      );
+      items.add(
+        DropdownMenuItem(
+          value: "2-6º Secundaria", // El valor asociado a esta opción
+          child: Text('6º Secundaria', style: AppTextStyles.parrafo()), // Lo que se mostrará en el desplegable
+        ),
+      );
+      if(_userMeta.curso! == '4º Secundaria'){
+        selectedItems.add(0);
+      }else{
+        if(_userMeta.curso! == '5º Secundaria'){
+          selectedItems.add(1);
+        }else{
+          if(_userMeta.curso! == '6º Secundaria'){
+            selectedItems.add(2);
+          }
+        }
       }
-      opcionesSeleccionadas = _armarSelectedOptions("colegio");
+    }
+    pos = 0;
+    if(campo == "promo"){
+      for (var opcion in _campoPromo["attributes"]["opciones"]) {
+        items.add(
+          DropdownMenuItem(
+            value: "$pos-${opcion["opcion"]}", // El valor asociado a esta opción
+            child: Text(opcion["opcion"]!, style: AppTextStyles.parrafo()), // Lo que se mostrará en el desplegable
+          ),
+        );
+        if(_userMeta.promo == opcion["opcion"]){
+          selectedItems.add(pos);
+        }
+        pos++;
+      }
+    }
+    pos = 0;
+    if(campo == "colegio"){
+      for (var colegio in _colegios) {
+        items.add(
+          DropdownMenuItem(
+            value: "${colegio.id}-${colegio.nombre}", // El valor asociado a esta opción
+            child: Text(colegio.nombre!, style: AppTextStyles.parrafo()), // Lo que se mostrará en el desplegable
+          ),
+        );
+        if(_userMeta.colegio!.id == colegio.id){
+          selectedItems.add(pos);
+        }
+        pos++;
+      }
     }
     return Container(
       margin: EdgeInsets.symmetric(vertical: 8),
@@ -262,26 +273,46 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
           Container(
             margin: EdgeInsets.symmetric(vertical: 8),
             decoration: AppDecorationStyle.campoContainerForm(),
-            child: MultiSelectDropDown(
-              onOptionSelected: (selectedOptions) {
-                if (campo == "curso") {
-                  _onOptionSelectedCurso(selectedOptions);
-                }
-                if (campo == "colegio") {
-                  _onOptionSelectedColegio(selectedOptions);
-                }
+            child: SearchChoices.multiple(
+              fieldDecoration: BoxDecoration(
+                border: Border.all(color: Colors.transparent), // Esto elimina el borde
+              ),
+              items: items,
+              selectedItems: selectedItems,
+              hint: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Text(label, style: AppTextStyles.parrafo(),),
+              ),
+              searchHint: "Selecciona una opcion",
+              onChanged: (value) {
+                setState(() {
+                  if(campo == "promo"){
+                    if(value.length > 0){
+                      List<String> aux = (items[value[value.length - 1]].value.toString()).split("-");
+                      _userMeta.promo = aux[1];
+                    }else{
+                      _userMeta.promo = "";
+                      selectedItems = [];
+                    }
+                  }
+                  if(campo == "colegio"){
+                    if(value.length > 0){
+                      List<String> aux = (items[value[value.length - 1]].value.toString()).split("-");
+                      _userMeta.colegio = Colegio(
+                        id: int.parse(aux[0]),
+                        nombre: aux[1],
+                      );
+                    }else{
+                      _userMeta.colegio = Colegio();
+                      selectedItems = [];
+                    }
+                  }
+                });
               },
-              options: opciones,
-              hint: label,
-              selectionType: SelectionType.single,
-              chipConfig: const ChipConfig(wrapType: WrapType.wrap, backgroundColor: AppColorStyles.altTexto1),
-              selectedOptionIcon: const Icon(Icons.check_circle, color: AppColorStyles.altTexto1),
-              selectedOptionTextColor: AppColorStyles.oscuro1,
-              selectedOptionBackgroundColor: AppColorStyles.altFondo1,
-              optionTextStyle: AppTextStyles.parrafo(color: AppColorStyles.altTexto1),
-              borderRadius: 14,
-              borderColor: AppColorStyles.blanco,
-              selectedOptions: opcionesSeleccionadas,
+              closeButton: "Guardar",
+              doneButton: "Guardar",
+              displayClearIcon: false,
+              isExpanded: true,
             ),
           ),
           if (error.isNotEmpty)

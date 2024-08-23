@@ -197,7 +197,7 @@ class _CarreraScreenState extends State<CarreraScreen> {
                         alignment: Alignment.centerLeft,
                         margin: EdgeInsets.symmetric(vertical: 5),
                         child: Text(
-                          _carreraUpsa.masInformacion![index]["titulo"],
+                          _carreraUpsa.masInformacion![index]["descripcion"],
                           style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
                           softWrap: true, // Permite el salto de línea automático
                         ),

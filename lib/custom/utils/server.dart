@@ -714,7 +714,7 @@ class ApiService {
             "fechaDeNacimiento": datos.fechaDeNacimiento == "" ? null : datos.fechaDeNacimiento,
             "celular1": datos.celular1 == "" ? null : datos.celular1,
             "colegio": datos.colegio!.id,
-            "curso": datos.curso,
+            "promo": datos.promo,
           }}
         )
       );
@@ -2186,6 +2186,26 @@ class ApiService {
       }
     } catch (e) {
       print('Error en getCampoPersonalziado: $e');
+      return res;
+    }
+  }
+  Future<Map<String, dynamic>> getCampoPersonalziadoJson(int id) async {
+    Map<String, dynamic> res = {};
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/campos-personalizados/$id/?populate=*');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = FuncionUpsa.armarOpcionesJson(response.body);
+        return res;
+      } else {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  getCampoPersonalziadoJson: $error');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getCampoPersonalziadoJson: $e');
       return res;
     }
   }

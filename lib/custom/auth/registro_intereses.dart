@@ -75,7 +75,7 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
         _user.estado = "Completado";
         Provider.of<AppNotifier>(context, listen: false).setUser(_user);
         _animacionCarga.setMostrar(false);
-        MensajeTemporalInferior().mostrarMensaje(context,"Completaste tu cuenta con exito.", "exito");
+        MensajeTemporalInferior().mostrarMensaje(context,"Completaste tu cuenta con éxito.", "exito");
         Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen()),(Route<dynamic> route) => false);
       }
     } on Exception catch (e) {

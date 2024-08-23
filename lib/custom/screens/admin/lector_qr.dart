@@ -205,7 +205,7 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
       fondo = Colors.red;
     }
     if(caso == "valido"){
-      texto = "Exito, el QR se escaneo correctamente"; 
+      texto = "Éxito, el QR se escaneo correctamente"; 
       fondo = AppColorStyles.altTexto1;
     }
     showModalBottomSheet(
@@ -347,7 +347,7 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
             child: MultiSelectDropDown(
               onOptionSelected: (selectedOptions) {
                 if (selectedOptions.isNotEmpty) {
-                  List<String> partes = selectedOptions[0].value!.split(';');
+                  List<String> partes = selectedOptions[0].value!.toString().split(';');
                   if (partes.length >= 2) {
                     _idSeleccionado = int.parse(partes[0]);
                     _tipoSeleccionado = partes[1];
