@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'dart:convert';
+import 'dart:io';
 //import 'package:dio/dio.dart' as dio;
 //import 'package:path/path.dart' as path;
 import 'package:flutkit/custom/models/avatar.dart';
@@ -15,6 +16,7 @@ import 'package:flutkit/custom/models/quiz_preguntas.dart';
 import 'package:flutkit/custom/models/resultado.dart';
 import 'package:flutkit/custom/models/sobre_nosotros.dart';
 import 'package:flutkit/custom/models/user_meta.dart';
+import 'package:flutkit/custom/screens/inicio/sin_internet.dart';
 import 'package:flutkit/custom/utils/funciones.dart';
 import 'package:flutkit/custom/models/campus.dart';
 import 'package:flutkit/custom/models/carrera.dart';
@@ -25,6 +27,7 @@ import 'package:flutkit/custom/models/interes.dart';
 import 'package:flutkit/custom/models/noticia.dart';
 import 'package:flutkit/custom/models/universidad.dart';
 import 'package:flutkit/custom/utils/generadores.dart';
+import 'package:flutkit/main.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -58,8 +61,8 @@ class ApiService {
         }
         return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en  login: $error');
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  login: $e');
         return res;
       }
     } catch (e) {
@@ -91,10 +94,11 @@ class ApiService {
         )
       );
       if (response.statusCode != 200) {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  actualizarUsuarioTokens: $e');
       }
     } catch (e) {
-      throw Exception(e);
+      print('Error en actualizarUsuarioTokens: $e');
     }
   }
   Future<User> getUsuarioPopulate(int id) async {
@@ -112,8 +116,8 @@ class ApiService {
         res = User.armarUsuarioPopulate(response.body);
         return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en  getUsuarioPopulate: $error');
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  getUsuarioPopulate: $e');
         return res;
       }
     } catch (e) {
@@ -136,8 +140,8 @@ class ApiService {
         res = User.armarUsuario(response.body);
         return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en  getUser: $error');
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  getUser: $e');
         return res;
       }
     } catch (e) {
@@ -145,7 +149,8 @@ class ApiService {
       return res;
     }
   }
-  Future<User?> addUser(Map<String,String> data) async {
+  Future<User> addUser(Map<String,String> data) async {
+    User res = User();
     await dotenv.load(fileName: ".env");
     try {
       var url = Uri.parse(dotenv.get('baseUrl') + dotenv.get('usersRegisterEndpoint'));
@@ -158,36 +163,42 @@ class ApiService {
       if (response.statusCode == 201) {
         bool seEnvioCorreo = await enviarCorreo({"codigoDeVerificacion":data["codigoDeVerificacion"]}, "Código de verificación", data["email"]!);
         if(seEnvioCorreo){
-          User model = User.armarUsuario(response.body);
-          crearUserMeta(model.id!, data);
-          return model;
+          res = User.armarUsuario(response.body);
+          crearUserMeta(res.id!, data);
         }
+        return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        throw Exception(error);
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  addUser: $e');
+        return res;
       }
     } catch (e) {
-      throw Exception(e);
+      print('Error en addUser: $e');
+      return res;
     }
-    return null;
   }
   Future<String> pedirTokenUser(int userId) async {
+    String res = "";
     await dotenv.load(fileName: ".env");
     try {
       var url = Uri.parse('${dotenv.get('baseUrl')}/users/$userId');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
-        String token = jsonDecode(response.body)['codigoDeVerificacion'];
-        return token;
+        res = jsonDecode(response.body)['codigoDeVerificacion'];
+        return res;
       } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  pedirTokenUser: $e');
+        return res;
       }
     } catch (e) {
-      throw Exception(e);
+      print('Error en pedirTokenUser: $e');
+      return res;
     }
   }
   Future<bool> activarCuenta(bool estado, int userId) async {
+    bool res = false;
     await dotenv.load(fileName: ".env");
     try {
       var url = Uri.parse("${dotenv.get('baseUrl')}/users/$userId");
@@ -198,16 +209,20 @@ class ApiService {
           },
           body: json.encode({"confirmed":true, "estado": "Verificado"}));
       if (response.statusCode == 200) {
-        return true;
+        res = true;
+        return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        throw Exception(error);
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  activarCuenta: $e');
+        return res;
       }
     } catch (e) {
-      throw Exception(e);
+      print('Error en activarCuenta: $e');
+      return res;
     }
   }
   Future<bool> setEstadoUser(int id, String estado) async {
+    bool res = false;
     await dotenv.load(fileName: ".env");
     try {
       var url = Uri.parse("${dotenv.get('baseUrl')}/users/$id");
@@ -223,28 +238,36 @@ class ApiService {
         )
       );
       if (response.statusCode == 200) {
-        return true;
+        res = true;
+        return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        throw Exception(error);
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  setEstadoUser: $e');
+        return res;
       }
     } catch (e) {
-      throw Exception(e);
+      print('Error en setEstadoUser: $e');
+      return res;
     }
   }
   Future<int> _getIdUserMeta(int id) async{
+    int res = -1;
     await dotenv.load(fileName: ".env");
     try {
       var url = Uri.parse('${dotenv.get('baseUrl')}/users/$id?populate=*');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
-        return jsonDecode(response.body)["userMeta"]["id"];
+        res = jsonDecode(response.body)["userMeta"]["id"];
+        return res;
       } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  _getIdUserMeta: $e');
+        return res;
       }
     } catch (e) {
-      throw Exception(e);
+      print('Error en _getIdUserMeta: $e');
+      return res;
     }
   }
   Future<User> getUserPopulateConMetasActividades(int id) async {
@@ -262,10 +285,13 @@ class ApiService {
         res = User.armarUsuarioPopulateConMetasActividades(response.body);
         return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en  getUserPopulateConMetasActividades: $error');
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  getUserPopulateConMetasActividades: $e');
         return res;
       }
+    } on SocketException {
+      navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
+      return res;
     } catch (e) {
       print('Error en getUserPopulateConMetasActividades: $e');
       return res;
@@ -286,12 +312,12 @@ class ApiService {
         res = User.armarUsuarioPopulateConMetasParaFormularioCarrera(response.body);
         return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en  getUserPopulateConMetasEActividades: $error');
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  getUserPopulateConMetasParaFormularioCarrera: $e');
         return res;
       }
     } catch (e) {
-      print('Error en getUserPopulateConMetasEActividades: $e');
+      print('Error en getUserPopulateConMetasParaFormularioCarrera: $e');
       return res;
     }
   }
@@ -310,8 +336,8 @@ class ApiService {
         res = User.armarUsuarioPopulateConMetasParaFormularioPerfil(response.body);
         return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en  getUserPopulateConMetasParaFormularioPerfil: $error');
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  getUserPopulateConMetasParaFormularioPerfil: $e');
         return res;
       }
     } catch (e) {
@@ -334,10 +360,13 @@ class ApiService {
         res = User.armarUsuarioPopulateConActividadesPasadas(response.body);
         return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en  getUserPopulateConActividadesPasadas: $error');
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getUserPopulateConActividadesPasadas: $e');
         return res;
       }
+    } on SocketException {
+      navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
+      return res;
     } catch (e) {
       print('Error en getUserPopulateConActividadesPasadas: $e');
       return res;
@@ -359,10 +388,11 @@ class ApiService {
         )
       );
       if (response.statusCode != 200) {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  setUserParaDesactivarNotificaciones: $e');
       }
     } catch (e) {
-      throw Exception(e);
+      print('Error en setUserParaDesactivarNotificaciones: $e');
     }
   }
   Future<User> getUserPopulateParaSolitudDeTestVocacional(int id) async {
@@ -380,8 +410,8 @@ class ApiService {
         res = User.armarUsuarioPopulateConMetasParaSolitudDeTestVocacional(response.body);
         return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en  getUserPopulateParaSolitudDeTestVocacional: $error');
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getUserPopulateParaSolitudDeTestVocacional: $e');
         return res;
       }
     } catch (e) {
@@ -404,8 +434,8 @@ class ApiService {
         res = User.armarUsuarioPopulateConMetasParaSolitudDeInscripcion(response.body);
         return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en getUserPopulateParaSolitudDeInscripcion: $error');
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getUserPopulateParaSolitudDeInscripcion: $e');
         return res;
       }
     } catch (e) {
@@ -428,8 +458,8 @@ class ApiService {
         res = User.armarUsuarioPopulateParaRetroalimentacion(response.body);
         return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en  getUserPopulateParaRetroalimentacion: $error');
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  getUserPopulateParaRetroalimentacion: $e');
         return res;
       }
     } catch (e) {
@@ -485,8 +515,8 @@ class ApiService {
         res = FuncionUpsa.armarListaEnterosDesdeJsonString("cursillosVistos", response.body);
         return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en  _getUserCursillosVistos: $error');
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  _getUserCursillosVistos: $e');
         return res;
       }
     } catch (e) {
@@ -512,8 +542,8 @@ class ApiService {
         }
         return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en  getUserPorEmail: $error');
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getUserPorEmail: $e');
         return res;
       }
     } catch (e) {
@@ -536,8 +566,8 @@ class ApiService {
         res = User.armarUsuarioPorEmail(response.body);
         return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en  verificarCodigo: $error');
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  verificarCodigo: $e');
         return res;
       }
     } catch (e) {
@@ -592,11 +622,11 @@ class ApiService {
         return res;
       }else{
         String e = jsonDecode(response.body)['error']['message'];
-        print('Error en _setActualizarCodigoDeVerificacion: $e');
+        print('Error en setActualizarContrasenia: $e');
         return res;
       }
     } catch (e) {
-      print('Error en _setActualizarCodigoDeVerificacion: $e');
+      print('Error en setActualizarContrasenia: $e');
       return res;
     }
   }
@@ -637,11 +667,12 @@ class ApiService {
         res = jsonDecode(response.body)["data"]["id"];
         return res;
       } else {
-        print(jsonDecode(response.body)['error']['message']);
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  crearInscripcionActividad: $error');
         return res;
       }
     } catch (e) {
-      print(e.toString());
+      print('Error en crearInscripcionActividad: $e');
       return res;
     }
   }
@@ -665,19 +696,19 @@ class ApiService {
           }
         )
       );
-      if (response.statusCode == 200) {
-        //return true;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
+      if (response.statusCode != 200) {
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  marcarAsistencia: $error'); 
       }
     } catch (e) {
-      throw Exception(e);
+      print('Error en marcarAsistencia: $e');
     }
   }
   //INSCRIPCIONES FIN
 
   //USER META INICIO
   Future<bool> crearUserMeta(int idUser, data) async {
+    bool res = false;
     await dotenv.load(fileName: ".env");
     try {
       var url = Uri.parse("${dotenv.get('baseUrl')}/user-metas");
@@ -688,16 +719,20 @@ class ApiService {
           },
           body: json.encode({"data":{"user": idUser, "nombres": data["nombres"], "apellidos": data["apellidos"]}}));
       if (response.statusCode == 200) {
-        return true;
+        res = true;
+        return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        throw Exception(error);
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  crearUserMeta: $e');
+        return res;
       }
     } catch (e) {
-      throw Exception(e);
+      print('Error en crearUserMeta: $e');
+      return res;
     }
   }
   Future<bool> registrarPerfil(UserMeta datos, int idUser) async {
+    bool res = false;
     await dotenv.load(fileName: ".env");
     try {
       var url = Uri.parse("${dotenv.get('baseUrl')}/user-metas/${datos.id}");
@@ -720,21 +755,25 @@ class ApiService {
       );
       if (response.statusCode == 200) {
         if(await setEstadoUser(idUser, "Perfil parte 1")){
-          return true;
+          res = true;
+          return res;
         }else{
-          return false;
+          return res;
         }
-      } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        throw Exception(error);
+      }  else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en registrarPerfil: $e');
+        return res;
       }
     } catch (e) {
-      throw Exception(e);
+      print('Error en registrarPerfil: $e');
+      return res;
     }
   }
   Future<bool> registrarCarrera(UserMeta data, User user) async {
     List<Map<String, dynamic>> recibirInformacion = [];
     List<int> carreras = [];
+    bool res = false;
     for (var item in data.recibirInformacion!) {
       recibirInformacion.add(
         {
@@ -767,23 +806,29 @@ class ApiService {
       if (response.statusCode == 200) {
         await crearHistorialDePreferencias(user.id!, data);
         if(user.estado == "Completado"){
-          return true;
+          res = true;
+          return res;
         }else{
           if(await setEstadoUser(user.id!, "Perfil parte 2")){
-            return true;
+            res = true;
+            return res;
           }else{
-            return false;
+            res = false;
+            return res;
           }
         }
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        throw Exception(error);
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en registrarCarrera: $e');
+        return res;
       }
     } catch (e) {
-      throw Exception(e);
+      print('Error en registrarCarrera: $e');
+      return res;
     }
   }
   Future<bool> registrarIntereses(UserMeta datos, int id) async {
+    bool res = false;
     await dotenv.load(fileName: ".env");
     try {
       int idUserMeta = await _getIdUserMeta(id) ;
@@ -802,19 +847,22 @@ class ApiService {
         );
         if (response.statusCode == 200) {
           if(await setEstadoUser(id, "Completado")){
-            return true;
+            res = true;
+            return res;
           }else{
-            return false;
+            return res;
           }
         } else {
-          String error = jsonDecode(response.body)['error']['message'];
-          throw Exception(error);
+          String e = jsonDecode(response.body)['error']['message'];
+          print('Error en registrarIntereses: $e');
+          return res;
         }
       }else{
-        return false;
+        return res;
       }
     } catch (e) {
-      throw Exception(e);
+      print('Error en registrarIntereses: $e');
+      return res;
     }
   }
   Future<bool> setUserMetaAvatar(int userMetaId, int avatarId) async {
@@ -850,6 +898,7 @@ class ApiService {
 
   //CORREOS INICIO
   Future<bool> enviarCorreo(Object token, String motivo, String email) async {
+    bool res = false;
     await dotenv.load(fileName: ".env");
     try {
       var url = Uri.parse("${dotenv.get('baseUrl')}/correos");
@@ -860,13 +909,16 @@ class ApiService {
           },
           body: json.encode({"data":{"destino": email, "motivo": motivo, "contenidoJson": token}}));
       if (response.statusCode == 200) {
-        return true;
-      } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        throw Exception(error);
+        res = true;
+        return res;
+      }  else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en enviarCorreo: $e');
+        return res;
       }
     } catch (e) {
-      throw Exception(e);
+      print('Error en enviarCorreo: $e');
+      return res;
     }
   }
   //CORREOS FIN
@@ -907,6 +959,9 @@ class ApiService {
         print('Error en getEventoPopulateConInscripcionesSeguidores: $e');
         return res;
       }
+    } on SocketException {
+      navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
+      return res;
     } catch (e) {
       print('Error en getEventoPopulateConInscripcionesSeguidores: $e');
       return res;
@@ -928,6 +983,9 @@ class ApiService {
         print('Error en getEventos: $e');
         return  res;
       }
+    } on SocketException {
+      navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
+      return res;
     } catch (e) {
       print('Error en getEventos: $e');
       return res;
@@ -959,6 +1017,9 @@ class ApiService {
         print('Error en getEventosDesde: $e');
         return res;
       }
+    } on SocketException {
+      navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
+      return res;
     } catch (e) {
       print('Error en getEventosDesde: $e');
       return res;
@@ -1000,6 +1061,7 @@ class ApiService {
             "tipo":"Eventos",
             "id":  item['id'],
             "titulo": item['attributes']['titulo'],
+            "updatedAt": item['attributes']['updatedAt'],
             "descripcion": item['attributes']['descripcion'],
             "categoria": item['attributes']['categoria']['data'] != null ? item['attributes']['categoria']['data']['attributes']['nombre'] : "Sin categoria", 
             "imagen": item['attributes']['imagen']['data'] != null ? item['attributes']['imagen']['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",
@@ -1066,6 +1128,9 @@ class ApiService {
         print('Error en getNoticias: $e');
         return res;
       }
+    } on SocketException {
+      navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
+      return res;
     } catch (e) {
       print('Error en getNoticias: $e');
       return res;
@@ -1086,6 +1151,9 @@ class ApiService {
         print('Error en getNoticia: $e');
         return res;
       }
+    } on SocketException {
+      navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
+      return res;
     } catch (e) {
       print('Error en getNoticia: $e');
       return res;
@@ -1106,6 +1174,9 @@ class ApiService {
         print('Error en getOtrasNoticias: $e');
         return res;
       }
+    } on SocketException {
+      navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
+      return res;
     } catch (e) {
       print('Error en getOtrasNoticias: $e');
       return res;
@@ -1126,6 +1197,7 @@ class ApiService {
             "tipo":"Noticias",
             "id":  item['id'],
             "titulo": item['attributes']['titulo'],
+            "updatedAt": item['attributes']['updatedAt'],
             "descripcion": item['attributes']['descripcion'],
             "categoria": item['attributes']['categoria']['data'] != null ? item['attributes']['categoria']['data']['attributes']['nombre'] : "Sin categoria", 
             "imagen": item['attributes']['imagen']['data'] != null ? item['attributes']['imagen']['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",
@@ -1163,6 +1235,9 @@ class ApiService {
         print('Error en getClubes: $e');
         return res;
       }
+    } on SocketException {
+      navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
+      return res;
     } catch (e) {
       print('Error en getClubes: $e');
       return res;
@@ -1184,6 +1259,7 @@ class ApiService {
             "tipo":"Clubes",
             "id":  item['id'],
             "titulo": item['attributes']['titulo'],
+            "updatedAt": item['attributes']['updatedAt'],
             "descripcion": item['attributes']['descripcion'],
             "categoria": item['attributes']['categoria']['data'] != null ? item['attributes']['categoria']['data']['attributes']['nombre'] : "Sin categoria", 
             "imagen": item['attributes']['imagen']['data'] != null ? item['attributes']['imagen']['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",
@@ -1216,6 +1292,9 @@ class ApiService {
         print('Error en getClubPopulateConInscripcionesSeguidores: $e');
         return res;
       }
+    } on SocketException {
+      navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
+      return res;
     } catch (e) {
       print('Error en getClubPopulateConInscripcionesSeguidores: $e');
       return res;
@@ -1278,6 +1357,9 @@ class ApiService {
         print('Error en getClubesDesde: $e');
         return res;
       }
+    } on SocketException {
+      navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
+      return res;
     } catch (e) {
       print('Error en getClubesDesde: $e');
       return res;
@@ -1341,11 +1423,11 @@ class ApiService {
         return res;
       }else {
         String e = jsonDecode(response.body)['error']['message'];
-        print('Error en getConvenioPopulate: $e');
+        print('Error en getConvenioPopulateConEnlacesDePaises: $e');
         return res;
       }
     } catch (e) {
-      print('Error en getConvenioPopulate: $e');
+      print('Error en getConvenioPopulateConEnlacesDePaises: $e');
       return res;
     }
   }
@@ -1353,38 +1435,46 @@ class ApiService {
 
   //COLEGIO INICIO
   Future<List<Colegio>> getColegios() async {
+    List<Colegio> res = [];
     await dotenv.load(fileName: ".env");
     try {
       var url = Uri.parse('${dotenv.get('baseUrl')}/colegios/?populate=*&sort=id:desc');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
-        List<Colegio> colegios = ColegiosFromJson(response.body);
-        return colegios;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
+        res = ColegiosFromJson(response.body);
+        return res;
+      }  else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getColegios: $e');
+        return res;
       }
     } catch (e) {
-      throw Exception(e);
+      print('Error en getColegios: $e');
+      return res;
     }
   }
   //COLEGIO FIN
 
   //CARRERA INICIO 
   Future<List<Carrera>> getCarreras() async {
+    List<Carrera> res = [];
     await dotenv.load(fileName: ".env");
     try {
       var url = Uri.parse('${dotenv.get('baseUrl')}/carreras/?populate=*&pagination[pageSize]=200');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
-        List<Carrera> carreras = CarrerasFromJson(response.body);
-        return carreras;
-      } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
+        res = CarrerasFromJson(response.body);
+        return res;
+      }  else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getCarreras: $e');
+        return res;
       }
     } catch (e) {
-      throw Exception(e);
+      print('Error en getCarreras: $e');
+      return res;
     }
   }
   //CARRERA FIN
@@ -1434,55 +1524,49 @@ class ApiService {
 
   //INTERESES INICIO 
   Future<List<Interes>> getIntereses() async {
+    List<Interes> res = [];
     await dotenv.load(fileName: ".env");
     try {
       var url = Uri.parse('${dotenv.get('baseUrl')}/intereses/?populate=*');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
-        List<Interes> intereses = InteresesFromJson(response.body);
-        return intereses;
+        res = InteresesFromJson(response.body);
+        return res;
       } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getIntereses: $e');
+        return res;
       }
     } catch (e) {
-      throw Exception(e);
+      print('Error en getIntereses: $e');
+      return res;
     }
   }
   //INTERESES FIN
 
-  //eventos.upsa.edu.bo INICIO 
-  Future<List<Universidad>> getUnivesidadeForId(int idUniversidad) async {
-    try {
-      var url = Uri.parse('https://eventos.upsa.edu.bo/universidad-depto/${idUniversidad.toString()}');
-      var response = await http.get(url);
-      if (response.statusCode == 200) {
-        List<Universidad> universidades = UniversidadesFromJson(response.body);
-        return universidades;
-      } else {
-        throw Exception("Algo salio mal");
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-  //eventos.upsa.edu.bo FIN
-
   //CAMPUS INICIO 
   Future<Campus> getDatosCampus() async {
+    Campus res = Campus();
     await dotenv.load(fileName: ".env");
     try {
       var url = Uri.parse('${dotenv.get('baseUrl')}/campus/?populate=*');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
-        Campus campus = CampusFromJson(response.body);
-        return campus;
+        res = CampusFromJson(response.body);
+        return res;
       } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getDatosCampus: $e');
+        return res;
       }
+    } on SocketException {
+      navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
+      return res;
     } catch (e) {
-      throw Exception(e);
+      print('Error en getDatosCampus: $e');
+      return res;
     }
   }
   //CAMPUS FIN
@@ -1514,6 +1598,9 @@ class ApiService {
         print('Error en getConcursosDesde: $e');
         return res;
       }
+    } on SocketException {
+      navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
+      return res;
     } catch (e) {
       print('Error en getConcursosDesde: $e');
       return res;
@@ -1554,6 +1641,9 @@ class ApiService {
         print('Error en getConcursoPopulateConInscripcionesSeguidores: $e');
         return res;
       }
+    } on SocketException {
+      navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
+      return res;
     } catch (e) {
       print('Error en getConcursoPopulateConInscripcionesSeguidores: $e');
       return res;
@@ -1575,25 +1665,32 @@ class ApiService {
         print('Error en getConcursos: $e');
         return  res;
       }
+    } on SocketException {
+      navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
+      return res;
     } catch (e) {
       print('Error en getConcursos: $e');
       return res;
     }
   }
   Future<Concurso> getConcurso(int id) async {
+    Concurso res = Concurso();
     await dotenv.load(fileName: ".env");
     try {
       var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/$id?populate=*');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
-        Concurso concurso = Concurso.armarConcursoPopulate(response.body);
-        return concurso;
+        res = Concurso.armarConcursoPopulate(response.body);
+        return res;
       } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getConcurso: $e');
+        return res;
       }
     } catch (e) {
-      throw Exception(e);
+      print('Error en getConcurso: $e');
+      return res;
     }
   }
   Future<List<Map<String,dynamic>>> getConcursosUltimas(int cantidad) async {
@@ -1612,6 +1709,7 @@ class ApiService {
             "tipo":"Concursos",
             "id":  item['id'],
             "titulo": item['attributes']['titulo'],
+            "updatedAt": item['attributes']['updatedAt'],
             "descripcion": item['attributes']['descripcion'],
             "categoria": item['attributes']['categoria']['data'] != null ? item['attributes']['categoria']['data']['attributes']['nombre'] : "Sin categoria", 
             "imagen": item['attributes']['imagen']['data'] != null ? item['attributes']['imagen']['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",
@@ -1730,19 +1828,23 @@ class ApiService {
 
   //CONTACTO INICIO 
   Future<Contacto> getContacto() async {
+    Contacto res = Contacto();
     await dotenv.load(fileName: ".env");
     try {
       var url = Uri.parse('${dotenv.get('baseUrl')}/contacto/?populate=*');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
-        Contacto res = ContactoFromJson(response.body);
+        res = ContactoFromJson(response.body);
         return res;
       } else {
-        throw Exception(jsonDecode(response.body)["error"]["message"]);
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getContacto: $e');
+        return res;
       }
     } catch (e) {
-      throw Exception(e);
+      print('Error en getContacto: $e');
+      return res;
     }
   }
   //CONTACTO FIN
@@ -1763,12 +1865,12 @@ class ApiService {
         res = "exito";
         return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en  crearContacto$error');
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  crearContacto: $e');
         return res;
       }
     } catch (e) {
-      print('Error en  crearContacto$e');
+      print('Error en  crearContacto: $e');
       return res;
     }
   }
@@ -1794,12 +1896,15 @@ class ApiService {
         res = Resultado.armarResultadosPopulate(response.body);
         return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en  crearContacto$error');
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en getBusquedas: $e');
         return res;
       }
+    } on SocketException {
+      navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
+      return res;
     } catch (e) {
-      print('Error en  crearContacto$e');
+      print('Error en getBusquedas: $e');
       return res;
     }
   }
@@ -1818,11 +1923,11 @@ class ApiService {
         return res;
       } else {
         String e = jsonDecode(response.body)['error']['message'];
-        print('Error en getEventoConInscripciones: $e');
+        print('Error en getContenidosPorEtiquetas: $e');
         return res;
       }
     } catch (e) {
-      print('Error en getEventoConInscripciones: $e');
+      print('Error en getContenidosPorEtiquetas: $e');
       return res;
     }
   }
@@ -1839,15 +1944,18 @@ class ApiService {
     for (var item in data) {
       if(item["opciones"].length > 0){
         String aux2 = "";
+        bool aux3 = false;
         for (var item2 in item["opciones"]) {
           if(item["respuestaSeleccionada"] == item2["id"]){
             aux2 = item2["opcion"];
+            aux3 = item2["esCorrecto"];
           }
         }
         aux.add(
           {
             "label": item["label"],
             "value": aux2,
+            "esCorrecto": aux3,
           }
         );
       }
@@ -1901,6 +2009,9 @@ class ApiService {
         print('Error en getQuizzesPreguntas: $e');
         return  res;
       }
+    } on SocketException {
+      navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
+      return res;
     } catch (e) {
       print('Error en getQuizzesPreguntas: $e');
       return res;
@@ -1910,7 +2021,7 @@ class ApiService {
     QuizPregunta res = QuizPregunta();
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/quizzes/$id/?populate[campos][populate][0]=opciones');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/quizzes/$id/?populate[campos][populate][0]=opciones&populate[respuestasDeQuizzes][populate][0]=usuario');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -1921,6 +2032,9 @@ class ApiService {
         print('Error en getQuizPopulateParaLLenar: $e');
         return res;
       }
+    } on SocketException {
+      navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
+      return res;
     } catch (e) {
       print('Error en getQuizPopulateParaLLenar: $e');
       return res;
@@ -1944,6 +2058,9 @@ class ApiService {
         print('Error en getConfiguracion: $e');
         return res;
       }
+    } on SocketException {
+      navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
+      return res;
     } catch (e) {
       print('Error en getConfiguracion: $e');
       return res;
@@ -1987,6 +2104,9 @@ class ApiService {
         print('Error en  crearRetroalimentacion: $error');
         return res;
       }
+    } on SocketException {
+      navigatorKey.currentState!.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
+      return res;
     } catch (e) {
       print('Error en  crearRetroalimentacion: $e');
       return res;
@@ -2020,12 +2140,12 @@ class ApiService {
         res = "exito";
         return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en  crearSolicitudDeTestVocacional$error');
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en crearSolicitudDeTestVocacional: $e');
         return res;
       }
     } catch (e) {
-      print('Error en  crearSolicitudDeTestVocacional$e');
+      print('Error en crearSolicitudDeTestVocacional: $e');
       return res;
     }
   }
@@ -2057,12 +2177,12 @@ class ApiService {
         res = "exito";
         return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en crearSolicitudDeInscripcion$error');
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en crearSolicitudDeInscripcion: $e');
         return res;
       }
     } catch (e) {
-      print('Error en crearSolicitudDeInscripcion$e');
+      print('Error en crearSolicitudDeInscripcion: $e');
       return res;
     }
   }
@@ -2180,8 +2300,8 @@ class ApiService {
         res = FuncionUpsa.armarOpciones(response.body);
         return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en  getCampoPersonalziado: $error');
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  getCampoPersonalziado: $e');
         return res;
       }
     } catch (e) {
@@ -2200,8 +2320,8 @@ class ApiService {
         res = FuncionUpsa.armarOpcionesJson(response.body);
         return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en  getCampoPersonalziadoJson: $error');
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  getCampoPersonalziadoJson: $e');
         return res;
       }
     } catch (e) {
@@ -2227,8 +2347,8 @@ class ApiService {
         res = Avatar.armarAvataresPopulate(response.body);
         return res;
       } else {
-        String error = jsonDecode(response.body)['error']['message'];
-        print('Error en  getAvataresPopulate: $error');
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  getAvataresPopulate: $e');
         return res;
       }
     } catch (e) {
@@ -2302,6 +2422,11 @@ class ApiService {
     res.addAll(aux);
     aux = await getNoticiasUltimas(5);
     res.addAll(aux);
+    res.sort((a, b) {
+      DateTime dateA = DateTime.parse(a['updatedAt']);
+      DateTime dateB = DateTime.parse(b['updatedAt']);
+      return dateB.compareTo(dateA); // Para ordenar desde el más nuevo al más antiguo
+    });
     return res;
   }
   //EXTRAS FIN

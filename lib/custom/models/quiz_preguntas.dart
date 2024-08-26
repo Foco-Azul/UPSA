@@ -7,12 +7,16 @@ class QuizPregunta {
   String? titulo;
   String? descripcion;
   List<Map<String, dynamic>>? campos;
+  String? imagen;
+  List<Map<String, dynamic>>? usuarios;
 
   QuizPregunta({
     this.id = -1,
     this.titulo = "",
     this.descripcion = "",
     this.campos,
+    this.imagen = "/uploads/default_02263f0f89.png",
+    this.usuarios,
   });
   static QuizPregunta armarQuizPreguntaPopulateParaLlenar(String str) {
     final jsonData = json.decode(str);
@@ -22,7 +26,33 @@ class QuizPregunta {
       titulo: data['attributes']["titulo"],
       descripcion: data['attributes']["descripcion"] ?? "",
       campos: _armarCamposConError(data['attributes']["campos"]),
+      usuarios: _armarListaDeUsuarios(data['attributes']["respuestasDeQuizzes"]["data"]),
     );
+  }
+  static List<Map<String, dynamic>> _armarListaDeUsuarios(dynamic data){
+    List<Map<String, dynamic>> res = [];
+    if(data != null){
+      for (var respuesta  in data) {
+        if(respuesta["attributes"]["usuario"]["data"] != null){
+          bool bandera = false;
+          for (var item in res) {
+            if(item["id"] == respuesta["attributes"]["usuario"]["data"]["id"]){
+              item["cantidad"] = item["cantidad"] + 1;
+              bandera = true;
+            }
+          }
+          if(!bandera){
+            res.add(
+              {
+                "id": respuesta["attributes"]["usuario"]["data"]["id"],
+                "cantidad": 1,
+              }
+            );
+          }
+        }
+      }
+    }
+    return res;
   }
   static List<QuizPregunta> armarQuizPreguntasPopulate(String str) {
     List<QuizPregunta> res = [];
@@ -33,6 +63,7 @@ class QuizPregunta {
         id: item["id"],
         titulo: item['attributes']["titulo"],
         descripcion: item['attributes']["descripcion"] ?? "",
+        imagen: item['attributes']["imagen"]['data'] != null ? item['attributes']["imagen"]['data']['attributes']['url'] : "/uploads/default_02263f0f89.png", 
       );
       res.add(aux);
     }
@@ -41,6 +72,7 @@ class QuizPregunta {
 
   static List<Map<String, dynamic>> _armarCamposConError(List<dynamic>? data){
     List<Map<String, dynamic>> res = [];
+    int pos = 0;
     if(data != null){
       for (var item in data) {
         List<Map<String, dynamic>> aux = [];
@@ -50,6 +82,7 @@ class QuizPregunta {
               "id": item2["id"],
               "opcion": item2["opcion"],
               "esCorrecto": item2["esCorrecto"],
+              "mensaje": "",
             }
           );
         }
@@ -58,10 +91,11 @@ class QuizPregunta {
             "id": item["id"],
             "label": item["label"],
             "opciones": aux,
-            "error": "",
             "respuestaSeleccionada": -1,
+            "pos": pos,
           }
         );
+        pos++;
       }
     }
     return res;

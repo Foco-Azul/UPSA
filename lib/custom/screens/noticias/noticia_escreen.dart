@@ -8,6 +8,8 @@ import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/screens/inicio/etiquetas_screen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/custom/widgets/foto_full_screen.dart';
+import 'package:flutkit/custom/widgets/video_full_screen%20copy.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
@@ -59,7 +61,6 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
     });
     await dotenv.load(fileName: ".env");
     _backUrl = dotenv.get('backUrl');
-    
     _noticia = await ApiService().getNoticia(_idNoticia);
     _otrasNoticias = await ApiService().getOtrasNoticias(_idNoticia);
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
@@ -90,7 +91,7 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
     }
     _otrasNoticias = aux;
   } 
-  
+
   @override
   Widget build(BuildContext context) {
     if (controller.uiLoading) {
@@ -254,26 +255,122 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
     );
   }
   List<Widget> _crearGaleria() {
+    int pos = 0;
     return _noticia.imagenes!.map((url) {
-      return Container(
-        decoration: BoxDecoration(
-          color: customTheme.card,
-          borderRadius: BorderRadius.all(Radius.circular(24)),
-          boxShadow: [
-            BoxShadow(
-                color: customTheme.shadowColor.withAlpha(120),
-                blurRadius: 24,
-                spreadRadius: 4)
-          ]),
-        child: ClipRRect(
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-          child: Image.network(
-            _backUrl + url,
-            height: 240.0,
-            fit: BoxFit.fill,
-          ),
-        )
-      );
+      if(_noticia.video!.isNotEmpty && pos == 0){
+        pos++;
+        return Stack(
+          children: [
+            Container(
+              width: double.infinity, // Asegura que el contenedor ocupe todo el ancho disponible
+              height: double.infinity,
+              decoration: BoxDecoration(
+                color: customTheme.card,
+                borderRadius: BorderRadius.all(Radius.circular(24)),
+                boxShadow: [
+                  BoxShadow(
+                    color: customTheme.shadowColor.withAlpha(120),
+                    blurRadius: 24,
+                    spreadRadius: 4,
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+                child: Image.network(
+                  _backUrl + url,
+                  height: 240.0,
+                  width: double.infinity, // Asegura que la imagen ocupe todo el ancho disponible
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 8, // Ajusta la posición del ícono según tu preferencia
+              right: 16,
+              child: GestureDetector(
+                onTap: () {
+                  // Acción al pulsar el ícono
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FullScreenVideo(videoUrl: _backUrl + _noticia.video!),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: AppColorStyles.altTexto1, // Color de fondo del contenedor
+                    borderRadius: BorderRadius.circular(24.0), // Borde redondeado con radio de 24
+                  ),
+                  child: Icon(
+                    Icons.play_arrow_outlined, // Cambia al ícono que prefieras
+                    color: AppColorStyles.blanco, // Color del ícono
+                    size: 24.0, // Tamaño del ícono
+                  ),
+                )
+              ),
+            ),
+          ],
+        );
+      }else{
+        return Stack(
+          children: [
+            Container(
+              width: double.infinity, // Asegura que el contenedor ocupe todo el ancho disponible
+              height: double.infinity,
+              decoration: BoxDecoration(
+                color: customTheme.card,
+                borderRadius: BorderRadius.all(Radius.circular(24)),
+                boxShadow: [
+                  BoxShadow(
+                    color: customTheme.shadowColor.withAlpha(120),
+                    blurRadius: 24,
+                    spreadRadius: 4,
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+                child: Image.network(
+                  _backUrl + url,
+                  height: 240.0,
+                  width: double.infinity, // Asegura que la imagen ocupe todo el ancho disponible
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 8, // Ajusta la posición del ícono según tu preferencia
+              right: 16,
+              child: GestureDetector(
+                onTap: () {
+                  // Acción al pulsar el ícono
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FullScreenImage(imageUrl: _backUrl + url),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: AppColorStyles.altTexto1, // Color de fondo del contenedor
+                    borderRadius: BorderRadius.circular(24.0), // Borde redondeado con radio de 24
+                  ),
+                  child: Icon(
+                    Icons.fullscreen_outlined, // Cambia al ícono que prefieras
+                    color: AppColorStyles.blanco, // Color del ícono
+                    size: 24.0, // Tamaño del ícono
+                  ),
+                )
+              ),
+            ),
+          ],
+        );
+      }
     }).toList();
   }
   Widget _crearSeguimientoOpcional(bool condicion){

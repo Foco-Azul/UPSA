@@ -5,9 +5,11 @@ import 'dart:convert';
 import 'package:flutkit/custom/auth/registro_carrera.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/notificacion.dart';
+import 'package:flutkit/custom/models/quiz_preguntas.dart';
 import 'package:flutkit/custom/screens/actividades/club_screen.dart';
 import 'package:flutkit/custom/screens/actividades/concurso_escreen.dart';
 import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
+import 'package:flutkit/custom/screens/actividades/quiz_screen.dart';
 import 'package:flutkit/custom/screens/campus/cursillo_screen.dart';
 import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
 import 'package:flutkit/custom/screens/perfil/perfil_screen.dart';
@@ -55,7 +57,6 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
   }
   void _armarListaNotificaciones(List<String> data){
     for (var item in data) {
-      print(item);
       Map<String, dynamic> aux = json.decode(item);
       Notificacion notificacion = Notificacion(
         tipoNotificacion: aux["tipoNotificacion"],
@@ -162,10 +163,10 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
           }        
           if(item.tipoContenido == "club"){
             Navigator.push(context, MaterialPageRoute(builder: (context) => ClubScreen(id: item.id!,)));
-          }        
-          if(item.tipoContenido == "noticia"){
-            Navigator.push(context, MaterialPageRoute(builder: (context) => NoticiaScreen(idNoticia: item.id!,)));
-          }
+          } 
+          if(item.tipoContenido == "quiz"){
+            Navigator.push(context, MaterialPageRoute(builder: (context) => QuizScreen(id: item.id!)));
+          }       
         }else{
           if(item.tipoNotificacion == "contenidoApp"){
             if(item.tipoContenido == "noticia"){
@@ -174,16 +175,14 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
             if(item.tipoContenido == "cursillo"){
               Navigator.push(context, MaterialPageRoute(builder: (context) => CursilloScreen(id: item.id!,)));
             }
-            if(item.tipoContenido == "formulario de preferencias"){
-              Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroCarrera()));
-            }
-            if(item.tipoContenido == "nueva insignia"){
-              Navigator.push(context, MaterialPageRoute(builder: (context) => PerfilScreen()));
-            }
+
           }else{
             if(item.tipoNotificacion == "personalizado"){
               if(item.tipoContenido == "nueva insignia"){
                 Navigator.push(context, MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)));
+              }
+              if(item.tipoContenido == "formulario de preferencias"){
+                Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroCarrera()));
               }
             }
           }

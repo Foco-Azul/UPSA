@@ -291,7 +291,6 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
                 child: Row(
                   children: [
                     // Imagen a la izquierda
-                    if(actividad != 'Quiz')
                     Container(
                       margin: EdgeInsets.only(right: 15),
                       width: MediaQuery.of(context).size.width * 0.25,

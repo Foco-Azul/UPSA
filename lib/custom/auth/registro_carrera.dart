@@ -155,7 +155,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                         _crearCampoOpcion("¿Ya hiciste un Test Vocacional?", "Si", "No", _userMeta.testVocacional!, _userMeta.testVocacional!, "testVocacional"),
                         _crearCampoSelectorSimpleOpcional('¿Dónde de aplicarón el test?', _userMeta.testVocacional!, _errores["aplicacionTest"]!, "aplicacionTest"),
                         _crearCampoSelectorMulti('Seleccioná hasta dos carreras que te gustaría estudiar(en orden de importancia)', _userMeta.carreras!, _errores["carreras"]!, "carreras"),
-                        _crearCampoSelectorSimple('Seleccioná la universidad dónde te gustaría estudiar (en orden de importancia)', _userMeta.universidad!, _errores["universidad"]!, "universidad"),
+                        _crearCampoSelectorSimple('Seleccioná la universidad dónde te gustaría estudiar', _userMeta.universidad!, _errores["universidad"]!, "universidad"),
                         _crearCampoSelectorMulti('¿Sobre qué aspectos te gustaría recibir información?(seleccioná todas las que aplican)', _userMeta.recibirInformacion!, "", "recibirInformacion"),
                         _crearBoton(),
                       ]
@@ -245,6 +245,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
             margin: EdgeInsets.symmetric(vertical: 8),
             decoration: AppDecorationStyle.campoContainerForm(),
             child: SearchChoices.multiple(
+              menuBackgroundColor: AppColorStyles.blanco,
               fieldDecoration: BoxDecoration(
                 border: Border.all(color: Colors.transparent), // Esto elimina el borde
               ),
@@ -254,7 +255,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                 padding: const EdgeInsets.all(12.0),
                 child: Text("Seleccionar...", style: AppTextStyles.parrafo(),),
               ),
-              searchHint: "- Seleccionar -",
+              searchHint: "Selecciona una opción",
               onChanged: (value) {
                 setState(() {
                   if(campo == "carreras"){
@@ -350,6 +351,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
             margin: EdgeInsets.symmetric(vertical: 8),
             decoration: AppDecorationStyle.campoContainerForm(),
             child: SearchChoices.multiple(
+              menuBackgroundColor: AppColorStyles.blanco,
               fieldDecoration: BoxDecoration(
                 border: Border.all(color: Colors.transparent), // Esto elimina el borde
               ),
@@ -461,6 +463,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                     margin: EdgeInsets.symmetric(vertical: 8),
                     decoration: AppDecorationStyle.campoContainerForm(),
                     child: SearchChoices.multiple(
+                      menuBackgroundColor: AppColorStyles.blanco,
                       fieldDecoration: BoxDecoration(
                         border: Border.all(color: Colors.transparent), // Esto elimina el borde
                       ),

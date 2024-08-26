@@ -1,30 +1,26 @@
+import 'package:flutkit/custom/models/configuracion.dart';
 import 'package:flutkit/custom/theme/styles.dart';
+import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/custom/widgets/animacion_carga.dart';
+import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
+import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ActualizacionScreen extends StatefulWidget {
-  const ActualizacionScreen({Key? key, this.isAndroid = true, this.android = "", this.ios = "", this.novedades = "",}) : super(key: key);
-  final bool isAndroid;
-  final String android;
-  final String ios;
-  final String novedades;
+class SinInternetScreen extends StatefulWidget {
+  const SinInternetScreen({Key? key,}) : super(key: key);
   @override
-  _ActualizacionScreenState createState() => _ActualizacionScreenState();
+  _SinInternetScreenState createState() => _SinInternetScreenState();
 }
 
-class _ActualizacionScreenState extends State<ActualizacionScreen> {
-  bool _isAndroid = true;
-  String _android = "";
-  String _ios = "";
-  String _novedades = "";
+class _SinInternetScreenState extends State<SinInternetScreen> {
+
+  late AnimacionCarga _animacionCarga;
 
   @override
   void initState() {
     super.initState();
-    _isAndroid = widget.isAndroid;
-    _android = widget.android;
-    _ios = widget.ios;
-    _novedades = widget.novedades;
+    _animacionCarga = AnimacionCarga(context: context);
   }
 
   @override
@@ -35,7 +31,7 @@ class _ActualizacionScreenState extends State<ActualizacionScreen> {
         backgroundColor: AppColorStyles.altFondo1,
         centerTitle: true,
         title: Text(
-          "Actualizacción de app",
+          "No se puede acceder",
           style: AppTitleStyles.principal()
         ),
       ),
@@ -57,12 +53,12 @@ class _ActualizacionScreenState extends State<ActualizacionScreen> {
           Row(
             children: [
               Icon(
-                Icons.app_shortcut_outlined, // Reemplaza con el icono que desees
+                Icons.signal_wifi_connected_no_internet_4_outlined, // Reemplaza con el icono que desees
                 color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
               ), 
               SizedBox(width: 4.0), // Espaciado entre el icono y el texto
               Text(
-                "Nueva versión DE NIBU disponbile".toUpperCase(), // Primer texto
+                "Sin acceso a internet".toUpperCase(), // Primer texto
                 style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
               ),
             ]
@@ -74,24 +70,12 @@ class _ActualizacionScreenState extends State<ActualizacionScreen> {
                 Container(
                   alignment: Alignment.centerLeft,
                   child:  Text(
-                    'Actualizá para contar con las siguientes novedades.',
+                    'Revisa tu coneccion a internet',
                     style: AppTextStyles.parrafo(color: AppColorStyles.oscuro1),
                   ),
                 ),
                 Container(
                   margin: EdgeInsets.only(top: 4,),
-                  child: Divider(),
-                ),
-                //LISTA DE NOVEDADES
-                Container(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    _novedades,
-                    style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.only(top: 4),
                   child: Divider(),
                 ),
               ]
@@ -101,21 +85,27 @@ class _ActualizacionScreenState extends State<ActualizacionScreen> {
             alignment: Alignment.centerLeft,
             child: ElevatedButton(
               onPressed: () async{
-                // Acción que deseas realizar al pulsar el Container
-                if(_isAndroid){
-                  await launchUrl(Uri.parse(_android), mode: LaunchMode.externalApplication,);
+                _animacionCarga.setMostrar(true);
+                Configuracion configuracion = await ApiService().getConfiguracion();
+                if(configuracion.version! != "-1"){
+                  _animacionCarga.setMostrar(false);
+                  Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 0,)),(Route<dynamic> route) => false);
                 }else{
-                  await launchUrl(Uri.parse(_ios), mode: LaunchMode.externalApplication,);
+                  MensajeTemporalInferior().mostrarMensaje(context,"No se pudo conectar a internet.", "error");
                 }
+                _animacionCarga.setMostrar(false);
+                setState(() {
+                  
+                });
               },
               style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
               child: IntrinsicWidth(
                 child: Row(
                   children: [
-                    Icon(Icons.get_app_outlined, color: AppColorStyles.altTexto1), // Icono a la izquierda
+                    Icon(Icons.replay_outlined, color: AppColorStyles.altTexto1), // Icono a la izquierda
                     SizedBox(width: 8.0), // Espacio entre el icono y el texto
                     Text(
-                      _isAndroid ? 'Actualizar en Google Play' : 'Actualizar en App Store',
+                      'Reintentar',
                       style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
                     ),
                   ],

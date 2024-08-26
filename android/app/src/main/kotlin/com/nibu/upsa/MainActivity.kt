@@ -1,4 +1,4 @@
-package com.upsa_dev_1.flutkit
+package com.nibu.upsa
 
 import io.flutter.embedding.android.FlutterActivity
 

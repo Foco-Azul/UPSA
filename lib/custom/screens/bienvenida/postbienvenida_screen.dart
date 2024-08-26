@@ -79,7 +79,7 @@ class _PostBienvenidaScreenState extends State<PostBienvenidaScreen>{
               ),
               SizedBox(height: 15,),
               Text(
-                'Iniciá tu carrera universitaria junto a la UPSA.',
+                'Iniciá tu vida universitaria junto a la UPSA.',
                 style: TextStyle(fontWeight: FontWeight.normal, fontSize: 15, color: AppColorStyles.blanco),
                 textAlign: TextAlign.center,
               ),

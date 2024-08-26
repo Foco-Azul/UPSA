@@ -4,14 +4,16 @@ import 'dart:convert';
 
 class Configuracion {
   Configuracion({
-    this.version,
-    this.android,
-    this.ios,
+    this.version = "-1",
+    this.android = "",
+    this.ios = "",
+    this.novedades = "",
   });
 
   String? version;
   String? android;
   String? ios;
+  String? novedades;
 
   static Configuracion armarConfiguracion(String str) {
     final jsonData = json.decode(str);
@@ -20,6 +22,7 @@ class Configuracion {
       version: data['attributes']["version"] ?? "",
       android: data['attributes']["android"] ?? "",
       ios: data['attributes']["ios"] ?? "",
+      novedades: data['attributes']["novedades"] ?? "",
     );
   }  
 }

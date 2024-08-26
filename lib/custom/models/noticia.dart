@@ -18,6 +18,7 @@ class Noticia {
     this.colegios,
     this.imagenes,
     this.usuariosPermitidos,
+    this.video,
   });
 
   int? id;
@@ -31,6 +32,7 @@ class Noticia {
   List<Etiqueta>? etiquetas;
   List<Colegio>? colegios;
   List<int>? usuariosPermitidos;
+  String? video;
 
   static List<Noticia> armarNoticiasPopulate(String str) {
     List<Noticia> res = [];
@@ -96,6 +98,7 @@ class Noticia {
       notaCompleta: data['attributes']["notaCompleta"] ?? "", 
       descripcion: data['attributes']["descripcion"], 
       etiquetas: Etiqueta.armarEtiquetas(data['attributes']["etiquetas"]['data']),
+      video: data['attributes']["video"]['data'] != null ? data['attributes']["video"]['data']['attributes']['url'] : "", 
     );
   }
   static List<Noticia> armarNoticiasRelacionadas(List<dynamic> data){

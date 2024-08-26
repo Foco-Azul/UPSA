@@ -1,6 +1,5 @@
 
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
-import 'package:flutkit/custom/auth/registro_perfil.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/configuracion.dart';
 import 'package:flutkit/custom/models/resultado.dart';
@@ -16,6 +15,7 @@ import 'package:flutkit/custom/screens/campus/matriculate_screem.dart';
 import 'package:flutkit/custom/screens/inicio/actualizacion_screen.dart';
 import 'package:flutkit/custom/screens/inicio/inicio_screen.dart';
 import 'package:flutkit/custom/screens/inicio/notificaciones_screen.dart';
+import 'package:flutkit/custom/screens/inicio/sin_internet.dart';
 import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
 import 'package:flutkit/custom/screens/noticias/noticias_inicio.dart';
 import 'package:flutkit/custom/screens/perfil/perfil_screen.dart';
@@ -76,20 +76,23 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
       controller.uiLoading = true;
     });
     _configuracion = await ApiService().getConfiguracion();
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String version = prefs.getString('version') ?? "";
-    AppInfoData info = await AppInfoData.get(); 
-    if (_configuracion.version!.isNotEmpty && _configuracion.version!.split('+')[0][0] != info.package.version.major.toString()) {
-      Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => ActualizacionScreen(isAndroid: info.platform.isAndroid, android: _configuracion.android!, ios: _configuracion.ios!,)),(Route<dynamic> route) => false);
-    }
-    await prefs.setString('version', info.package.version.toString());
-    if(version.isEmpty){
-      Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => WelcomeScreen()),(Route<dynamic> route) => false);
-    }else{
-      if(version.split('+')[0][0] != info.package.version.major.toString()){
-        Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => WelcomeScreen()),(Route<dynamic> route) => false);
+    if(_configuracion.version! != "-1"){
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String version = prefs.getString('version') ?? "";
+      AppInfoData info = await AppInfoData.get(); 
+      if (_configuracion.version!.isNotEmpty && _configuracion.version!.split('+')[0][0] != info.package.version.major.toString()) {
+        Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => ActualizacionScreen(isAndroid: info.platform.isAndroid, android: _configuracion.android!, ios: _configuracion.ios!, novedades: _configuracion.novedades!)),(Route<dynamic> route) => false);
       }
+      await prefs.setString('version', info.package.version.toString());
+      if(version.isEmpty){
+        Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => WelcomeScreen()),(Route<dynamic> route) => false);
+      }else{
+        if(version.split('+')[0][0] != info.package.version.major.toString()){
+          Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => WelcomeScreen()),(Route<dynamic> route) => false);
+        }
+      }
+    }else{
+      Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
     }
     setState(() {
       controller.uiLoading = false;
@@ -324,6 +327,13 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
         return AppBar(
           backgroundColor: AppColorStyles.altFondo1,
           actions: [
+            SizedBox(
+              width: 40.0,
+              child: Image.asset(
+                'lib/custom/assets/images/logo.png',
+                fit: BoxFit.cover,
+              ),
+            ),
             Expanded(
               child: Container (
                 margin: EdgeInsets.symmetric(horizontal: 15),
@@ -391,7 +401,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
             IconButton(
               icon: Icon(Icons.notifications_none_outlined, size: 30, color: AppColorStyles.altTexto1,),
               onPressed: () {
-                Navigator.push(context,MaterialPageRoute(builder: (context) => RegistroPerfil()),);
+                Navigator.push(context,MaterialPageRoute(builder: (context) => NotificacionesScreen()),);
               },
             ),
           ],

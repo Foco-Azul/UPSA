@@ -274,6 +274,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
             margin: EdgeInsets.symmetric(vertical: 8),
             decoration: AppDecorationStyle.campoContainerForm(),
             child: SearchChoices.multiple(
+              menuBackgroundColor: AppColorStyles.blanco,
               fieldDecoration: BoxDecoration(
                 border: Border.all(color: Colors.transparent), // Esto elimina el borde
               ),
@@ -503,7 +504,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       margin: EdgeInsets.symmetric(vertical: 15),
       alignment: Alignment.centerLeft,
       child: Text(
-        'Registrar tus datos aquí te permitirá inscribirte fácilmente a nuestros talleres, clubes y eventos especiales. ',
+        'Registrar tus datos aquí te permitirá inscribirte fácilmente a nuestros talleres, clubes y eventos exclusivos. ',
         style: TextStyle(
           color: AppColorStyles.oscuro1,
           fontSize: 15,

@@ -77,8 +77,8 @@ class _Register2ScreenState extends State<Register2Screen> {
       _data["username"] = _data["email"]!;
       _data["codigoDeVerificacion"] = generador.generarCodigoDeVerificacion();
       _data["tokenDispositivo"] = _prefs.getString('tokenDispositivo') ?? "";
-      User? createduser = await ApiService().addUser(_data);
-      if (createduser != null) {
+      User createduser = await ApiService().addUser(_data);
+      if (createduser.id != -1) {
         // navigate to the dashboard.
         Provider.of<AppNotifier>(context, listen: false).login();
         Provider.of<AppNotifier>(context, listen: false).setUser(createduser);
@@ -88,7 +88,7 @@ class _Register2ScreenState extends State<Register2Screen> {
       }else{
         _error["error"] = "Ya existe una cuenta con el mismo correo electronico.";
         _animacionCarga.setMostrar(false);
-        Navigator.of(context).pop();
+        setState(() {});
       }
     } on Exception catch (e) {
       setState(() {
@@ -99,7 +99,6 @@ class _Register2ScreenState extends State<Register2Screen> {
         }
       });
       _animacionCarga.setMostrar(false);
-      Navigator.of(context).pop();
     }
   }
  
@@ -285,7 +284,7 @@ class _Register2ScreenState extends State<Register2Screen> {
         if (_error["error"]!.isNotEmpty)
         Container(
           alignment: Alignment.centerLeft, 
-          //margin: EdgeInsets.only(top: 10),
+          margin: EdgeInsets.symmetric(vertical: 15),
           child: Text(
             _error["error"]!,
             style: const TextStyle(color: Colors.red),

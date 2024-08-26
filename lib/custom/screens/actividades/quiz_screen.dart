@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/auth/login_screen.dart';
 import 'package:flutkit/custom/auth/registro_carrera.dart';
@@ -38,7 +39,35 @@ class _QuizScreenState extends State<QuizScreen> {
   bool _isLoggedIn = false;
   late AnimacionCarga _animacionCarga;
   bool _bandera = false;
- 
+  final Map<String, int> _marcador = {
+    "actual": 0,
+    "inicial": 0,
+    "final":0,
+  };
+  String _errorGeneral = "";
+  final List<String> _respuestasCorrectas = [
+    "¡Bien tirau!",
+    "¡Le achuntaste!",
+    "¡Estás tiluchi!",
+    "¡Bien ahí!",
+    "¡Esssa!",
+    "¡Buena, pariente!",
+    "Ya casi, ¡vos podés!",
+    "¡Felicidades! Sos un jichi.",
+  ];
+  final List<String> _respuestasInCorrectas = [
+    "¡Uy! Le pelaste.", 
+    "¡Al aguaa!",
+    "Ya pues, oye…",
+    "Negativo.",
+    "Le pelaste de nuevo.",
+    "Ponete las pilas.", 
+    "Jaja, moderate.", 
+    "Bueno, lo intentaste. ¡A estudiar!",
+  ];
+  final random = Random();
+  bool _permitido = false;
+
   @override
   void initState() {
     super.initState();
@@ -52,9 +81,17 @@ class _QuizScreenState extends State<QuizScreen> {
   
   Future<void> _cargarDatos() async { 
     _quizPregunta = await ApiService().getQuizPopulateParaLLenar(_id);
+    _marcador["final"] = _quizPregunta.campos!.length - 1;
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
     if (_isLoggedIn) {
       _user = Provider.of<AppNotifier>(context, listen: false).user;
+      for (var item in _quizPregunta.usuarios!) {
+        if(item["id"] == _user.id){
+          if(item["cantidad"] < 3){
+            _permitido = true;
+          }
+        }
+      }
     }
     setState(() {
       controller.uiLoading = false;
@@ -64,15 +101,15 @@ class _QuizScreenState extends State<QuizScreen> {
     bool hayErrores = false;
     for (var item in _quizPregunta.campos!) {
       if(item["opciones"].length > 0 && item["respuestaSeleccionada"] <= 0){
-        item["error"] = "Responde esta pregunta";
         hayErrores = true;
-      }else{
-        item["error"] = "";
       }
     }
     setState(() { });
     if(hayErrores == false){
+      _errorGeneral = "";
       _enviarFormulario();
+    }else{
+      _errorGeneral = "Tienes preguntas sin responder";
     }
   }
   void _enviarFormulario() async{
@@ -88,7 +125,6 @@ class _QuizScreenState extends State<QuizScreen> {
     setState(() {
     });
   }
-
   
   @override
   Widget build(BuildContext context) {
@@ -197,7 +233,8 @@ class _QuizScreenState extends State<QuizScreen> {
       );
     }
   }
-   Widget _crearTarjetaConFormulario(){
+  
+  Widget _crearTarjetaConFormulario(){
     return Container(
       padding: EdgeInsets.all(15.0),
       margin: EdgeInsets.all(15.0),
@@ -209,12 +246,25 @@ class _QuizScreenState extends State<QuizScreen> {
             margin: EdgeInsets.symmetric(vertical: 10.0), // Ajusta los valores del margen según sea necesario
             child: Text(
               _quizPregunta.descripcion!,
-              style: AppTextStyles.parrafo(),
+              style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
             ),
           ),
           Container(
             margin: EdgeInsets.only(bottom: 15),
             child: Divider(),
+          ),
+          Row(
+            children: [
+              Icon(
+                Icons.psychology_alt_outlined, // Reemplaza con el icono que desees
+                color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
+              ), 
+              SizedBox(width: 4.0), // Espaciado entre el icono y el texto
+              Text(
+                "Quiz".toUpperCase(), // Primer texto
+                style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
+              ),
+            ]
           ),
           _crearFormulario(),
         ],
@@ -222,7 +272,7 @@ class _QuizScreenState extends State<QuizScreen> {
     );
   }
   Widget _crearFormulario(){
-    if(!_isLoggedIn || _bandera){
+    if(!_isLoggedIn || _bandera || !_permitido){
       return Column(
         children: [
           Visibility(
@@ -251,6 +301,21 @@ class _QuizScreenState extends State<QuizScreen> {
                     ),
                   ),
                 )
+              ],
+            )
+          ),
+          Visibility(
+            visible: _isLoggedIn && !_permitido,
+            child: Column(
+              children: [
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 10.0), // Ajusta los valores del margen según sea necesario
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Alcanzaste el maximo de intentos.",
+                    style: AppTextStyles.parrafo(),
+                  ),
+                ),
               ],
             )
           ),
@@ -305,23 +370,96 @@ class _QuizScreenState extends State<QuizScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _crearPreuntas(),
+          if(_errorGeneral.isNotEmpty)
           Container(
-            margin: EdgeInsets.symmetric(vertical: 15),
-            alignment: Alignment.centerLeft,
-            child: ElevatedButton(
-              onPressed: () {
-                _validarCampos();
-              },
-              style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
-              child: Text(
-                'Enviar',
-                style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
-              ),
+            margin: EdgeInsets.only(top: 8),
+            width: double.infinity,
+            child: Text(
+              _errorGeneral,
+              style: TextStyle(color: Colors.red),
+              textAlign: TextAlign.start,
             ),
-          )
+          ),
+          _crearBotones(),
         ]
       );
     }
+  }
+  Widget _crearBotones() {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 15),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Visibility(
+            visible: _marcador["actual"]! > 0,
+            child: Container(
+              alignment: Alignment.centerLeft,
+              child: ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _marcador["actual"] = _marcador["actual"]! - 1;
+                  });
+                },
+                style: AppDecorationStyle.botonCursillo(),
+                child: Row(
+                  children: [
+                    Transform.rotate(
+                      angle: 3.14, // Rotar 180 grados (π radianes)
+                      child: Icon(Icons.arrow_right_alt_outlined, color: AppColorStyles.oscuro1),
+                    ),
+                    Text(
+                      'Anterior',
+                      style: AppTextStyles.botonMenor(),
+                    )
+                  ]
+                ),
+              ),
+            ),
+          ),
+          Visibility(
+            visible: _marcador["actual"]! < _marcador["final"]!,
+            child: Container(
+              alignment: Alignment.centerLeft,
+              child: ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _marcador["actual"] = _marcador["actual"]! + 1;
+                  });
+                },
+                style: AppDecorationStyle.botonCursillo(),
+                child: Row(
+                  children: [
+                    Text(
+                      'Próximo',
+                      style: AppTextStyles.botonMenor(),
+                    ),
+                    Icon(Icons.arrow_right_alt_outlined, color: AppColorStyles.oscuro1),
+                  ]
+                ),
+              ),
+            ), 
+          ),
+          Visibility(
+            visible: _marcador["actual"]! == _marcador["final"]!,
+            child: Container(
+              margin: EdgeInsets.symmetric(vertical: 15),
+              alignment: Alignment.centerLeft,
+              child: ElevatedButton(
+                onPressed: () {
+                  _validarCampos();
+                },
+                style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
+                child: Text(
+                  'Enviar',
+                  style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
+                ),
+              ),
+            )
+          ),
+        ],
+      ),
+    );
   }
   Widget _crearPreuntas() {
     List<Map<String, dynamic>> campos = _quizPregunta.campos!;
@@ -333,33 +471,26 @@ class _QuizScreenState extends State<QuizScreen> {
     );
   }
   Widget _crearPregunta(Map<String,dynamic> data) {
-    return Column(
-      children: [
-        Container(
-          margin: EdgeInsets.symmetric(vertical: 5),
-          alignment: Alignment.centerLeft,
-          child: Text(
-            data['label'],
-            style: (data["opciones"].length > 0) ? AppTextStyles.parrafo(color: AppColorStyles.gris1) : AppTextStyles.etiqueta(color: AppColorStyles.altTexto1)
+    return Visibility(
+      visible: _marcador["actual"] == data["pos"],
+      child: Column(
+        children: [
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 5),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              data['label'],
+              style: (data["opciones"].length > 0) ? AppTextStyles.parrafo(color: AppColorStyles.oscuro2) : AppTextStyles.etiqueta(color: AppColorStyles.altTexto1)
+            ),
           ),
-        ),
-        if(data["opciones"].length > 0)
-        _crearOpciones(data["opciones"], data["id"]),
-        if (data["error"]!.isNotEmpty && data["opciones"].length > 0)
-        Container(
-          margin: EdgeInsets.only(top: 8),
-          width: double.infinity,
-          child: Text(
-            data["error"]!,
-            style: TextStyle(color: Colors.red),
-            textAlign: TextAlign.start,
+          if(data["opciones"].length > 0)
+          _crearOpciones(data["opciones"], data["id"]),
+          Container(
+            margin: EdgeInsets.only(bottom: 15),
+            child: Divider(),
           ),
-        ),
-        Container(
-          margin: EdgeInsets.only(bottom: 15),
-          child: Divider(),
-        ),
-      ],
+        ],
+      )
     );
   }
   Widget _crearOpciones(List<Map<String, dynamic>> data, int idCampo) {
@@ -379,12 +510,9 @@ class _QuizScreenState extends State<QuizScreen> {
     }
     return Column(
       children: [
+        SizedBox(height: 8,),
         Row(
           children: <Widget>[
-            Text(
-              data["opcion"],
-              style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
-            ),
             Container(
               margin: MySpacing.right(8),
               child: Radio(
@@ -396,15 +524,41 @@ class _QuizScreenState extends State<QuizScreen> {
                   setState(() {
                     for (var item in _quizPregunta.campos!) {
                       if(item["id"] == idCampo){
-                        item["respuestaSeleccionada"] = value!;
+                        if(item["respuestaSeleccionada"] == -1){
+                          item["respuestaSeleccionada"] = value!;
+                          if(data["esCorrecto"] == true){
+                            data["mensaje"] = _respuestasCorrectas[random.nextInt(_respuestasCorrectas.length)];
+                          }else{
+                            data["mensaje"] = _respuestasInCorrectas[random.nextInt(_respuestasInCorrectas.length)];
+                          }
+                        }
                       }
                     }
+                    
                   });
                 },
               ),
             ),
+            Flexible(
+              child: Text(
+                data["opcion"],
+                style: AppTextStyles.parrafo(color: (data["mensaje"].isNotEmpty) ? (data["esCorrecto"] ? AppColorStyles.verde1 : Color(0xFFA91010)) :AppColorStyles.gris1),
+                softWrap: true,
+                overflow: TextOverflow.visible,
+              )
+            ),
           ],
         ),
+        if(data["mensaje"].isNotEmpty)
+        Container(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            data["mensaje"],
+            style: AppTextStyles.parrafo(color: data["esCorrecto"] ? AppColorStyles.verde1 : Color(0xFFA91010)),
+            softWrap: true,
+            overflow: TextOverflow.visible,
+          ),
+        )
       ],
     );
   }
