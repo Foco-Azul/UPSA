@@ -1,22 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutkit/custom/models/categoria.dart';
-    
-// getting a list of users from json
-List<Cursillo> CursillosFromJson(String str) {
-  final jsonData = json.decode(str);
-  final List<dynamic> data = jsonData['data'];
-
-  return data.map((item) => Cursillo.fromJson(item)).toList();
-}
-
-Cursillo CursilloFromJson(String str) {
-  final jsonData = json.decode(str);
-  final Map<String, dynamic> data = jsonData['data'];
-
-  return Cursillo.fromJson(data);
-}
-
+import 'package:flutkit/custom/models/categoria.dart';    
 
 // Cursillo class
 class Cursillo {
@@ -34,15 +18,6 @@ class Cursillo {
   String? urlVideo;
   Categoria? categoria;
 
-  factory Cursillo.fromJson(Map<String, dynamic> json) {
-    return Cursillo(
-      id: json["id"],
-      titulo: json['attributes']["titulo"],
-      descripcion: json['attributes']["descripcion"],
-      urlVideo: json['attributes']["urlVideo"],
-      categoria: Categoria.armarCategoria(json['attributes']["categoria"]["data"]),
-    );
-  }
   static Cursillo armarCursilloPopulate(String str) {
     final jsonData = json.decode(str);
     final Map<String, dynamic> data = jsonData['data'];

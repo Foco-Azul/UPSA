@@ -2,22 +2,6 @@ import 'dart:convert';
 
 import 'package:flutkit/custom/models/categoria.dart';
     
-// getting a list of users from json
-List<CarreraUpsa> CarrerasUpsaFromJson(String str) {
-  final jsonData = json.decode(str);
-  final List<dynamic> data = jsonData['data'];
-
-  return data.map((item) => CarreraUpsa.fromJson(item)).toList();
-}
-
-CarreraUpsa CarreraUpsaFromJson(String str) {
-  final jsonData = json.decode(str);
-  final Map<String, dynamic> data = jsonData['data'];
-
-  return CarreraUpsa.fromJson(data);
-}
-
-
 // CarreraUpsa class
 class CarreraUpsa {
   CarreraUpsa({
@@ -40,13 +24,6 @@ class CarreraUpsa {
   List<dynamic>? masInformacion;
   String? pdf;
 
-  factory CarreraUpsa.fromJson(Map<String, dynamic> json) {
-    return CarreraUpsa(
-      id: json["id"],
-      nombre: json['attributes']["nombre"],
-      categoria: Categoria.armarCategoria(json['attributes']["categoria"]["data"]),
-    );
-  }
   static CarreraUpsa armarCarreraUpsaPopulate(String str) {
     final jsonData = json.decode(str);
     final Map<String, dynamic> data = jsonData['data'];

@@ -8,14 +8,6 @@ List<Colegio> ColegiosFromJson(String str) {
   return data.map((item) => Colegio.fromJson(item)).toList();
 }
 
-Colegio ColegioFromJson(String str) {
-  final jsonData = json.decode(str);
-  final Map<String, dynamic> data = jsonData['data'];
-
-  return Colegio.fromJson(data);
-}
-
-
 // Colegio class
 class Colegio {
   Colegio({

@@ -81,12 +81,13 @@ dependencies:
   multi_dropdown: ^2.1.0
   lucide_icons: ^0.257.0
   table_calendar: ^3.0.9
-  youtube_player_flutter: ^9.0.1
+  #youtube_player_flutter: ^9.0.3
   photo_view: ^0.15.0
   dio: ^5.4.3+1
   flutter_app_info: ^1.1.2
   search_choices: ^2.2.7
   video_player: ^2.9.1
+  youtube_player_iframe: ^5.1.2
 #  flutx: ^0.2.0-rc.1
 #  flutx: ^0.1.2
 

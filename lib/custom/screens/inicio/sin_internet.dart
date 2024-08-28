@@ -5,7 +5,6 @@ import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class SinInternetScreen extends StatefulWidget {
   const SinInternetScreen({Key? key,}) : super(key: key);

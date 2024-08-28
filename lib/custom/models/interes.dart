@@ -8,14 +8,6 @@ List<Interes> InteresesFromJson(String str) {
   return data.map((item) => Interes.fromJson(item)).toList();
 }
 
-Interes InteresFromJson(String str) {
-  final jsonData = json.decode(str);
-  final Map<String, dynamic> data = jsonData['data'];
-
-  return Interes.fromJson(data);
-}
-
-
 // Interes class
 class Interes {
   Interes({

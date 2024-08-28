@@ -13,9 +13,10 @@ import 'package:flutkit/custom/controllers/login_controller.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+//import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+//import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 
 class CursilloScreen extends StatefulWidget {
@@ -32,7 +33,7 @@ class _CursilloScreenState extends State<CursilloScreen> {
   late ProfileController controller;
   late LoginController loginController;
   late Timer timerAnimation;
-  late YoutubePlayerController _controller;
+  //late YoutubePlayerController _controller;
   bool _isPlayerInFullScreen = false;
   Cursillo _cursillo = Cursillo();
   List<Cursillo> _cursillosData = [];
@@ -40,6 +41,7 @@ class _CursilloScreenState extends State<CursilloScreen> {
   int _anterior = -1;
   int _siguiente = -1;
   bool _isLoggedIn = false;
+  late YoutubePlayerController _controllerVideo;
   
   @override
   void initState() {
@@ -49,9 +51,34 @@ class _CursilloScreenState extends State<CursilloScreen> {
     customTheme = AppTheme.customTheme;
     controller = ProfileController();
     _id = widget.id;
+    //_controllerVideo.setLoop();
     _cargarDatos();
   }
-  
+  String extractYoutubeId(String url) {
+    String res = "";
+    final RegExp regExp = RegExp(
+      r'(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*?[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})',
+      caseSensitive: false,
+      multiLine: false,
+    );
+
+    final match = regExp.firstMatch(url);
+
+    if (match != null) {
+      res = match.group(1).toString();
+    }
+    return res;
+  }
+  void _enterFullscreen() {
+    _controllerVideo.exitFullScreen(lock: true);
+    _controllerVideo.enterFullScreen(lock: true);
+    _isPlayerInFullScreen = true;
+  }
+  void _exitFullScreen() {
+    _controllerVideo.enterFullScreen(lock: true);
+    _controllerVideo.exitFullScreen(lock: true);
+    _isPlayerInFullScreen = false;
+  }
   void _cargarDatos() async {
     setState(() {
       controller.uiLoading = true;
@@ -64,6 +91,18 @@ class _CursilloScreenState extends State<CursilloScreen> {
     _cursillo = await ApiService().getCursilloPopulate(_id);
     _cursillosData = await ApiService().getCursillosPopulate();
     _armarProximos();
+    _controllerVideo = YoutubePlayerController.fromVideoId(
+      videoId: extractYoutubeId(_cursillo.urlVideo!),
+      autoPlay: true,
+      params: YoutubePlayerParams(
+        showFullscreenButton: false,
+        loop: true,
+        interfaceLanguage: 'es',
+        enableCaption: false,
+        enableKeyboard: true,
+      ),
+    );
+    /*
     _controller = YoutubePlayerController(
       initialVideoId: YoutubePlayer.convertUrlToId(_cursillo.urlVideo!)!,
       flags: const YoutubePlayerFlags(
@@ -71,6 +110,7 @@ class _CursilloScreenState extends State<CursilloScreen> {
         mute: false,
       ),
     );
+    */
     setState(() {
       controller.uiLoading = false;
     });
@@ -121,91 +161,117 @@ class _CursilloScreenState extends State<CursilloScreen> {
         ),
       );
     } else {
-      return Scaffold(
-        appBar: !_isPlayerInFullScreen ? AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios_new),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
+      return PopScope(
+        onPopInvoked: (canPop) {
+          if (canPop) {
+            _exitFullScreen();
+          } 
+        },
+        child: Scaffold(
+          appBar: !_isPlayerInFullScreen ? AppBar(
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back_ios_new),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            backgroundColor: AppColorStyles.altFondo1,
+            centerTitle: true, // Centra el título del AppBar
+            title: Text(
+              _cursillo.categoria!.nombre!,
+              style: AppTitleStyles.principal(),
+            ),
+          ) : null,
           backgroundColor: AppColorStyles.altFondo1,
-          centerTitle: true, // Centra el título del AppBar
-          title: Text(
-            _cursillo.categoria!.nombre!,
-            style: AppTitleStyles.principal(),
-          ),
-        ) : null,
-        backgroundColor: AppColorStyles.altFondo1,
-        body: SingleChildScrollView(
-          child: Container(
-            margin: EdgeInsets.all(15),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                _videoYoutube(),
-                _descripcion(),
-              ],
+          body: SingleChildScrollView(
+            child: Container(
+              margin: EdgeInsets.all(_isPlayerInFullScreen ? 0 : 15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  _videoYoutube(),
+                  _descripcion(),
+                ],
+              ),
             ),
           ),
-        ),
-        bottomNavigationBar: !_isPlayerInFullScreen ? FlashyTabBar(
-          iconSize: 24,
-          backgroundColor: AppColorStyles.blanco,
-          selectedIndex: 2,
-          animationDuration: Duration(milliseconds: 500),
-          showElevation: true,
-          items: [
-            FlashyTabBarItem(
-              inactiveColor: AppColorStyles.altTexto1,
-              activeColor: AppColorStyles.altTexto1,
-              icon: Icon(Icons.home_sharp),
-              title: Text(
-                'Inicio',
-                style: AppTextStyles.bottomMenu()
+          floatingActionButton: Container(
+            margin: EdgeInsets.only(bottom: _isPlayerInFullScreen ? 50 : 0),
+            child: FloatingActionButton.small(
+              backgroundColor: AppColorStyles.blanco,
+              onPressed: () {
+                setState(() {
+                  if(_isPlayerInFullScreen){
+                    _exitFullScreen();
+                  }else{
+                    _enterFullscreen();
+                  }
+                });
+              },
+              child: Icon(
+                _isPlayerInFullScreen ? Icons.fullscreen_exit_outlined : Icons.fullscreen_outlined,
+                color: AppColorStyles.altTexto1,
               ),
             ),
-            FlashyTabBarItem(
-              inactiveColor: AppColorStyles.altTexto1,
-              activeColor: AppColorStyles.altTexto1,
-              icon: Icon(Icons.emoji_events_sharp),
-              title: Text(
-                'Actividades',
-                style: AppTextStyles.bottomMenu()
+          ),
+          bottomNavigationBar: !_isPlayerInFullScreen ? FlashyTabBar(
+            iconSize: 24,
+            backgroundColor: AppColorStyles.blanco,
+            selectedIndex: 2,
+            animationDuration: Duration(milliseconds: 500),
+            showElevation: true,
+            items: [
+              FlashyTabBarItem(
+                inactiveColor: AppColorStyles.altTexto1,
+                activeColor: AppColorStyles.altTexto1,
+                icon: Icon(Icons.home_sharp),
+                title: Text(
+                  'Inicio',
+                  style: AppTextStyles.bottomMenu()
+                ),
               ),
-            ),
-            FlashyTabBarItem(
-              inactiveColor: AppColorStyles.altTexto1,
-              activeColor: AppColorStyles.altTexto1,
-              icon: Icon(Icons.local_library_sharp),
-              title: Text(
-                'Campus',
-                style: AppTextStyles.bottomMenu()
+              FlashyTabBarItem(
+                inactiveColor: AppColorStyles.altTexto1,
+                activeColor: AppColorStyles.altTexto1,
+                icon: Icon(Icons.emoji_events_sharp),
+                title: Text(
+                  'Actividades',
+                  style: AppTextStyles.bottomMenu()
+                ),
               ),
-            ),
-            FlashyTabBarItem(
-              inactiveColor: AppColorStyles.altTexto1,
-              activeColor: AppColorStyles.altTexto1,
-              icon: Icon(Icons.push_pin_sharp),
-              title: Text(
-                'Noticias',
-                style: AppTextStyles.bottomMenu()
+              FlashyTabBarItem(
+                inactiveColor: AppColorStyles.altTexto1,
+                activeColor: AppColorStyles.altTexto1,
+                icon: Icon(Icons.local_library_sharp),
+                title: Text(
+                  'Campus',
+                  style: AppTextStyles.bottomMenu()
+                ),
               ),
-            ),
-            FlashyTabBarItem(
-              inactiveColor: AppColorStyles.altTexto1,
-              activeColor: AppColorStyles.altTexto1,
-              icon: Icon(Icons.account_circle_sharp),
-              title: Text(
-                'Mi perfil',
-                style: AppTextStyles.bottomMenu()
+              FlashyTabBarItem(
+                inactiveColor: AppColorStyles.altTexto1,
+                activeColor: AppColorStyles.altTexto1,
+                icon: Icon(Icons.push_pin_sharp),
+                title: Text(
+                  'Noticias',
+                  style: AppTextStyles.bottomMenu()
+                ),
               ),
-            ),
-          ],
-          onItemSelected: (index) {
-            Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: index,)),(Route<dynamic> route) => false);
-          },
-        ) : null
+              FlashyTabBarItem(
+                inactiveColor: AppColorStyles.altTexto1,
+                activeColor: AppColorStyles.altTexto1,
+                icon: Icon(Icons.account_circle_sharp),
+                title: Text(
+                  'Mi perfil',
+                  style: AppTextStyles.bottomMenu()
+                ),
+              ),
+            ],
+            onItemSelected: (index) {
+              Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: index,)),(Route<dynamic> route) => false);
+            },
+          ) : null
+        )
       );
     }
   } 
@@ -295,6 +361,18 @@ class _CursilloScreenState extends State<CursilloScreen> {
     );
   }
   Widget _videoYoutube(){
+    return YoutubePlayerScaffold(
+      controller: _controllerVideo,
+      aspectRatio: 16 / 8,
+      builder: (context, player) {    
+        return Column(
+          children: [
+            player,
+          ],
+        );
+      },
+    );
+    /*
     return YoutubePlayerBuilder(
       player: YoutubePlayer(
         controller: _controller,
@@ -326,5 +404,6 @@ class _CursilloScreenState extends State<CursilloScreen> {
         );
       },
     );
+    */
   }
 }

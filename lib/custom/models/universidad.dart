@@ -1,20 +1,5 @@
 import 'dart:convert';
     
-// getting a list of users from json
-List<Universidad> UniversidadesFromJson(String str) {
-  final jsonData = json.decode(str);
-  final List<dynamic> data = jsonData;
-  return data.map((item) => Universidad.fromJson(item)).toList();
-}
-
-Universidad UniverdadFromJson(String str) {
-  final jsonData = json.decode(str);
-  final Map<String, dynamic> data = jsonData;
-
-  return Universidad.fromJson(data);
-}
-
-
 // Universidad class
 class Universidad {
   Universidad({
@@ -27,12 +12,6 @@ class Universidad {
   String? nombre;
   int? idDepartamento;
 
-  factory Universidad.fromJson(Map<String, dynamic> json) {
-    return Universidad(
-      id: int.parse(json["id"]),
-      nombre: json["nombre"],
-    );
-  }
   static List<Universidad> armarUniversidadesPopulate(String str) {
     List<Universidad> res = [];
     final jsonData = json.decode(str);

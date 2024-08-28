@@ -8,14 +8,6 @@ List<Carrera> CarrerasFromJson(String str) {
   return data.map((item) => Carrera.fromJson(item)).toList();
 }
 
-Carrera CarreraFromJson(String str) {
-  final jsonData = json.decode(str);
-  final Map<String, dynamic> data = jsonData['data'];
-
-  return Carrera.fromJson(data);
-}
-
-
 // Carrera class
 class Carrera {
   Carrera({
