@@ -218,27 +218,29 @@ class _CursillosInicioState extends State<CursillosInicio> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Wrap(
+        Column(
           children: List.generate(cursillos.length, (index) {
             return GestureDetector(
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => CursilloScreen(id: cursillos[index].id!)));
               },
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Flexible(
-                    child: Text(
-                      cursillos[index].titulo!,
-                      style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
-                      softWrap: true,
-                      overflow: TextOverflow.visible, // Puedes ajustar esto a TextOverflow.ellipsis si prefieres truncar el texto
-                    ),
-                  ),
-                  if (index != cursillos.length - 1)
+              child:
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 10.0), // Ajusta el margen aquí
+                child: Row(
+                  children: [
                     Icon(LucideIcons.dot, color: AppColorStyles.oscuro2),
-                ],
-              ),
+                    Flexible(
+                      child: Text(
+                        cursillos[index].titulo!,
+                        style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
+                        softWrap: true,
+                        overflow: TextOverflow.visible, // Puedes ajustar esto a TextOverflow.ellipsis si prefieres truncar el texto
+                      ),
+                    ),
+                  ],
+                ),
+              )
             );
           }),
         ),

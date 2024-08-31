@@ -1998,7 +1998,7 @@ class ApiService {
     List<QuizPregunta> res = [];
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/quizzes/?populate=*');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/quizzes/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {

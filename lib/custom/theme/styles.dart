@@ -182,6 +182,7 @@ class AppBanderaStyles {
       "belgica": '🇧🇪 ',
       "brasil": '🇧🇷 ',
       "chile": '🇨🇱 ',
+      "puerto rico": '🇵🇷 ',
       // América del Norte
       "canada": '🇨🇦 ',
       "mexico": '🇲🇽 ',
@@ -217,6 +218,7 @@ class AppBanderaStyles {
       "uruguay": '🇺🇾 ',
       "venezuela": '🇻🇪 ',
       // Europa
+      "escocia": '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
       "albania": '🇦🇱 ',
       "andorra": '🇦🇩 ',
       "armenia": '🇦🇲 ',

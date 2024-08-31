@@ -9,7 +9,7 @@ import 'package:flutkit/custom/screens/inicio/etiquetas_screen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/widgets/foto_full_screen.dart';
-import 'package:flutkit/custom/widgets/video_full_screen.dart';
+import 'package:flutkit/custom/widgets/video_full_vertical_screen.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';

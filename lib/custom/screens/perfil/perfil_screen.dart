@@ -21,6 +21,7 @@ import 'package:flutkit/custom/screens/perfil/actividades_pasadas_screen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/widgets/animacion_carga.dart';
+import 'package:flutkit/custom/widgets/foto_full_screen.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
@@ -497,8 +498,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   ),
                 ),
                 Positioned(
-                  bottom: 10,
-                  left: 10, // Añade esta línea para alinear a la izquierda
+                  bottom: 16,
+                  left: 8, // Añade esta línea para alinear a la izquierda
                   child: _buildPageIndicatorStatic(),
                 ),
               ],
@@ -512,24 +513,49 @@ class _PerfilScreenState extends State<PerfilScreen> {
   }
   List<Widget> _crearGaleria() {
     return _userMeta.colegio!.imagenes!.map((url) {
-      return Container(
-        decoration: BoxDecoration(
-          color: customTheme.card,
-          borderRadius: BorderRadius.all(Radius.circular(24)),
-          boxShadow: [
-            BoxShadow(
-                color: customTheme.shadowColor.withAlpha(120),
-                blurRadius: 24,
-                spreadRadius: 4)
-          ]),
-        child: ClipRRect(
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-          child: Image.network(
-            _backUrl + url,
-            height: 240.0,
-            fit: BoxFit.fill,
+      return Stack(
+        children: [
+          Container(
+            width: double.infinity, // Asegura que el contenedor ocupe todo el ancho disponible
+            decoration: AppDecorationStyle.tarjeta(),
+            child: ClipRRect(
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+              child: Image.network(
+                _backUrl+url,
+                height: 240.0,
+                width: double.infinity, // Asegura que la imagen ocupe todo el ancho disponible
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
-        )
+          Positioned(
+            bottom: 16, // Ajusta la posición del ícono según tu preferencia
+            right: 8,
+            child: GestureDetector(
+              onTap: () {
+                // Acción al pulsar el ícono
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FullScreenImage(imageUrl: _backUrl+url,),
+                  ),
+                );
+              },
+              child: Container(
+                padding: EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: AppColorStyles.altTexto1, // Color de fondo del contenedor
+                  borderRadius: BorderRadius.circular(24.0), // Borde redondeado con radio de 24
+                ),
+                child: Icon(
+                  Icons.fullscreen_outlined, // Cambia al ícono que prefieras
+                  color: AppColorStyles.blanco, // Color del ícono
+                  size: 24.0, // Tamaño del ícono
+                ),
+              )
+            ),
+          ),
+        ],
       );
     }).toList();
   }

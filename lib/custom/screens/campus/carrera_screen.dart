@@ -4,6 +4,7 @@ import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/carrera_upsa.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/custom/widgets/foto_full_screen.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutkit/custom/controllers/login_controller.dart';
@@ -301,16 +302,50 @@ class _CarreraScreenState extends State<CarreraScreen> {
     );
   }
   Widget _bannerCarrera() {
-    return Container(
-      margin: EdgeInsets.all(15), // Margen de 8.0 en todos los lados
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(10.0), // Radio del borde
-        child: Image.network(
-          _backUrl+_carreraUpsa.imagen!,
-          height: 240.0,
-          fit: BoxFit.cover, // Ajuste de la imagen
+    return Stack(
+      children: [
+        Container(
+          margin: EdgeInsets.all(15),
+          width: double.infinity, // Asegura que el contenedor ocupe todo el ancho disponible
+          decoration: AppDecorationStyle.tarjeta(),
+          child: ClipRRect(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+            child: Image.network(
+              _backUrl+_carreraUpsa.imagen!,
+              height: 240.0,
+              width: double.infinity, // Asegura que la imagen ocupe todo el ancho disponible
+              fit: BoxFit.cover,
+            ),
+          ),
         ),
-      ),
+        Positioned(
+          bottom: 16, // Ajusta la posición del ícono según tu preferencia
+          right: 16,
+          child: GestureDetector(
+            onTap: () {
+              // Acción al pulsar el ícono
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FullScreenImage(imageUrl: _backUrl+_carreraUpsa.imagen!,),
+                ),
+              );
+            },
+            child: Container(
+              padding: EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                color: AppColorStyles.altTexto1, // Color de fondo del contenedor
+                borderRadius: BorderRadius.circular(24.0), // Borde redondeado con radio de 24
+              ),
+              child: Icon(
+                Icons.fullscreen_outlined, // Cambia al ícono que prefieras
+                color: AppColorStyles.blanco, // Color del ícono
+                size: 24.0, // Tamaño del ícono
+              ),
+            )
+          ),
+        ),
+      ],
     );
   }
   Widget _facultadNombre() {

@@ -13,6 +13,7 @@ import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 
@@ -213,26 +214,27 @@ class _CarrerasInicioState extends State<CarrerasInicio> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Wrap(
+        Column(
           children: List.generate(carreras.length, (index) {
             return GestureDetector(
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => CarreraScreen(id: carreras[index].id!,)));
               },
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Flexible(
-                    child: Text(
-                      carreras[index].nombre!,
-                      style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
-                      softWrap: true,
-                      overflow: TextOverflow.visible, // Puedes ajustar esto a TextOverflow.ellipsis si prefieres truncar el texto
-                    ),
-                  ),
-                  if (index != carreras.length - 1)
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 10.0), // Ajusta el margen aquí
+                child: Row(
+                  children: [
                     Icon(LucideIcons.dot, color: AppColorStyles.oscuro2),
-                ],
+                    Flexible(
+                      child: Text(
+                        carreras[index].nombre!,
+                        style: AppTextStyles.parrafo(color: AppColorStyles.oscuro2),
+                        softWrap: true,
+                        overflow: TextOverflow.visible, // Puedes ajustar a TextOverflow.ellipsis si prefieres truncar el texto
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           }),

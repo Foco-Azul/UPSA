@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
   final Widget initialScreen;
 
   MyApp({required this.initialScreen});
-  @override
+  @override 
   Widget build(BuildContext context) {
     return Consumer<AppNotifier>(
       builder: (BuildContext context, AppNotifier value, Widget? child) {

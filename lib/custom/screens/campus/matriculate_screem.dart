@@ -592,10 +592,10 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
                     onPressed: () {
                       _validarCampos();
                     },
-                    style: AppDecorationStyle.botonContacto(),
+                    style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
                     child: Text(
                       'Enviar',
-                      style: AppTextStyles.botonMenor(color: AppColorStyles.blanco), // Estilo del texto del botón
+                      style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
                     ),
                   ),
                 )
