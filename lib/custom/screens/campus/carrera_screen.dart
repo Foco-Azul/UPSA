@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/carrera_upsa.dart';
 import 'package:flutkit/custom/theme/styles.dart';
+import 'package:flutkit/custom/utils/funciones.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/widgets/foto_full_screen.dart';
 import 'package:flutkit/homes/homes_screen.dart';
@@ -49,6 +51,10 @@ class _CarreraScreenState extends State<CarreraScreen> {
     await dotenv.load(fileName: ".env");
     _backUrl = dotenv.get('backUrl');
     _carreraUpsa = await ApiService().getCarreraUpsa(_id);
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Carreras_${FuncionUpsa.limpiarYReemplazar(_carreraUpsa.nombre!)}',
+      screenClass: 'Carreras_${FuncionUpsa.limpiarYReemplazar(_carreraUpsa.nombre!)}', // Clase o tipo de pantalla
+    );
     setState(() {
       controller.uiLoading = false;
     });

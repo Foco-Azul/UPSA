@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/carrera_upsa.dart';
@@ -45,6 +46,10 @@ class _CarrerasInicioState extends State<CarrerasInicio> {
     setState(() {
       controller.uiLoading = true;
     });
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Carreras',
+      screenClass: 'Carreras', // Clase o tipo de pantalla
+    );
     _carrerasUpsa = await ApiService().getCarrerasUpsaPopulate();
     _armarCategorias();
     setState(() {

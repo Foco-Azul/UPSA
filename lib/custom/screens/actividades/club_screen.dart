@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:barcode_widget/barcode_widget.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/categoria.dart';
@@ -68,6 +69,10 @@ class _ClubScreenState extends State<ClubScreen> {
   
   Future<void> _cargarDatos() async { 
     _club = await ApiService().getClubPopulateConInscripcionesSeguidores(_id);
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Clubes_${FuncionUpsa.limpiarYReemplazar(_club.titulo!)}',
+      screenClass: 'Clubes_${FuncionUpsa.limpiarYReemplazar(_club.titulo!)}', // Clase o tipo de pantalla
+    );
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
     if (_isLoggedIn) {
       _user = Provider.of<AppNotifier>(context, listen: false).user;

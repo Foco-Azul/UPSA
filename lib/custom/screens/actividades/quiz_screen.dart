@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/auth/login_screen.dart';
 import 'package:flutkit/custom/auth/registro_carrera.dart';
@@ -10,6 +11,7 @@ import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/quiz_preguntas.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/theme/styles.dart';
+import 'package:flutkit/custom/utils/funciones.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
@@ -81,6 +83,10 @@ class _QuizScreenState extends State<QuizScreen> {
   
   Future<void> _cargarDatos() async { 
     _quizPregunta = await ApiService().getQuizPopulateParaLLenar(_id);
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Quizzes_${FuncionUpsa.limpiarYReemplazar(_quizPregunta.titulo!)}',
+      screenClass: 'Quizzes_${FuncionUpsa.limpiarYReemplazar(_quizPregunta.titulo!)}', // Clase o tipo de pantalla
+    );
     _marcador["final"] = _quizPregunta.campos!.length - 1;
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
     if (_isLoggedIn) {

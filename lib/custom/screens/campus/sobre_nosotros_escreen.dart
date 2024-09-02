@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/sobre_nosotros.dart';
@@ -41,6 +42,10 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
     setState(() {
       controller.uiLoading = true;
     });
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Sobre_nosotros',
+      screenClass: 'Sobre_nosotros', // Clase o tipo de pantalla
+    );
     await dotenv.load(fileName: ".env");
     _backUrl = dotenv.get('backUrl');
     _sobreNosotros = await ApiService().getSobreNosotros();

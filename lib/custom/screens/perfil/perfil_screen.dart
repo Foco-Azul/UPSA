@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutkit/custom/auth/login_screen.dart';
 import 'package:flutkit/custom/auth/register_screen.dart';
 import 'package:flutkit/custom/auth/registro_carrera.dart';
@@ -73,6 +74,10 @@ class _PerfilScreenState extends State<PerfilScreen> {
   }
 
   void _cargarDatos() async{
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Perfil',
+      screenClass: 'Perfil', // Clase o tipo de pantalla
+    );
     await dotenv.load(fileName: ".env");
     _backUrl = dotenv.get('backUrl');
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;

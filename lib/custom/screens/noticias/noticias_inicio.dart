@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/categoria.dart';
 import 'package:flutkit/custom/models/noticia.dart';
@@ -40,6 +41,10 @@ class _NoticiasScreenState extends State<NoticiasScreen> {
     _cargarCategorias();
   }
   void _cargarCategorias() async{
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Noticias',
+      screenClass: 'Noticias', // Clase o tipo de pantalla
+    );
     await dotenv.load(fileName: ".env");
     _backUrl = dotenv.get('backUrl');
   

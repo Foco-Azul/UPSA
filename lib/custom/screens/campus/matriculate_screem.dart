@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/auth/login_screen.dart';
 import 'package:flutkit/custom/auth/registro_carrera.dart';
@@ -67,7 +68,11 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
   void _cargarDatos() async { 
     setState(() {
       controller.uiLoading = true;
-    });
+    });    
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Inscribete',
+      screenClass: 'Inscribete', // Clase o tipo de pantalla
+    );
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
     if(_isLoggedIn){
       _user = Provider.of<AppNotifier>(context, listen: false).user;

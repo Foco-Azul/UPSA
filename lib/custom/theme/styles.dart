@@ -158,6 +158,9 @@ class AppIconStyles {
       "sports_basketball_outlined": Icons.sports_basketball_outlined,
       "book_outlined": Icons.book_outlined,
       "psychology_outlined": Icons.psychology_outlined,
+      "people_alt_outlined": Icons.people_alt_outlined,
+      "school_outlined": Icons.school_outlined,
+      "maps_home_work_outlined": Icons.maps_home_work_outlined,
     };
     return iconMap[nombre];
   }

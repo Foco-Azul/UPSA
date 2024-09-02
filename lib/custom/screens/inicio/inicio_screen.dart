@@ -7,6 +7,7 @@ import 'package:flutkit/custom/screens/actividades/concurso_escreen.dart';
 import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
 import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
+import 'package:flutkit/custom/utils/funciones.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
@@ -17,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 class InicioScreen extends StatefulWidget {
   const InicioScreen({Key? key}) : super(key: key);
@@ -45,6 +47,10 @@ class _InicioScreenState extends State<InicioScreen> {
     setState(() {
       controller.uiLoading = true;
     });
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Inicio',
+      screenClass: 'Inicio', // Clase o tipo de pantalla
+    );
     await dotenv.load(fileName: ".env");
     _backUrl = dotenv.get('backUrl');
     _contenido = await ApiService().getContenido();

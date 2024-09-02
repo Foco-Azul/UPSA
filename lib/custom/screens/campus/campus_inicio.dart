@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/campus.dart';
 import 'package:flutkit/custom/screens/campus/carreras_inicio.dart';
@@ -41,9 +42,14 @@ class _CampusScreenState extends State<CampusScreen> {
     theme = AppTheme.theme;
     customTheme = AppTheme.customTheme;
     controller = ProfileController();
+    
     _cargarDatos();
   }
   void _cargarDatos() async{
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Campus',
+      screenClass: 'Campus', // Clase o tipo de pantalla
+    );
     _campus = await ApiService().getDatosCampus();
     await dotenv.load(fileName: ".env");
     _backUrl = dotenv.get('backUrl');

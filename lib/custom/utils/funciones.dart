@@ -252,4 +252,11 @@ class FuncionUpsa {
     }
     return res;
   }
+  static String limpiarYReemplazar(String texto) {
+    // Reemplaza espacios con guiones bajos
+    String res = texto.replaceAll(' ', '_');
+    // Elimina cualquier carácter que no sea letra, número o guion bajo
+    res = res.replaceAll(RegExp(r'[^a-zA-Z0-9_]'), '');
+    return res;
+  }
 }

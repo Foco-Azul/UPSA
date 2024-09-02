@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:barcode_widget/barcode_widget.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/categoria.dart';
@@ -66,6 +67,10 @@ class _EventoScreenState extends State<EventoScreen> {
   
   Future<void> _cargarDatos() async { 
     _evento = await ApiService().getEventoPopulateConInscripcionesSeguidores(_id);
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Eventos_${FuncionUpsa.limpiarYReemplazar(_evento.titulo!)}',
+      screenClass: 'Eventos_${FuncionUpsa.limpiarYReemplazar(_evento.titulo!)}', // Clase o tipo de pantalla
+    );
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
     if (_isLoggedIn) {
       _user = Provider.of<AppNotifier>(context, listen: false).user;

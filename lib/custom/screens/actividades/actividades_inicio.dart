@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/categoria.dart';
 import 'package:flutkit/custom/models/club.dart';
@@ -51,6 +52,7 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
     theme = AppTheme.theme;
     customTheme = AppTheme.customTheme;
     controller = ProfileController();
+    
     _cargarDatos();
   }
   
@@ -58,7 +60,10 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
     setState(() {
       controller.uiLoading = true;
     });
-
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Actividades',
+      screenClass: 'Actividades', // Clase o tipo de pantalla
+    );
     await dotenv.load(fileName: ".env");
     _backUrl = dotenv.get('backUrl');
 

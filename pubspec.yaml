@@ -88,6 +88,7 @@ dependencies:
   search_choices: ^2.2.7
   video_player: ^2.9.1
   youtube_player_iframe: ^5.1.2
+  firebase_analytics: ^10.10.7
 #  flutx: ^0.2.0-rc.1
 #  flutx: ^0.1.2
 

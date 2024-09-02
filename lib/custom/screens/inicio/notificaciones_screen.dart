@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutkit/custom/auth/registro_carrera.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/notificacion.dart';
@@ -45,6 +46,10 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
     setState(() {
       controller.uiLoading = true;
     });
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Notificaciones',
+      screenClass: 'Notificaciones', // Clase o tipo de pantalla
+    );
     _prefs = await SharedPreferences.getInstance();
     //await _prefs.setStringList('notificaciones', []);
     List<String> notificacionesCadenas = _prefs.getStringList('notificaciones') ?? [];

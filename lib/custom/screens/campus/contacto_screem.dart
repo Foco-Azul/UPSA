@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/contacto.dart';
@@ -64,6 +65,10 @@ class _ContactoScreenState extends State<ContactoScreen> {
     setState(() {
       controller.uiLoading = true;
     });
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Contacto',
+      screenClass: 'Contacto', // Clase o tipo de pantalla
+    );
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
     if(_isLoggedIn){
       _user = Provider.of<AppNotifier>(context, listen: false).user;

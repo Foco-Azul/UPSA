@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/categoria.dart';
@@ -7,6 +8,7 @@ import 'package:flutkit/custom/models/noticia.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/screens/inicio/etiquetas_screen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
+import 'package:flutkit/custom/utils/funciones.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/widgets/foto_full_screen.dart';
 import 'package:flutkit/custom/widgets/video_full_vertical_screen.dart';
@@ -62,6 +64,10 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
     await dotenv.load(fileName: ".env");
     _backUrl = dotenv.get('backUrl');
     _noticia = await ApiService().getNoticia(_idNoticia);
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Noticias_${FuncionUpsa.limpiarYReemplazar(_noticia.titulo!)}',
+      screenClass: 'Noticias_${FuncionUpsa.limpiarYReemplazar(_noticia.titulo!)}', // Clase o tipo de pantalla
+    );
     _otrasNoticias = await ApiService().getOtrasNoticias(_idNoticia);
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
     if (_isLoggedIn) {

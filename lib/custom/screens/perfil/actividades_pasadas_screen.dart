@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/screens/actividades/club_screen.dart';
@@ -39,6 +40,10 @@ class _ActividadesPasadasScreenState extends State<ActividadesPasadasScreen> {
     setState(() {
       controller.uiLoading = true;
     });
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Todas las actividades',
+      screenClass: 'Todas las actividades', // Clase o tipo de pantalla
+    );
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
     if(_isLoggedIn){
       _user = Provider.of<AppNotifier>(context, listen: false).user;

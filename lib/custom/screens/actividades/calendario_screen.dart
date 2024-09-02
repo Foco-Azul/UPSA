@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/categoria.dart';
@@ -39,6 +40,10 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
     _cargarDatos();
   }
   void _cargarDatos() async{
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Calendario',
+      screenClass: 'Calendario', // Clase o tipo de pantalla
+    );
     _actividades = await ApiService().getActividades();
     setState(() {
       controller.uiLoading = false;

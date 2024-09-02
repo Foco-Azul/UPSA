@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutkit/custom/auth/registro_intereses.dart';
 import 'package:flutkit/custom/models/carrera.dart';
 import 'package:flutkit/custom/models/universidad.dart';
@@ -55,6 +56,10 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
   }
 
   void cargarDatos() async{
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Formulario_de_preferencias_de_carrera',
+      screenClass: 'Formulario_de_preferencias_de_carrera', // Clase o tipo de pantalla
+    );
     _user = Provider.of<AppNotifier>(context, listen: false).user;
     _user = await ApiService().getUserPopulateConMetasParaFormularioCarrera(_user.id!);
     _opcionesRecibirInformacion = await ApiService().getCampoPersonalziado(1); 

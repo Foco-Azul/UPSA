@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/auth/login_screen.dart';
 import 'package:flutkit/custom/auth/registro_carrera.dart';
@@ -8,6 +9,7 @@ import 'package:flutkit/custom/auth/validar_email.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/theme/styles.dart';
+import 'package:flutkit/custom/utils/funciones.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
 import 'package:flutkit/custom/widgets/animacion_carga.dart';
@@ -82,6 +84,10 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
     setState(() {
       controller.uiLoading = true;
     });
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Retroalimentaciones_${FuncionUpsa.limpiarYReemplazar(_titulo)}',
+      screenClass: 'Retroalimentaciones_${FuncionUpsa.limpiarYReemplazar(_titulo)}', // Clase o tipo de pantalla
+    );
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
     if(_isLoggedIn){
       _user = Provider.of<AppNotifier>(context, listen: false).user;

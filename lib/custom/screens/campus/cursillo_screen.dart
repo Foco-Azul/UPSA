@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/categoria.dart';
 import 'package:flutkit/custom/models/cursillo.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/theme/styles.dart';
+import 'package:flutkit/custom/utils/funciones.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/homes/homes_screen.dart';
@@ -89,6 +91,10 @@ class _CursilloScreenState extends State<CursilloScreen> {
       await ApiService().setUserCursillosVistos(user.id!, _id);
     }
     _cursillo = await ApiService().getCursilloPopulate(_id);
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Cursillos_${FuncionUpsa.limpiarYReemplazar(_cursillo.titulo!)}',
+      screenClass: 'Cursillos_${FuncionUpsa.limpiarYReemplazar(_cursillo.titulo!)}', // Clase o tipo de pantalla
+    );
     _cursillosData = await ApiService().getCursillosPopulate();
     _armarProximos();
     _controllerVideo = YoutubePlayerController.fromVideoId(

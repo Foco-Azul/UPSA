@@ -1,4 +1,5 @@
 
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/categoria.dart';
 import 'package:flutkit/custom/models/user.dart';
@@ -7,6 +8,7 @@ import 'package:flutkit/custom/screens/actividades/concurso_escreen.dart';
 import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
 import 'package:flutkit/custom/screens/noticias/noticia_escreen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
+import 'package:flutkit/custom/utils/funciones.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
@@ -45,6 +47,10 @@ class _EtiquetasScreenState extends State<EtiquetasScreen> {
     setState(() {
       controller.uiLoading = true;
     });
+    await FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Etiquetas_${FuncionUpsa.limpiarYReemplazar(_etiqueta)}',
+      screenClass: 'Etiquetas_${FuncionUpsa.limpiarYReemplazar(_etiqueta)}', // Clase o tipo de pantalla
+    );
     _contenidos = await ApiService().getContenidosPorEtiquetas(_etiqueta);
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
     if (_isLoggedIn) {
