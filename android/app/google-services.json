@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "139809526942",
-    "project_id": "upsa-8d2e3",
-    "storage_bucket": "upsa-8d2e3.appspot.com"
+    "project_number": "647980788795",
+    "project_id": "nibu-91a04",
+    "storage_bucket": "nibu-91a04.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:139809526942:android:8318e66ccd4ec94ae4978f",
+        "mobilesdk_app_id": "1:647980788795:android:5085fdecac1188ac24801e",
         "android_client_info": {
           "package_name": "com.nibu.upsa"
         }
@@ -15,26 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCqLNwNDzJ5WV6gWpSxzzc82Yk_vZy4pXA"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:139809526942:android:e5de7d246efe25b7e4978f",
-        "android_client_info": {
-          "package_name": "com.upsa_dev_1.flutkit"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyCqLNwNDzJ5WV6gWpSxzzc82Yk_vZy4pXA"
+          "current_key": "AIzaSyDm0KT2skghm_8a4oWLLEMFXLXlnKCPA3E"
         }
       ],
       "services": {

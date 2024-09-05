@@ -46,7 +46,7 @@ class _PostBienvenidaScreenState extends State<PostBienvenidaScreen>{
       body: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
-          _crearImgen(),
+          _crearImagen(),
           _crearContenedorPostBienvenida(),
         ],
       ),
@@ -146,10 +146,13 @@ class _PostBienvenidaScreenState extends State<PostBienvenidaScreen>{
       ),
     );
   }
-  Widget _crearImgen(){
-    return Opacity(
-      opacity: 0.5, // Establece el nivel de opacidad (0.0 a 1.0)
-      child: Image.asset('lib/custom/assets/images/bienvenida_1.png', fit: BoxFit.cover),
+  Widget _crearImagen(){
+    return SizedBox(
+      height: 200,
+      child: Opacity(
+        opacity: 0.5, // Establece el nivel de opacidad (0.0 a 1.0)
+        child: Image.asset('lib/custom/assets/images/bienvenida_1.png', fit: BoxFit.cover),
+      ),
     );
   }
 }
