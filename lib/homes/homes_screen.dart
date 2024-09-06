@@ -9,8 +9,11 @@ import 'package:flutkit/custom/screens/actividades/calendario_screen.dart';
 import 'package:flutkit/custom/screens/actividades/club_screen.dart';
 import 'package:flutkit/custom/screens/actividades/concurso_escreen.dart';
 import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
+import 'package:flutkit/custom/screens/actividades/quiz_screen.dart';
 import 'package:flutkit/custom/screens/bienvenida/bienvenida_screen.dart';
 import 'package:flutkit/custom/screens/campus/campus_inicio.dart';
+import 'package:flutkit/custom/screens/campus/carrera_screen.dart';
+import 'package:flutkit/custom/screens/campus/cursillo_screen.dart';
 import 'package:flutkit/custom/screens/campus/matriculate_screem.dart';
 import 'package:flutkit/custom/screens/inicio/actualizacion_screen.dart';
 import 'package:flutkit/custom/screens/inicio/inicio_screen.dart';
@@ -279,12 +282,22 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
         if(item.tipo == "club"){
           Navigator.push(context, MaterialPageRoute(builder: (context) => ClubScreen(id: item.idContenido!,)));
         }        
+        if(item.tipo == "quiz"){
+          Navigator.push(context, MaterialPageRoute(builder: (context) => QuizScreen(id: item.idContenido!,)));
+        }
         if(item.tipo == "noticia"){
           Navigator.push(context, MaterialPageRoute(builder: (context) => NoticiaScreen(idNoticia: item.idContenido!,)));
+        }
+        if(item.tipo == "cursillo"){
+          Navigator.push(context, MaterialPageRoute(builder: (context) => CursilloScreen(id: item.idContenido!,)));
+        }
+        if(item.tipo == "carrera"){
+          Navigator.push(context, MaterialPageRoute(builder: (context) => CarreraScreen(id: item.idContenido!,)));
         }
         if(item.tipo == "matriculate"){
           Navigator.push(context, MaterialPageRoute(builder: (context) => MatriculateScreen()));
         }
+
       },
       child: Container(
         margin: EdgeInsets.all(15), // Añadir margen superior si es necesario
