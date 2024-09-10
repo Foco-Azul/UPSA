@@ -3,6 +3,7 @@
 // ignore_for_file: avoid_print
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -91,6 +92,19 @@ class PushNotificationService{
   }
   static Future initializeApp() async {
     await Firebase.initializeApp();
+    if (Platform.isIOS) {
+      FirebaseMessaging messaging = FirebaseMessaging.instance;
+      NotificationSettings settings = await messaging.requestPermission(
+        alert: true,
+        announcement: false,
+        badge: true,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: false,
+        sound: true,
+      );
+      print('Permisos de notificación para iOS: ${settings.authorizationStatus}');
+    }
     token = await FirebaseMessaging.instance.getToken();
     print('TOKEN: $token');
     SharedPreferences prefs = await SharedPreferences.getInstance();
