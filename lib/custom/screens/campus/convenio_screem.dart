@@ -320,7 +320,7 @@ class _ConvenioScreenState extends State<ConvenioScreen> {
               );
             },
             body: Container(
-              padding: EdgeInsets.symmetric(horizontal: 15.0),
+              padding: EdgeInsets.only(left: 15.0, right: 15, bottom: 15),
               alignment: Alignment.centerLeft,
               child: _crearEnlacesPaises(item["expandedValue"]),
             ),

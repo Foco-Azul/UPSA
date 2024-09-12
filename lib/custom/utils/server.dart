@@ -1436,19 +1436,26 @@ class ApiService {
   //COLEGIO INICIO
   Future<List<Colegio>> getColegios() async {
     List<Colegio> res = [];
+    int paginasTotal = 1;
+    int paginaActual = 1;
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/colegios/?populate=*&sort=id:desc');
-      var response = await http.get(url,
+      do {
+        List<Colegio> aux = [];
+        var url = Uri.parse('${dotenv.get('baseUrl')}/colegios/?populate=*&sort=id:desc&pagination[pageSize]=200&pagination[page]=$paginaActual');
+        var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
-      if (response.statusCode == 200) {
-        res = ColegiosFromJson(response.body);
-        return res;
-      }  else {
-        String e = jsonDecode(response.body)['error']['message'];
-        print('Error en getColegios: $e');
-        return res;
-      }
+        if (response.statusCode == 200) {
+          aux = ColegiosFromJson(response.body);
+          paginaActual++;
+          paginasTotal = (json.decode(response.body))["meta"]["pagination"]["pageCount"];
+          res.addAll(aux);
+        }  else {
+          String e = jsonDecode(response.body)['error']['message'];
+          print('Error en getColegios: $e');
+        }
+      } while (paginaActual <= paginasTotal);
+      return res;
     } catch (e) {
       print('Error en getColegios: $e');
       return res;
@@ -2117,6 +2124,10 @@ class ApiService {
   //SOLICITUD DE TEST VOCACIONAL INICIO 
   Future<String> crearSolicitudDeTestVocacional(Map<String, dynamic> data, int id) async {
     String res = "fallo";
+    String carreras = "";
+    for (var item in data["carreras"]) {
+      carreras+= item.nombre+"; ";
+    }
     await dotenv.load(fileName: ".env");
     try {
       var url = Uri.parse("${dotenv.get('baseUrl')}/solicitudes-de-test-vocacional/");
@@ -2130,7 +2141,7 @@ class ApiService {
             "data":{
               "fechas": data["fechas"], 
               "telefono": int.tryParse(data["telefono"]!), 
-              "carreras": data["carreras"],
+              "carreras": carreras,
               "usuario": id,
             }
           }

@@ -226,7 +226,7 @@ class _CarrerasInicioState extends State<CarrerasInicio> {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => CarreraScreen(id: carreras[index].id!,)));
               },
               child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 10.0), // Ajusta el margen aquí
+                margin: const EdgeInsets.symmetric(vertical: 5.0), // Ajusta el margen aquí
                 child: Row(
                   children: [
                     Icon(LucideIcons.dot, color: AppColorStyles.oscuro2),

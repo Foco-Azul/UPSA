@@ -30,6 +30,7 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
   String _backUrl = "";
   SobreNosotros _sobreNosotros = SobreNosotros();
   final List<List<dynamic>> _desplegables = [];
+  
   @override
   void initState() {
     super.initState();
@@ -38,6 +39,7 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
     controller = ProfileController();
     _cargarDatos();
   }
+  
   void _cargarDatos() async {
     setState(() {
       controller.uiLoading = true;
@@ -73,6 +75,7 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
     aux.add(aux2);
     _desplegables.add(aux);
   }
+  
   @override
   Widget build(BuildContext context) {
     if (controller.uiLoading) {
@@ -171,6 +174,7 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
       );
     }
   }
+  
   Widget _crearGaleriaImagenes(){
     return Container(
       margin: EdgeInsets.all(15), 
@@ -233,7 +237,7 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
               );
             },
             body: Container(
-              padding: EdgeInsets.all(15.0),
+              padding: EdgeInsets.only(left: 15.0, right: 15, bottom: 15),
               alignment: Alignment.centerLeft,
               child: Text(
                 item["expandedValue"],
@@ -288,7 +292,7 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
               ),
             ),
             SizedBox( 
-              height: MediaQuery.of(context).size.height * 0.3,
+              height: 250,
               child: TabBarView(
                 children: <Widget>[
                   getTabContent('Misión'),

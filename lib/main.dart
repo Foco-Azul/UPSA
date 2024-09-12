@@ -21,7 +21,7 @@ Future<void> main() async {
     MultiProvider( 
       providers:[
         ChangeNotifierProvider<AppNotifier>(create: (context) => AppNotifier()),
-      ],
+      ], 
       child: MyApp(initialScreen: HomesScreen()),
     )
   ); 

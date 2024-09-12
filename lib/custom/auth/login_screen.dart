@@ -214,6 +214,10 @@ class _Login2ScreenState extends State<Login2Screen> {
     );
   }
   Widget _crearCampoConError(String error, String labelText, String hintText, String campo){
+    TextInputType tipo = TextInputType.text;
+    if(campo == "email"){
+      tipo = TextInputType.emailAddress;
+    }
     return Container(
       margin: EdgeInsets.symmetric(vertical: 15),
       child: Column(
@@ -229,7 +233,8 @@ class _Login2ScreenState extends State<Login2Screen> {
                 setState(() {});
               },
               decoration: AppDecorationStyle.campoTexto(hintText: hintText, labelText: labelText),
-              style: AppTextStyles.parrafo(color: AppColorStyles.gris1)
+              style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
+              keyboardType: tipo,
             ),
           ),
           if (error.isNotEmpty)

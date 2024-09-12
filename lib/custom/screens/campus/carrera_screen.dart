@@ -269,10 +269,10 @@ class _CarreraScreenState extends State<CarreraScreen> {
             child: ElevatedButton(
               onPressed: () async {
                 if (!await launchUrl(
-                    Uri.parse("https://upsa.edu.bo/"),
+                    Uri.parse(_carreraUpsa.enlaceExterno!),
                     mode: LaunchMode.externalApplication,
                   )) {
-                    throw Exception('Could not launch ${"https://upsa.edu.bo/"}');
+                    throw Exception('Could not launch ${_carreraUpsa.enlaceExterno!}');
                   }
               },
               style: AppDecorationStyle.botonContacto(),

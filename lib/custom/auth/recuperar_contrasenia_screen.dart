@@ -159,6 +159,10 @@ class _RecuperarContraseniaScreenState extends State<RecuperarContraseniaScreen>
     );
   }
   Widget _crearCampoConErrorOpcional(String error, String labelText, String hintText, String campo, bool condicion){
+    TextInputType tipo = TextInputType.text;
+    if(campo == "email"){
+      tipo = TextInputType.emailAddress;
+    }
     return Visibility(
       visible: condicion,
       child: Container(
@@ -179,7 +183,8 @@ class _RecuperarContraseniaScreenState extends State<RecuperarContraseniaScreen>
                   setState(() {});
                 },
                 decoration: AppDecorationStyle.campoTexto(hintText: hintText, labelText: labelText),
-                style: AppTextStyles.parrafo(color: AppColorStyles.gris1)
+                style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
+                keyboardType: tipo,
               ),
             ),
             if (error.isNotEmpty)

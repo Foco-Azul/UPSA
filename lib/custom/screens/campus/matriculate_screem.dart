@@ -14,6 +14,7 @@ import 'package:flutkit/custom/utils/validaciones.dart';
 import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/helpers/theme/app_notifier.dart';
+import 'package:flutkit/helpers/widgets/my_button.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutkit/custom/controllers/login_controller.dart';
@@ -21,6 +22,7 @@ import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 //import 'package:url_launcher/url_launcher.dart';
@@ -54,6 +56,9 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
   bool _bandera = false;
   bool _permitido = false;
   late AnimacionCarga _animacionCarga;
+  DateTime selectedDate = DateTime.now(); // Maneja la fecha
+  TimeOfDay selectedTime = TimeOfDay.now(); // Maneja la hora
+
 
   @override
   void initState() {
@@ -125,7 +130,73 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
     }
     _matriculate.masInformacion = nuevoMasInformacion;
   }
-  
+  _pickDate(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
+      locale: const Locale("es"),
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime.now(), // Fecha actual como mínima
+      lastDate: DateTime.now().add(Duration(days: 365)), // Un año desde la fecha actual
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColorStyles.altVerde1, // Color de fondo del encabezado
+              onPrimary: AppColorStyles.blanco,  // Color del texto del encabezado
+              onSurface: AppColorStyles.altTexto1, // Color del texto del cuerpo
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColorStyles.altTexto1, // Color del texto del botón
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        selectedDate = pickedDate;
+        _formData["fecha"] = DateFormat('dd-MM-yyyy').format(selectedDate); // Formatear solo la fecha
+      });
+    }
+  }
+
+  _pickTime(BuildContext context) async {
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(selectedDate), // Hora inicial basada en la fecha seleccionada
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColorStyles.altVerde1, // Color de fondo del encabezado
+              onPrimary: AppColorStyles.blanco,  // Color del texto del encabezado
+              onSurface: AppColorStyles.altTexto1, // Color del texto del cuerpo
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedTime != null) {
+      setState(() {
+        selectedTime = pickedTime; // Guardar solo la hora seleccionada
+        final DateTime fullDateTime = DateTime(
+          selectedDate.year,
+          selectedDate.month,
+          selectedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+        _formData["horario"] = DateFormat('HH:mm').format(fullDateTime); // Formatear solo la hora
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (controller.uiLoading) {
@@ -253,7 +324,7 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
               );
             },
             body: Container(
-              padding: EdgeInsets.all(15.0),
+              padding: EdgeInsets.only(left: 15.0, right: 15, bottom: 15),
               alignment: Alignment.centerLeft,
               child: Text(
                 item["expandedValue"],
@@ -500,6 +571,7 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
             ),
             Column(
               children: [
+                /*
                 Container(
                   margin: EdgeInsets.symmetric(vertical: 15),
                   child: Column(
@@ -545,7 +617,97 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
                       ),
                     ]
                   )
-                ),  
+                ), */ 
+                Container(
+                  margin: EdgeInsets.only(top: 16, bottom: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: TextFormField(
+                              readOnly: true,
+                              controller: TextEditingController(text: _formData["fecha"]),
+                              decoration: AppDecorationStyle.campoContacto(hintText: "", labelText: "Fecha de cita"),
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(left: 15),
+                            child: MyButton(
+                              padding: EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                              onPressed: () {
+                                _pickDate(context);
+                              },
+                              elevation: 0,
+                              borderRadiusAll: 4,
+                              backgroundColor: AppColorStyles.altTexto1,
+                              child: Icon(
+                                LucideIcons.calendar,
+                                size: 20,
+                                color: AppColorStyles.blanco,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (_formDataError["errorFecha"]!.isNotEmpty)
+                      Container(
+                        margin: EdgeInsets.only(top: 8),
+                        child: Text(
+                          _formDataError["errorFecha"]!,
+                          style: TextStyle(color: Colors.red),
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(top: 16, bottom: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: TextFormField(
+                              readOnly: true,
+                              controller: TextEditingController(text: _formData["horario"]),
+                              decoration: AppDecorationStyle.campoContacto(hintText: "", labelText: "Horario de cita"),
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(left: 15),
+                            child: MyButton(
+                              padding: EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                              onPressed: () {
+                                _pickTime(context);
+                              },
+                              elevation: 0,
+                              borderRadiusAll: 4,
+                              backgroundColor: AppColorStyles.altTexto1,
+                              child: Icon(
+                                Icons.access_time,
+                                size: 20,
+                                color: AppColorStyles.blanco,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (_formDataError["errorHorario"]!.isNotEmpty)
+                      Container(
+                        margin: EdgeInsets.only(top: 8),
+                        child: Text(
+                          _formDataError["errorHorario"]!,
+                          style: TextStyle(color: Colors.red),
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 Container(
                   margin: EdgeInsets.symmetric(vertical: 15),
                   child: Column(
