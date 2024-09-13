@@ -82,16 +82,31 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
     if(_configuracion.version! != "-1"){
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String version = prefs.getString('version') ?? "";
+      String versionIos = prefs.getString('versionIos') ?? "";
       AppInfoData info = await AppInfoData.get(); 
-      if (_configuracion.version!.isNotEmpty && _configuracion.version!.split('+')[0][0] != info.package.version.major.toString()) {
-        Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => ActualizacionScreen(isAndroid: info.platform.isAndroid, android: _configuracion.android!, ios: _configuracion.ios!, novedades: _configuracion.novedades!)),(Route<dynamic> route) => false);
-      }
-      await prefs.setString('version', info.package.version.toString());
-      if(version.isEmpty){
-        Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => WelcomeScreen()),(Route<dynamic> route) => false);
-      }else{
-        if(version.split('+')[0][0] != info.package.version.major.toString()){
+      if(info.platform.isAndroid){
+        if (_configuracion.version!.isNotEmpty && _configuracion.version!.split('+')[0][0] != info.package.version.major.toString()) {
+          Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => ActualizacionScreen(isAndroid: info.platform.isAndroid, android: _configuracion.android!, ios: _configuracion.ios!, novedades: _configuracion.novedades!)),(Route<dynamic> route) => false);
+        }
+        await prefs.setString('version', info.package.version.toString());
+        if(version.isEmpty){
           Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => WelcomeScreen()),(Route<dynamic> route) => false);
+        }else{
+          if(version.split('+')[0][0] != info.package.version.major.toString()){
+            Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => WelcomeScreen()),(Route<dynamic> route) => false);
+          }
+        }
+      }else{
+        if (_configuracion.version!.isNotEmpty && _configuracion.version!.split('+')[0][0] != info.package.version.major.toString()) {
+          Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => ActualizacionScreen(isAndroid: info.platform.isAndroid, android: _configuracion.android!, ios: _configuracion.ios!, novedades: _configuracion.novedadesIos!)),(Route<dynamic> route) => false);
+        }
+        await prefs.setString('versionIos', info.package.version.toString());
+        if(versionIos.isEmpty){
+          Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => WelcomeScreen()),(Route<dynamic> route) => false);
+        }else{
+          if(versionIos.split('+')[0][0] != info.package.version.major.toString()){
+            Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => WelcomeScreen()),(Route<dynamic> route) => false);
+          }
         }
       }
     }else{
@@ -121,7 +136,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
       return Scaffold(
         body: Container(
           margin: MySpacing.top(MySpacing.safeAreaTop(context) + 20),
-          child: LoadingEffect.getSearchLoadingScreen(
+          child: LoadingEffect.getOrderLoadingScreen(
             context,
           ),
         ),

@@ -153,7 +153,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       return Scaffold(
         body: Container(
           margin: MySpacing.top(MySpacing.safeAreaTop(context) + 20),
-          child: LoadingEffect.getSearchLoadingScreen(
+          child: LoadingEffect.getCouponLoadingScreen(
             context,
           ),
         ),

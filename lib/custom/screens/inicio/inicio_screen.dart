@@ -92,7 +92,7 @@ class _InicioScreenState extends State<InicioScreen> {
       return Scaffold(
         body: Container(
           margin: MySpacing.top(MySpacing.safeAreaTop(context) + 20),
-          child: LoadingEffect.getSearchLoadingScreen(
+          child: LoadingEffect.getOrderLoadingScreen(
             context,
           ),
         ),

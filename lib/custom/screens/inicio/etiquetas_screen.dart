@@ -91,7 +91,7 @@ class _EtiquetasScreenState extends State<EtiquetasScreen> {
       return Scaffold(
         body: Container(
           margin: MySpacing.top(MySpacing.safeAreaTop(context) + 20),
-          child: LoadingEffect.getSearchLoadingScreen(
+          child: LoadingEffect.getCouponLoadingScreen(
             context,
           ),
         ),

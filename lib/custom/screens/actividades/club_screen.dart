@@ -168,7 +168,7 @@ class _ClubScreenState extends State<ClubScreen> {
       return Scaffold(
         body: Container(
           margin: MySpacing.top(MySpacing.safeAreaTop(context) + 20),
-          child: LoadingEffect.getSearchLoadingScreen(
+          child: LoadingEffect.getDatingHomeScreen(
             context,
           ),
         ),

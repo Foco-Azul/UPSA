@@ -157,11 +157,11 @@ class _CursilloScreenState extends State<CursilloScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (controller.uiLoading) {
+    if (controller.uiLoading || true) {
       return Scaffold(
         body: Container(
           margin: MySpacing.top(MySpacing.safeAreaTop(context) + 20),
-          child: LoadingEffect.getSearchLoadingScreen(
+          child: LoadingEffect.getProductLoadingScreen(
             context,
           ),
         ),

@@ -82,7 +82,7 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
       return Scaffold(
         body: Container(
           margin: MySpacing.top(MySpacing.safeAreaTop(context) + 20),
-          child: LoadingEffect.getSearchLoadingScreen(
+          child: LoadingEffect.getCouponLoadingScreen(
             context,
           ),
         ),
@@ -292,7 +292,7 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
               ),
             ),
             SizedBox( 
-              height: 250,
+              height: 300,
               child: TabBarView(
                 children: <Widget>[
                   getTabContent('Misión'),

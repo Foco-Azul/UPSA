@@ -132,7 +132,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
       return Scaffold(
         body: Container(
           margin: MySpacing.top(MySpacing.safeAreaTop(context) + 20),
-          child: LoadingEffect.getSearchLoadingScreen(
+          child: LoadingEffect.getCouponLoadingScreen(
             context,
           ),
         ),
@@ -660,7 +660,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 style: AppTextStyles.parrafo()
               ),
             ),
-          ),*/
+          ),
           Visibility(
             visible: _isLoggedIn,
             child: Container(
@@ -683,7 +683,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 ),
               ),
             ),
-          ),
+          ),*/
           Container(
             margin: EdgeInsets.symmetric(vertical: 5),
             child: GestureDetector(

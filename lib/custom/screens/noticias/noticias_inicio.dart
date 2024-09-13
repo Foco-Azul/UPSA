@@ -115,7 +115,7 @@ class _NoticiasScreenState extends State<NoticiasScreen> {
       return Scaffold(
         body: Container(
           margin: MySpacing.top(MySpacing.safeAreaTop(context) + 20),
-          child: LoadingEffect.getSearchLoadingScreen(
+          child: LoadingEffect.getCartLoadingScreen(
             context,
           ),
         ),

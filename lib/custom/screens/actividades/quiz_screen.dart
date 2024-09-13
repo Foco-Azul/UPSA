@@ -138,7 +138,7 @@ class _QuizScreenState extends State<QuizScreen> {
       return Scaffold(
         body: Container(
           margin: MySpacing.top(MySpacing.safeAreaTop(context) + 20),
-          child: LoadingEffect.getSearchLoadingScreen(
+          child: LoadingEffect.getDatingHomeScreen(
             context,
           ),
         ),

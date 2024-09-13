@@ -56,7 +56,7 @@ class AppTextStyles {
     Color color = AppColorStyles.oscuro1,
   }) {
     return TextStyle(
-      fontSize: 14.0,
+      fontSize: 15.0,
       fontWeight: FontWeight.normal,
       color: color,
     );
