@@ -97,7 +97,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
           }
         }
       }else{
-        if (_configuracion.version!.isNotEmpty && _configuracion.version!.split('+')[0][0] != info.package.version.major.toString()) {
+        if (_configuracion.versionIos!.isNotEmpty && _configuracion.versionIos!.split('+')[0][0] != info.package.version.major.toString()) {
           Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => ActualizacionScreen(isAndroid: info.platform.isAndroid, android: _configuracion.android!, ios: _configuracion.ios!, novedades: _configuracion.novedadesIos!)),(Route<dynamic> route) => false);
         }
         await prefs.setString('versionIos', info.package.version.toString());
