@@ -53,5 +53,7 @@
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Esta aplicación necesita acceder a la biblioteca de fotos para el escaneo de QR.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Esta aplicación necesita acceder a la cámara para escanear las entradas QR.</string>
 </dict>
 </plist>

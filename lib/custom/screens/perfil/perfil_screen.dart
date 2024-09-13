@@ -24,7 +24,6 @@ import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/custom/widgets/foto_full_screen.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
-import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
