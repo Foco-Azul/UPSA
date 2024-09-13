@@ -55,5 +55,7 @@
 	<string>Esta aplicación necesita acceder a la biblioteca de fotos para el escaneo de QR.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Esta aplicación necesita acceder a la cámara para escanear las entradas QR.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Esta aplicación necesita acceder a su ubicación para mejorar la experiencia de usuario al ofrecer contenido basado en la ubicación.</string>
 </dict>
 </plist>
