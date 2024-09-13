@@ -157,7 +157,7 @@ class _CursilloScreenState extends State<CursilloScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (controller.uiLoading || true) {
+    if (controller.uiLoading) {
       return Scaffold(
         body: Container(
           margin: MySpacing.top(MySpacing.safeAreaTop(context) + 20),
