@@ -174,6 +174,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
       );
     }
   }
+
   Widget _crearContenedorPostBienvenida(){
     return Column(
       children: <Widget>[
@@ -192,7 +193,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 child: Icon(
                   Icons.rocket, // Icono que deseas mostrar
                   color: AppColorStyles.blanco, // Color del icono
-                  size: 50, // Tamaño del icono
+                  size: (MediaQuery.of(context).size.height) * 0.05, // Tamaño del icono
                 ),
               ),
               Text(
@@ -208,7 +209,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               _crearBoton("Registrar mi cuenta", "signup", AppColorStyles.oscuro1, AppColorStyles.altVerde1),
               _crearBoton("Iniciar Sesión", "login",AppColorStyles.oscuro1, AppColorStyles.altFondo1),
               Container(
-                margin: MySpacing.only(top: 50, bottom: 15, left: 60, right: 60),
+                margin: MySpacing.only(top: (MediaQuery.of(context).size.height) * 0.03, bottom: 15, left: 60, right: 60),
                 child: Text.rich(
                   TextSpan(
                     text: 'Al registrar tu cuenta, aceptás nuestros ',
@@ -270,7 +271,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
   }
   Widget _crearImagen(){
     return SizedBox(
-      height: 200,
+      height: (MediaQuery.of(context).size.height) * 0.3,
       child: Opacity(
         opacity: 0.5, // Establece el nivel de opacidad (0.0 a 1.0)
         child: Image.asset('lib/custom/assets/images/bienvenida_1.png', fit: BoxFit.cover),
@@ -430,7 +431,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
       },
     );
   }
-
   Widget _armarAvatares(){
     List<Widget> avatares = _avatares.map((item) => _crearAvatar(item)).toList();
     return Wrap(
