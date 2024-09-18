@@ -164,14 +164,19 @@ class _PerfilScreenState extends State<PerfilScreen> {
       );
     }else{
       return Scaffold(
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
+        body: Stack(
           children: <Widget>[
             _crearImagen(),
-            _crearContenedorPostBienvenida(),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                _crearContenedorPostBienvenida(),
+              ],
+            ),
           ],
         ),
       );
+
     }
   }
 
@@ -180,6 +185,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
       children: <Widget>[
         Container(
           width: double.infinity,
+          //height: 200,
           padding: EdgeInsets.all(15),
           decoration: BoxDecoration(
             color: AppColorStyles.altTexto1, // Establece el color de fondo
@@ -193,7 +199,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 child: Icon(
                   Icons.rocket, // Icono que deseas mostrar
                   color: AppColorStyles.blanco, // Color del icono
-                  size: (MediaQuery.of(context).size.height) * 0.05, // Tamaño del icono
+                  size: 50 // Tamaño del icono
                 ),
               ),
               Text(
@@ -270,11 +276,13 @@ class _PerfilScreenState extends State<PerfilScreen> {
     );
   }
   Widget _crearImagen(){
-    return SizedBox(
-      height: (MediaQuery.of(context).size.height) * 0.3,
+    return Positioned.fill(
       child: Opacity(
-        opacity: 0.5, // Establece el nivel de opacidad (0.0 a 1.0)
-        child: Image.asset('lib/custom/assets/images/bienvenida_1.png', fit: BoxFit.cover),
+        opacity: 0.5, // Nivel de opacidad
+        child: Image.asset(
+          'lib/custom/assets/images/bienvenida_1.png',
+          fit: BoxFit.cover, // La imagen cubrirá todo el espacio
+        ),
       ),
     );
   }

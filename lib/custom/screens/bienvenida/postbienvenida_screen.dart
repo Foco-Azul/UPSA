@@ -43,11 +43,15 @@ class _PostBienvenidaScreenState extends State<PostBienvenidaScreen>{
           ),
         ],
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
+      body: Stack(
         children: <Widget>[
           _crearImagen(),
-          _crearContenedorPostBienvenida(),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              _crearContenedorPostBienvenida(),
+            ],
+          ),
         ],
       ),
     );
@@ -57,6 +61,7 @@ class _PostBienvenidaScreenState extends State<PostBienvenidaScreen>{
       children: <Widget>[
         Container(
           width: double.infinity,
+          //height: 200,
           padding: EdgeInsets.all(15),
           decoration: BoxDecoration(
             color: AppColorStyles.altTexto1, // Establece el color de fondo
@@ -66,11 +71,11 @@ class _PostBienvenidaScreenState extends State<PostBienvenidaScreen>{
             mainAxisSize: MainAxisSize.min, // Hace que el Column se adapte al tamaño de su contenido
             children: [
               Container(
-                margin: EdgeInsets.only(top: 50, bottom: 20),
+                margin: EdgeInsets.only(top: 20, bottom: 20),
                 child: Icon(
                   Icons.rocket, // Icono que deseas mostrar
                   color: AppColorStyles.blanco, // Color del icono
-                  size: 50, // Tamaño del icono
+                  size: 50 // Tamaño del icono
                 ),
               ),
               Text(
@@ -86,7 +91,7 @@ class _PostBienvenidaScreenState extends State<PostBienvenidaScreen>{
               _crearBoton("Registrar mi cuenta", "signup", AppColorStyles.oscuro1, AppColorStyles.altVerde1),
               _crearBoton("Iniciar Sesión", "login",AppColorStyles.oscuro1, AppColorStyles.altFondo1),
               Container(
-                margin: MySpacing.only(top: 50, bottom: 15, left: 60, right: 60),
+                margin: MySpacing.only(top: (MediaQuery.of(context).size.height) * 0.03, bottom: 15, left: 60, right: 60),
                 child: Text.rich(
                   TextSpan(
                     text: 'Al registrar tu cuenta, aceptás nuestros ',
@@ -146,12 +151,14 @@ class _PostBienvenidaScreenState extends State<PostBienvenidaScreen>{
       ),
     );
   }
-  Widget _crearImagen(){
-    return SizedBox(
-      height: 200,
+   Widget _crearImagen(){
+    return Positioned.fill(
       child: Opacity(
-        opacity: 0.5, // Establece el nivel de opacidad (0.0 a 1.0)
-        child: Image.asset('lib/custom/assets/images/bienvenida_1.png', fit: BoxFit.cover),
+        opacity: 0.5, // Nivel de opacidad
+        child: Image.asset(
+          'lib/custom/assets/images/bienvenida_1.png',
+          fit: BoxFit.cover, // La imagen cubrirá todo el espacio
+        ),
       ),
     );
   }

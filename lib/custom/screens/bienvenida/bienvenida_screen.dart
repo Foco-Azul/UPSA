@@ -15,6 +15,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   final PageController _pageController = PageController(initialPage: 0);
   int _currentPage = 0;
   final int _numPages = 3;
+
   List<Widget> _buildPageIndicatorStatic() {
     List<Widget> list = [];
     for (int i = 0; i < _numPages; i++) {
@@ -34,16 +35,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       ),
     );
   }
+  
   @override
   void initState() {
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColorStyles.altFondo1,
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           _crearCarrusel(),
           _crearBotonesNav(),
@@ -52,6 +55,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       ),
     );
   }
+
   Widget _crearBoton(){
     return Container(
       width: double.infinity,
@@ -73,7 +77,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget _crearBotonesNav(){
     return 
       Container(
-        margin: EdgeInsets.only(left: 15, right: 15, bottom: 150),
+        margin: EdgeInsets.only(left: 15, right: 15, bottom: 15),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: _buildPageIndicatorStatic(),
@@ -82,7 +86,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
   Widget _crearCarrusel() {
     return SizedBox(
-      height: 520.0, // Ajusta la altura según sea necesario
+      height: (MediaQuery.of(context).size.height) * 0.65, // Ajusta la altura según sea necesario
       child: PageView(
         scrollDirection: Axis.horizontal,
         controller: _pageController,
@@ -113,18 +117,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
   Widget _crearContenido(String imagen, String titulo, String descripcion){
     return Container(
-      margin: EdgeInsets.only(left: 15, right: 15, top: 100),
+      margin: EdgeInsets.only(left: 15, right: 15, top: (MediaQuery.of(context).size.height) * 0.1,),
       child: Column(
         children: <Widget>[
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               SizedBox(
-                width: 315.0,
-                height: 250.0,
+                height: (MediaQuery.of(context).size.height) * 0.3,
                 child: Image.asset(
                   imagen,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
                 ),
               ),
               Text(titulo, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: AppColorStyles.altTexto1, height: 1,), textAlign: TextAlign.center,),

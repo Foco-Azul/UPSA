@@ -86,12 +86,14 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
             style: AppTitleStyles.principal()
           ),
         ),
-        body: Center(
-          child: Column(
-            children: [
-              _contruirCalendario(),
-              _construirActividadesMes(),
-            ],
+        body: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              children: [
+                _construirCalendario(),
+                _construirActividadesMes(),
+              ],
+            ),
           ),
         ),
         bottomNavigationBar: FlashyTabBar(
@@ -154,89 +156,91 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
       );
     }
   }
-  Widget _construirActividadesMes() {
-    // Filtra las actividades para el mes actual
-    List<Map<String, dynamic>> actividadesFiltradas = _actividades.where((actividad) {
-      return DateTime.parse(actividad["fecha"]).month == _focusedDay.month;
-    }).toList();
+Widget _construirActividadesMes() {
+  // Filtra las actividades para el mes actual
+  List<Map<String, dynamic>> actividadesFiltradas = _actividades.where((actividad) {
+    return DateTime.parse(actividad["fecha"]).month == _focusedDay.month;
+  }).toList();
 
-    return Expanded(
-      child: ListView.builder(
-        itemCount: actividadesFiltradas.length,
-        itemBuilder: (context, index) {
-          Categoria categoria = actividadesFiltradas[index]["categoria"];
-          return Container(
-            margin: EdgeInsets.all(15),
-            padding: EdgeInsets.all(15),
-            decoration: AppDecorationStyle.tarjeta(),
-            child: GestureDetector(
-              onTap: () {
-                if(_actividades[index]["tipo"] == "Evento"){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => EventoScreen(id: _actividades[index]["id"],)));
-                }
-                if(_actividades[index]["tipo"] == "Concurso"){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => ConcursoScreen(id: _actividades[index]['id'],)));
-                }
-                if(_actividades[index]["tipo"] == "Club"){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => ClubScreen(id: _actividades[index]['id'],)));
-                }
-              },
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    margin: EdgeInsets.only(right: 15),
-                    padding: EdgeInsets.all(5), 
+  return SizedBox(
+    height: MediaQuery.of(context).size.height * 0.6, // Ajusta el alto según sea necesario
+    child: ListView.builder(
+      itemCount: actividadesFiltradas.length,
+      itemBuilder: (context, index) {
+        Categoria categoria = actividadesFiltradas[index]["categoria"];
+        return Container(
+          margin: EdgeInsets.all(15),
+          padding: EdgeInsets.all(15),
+          decoration: AppDecorationStyle.tarjeta(),
+          child: GestureDetector(
+            onTap: () {
+              if (_actividades[index]["tipo"] == "Evento") {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => EventoScreen(id: _actividades[index]["id"])));
+              }
+              if (_actividades[index]["tipo"] == "Concurso") {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => ConcursoScreen(id: _actividades[index]['id'])));
+              }
+              if (_actividades[index]["tipo"] == "Club") {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => ClubScreen(id: _actividades[index]['id'])));
+              }
+            },
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(right: 15),
+                  padding: EdgeInsets.all(5), 
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: actividadesFiltradas[index]["color"],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Align(
                     alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: actividadesFiltradas[index]["color"],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        (DateTime.parse(actividadesFiltradas[index]["fecha"]).day).toString(),
-                        style: TextStyle(
-                          color: AppColorStyles.blanco,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500,
-                        ),
+                    child: Text(
+                      (DateTime.parse(actividadesFiltradas[index]["fecha"]).day).toString(),
+                      style: TextStyle(
+                        color: AppColorStyles.blanco,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          actividadesFiltradas[index]["titulo"],
-                          style: AppTitleStyles.tarjetaMenor()
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              actividadesFiltradas[index]["tipo"],
-                              style: AppTextStyles.parrafo(color: AppColorStyles.gris2)
-                            ),
-                            Icon(LucideIcons.dot, color: AppColorStyles.gris2),// Espacio entre el icono y el segundo texto
-                            Text(
-                              categoria.nombre!,
-                              style: AppTextStyles.parrafo(color: AppColorStyles.gris2)
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        actividadesFiltradas[index]["titulo"],
+                        style: AppTitleStyles.tarjetaMenor(),
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            actividadesFiltradas[index]["tipo"],
+                            style: AppTextStyles.parrafo(color: AppColorStyles.gris2),
+                          ),
+                          Icon(LucideIcons.dot, color: AppColorStyles.gris2), // Espacio entre el icono y el segundo texto
+                          Text(
+                            categoria.nombre!,
+                            style: AppTextStyles.parrafo(color: AppColorStyles.gris2),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          );
-        },
-      ),
-    );
-  }
-  Widget _contruirCalendario(){
+          ),
+        );
+      },
+    ),
+  );
+}
+
+  Widget _construirCalendario(){
     return Container(
       margin: EdgeInsets.all(15),
       padding: EdgeInsets.all(15), 

@@ -419,7 +419,7 @@ class LoadingEffect {
   }
 
   static Widget getOrderLoadingScreen(BuildContext context,
-      {int itemCount = 3}) {
+      {int itemCount = 2}) {
     LoadingThemeData theme = LoadingThemeData.theme;
 
     Widget singleLoading = Shimmer.fromColors(
@@ -501,7 +501,7 @@ class LoadingEffect {
   }
 
   static Widget getCouponLoadingScreen(BuildContext context,
-      {int itemCount = 3}) {
+      {int itemCount = 2}) {
     LoadingThemeData theme = LoadingThemeData.theme;
 
     Widget singleLoading = Shimmer.fromColors(
