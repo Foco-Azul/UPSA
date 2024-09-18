@@ -68,7 +68,7 @@ class _QuizScreenState extends State<QuizScreen> {
     "Bueno, lo intentaste. ¡A estudiar!",
   ];
   final random = Random();
-  bool _permitido = false;
+  bool _permitido = true;
 
   @override
   void initState() {
@@ -93,12 +93,13 @@ class _QuizScreenState extends State<QuizScreen> {
       _user = Provider.of<AppNotifier>(context, listen: false).user;
       for (var item in _quizPregunta.usuarios!) {
         if(item["id"] == _user.id){
-          if(item["cantidad"] < 3){
-            _permitido = true;
+          if(item["cantidad"] >= 3){
+            _permitido = false;
           }
         }
       }
     }
+    print(_permitido);
     setState(() {
       controller.uiLoading = false;
     });

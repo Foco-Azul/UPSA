@@ -1,3 +1,4 @@
+
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/theme/styles.dart';
@@ -9,9 +10,8 @@ import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:qrscan/qrscan.dart' as scanner;
 
 class LectorQRScreen extends StatefulWidget {
   const LectorQRScreen({Key? key}) : super(key: key);
@@ -26,7 +26,6 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
   late ProfileController controller;
   bool isDark = false;
   TextDirection textDirection = TextDirection.ltr;
-  final TextEditingController _outputController = TextEditingController();
   int selectedValue = 0;
   List<Map<String, dynamic>> _actividades = [];
   String _tipoSeleccionado = "";
@@ -46,6 +45,7 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
     });
   }
   void _verificarQR(String codigo) async{
+    Navigator.of(context).pop();
     bool bandera = false;
     for (var item in _actividades) {
       if(_tipoSeleccionado == item["tipo"] && _idSeleccionado == item["id"]){
@@ -84,14 +84,7 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
   void _marcarAsistencia(int inscripcionId) async{
     await ApiService().marcarAsistencia(inscripcionId);
   }
-
-  void _escanearEntrada() async {
-    await Permission.camera.request();
-    String? barcode = await scanner.scan();
-    _outputController.text = barcode ?? "";
-    _verificarQR(_outputController.text);
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     if (controller.uiLoading) {
@@ -192,7 +185,39 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
       );
     }
   }
-  
+
+  // Función que muestra el escáner dentro de un modal
+  void _showScannerModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return SizedBox(
+          height: MediaQuery.of(context).size.height * 0.8, // Ajusta la altura según necesites
+          child: Column(
+            children: [
+              Expanded(
+                child: MobileScanner(
+                  controller: MobileScannerController(
+                    detectionSpeed: DetectionSpeed.noDuplicates,
+                    returnImage: true,
+                  ),
+                  onDetect: (capture) {
+                    final List<Barcode> barcodes = capture.barcodes;
+                    for (final barcode in barcodes) {
+                      String codigo = barcode.rawValue ?? "";
+                      _verificarQR(codigo);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _datosDeLaEntrada(String caso, String titulo, Map<String, dynamic> entrada) {
     String texto = "";
     Color fondo = AppColorStyles.altFondo1;
@@ -302,7 +327,7 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
         onPressed: () {
           if(_idSeleccionado != -1 && _tipoSeleccionado.isNotEmpty){
             _error = "";
-            _escanearEntrada();
+            _showScannerModal();
           }else{
             _error = "Actividad no seleccionada.";
           }

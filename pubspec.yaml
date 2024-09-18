@@ -75,7 +75,6 @@ dependencies:
   package_info: ^2.0.2
   cached_network_image: ^3.3.1
   barcode_widget: ^2.0.4
-  qrscan: ^0.3.3
   permission_handler: ^11.3.1
   font_awesome_flutter: ^10.7.0
   multi_dropdown: ^2.1.0
@@ -89,6 +88,7 @@ dependencies:
   video_player: ^2.9.1
   youtube_player_iframe: ^5.1.2
   firebase_analytics: ^10.10.7
+  mobile_scanner: ^5.1.1
 #  flutx: ^0.2.0-rc.1
 #  flutx: ^0.1.2
 
