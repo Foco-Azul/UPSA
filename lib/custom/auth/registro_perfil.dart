@@ -501,7 +501,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
   }
   Widget _crearDescripcion(){
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 15),
+      margin: EdgeInsets.only(bottom: 15),
       alignment: Alignment.centerLeft,
       child: Text(
         'Registrar tus datos aquí te permitirá inscribirte fácilmente a nuestros talleres, clubes y eventos exclusivos. ',

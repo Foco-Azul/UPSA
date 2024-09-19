@@ -241,11 +241,10 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
             label,
             style: TextStyle(
               color: AppColorStyles.gris1,
-              fontSize: 12.0,
+              fontSize: 14.0,
               fontWeight: FontWeight.normal,
             ),
           ),
-          SizedBox(height: 8.0),
           Container(
             margin: EdgeInsets.symmetric(vertical: 8),
             decoration: AppDecorationStyle.campoContainerForm(),
@@ -347,11 +346,10 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
             label,
             style: TextStyle(
               color: AppColorStyles.gris1,
-              fontSize: 12.0,
+              fontSize: 14.0,
               fontWeight: FontWeight.normal,
             ),
           ),
-          SizedBox(height: 8.0),
           Container(
             margin: EdgeInsets.symmetric(vertical: 8),
             decoration: AppDecorationStyle.campoContainerForm(),
@@ -459,11 +457,10 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
                     label,
                     style: TextStyle(
                       color: AppColorStyles.gris1,
-                      fontSize: 12.0,
+                      fontSize: 14.0,
                       fontWeight: FontWeight.normal,
                     ),
                   ),
-                  SizedBox(height: 8.0),
                   Container(
                     margin: EdgeInsets.symmetric(vertical: 8),
                     decoration: AppDecorationStyle.campoContainerForm(),
@@ -526,11 +523,11 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
             label,
             style: TextStyle(
               color: AppColorStyles.gris1,
-              fontSize: 12.0,
+              fontSize: 14.0,
               fontWeight: FontWeight.normal,
             ),
           ),
-          SizedBox(height: 8.0),
+          SizedBox(height: 4.0),
           Row(
             mainAxisAlignment: MainAxisAlignment.start, // Alinea los hijos a la izquierda
             children: [
@@ -601,7 +598,7 @@ class _RegistroCarreraState extends State<RegistroCarrera> {
   }
   Widget _crearDescripcion(){
     return Container( 
-        margin: EdgeInsets.symmetric(vertical: 15),
+        margin: EdgeInsets.only(bottom: 15),
         alignment: Alignment.centerLeft,
         child: Text(
           '¿Qué pensás estudiar? Seleccioná tus preferencias.',

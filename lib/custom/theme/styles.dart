@@ -15,9 +15,10 @@ class AppTitleStyles {
   }
   static TextStyle principal({
     Color color = AppColorStyles.oscuro1,
+    double size = 18.0,
   }) {
     return TextStyle(
-      fontSize: 18.0,
+      fontSize: size,
       fontWeight: FontWeight.bold,
       color: color,
     );

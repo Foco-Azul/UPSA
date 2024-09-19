@@ -123,23 +123,23 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
               Navigator.of(context).pop();
             },
           ),
+          toolbarHeight: (_noticia.titulo!.length <= 42 ? 50.0 : ((50+(30*((((_noticia.titulo!.length) / 21).ceil())-2)))).toDouble()),
           title: Center(
-            child: Padding(
+            child: Container(
               padding: const EdgeInsets.only(right: 50.0),
-              child: RichText(
-                text: TextSpan(
-                  text: _noticia.titulo!,
-                  style: AppTitleStyles.principal(),
-                ),
+              child: Text(
+                _noticia.titulo!,
+                style: AppTitleStyles.principal(),
                 overflow: TextOverflow.visible,
                 textAlign: TextAlign.center,
+                softWrap: true,
               ),
             ),
           ),
         ),
         body: SingleChildScrollView(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            //crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               _breadcrumbs(),
               _crearGaleriaImagenes(),
@@ -488,24 +488,27 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
   Widget _breadcrumbs() {
     Categoria categoria = _noticia.categoria!;
     return Center(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center, // Alinea los elementos del Row al centro
-        children: [
-          Text(
-            "Noticia",
-            style: AppTextStyles.botonMenor(color: AppColorStyles.gris1)
-          ),
-          Icon(LucideIcons.dot, color: AppColorStyles.gris1),
-          Text(
-             categoria.nombre!,
-            style: AppTextStyles.botonMenor(color: AppColorStyles.gris1)
-          ),
-           Icon(LucideIcons.dot, color: AppColorStyles.gris1),
-          Text(
-            _noticia.publicacion!,
-            style: AppTextStyles.botonMenor(color: AppColorStyles.gris1)
-          ),
-        ],
+      child: Container(
+        margin: EdgeInsets.only(bottom: 10.0), // Aquí agregas el margin bottom
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center, // Alinea los elementos del Row al centro
+          children: [
+            Text(
+              "Noticia",
+              style: AppTextStyles.botonMenor(color: AppColorStyles.gris1),
+            ),
+            Icon(LucideIcons.dot, color: AppColorStyles.gris1),
+            Text(
+              categoria.nombre!,
+              style: AppTextStyles.botonMenor(color: AppColorStyles.gris1),
+            ),
+            Icon(LucideIcons.dot, color: AppColorStyles.gris1),
+            Text(
+              _noticia.publicacion!,
+              style: AppTextStyles.botonMenor(color: AppColorStyles.gris1),
+            ),
+          ],
+        ),
       ),
     );
   }

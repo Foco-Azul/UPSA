@@ -162,7 +162,7 @@ class _Login2ScreenState extends State<Login2Screen> {
           child: RichText(
             text: TextSpan(children: const <TextSpan>[
               TextSpan(
-                  text: "¿No tienes una cuenta? ",
+                  text: "¿No tenes una cuenta? ",
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: AppColorStyles.gris1)),
               TextSpan(
                   text: " Registrarse",

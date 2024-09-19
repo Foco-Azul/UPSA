@@ -178,16 +178,16 @@ class _EventoScreenState extends State<EventoScreen> {
               Navigator.of(context).pop();
             },
           ),
+          toolbarHeight: (_evento.titulo!.length <= 42 ? 50.0 : ((50+(30*((((_evento.titulo!.length) / 21).ceil())-2)))).toDouble()),
           title: Center(
-            child: Padding(
+            child: Container(
               padding: const EdgeInsets.only(right: 50.0),
-              child: RichText(
-                text: TextSpan(
-                  text: _evento.titulo!,
-                  style: AppTitleStyles.principal(),
-                ),
+              child: Text(
+                _evento.titulo!,
+                style: AppTitleStyles.principal(),
                 overflow: TextOverflow.visible,
                 textAlign: TextAlign.center,
+                softWrap: true,
               ),
             ),
           ),
@@ -412,7 +412,7 @@ class _EventoScreenState extends State<EventoScreen> {
             ),
           ),
           Positioned(
-            bottom: 16,
+            bottom: 24,
             left: 8, // Añade esta línea para alinear a la izquierda
             child: _buildPageIndicatorStatic(),
           ),
@@ -811,7 +811,7 @@ class _EventoScreenState extends State<EventoScreen> {
             ),
           ),
           Positioned(
-            bottom: 16, // Ajusta la posición del ícono según tu preferencia
+            bottom: 24, // Ajusta la posición del ícono según tu preferencia
             right: 8,
             child: GestureDetector(
               onTap: () {

@@ -513,7 +513,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   ),
                 ),
                 Positioned(
-                  bottom: 16,
+                  bottom: 24,
                   left: 8, // Añade esta línea para alinear a la izquierda
                   child: _buildPageIndicatorStatic(),
                 ),
@@ -544,7 +544,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
             ),
           ),
           Positioned(
-            bottom: 16, // Ajusta la posición del ícono según tu preferencia
+            bottom: 24, // Ajusta la posición del ícono según tu preferencia
             right: 8,
             child: GestureDetector(
               onTap: () {

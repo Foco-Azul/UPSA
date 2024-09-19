@@ -148,7 +148,7 @@ class _Register2ScreenState extends State<Register2Screen> {
           child: RichText(
             text: TextSpan(children: const <TextSpan>[
               TextSpan(
-                  text: "¿Ya tienes una cuenta? ",
+                  text: "¿Ya tenes una cuenta? ",
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: AppColorStyles.gris1)),
               TextSpan(
                   text: " Ingresar",

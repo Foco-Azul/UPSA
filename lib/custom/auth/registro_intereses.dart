@@ -173,7 +173,7 @@ class _RegistroInteresesState extends State<RegistroIntereses> {
   }
   Widget _crearDescripcion(){
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 15),
+      margin: EdgeInsets.only(bottom: 15),
       alignment: Alignment.centerLeft,
       child: Text(
         'Te juramos que es el último paso.',

@@ -173,16 +173,16 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
               Navigator.of(context).pop();
             },
           ),
+          toolbarHeight: (_concurso.titulo!.length <= 42 ? 50.0 : ((50+(30*((((_concurso.titulo!.length) / 21).ceil())-2)))).toDouble()),
           title: Center(
-            child: Padding(
+            child: Container(
               padding: const EdgeInsets.only(right: 50.0),
-              child: RichText(
-                text: TextSpan(
-                  text: _concurso.titulo!,
-                  style: AppTitleStyles.principal(),
-                ),
+              child: Text(
+                _concurso.titulo!,
+                style: AppTitleStyles.principal(),
                 overflow: TextOverflow.visible,
                 textAlign: TextAlign.center,
+                softWrap: true,
               ),
             ),
           ),
@@ -632,8 +632,8 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
           ),
         ),
         Positioned(
-          bottom: 16,
-          left: 16, // Añade esta línea para alinear a la izquierda
+          bottom: 24,
+          left: 8, // Añade esta línea para alinear a la izquierda
           child: _buildPageIndicatorStatic(),
         ),
       ],
@@ -817,8 +817,8 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
             ),
           ),
           Positioned(
-            bottom: 16, // Ajusta la posición del ícono según tu preferencia
-            right: 16,
+            bottom: 24, // Ajusta la posición del ícono según tu preferencia
+            right: 8,
             child: GestureDetector(
               onTap: () {
                 // Acción al pulsar el ícono

@@ -325,8 +325,8 @@ class _CarreraScreenState extends State<CarreraScreen> {
           ),
         ),
         Positioned(
-          bottom: 16, // Ajusta la posición del ícono según tu preferencia
-          right: 16,
+          bottom: 24, // Ajusta la posición del ícono según tu preferencia
+          right: 24,
           child: GestureDetector(
             onTap: () {
               // Acción al pulsar el ícono

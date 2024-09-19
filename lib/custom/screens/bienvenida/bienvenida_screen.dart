@@ -77,7 +77,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget _crearBotonesNav(){
     return 
       Container(
-        margin: EdgeInsets.only(left: 15, right: 15, bottom: 15),
+        margin: EdgeInsets.only(left: 15, right: 15, bottom: 30,),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: _buildPageIndicatorStatic(),
@@ -86,7 +86,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
   Widget _crearCarrusel() {
     return SizedBox(
-      height: (MediaQuery.of(context).size.height) * 0.65, // Ajusta la altura según sea necesario
+      height: (MediaQuery.of(context).size.height) * 0.63, // Ajusta la altura según sea necesario
       child: PageView(
         scrollDirection: Axis.horizontal,
         controller: _pageController,
@@ -130,10 +130,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   fit: BoxFit.contain,
                 ),
               ),
+              SizedBox(height: 20,),
               Text(titulo, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: AppColorStyles.altTexto1, height: 1,), textAlign: TextAlign.center,),
-              SizedBox(
-                height: 20,
-              ),
+              SizedBox(height: 8,),
               Text(descripcion, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 15, color: AppColorStyles.gris1, height: 1.5), textAlign: TextAlign.center),
             ],
           ),

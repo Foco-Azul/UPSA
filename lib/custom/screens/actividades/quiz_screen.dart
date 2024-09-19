@@ -99,7 +99,6 @@ class _QuizScreenState extends State<QuizScreen> {
         }
       }
     }
-    print(_permitido);
     setState(() {
       controller.uiLoading = false;
     });
@@ -158,16 +157,16 @@ class _QuizScreenState extends State<QuizScreen> {
               Navigator.of(context).pop();
             },
           ),
+          toolbarHeight: (_quizPregunta.titulo!.length <= 42 ? 50.0 : ((50+(30*((((_quizPregunta.titulo!.length) / 21).ceil())-2)))).toDouble()),
           title: Center(
-            child: Padding(
+            child: Container(
               padding: const EdgeInsets.only(right: 50.0),
-              child: RichText(
-                text: TextSpan(
-                  text: _quizPregunta.titulo!,
-                  style: AppTitleStyles.principal(),
-                ),
+              child: Text(
+                _quizPregunta.titulo!,
+                style: AppTitleStyles.principal(),
                 overflow: TextOverflow.visible,
                 textAlign: TextAlign.center,
+                softWrap: true,
               ),
             ),
           ),

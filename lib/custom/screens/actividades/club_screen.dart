@@ -187,16 +187,16 @@ class _ClubScreenState extends State<ClubScreen> {
               Navigator.of(context).pop();
             },
           ),
+          toolbarHeight: (_club.titulo!.length <= 42 ? 50.0 : ((50+(30*((((_club.titulo!.length) / 21).ceil())-2)))).toDouble()),
           title: Center(
-            child: Padding(
+            child: Container(
               padding: const EdgeInsets.only(right: 50.0),
-              child: RichText(
-                text: TextSpan(
-                  text: _club.titulo!,
-                  style: AppTitleStyles.principal(),
-                ),
+              child: Text(
+                _club.titulo!,
+                style: AppTitleStyles.principal(),
                 overflow: TextOverflow.visible,
                 textAlign: TextAlign.center,
+                softWrap: true,
               ),
             ),
           ),
@@ -368,7 +368,7 @@ class _ClubScreenState extends State<ClubScreen> {
             ),
           ),
           Positioned(
-            bottom: 16,
+            bottom: 24,
             left: 8, // Añade esta línea para alinear a la izquierda
             child: _buildPageIndicatorStatic(),
           ),
@@ -777,7 +777,7 @@ class _ClubScreenState extends State<ClubScreen> {
             ),
           ),
           Positioned(
-            bottom: 16, // Ajusta la posición del ícono según tu preferencia
+            bottom: 24, // Ajusta la posición del ícono según tu preferencia
             right: 8,
             child: GestureDetector(
               onTap: () {
