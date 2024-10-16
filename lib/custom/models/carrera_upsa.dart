@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutkit/custom/models/categoria.dart';
+import 'package:flutkit/custom/utils/funciones.dart';
     
 // CarreraUpsa class
 class CarreraUpsa {
@@ -31,8 +32,7 @@ class CarreraUpsa {
       id: data["id"],
       nombre: data['attributes']["nombre"],
       descripcion: data['attributes']["descripcion"],
-      imagen: data['attributes']["imagen"]['data'] != null ? data['attributes']["imagen"]['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",  
-      enlaceExterno: data['attributes']["enlaceExterno"],
+      imagen: FuncionUpsa.getImageUrl(data['attributes']["imagen"]['data']),
       categoria: Categoria.armarCategoria(data['attributes']["categoria"]["data"]),
       masInformacion: data['attributes']["masInformacion"] ?? [],
       pdf: data['attributes']["pdf"]['data'] != null ? data['attributes']["pdf"]['data']['attributes']['url'] : "",  

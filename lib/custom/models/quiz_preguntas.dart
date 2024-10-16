@@ -2,6 +2,8 @@
 // QuizPregunta class
 import 'dart:convert';
 
+import 'package:flutkit/custom/utils/funciones.dart';
+
 class QuizPregunta {
   int? id;
   String? titulo;
@@ -63,7 +65,7 @@ class QuizPregunta {
         id: item["id"],
         titulo: item['attributes']["titulo"],
         descripcion: item['attributes']["descripcion"] ?? "",
-        imagen: item['attributes']["imagen"]['data'] != null ? item['attributes']["imagen"]['data']['attributes']['url'] : "/uploads/default_02263f0f89.png", 
+        imagen: FuncionUpsa.getImageUrl(item['attributes']["imagen"]['data']),
       );
       res.add(aux);
     }

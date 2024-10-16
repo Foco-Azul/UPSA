@@ -267,7 +267,7 @@ class _QuizScreenState extends State<QuizScreen> {
               ), 
               SizedBox(width: 4.0), // Espaciado entre el icono y el texto
               Text(
-                "Quiz".toUpperCase(), // Primer texto
+                "Quiz2".toUpperCase(), // Primer texto
                 style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),
               ),
             ]
@@ -318,7 +318,7 @@ class _QuizScreenState extends State<QuizScreen> {
                   margin: EdgeInsets.symmetric(vertical: 10.0), // Ajusta los valores del margen según sea necesario
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    "Alcanzaste el maximo de intentos.",
+                    "Alcanzaste el maximo de 3 intentos.",
                     style: AppTextStyles.parrafo(),
                   ),
                 ),

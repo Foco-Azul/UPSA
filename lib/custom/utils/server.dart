@@ -538,7 +538,8 @@ class ApiService {
       if (response.statusCode == 200) {
         res = User.armarUsuarioPorEmail(response.body);
         if(res.id! != -1){
-          await _setActualizarCodigoDeVerificacion(res.id!, data);
+          String codigo = await _setActualizarCodigoDeVerificacion(res.id!, data);
+          res.codigo = codigo;
         }
         return res;
       } else {
@@ -575,7 +576,8 @@ class ApiService {
       return res;
     }
   }
-  Future<void> _setActualizarCodigoDeVerificacion(int userId, String email) async {
+  Future<String> _setActualizarCodigoDeVerificacion(int userId, String email) async {
+    String res =  "";
     String codigoDeVerificacion = Generador().generarCodigoDeVerificacion();
     await dotenv.load(fileName: ".env");
     try {
@@ -593,12 +595,16 @@ class ApiService {
       );
       if (response.statusCode == 200) {
         await enviarCorreo({"codigoDeVerificacion":codigoDeVerificacion}, "Contraseña olvidada", email);
+        res = codigoDeVerificacion;
+        return res;
       }else{
         String e = jsonDecode(response.body)['error']['message'];
         print('Error en _setActualizarCodigoDeVerificacion: $e');
+        return res;
       }
     } catch (e) {
       print('Error en _setActualizarCodigoDeVerificacion: $e');
+      return res;
     }
   }
   Future<User> setActualizarContrasenia(int userId, String password) async {
@@ -627,6 +633,59 @@ class ApiService {
       }
     } catch (e) {
       print('Error en setActualizarContrasenia: $e');
+      return res;
+    }
+  }
+  Future<User> _buscarUsuarioPorEmail(String email) async {
+    User res = User();
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}${dotenv.get('usersRegisterEndpoint')}/?filters[email][\$contains]=$email");
+      var response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          }, 
+      );
+      if (response.statusCode == 200) {
+        List<User> usuarios = User.armarUsuariosPorEmail(response.body);
+        if (usuarios.length > 1) {
+          res = usuarios[usuarios.length - 2]; // Penúltimo usuario
+        } else {
+          res = usuarios.last; // Último usuario
+        }
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  _buscarUsuarioPorEmail: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en _buscarUsuarioPorEmail: $e');
+      return res;
+    }
+  }
+  Future<bool> _actualizarEmailDeUsuario(String email, int idUser) async {
+    bool res = false;
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse("${dotenv.get('baseUrl')}/users/$idUser");
+      var response = await http.put(url,
+          headers: {
+            'Content-Type': 'application/json',
+            "Authorization": "Bearer ${dotenv.get('accesToken')}"
+          },
+          body: json.encode({"username":email, "email":email, }));
+      if (response.statusCode == 200) {
+        res = true;
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  _actualizarEmailDeUsuario: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en _actualizarEmailDeUsuario: $e');
       return res;
     }
   }
@@ -1979,7 +2038,7 @@ class ApiService {
           {
             "data":{
               "respuestas": aux, 
-              "quizzes": idQuiz,
+              "quiz": idQuiz,
               "usuario": userId,
             }
           }
@@ -2438,6 +2497,14 @@ class ApiService {
       DateTime dateB = DateTime.parse(b['updatedAt']);
       return dateB.compareTo(dateA); // Para ordenar desde el más nuevo al más antiguo
     });
+    return res;
+  }
+  Future<bool> eliminarCuenta(String email, int idUser) async{
+    bool res = false;
+    User usuario = await _buscarUsuarioPorEmail(email);
+    if(usuario.id != -1){
+      res = await _actualizarEmailDeUsuario('${usuario.email!}.downnibu', idUser);
+    }
     return res;
   }
   //EXTRAS FIN

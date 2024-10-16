@@ -44,7 +44,7 @@ class Noticia {
         titulo: item['attributes']["titulo"],
         categoria: Categoria.armarCategoria(item['attributes']["categoria"]["data"]),
         publicacion: FuncionUpsa.armarFechaPublicacion(item['attributes']["publishedAt"]), 
-        imagen: item['attributes']["imagen"]['data'] != null ? item['attributes']["imagen"]['data']['attributes']['url'] : "/uploads/default_02263f0f89.png", 
+        imagen: FuncionUpsa.getImageUrl(item['attributes']["imagen"]['data']),
         notaCompleta: item['attributes']["notaCompleta"], 
         descripcion: item['attributes']["descripcion"], 
         etiquetas: Etiqueta.armarEtiquetas(item['attributes']["etiquetas"]['data']),
@@ -93,7 +93,7 @@ class Noticia {
       titulo: data['attributes']["titulo"],
       categoria: Categoria.armarCategoria(data['attributes']["categoria"]["data"]),
       publicacion: FuncionUpsa.armarFechaPublicacion(data['attributes']["publishedAt"]), 
-      imagen: data['attributes']["imagen"]['data'] != null ? data['attributes']["imagen"]['data']['attributes']['url'] : "/uploads/default_02263f0f89.png", 
+      imagen: FuncionUpsa.getImageUrl(data['attributes']["imagen"]['data']),
       imagenes: FuncionUpsa.armarGaleriaImagenes(data['attributes']["imagenes"]['data'], data['attributes']["imagen"]['data']),
       notaCompleta: data['attributes']["notaCompleta"] ?? "", 
       descripcion: data['attributes']["descripcion"], 
@@ -107,7 +107,7 @@ class Noticia {
       Noticia aux = Noticia(
         id: item["id"],
         titulo: item['attributes']["titulo"],
-        imagen: item['attributes']["imagen"]['data'] != null ? item['attributes']["imagen"]['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",
+        imagen: FuncionUpsa.getImageUrl(item['attributes']["imagen"]['data']),
         usuariosPermitidos: armarListaDeEnteros(item['attributes']["colegios"]['data']),
       );
       res.add(aux);

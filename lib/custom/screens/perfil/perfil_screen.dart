@@ -37,6 +37,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 
 class PerfilScreen extends StatefulWidget {
@@ -123,6 +124,27 @@ class _PerfilScreenState extends State<PerfilScreen> {
       });
     }
     Navigator.pop(context);
+  }
+  void _cerrarSesion(String mensaje) async{
+    _animacionCarga.setMostrar(true);
+    _prefs = await SharedPreferences.getInstance();
+    String tokenDispositivo = _prefs.getString('tokenDispositivo') ?? "";
+    if(_user.dispositivos!.contains(tokenDispositivo)){
+      _user.dispositivos!.remove(tokenDispositivo);
+      await ApiService().actualizarUsuarioTokens(_user.id!, _user.dispositivos!);
+    }
+    await _prefs.setStringList('notificaciones', []);
+    _mensajeTemporalInferior.mostrarMensaje(context, mensaje, "exito");
+    loginController.logout(context);
+    _animacionCarga.setMostrar(false);
+  }
+  void _eliminarCuenta() async{
+    _animacionCarga.setMostrar(true);
+    bool aux = await ApiService().eliminarCuenta(_user.email!, _user.id!);
+    _animacionCarga.setMostrar(false);
+    if(aux){
+      _cerrarSesion('Se eliminó tu cuenta con éxito.');
+    }
   }
 
   @override
@@ -213,7 +235,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 textAlign: TextAlign.center,
               ),
               _crearBoton("Registrar mi cuenta", "signup", AppColorStyles.oscuro1, AppColorStyles.altVerde1),
-              _crearBoton("Iniciar Sesión", "login",AppColorStyles.oscuro1, AppColorStyles.altFondo1),
+              _crearBoton("Iniciar sesión", "login",AppColorStyles.oscuro1, AppColorStyles.altFondo1),
               Container(
                 margin: MySpacing.only(top: (MediaQuery.of(context).size.height) * 0.03, bottom: 15, left: 60, right: 60),
                 child: Text.rich(
@@ -225,9 +247,14 @@ class _PerfilScreenState extends State<PerfilScreen> {
                         text: 'Términos de uso',
                         style: TextStyle(decoration: TextDecoration.underline, decorationColor: AppColorStyles.blanco,  decorationThickness: 2),
                         recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => SobreNosotrosScreen()));
-                          },
+                        ..onTap = () async{
+                          if (!await launchUrl(
+                            Uri.parse("https://www.upsa.edu.bo/es/nibu-terminos-y-condiciones"),
+                            mode: LaunchMode.externalApplication,
+                          )) {
+                            throw Exception('Could not launch https://www.upsa.edu.bo/es/nibu-terminos-y-condiciones');
+                          }
+                        },
                       ),
                       TextSpan( 
                         text: ' y ',
@@ -236,9 +263,14 @@ class _PerfilScreenState extends State<PerfilScreen> {
                         text: 'Políticas de privacidad',
                         style: TextStyle(decoration: TextDecoration.underline, decorationColor: AppColorStyles.blanco, decorationThickness: 2),
                         recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => SobreNosotrosScreen()));
-                          },
+                        ..onTap = () async{
+                          if (!await launchUrl(
+                            Uri.parse("https://www.upsa.edu.bo/es/politica-de-privacidad"),
+                            mode: LaunchMode.externalApplication,
+                          )) {
+                            throw Exception('Could not launch https://www.upsa.edu.bo/es/politica-de-privacidad');
+                          }
+                        },
                       ),
                       TextSpan(
                         text: '.',
@@ -694,18 +726,23 @@ class _PerfilScreenState extends State<PerfilScreen> {
           Container(
             margin: EdgeInsets.symmetric(vertical: 5),
             child: GestureDetector(
-              onTap: () async{
-                _animacionCarga.setMostrar(true);
-                _prefs = await SharedPreferences.getInstance();
-                String tokenDispositivo = _prefs.getString('tokenDispositivo') ?? "";
-                if(_user.dispositivos!.contains(tokenDispositivo)){
-                  _user.dispositivos!.remove(tokenDispositivo);
-                  await ApiService().actualizarUsuarioTokens(_user.id!, _user.dispositivos!);
-                }
-                await _prefs.setStringList('notificaciones', []);
-                _mensajeTemporalInferior.mostrarMensaje(context,"Se cerró tu cuenta con éxito.", "exito");
-                loginController.logout(context);
-                _animacionCarga.setMostrar(false);
+              onTap: () {
+                _popupEliminarCuenta();
+              },
+              child: Text(
+                "Eliminar cuenta",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 5),
+            child: GestureDetector(
+              onTap: (){
+                _cerrarSesion('Se cerró tu cuenta con éxito.');
               },
               child: Text(
                 "Cerrar sesión",
@@ -718,6 +755,51 @@ class _PerfilScreenState extends State<PerfilScreen> {
           ),
         ],
       ),
+    );
+  }
+  _popupEliminarCuenta(){
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('¿Estás seguro?'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              Text('Al eliminar tu cuenta, sucederá lo siguiente:'),
+              SizedBox(height: 10),
+              ListTile(
+                leading: Icon(Icons.warning, color: Colors.red),
+                title: Text('Perderás todos tus datos'),
+              ),
+              ListTile(
+                leading: Icon(Icons.warning, color: Colors.red),
+                title: Text('No podrás recuperar tus datos'),
+              ),
+              ListTile(
+                leading: Icon(Icons.warning, color: Colors.red),
+                title: Text('Al crear otra cuenta con el mismo correo, esta sera una cuenta nueva'),
+              ),
+              // Puedes agregar más ítems a la lista si es necesario
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Cierra el diálogo
+              },
+            ),
+            ElevatedButton(
+              child: Text('Confirmar'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Cierra el diálogo
+                _eliminarCuenta();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
   Widget _misActividades() {

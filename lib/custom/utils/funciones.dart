@@ -7,15 +7,44 @@ class FuncionUpsa {
   static List<String> armarGaleriaImagenes(List<dynamic>? datas, dynamic data){
     List<String> res = [];
     if(data != null){
-      res.add(data["attributes"]["url"]);
+      res.add(getImageUrl(data));
     }
     if(datas != null){
       for (var item in datas) {
-        res.add(item["attributes"]["url"]);
+        res.add(getImageUrl(item));
       }
     }
     return res;
   }
+
+  static String getImageUrl(dynamic data) {
+    String res = "/uploads/default_02263f0f89.png";
+
+    if(data != null){
+      if(data['attributes']['formats'] != null){
+        final formats = data['attributes']['formats'];
+
+        res = formats?['large']?['url'] ??
+          formats?['small']?['url'] ??
+          formats?['medium']?['url'] ??
+          data['attributes']?['url'] ?? 
+          "/uploads/default_02263f0f89.png";
+
+      }else{
+        res = data['attributes']['url'];
+      }
+    }
+    return res;
+  }
+
+  static String obtenerImagenUrl(String url) {
+    List<String> prefixes = ['thumbnail_', 'medium_', 'small_', 'large_'];
+    for (String prefix in prefixes) {
+      url = url.replaceAll(prefix, '');
+    }
+    return url;
+  }
+
   static List<Map<String, dynamic>> _armarEntradasParaEscanear(dynamic data){
     List<Map<String, dynamic>> res = [];
     if(data != null){

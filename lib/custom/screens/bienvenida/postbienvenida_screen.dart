@@ -8,6 +8,7 @@ import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PostBienvenidaScreen extends StatefulWidget {
   PostBienvenidaScreen({Key? key}) : super(key: key);
@@ -89,7 +90,7 @@ class _PostBienvenidaScreenState extends State<PostBienvenidaScreen>{
                 textAlign: TextAlign.center,
               ),
               _crearBoton("Registrar mi cuenta", "signup", AppColorStyles.oscuro1, AppColorStyles.altVerde1),
-              _crearBoton("Iniciar Sesión", "login",AppColorStyles.oscuro1, AppColorStyles.altFondo1),
+              _crearBoton("Iniciar sesión", "login",AppColorStyles.oscuro1, AppColorStyles.altFondo1),
               Container(
                 margin: MySpacing.only(top: (MediaQuery.of(context).size.height) * 0.03, bottom: 15, left: 60, right: 60),
                 child: Text.rich(
@@ -101,9 +102,14 @@ class _PostBienvenidaScreenState extends State<PostBienvenidaScreen>{
                         text: 'Términos de uso',
                         style: TextStyle(decoration: TextDecoration.underline, decorationColor: AppColorStyles.blanco,  decorationThickness: 2),
                         recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => SobreNosotrosScreen()));
-                          },
+                        ..onTap = () async{
+                          if (!await launchUrl(
+                            Uri.parse("https://www.upsa.edu.bo/es/nibu-terminos-y-condiciones"),
+                            mode: LaunchMode.externalApplication,
+                          )) {
+                            throw Exception('Could not launch https://www.upsa.edu.bo/es/nibu-terminos-y-condiciones');
+                          }
+                        },
                       ),
                       TextSpan( 
                         text: ' y ',
@@ -112,9 +118,14 @@ class _PostBienvenidaScreenState extends State<PostBienvenidaScreen>{
                         text: 'Políticas de privacidad',
                         style: TextStyle(decoration: TextDecoration.underline, decorationColor: AppColorStyles.blanco, decorationThickness: 2),
                         recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => SobreNosotrosScreen()));
-                          },
+                        ..onTap = () async{
+                          if (!await launchUrl(
+                            Uri.parse("https://www.upsa.edu.bo/es/politica-de-privacidad"),
+                            mode: LaunchMode.externalApplication,
+                          )) {
+                            throw Exception('Could not launch https://www.upsa.edu.bo/es/politica-de-privacidad');
+                          }
+                        },
                       ),
                       TextSpan(
                         text: '.',

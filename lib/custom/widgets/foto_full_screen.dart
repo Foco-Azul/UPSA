@@ -1,4 +1,5 @@
 import 'package:flutkit/custom/theme/styles.dart';
+import 'package:flutkit/custom/utils/funciones.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:photo_view/photo_view.dart';
@@ -21,6 +22,7 @@ class _FullScreenImageState extends State<FullScreenImage> {
   void initState() {
     super.initState();
     _imageUrl = widget.imageUrl;
+    _imageUrl = FuncionUpsa.obtenerImagenUrl(_imageUrl);
   }
 
   void _rotateImage() {

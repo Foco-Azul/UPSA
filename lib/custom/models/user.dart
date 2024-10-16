@@ -19,6 +19,7 @@ class User {
     this.solicitudesDeTestVocacional,
     this.retroalimentaciones,
     this.solicitudesDeInscripciones,
+    this.codigo = "",
   });
 
   int? id;
@@ -30,6 +31,7 @@ class User {
   String? estado;
   UserMeta? userMeta;
   bool? notificacionesHabilitadas;
+  String? codigo;
   List<String>? dispositivos;
   List<Map<String, dynamic>>? actividadesInscritas;
   List<Map<String, dynamic>>? actividadesSeguidas;
@@ -107,6 +109,24 @@ class User {
         estado: item["estado"],
       );
       break;
+    }
+    return res;
+  }
+
+  static List<User> armarUsuariosPorEmail(String str) {
+    List<User> res = [];
+    final jsonData = json.decode(str);
+    final List<dynamic> data = jsonData;
+    for (var item in data) {
+      res.add(User(
+        id: item["id"],
+        username: item["username"],
+        email: item["email"],
+        provider: item["provider"],
+        confirmed: item["confirmed"],
+        rolCustom: item["rolCustom"],
+        estado: item["estado"],
+      ));
     }
     return res;
   }

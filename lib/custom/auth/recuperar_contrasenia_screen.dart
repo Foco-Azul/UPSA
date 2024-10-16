@@ -2,6 +2,7 @@ import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
+import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/homes/homes_screen.dart';
@@ -27,15 +28,18 @@ class _RecuperarContraseniaScreenState extends State<RecuperarContraseniaScreen>
   Validacion validacion = Validacion();
   String _paso = "email";
   User _user = User();
+  late AnimacionCarga _animacionCarga;
   
   @override
   void initState() {
     super.initState();
     customTheme = AppTheme.customTheme;
     theme = AppTheme.theme;
+    _animacionCarga = AnimacionCarga(context: context);
   }
 
   void _verificarCuentaPorEmail() async{
+    _animacionCarga.setMostrar(true);
     _errorEmail = validacion.validarCorreo(_email, true);
     if(_errorEmail.isEmpty){
       _user = await ApiService().getUserPorEmail(_email);
@@ -46,29 +50,32 @@ class _RecuperarContraseniaScreenState extends State<RecuperarContraseniaScreen>
         _paso = "codigoDeVerificacion";
       }
     }
+    _animacionCarga.setMostrar(false);
     setState(() {});
   }
-  void _verificarCodigo() async{
+  void _verificarCodigo(){
     _errorCodigoDeVerificacion = validacion.validarCodigoDeVerificacion(_codigoDeVerificacion, true);
     if(_errorCodigoDeVerificacion.isEmpty){
-      User usuario = await ApiService().getUserPorEmail(_user.email!);
-      if(usuario.id! == -1){
+      if(_user.codigo! != _codigoDeVerificacion){
         _errorCodigoDeVerificacion = "Código incorrecto";
       }else{
-        _errorCodigoDeVerificacion = "";
         _paso = "password";
       }
     }
     setState(() {});
   }
   void _actualizarContrasenia() async{
+    
     _errorPassword = validacion.validarContrasenia(_password, true);
     if(_errorPassword.isEmpty){
+      _animacionCarga.setMostrar(true);
       User usuario = await ApiService().setActualizarContrasenia(_user.id!, _password);
       _errorPassword = "";
       if(usuario.id! == -1){
+        _animacionCarga.setMostrar(false);
         MensajeTemporalInferior().mostrarMensaje(context,"Algo salió mal.", "error");
       }else{
+        _animacionCarga.setMostrar(false);
         Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => HomesScreen(indice: 4,)),(Route<dynamic> route) => false);
         MensajeTemporalInferior().mostrarMensaje(context,"Se actualizó tu contraseña con éxito.", "exito");
       }
@@ -128,9 +135,6 @@ class _RecuperarContraseniaScreenState extends State<RecuperarContraseniaScreen>
     if(_paso == "email" || _paso == "codigoDeVerificacion"){
       texto = "Continuar";
     }
-    if(_paso == "codigoDeVerificacion"){
-      texto = "Continuar";
-    }
     if(_paso == "password"){
       texto = "Finalizar";
     }
@@ -142,12 +146,14 @@ class _RecuperarContraseniaScreenState extends State<RecuperarContraseniaScreen>
         onPressed: () {
           if(_paso == "email"){
             _verificarCuentaPorEmail();
-          }
-          if(_paso == "codigoDeVerificacion"){
-            _verificarCodigo();
-          }
-          if(_paso == "password"){
-            _actualizarContrasenia();
+          }else{
+            if(_paso == "codigoDeVerificacion"){
+              _verificarCodigo();
+            }else{
+              if(_paso == "password"){
+                _actualizarContrasenia();
+              }
+            }
           }
         },
         style: AppDecorationStyle.botonBienvenida(colorFondo: AppColorStyles.altVerde1),

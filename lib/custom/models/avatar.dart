@@ -2,6 +2,8 @@
 // Avatar class
 import 'dart:convert';
 
+import 'package:flutkit/custom/utils/funciones.dart';
+
 class Avatar {
   int? id;
   String? nombre;
@@ -20,7 +22,7 @@ class Avatar {
       Avatar aux = Avatar(
         id: item["id"],
         nombre: item["attributes"]["nombre"],
-        imagen: item["attributes"]["imagen"]["data"] != null ? item["attributes"]["imagen"]["data"]["attributes"]["url"] : "/uploads/avatar_89f34d0255.png",
+        imagen: FuncionUpsa.getImageUrl(item['attributes']["imagen"]['data']),
       );
       res.add(aux);
     }
@@ -32,7 +34,7 @@ class Avatar {
       res = Avatar(
         id: data["id"],
         nombre: data["attributes"]["nombre"],
-        imagen: data["attributes"]["imagen"]["data"] != null ? data["attributes"]["imagen"]["data"]["attributes"]["url"] : "/uploads/avatar_89f34d0255.png",
+        imagen: FuncionUpsa.getImageUrl(data['attributes']["imagen"]['data']),
       );
     }
     return res;
