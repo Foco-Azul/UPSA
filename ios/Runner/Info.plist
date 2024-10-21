@@ -57,5 +57,9 @@
 	<string>Esta aplicación necesita acceder a la cámara para escanear las entradas QR.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Esta aplicación necesita acceder a su ubicación para mejorar la experiencia de usuario al ofrecer contenido basado en la ubicación.</string>
+	<key>UIDeviceFamily</key>
+	<array>
+		<integer>1</integer>
+	</array>
 </dict>
 </plist>
