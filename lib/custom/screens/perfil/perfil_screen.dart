@@ -1013,6 +1013,14 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 ),
               ),
             ),
+            if((_user.estado == "Perfil parte 2" || _user.estado == "Completado") && _userMeta.carreraSugerida!["nombre"] == "Ninguna")
+            Container(
+              margin: EdgeInsets.only(top: 10),
+              child: Text(
+                "Estamos analizando tus respuestas para sugerirte una carrera.",
+                style: AppTextStyles.menor(color: AppColorStyles.gris2)
+              ),
+            ),
             Container(
               margin: EdgeInsets.only(top: 5),
               child: Text(
