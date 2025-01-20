@@ -18,25 +18,30 @@ class Validacion{
 
     return value!.isNotEmpty && !regex.hasMatch(value) ? false : true;
   }
-  String validarNombres(String? value, bool? esObligatorio){
+  String validarNombres(String? value, bool? esObligatorio) {
     String error = "";
-    if(esObligatorio!){
-      if(value != null && value.isNotEmpty){
-        if(!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value)){
-          error = "Solo se permiten letras";
+    // Modificar la expresión regular para incluir caracteres con acentos y diéresis
+    RegExp regex = RegExp(r'^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]+$');
+    
+    if (esObligatorio!) {
+      if (value != null && value.isNotEmpty) {
+        if (!regex.hasMatch(value)) {
+          error = "Solo se permiten letras y caracteres válidos";
         }
-      }else{
+      } else {
         error = "Este campo es requerido";
       }
-    }else{
-      if(value != null && value.isNotEmpty){
-        if(!RegExp(r'^[a-zA-Z]+$').hasMatch(value)){
-          error = "Solo se permiten letras";
+    } else {
+      if (value != null && value.isNotEmpty) {
+        if (!regex.hasMatch(value)) {
+          error = "Solo se permiten letras y caracteres válidos";
         }
       }
     }
+    
     return error;
   }
+
   bool validarNumeros(String? value, bool? esObligatorio, bool? esEntero){
     bool esValido = false;
     if(esObligatorio!){
