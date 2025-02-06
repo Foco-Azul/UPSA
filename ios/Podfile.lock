@@ -18,7 +18,7 @@ PODS:
   - firebase_core (2.32.0):
     - Firebase/CoreOnly (= 10.25.0)
     - Flutter
-  - firebase_messaging (14.9.1):
+  - firebase_messaging (14.9.4):
     - Firebase/Messaging (= 10.25.0)
     - firebase_core
     - Flutter
@@ -61,9 +61,12 @@ PODS:
     - GoogleUtilities/UserDefaults (~> 7.8)
     - nanopb (< 2.30911.0, >= 2.30908.0)
   - Flutter (1.0.0)
+  - Google-Maps-iOS-Utils (6.1.0):
+    - GoogleMaps (~> 9.0)
   - google_maps_flutter_ios (0.0.1):
     - Flutter
-    - GoogleMaps (< 8.0)
+    - Google-Maps-iOS-Utils (< 7.0, >= 5.0)
+    - GoogleMaps (< 10.0, >= 8.4)
   - GoogleAppMeasurement (10.25.0):
     - GoogleAppMeasurement/AdIdSupport (= 10.25.0)
     - GoogleUtilities/AppDelegateSwizzler (~> 7.11)
@@ -88,11 +91,9 @@ PODS:
     - GoogleUtilities/Environment (~> 7.7)
     - nanopb (< 2.30911.0, >= 2.30908.0)
     - PromisesObjC (< 3.0, >= 1.2)
-  - GoogleMaps (6.2.1):
-    - GoogleMaps/Maps (= 6.2.1)
-  - GoogleMaps/Base (6.2.1)
-  - GoogleMaps/Maps (6.2.1):
-    - GoogleMaps/Base
+  - GoogleMaps (9.2.0):
+    - GoogleMaps/Maps (= 9.2.0)
+  - GoogleMaps/Maps (9.2.0)
   - GoogleMLKit/BarcodeScanning (6.0.0):
     - GoogleMLKit/MLKitCore
     - MLKitBarcodeScanning (~> 5.0.0)
@@ -173,8 +174,6 @@ PODS:
   - PromisesObjC (2.4.0)
   - rive_common (0.0.1):
     - Flutter
-  - search_choices (0.0.1):
-    - Flutter
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -203,7 +202,6 @@ DEPENDENCIES:
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - rive_common (from `.symlinks/plugins/rive_common/ios`)
-  - search_choices (from `.symlinks/plugins/search_choices/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sqflite (from `.symlinks/plugins/sqflite/darwin`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
@@ -218,6 +216,7 @@ SPEC REPOS:
     - FirebaseCoreInternal
     - FirebaseInstallations
     - FirebaseMessaging
+    - Google-Maps-iOS-Utils
     - GoogleAppMeasurement
     - GoogleDataTransport
     - GoogleMaps
@@ -260,8 +259,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
   rive_common:
     :path: ".symlinks/plugins/rive_common/ios"
-  search_choices:
-    :path: ".symlinks/plugins/search_choices/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sqflite:
@@ -274,46 +271,46 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/webview_flutter_wkwebview/ios"
 
 SPEC CHECKSUMS:
-  device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
+  device_info_plus: 335f3ce08d2e174b9fdc3db3db0f4e3b1f66bd89
   Firebase: 0312a2352584f782ea56f66d91606891d4607f06
-  firebase_analytics: cc06e24d6a2343c44f845b3112143db72d10ef78
-  firebase_core: a626d00494efa398e7c54f25f1454a64c8abf197
-  firebase_messaging: a749db7e84bb2d24a77671a9d0a789fe6cd3b1ac
+  firebase_analytics: e7280be84e7ff1c1e5859bd8e48de410b07e0b73
+  firebase_core: 3b49a055ff54114cae400581c13671fe53936c36
+  firebase_messaging: 30fa3ec8cd0dc8a860b7817548911b97345a0875
   FirebaseAnalytics: ec00fe8b93b41dc6fe4a28784b8e51da0647a248
   FirebaseCore: 7ec4d0484817f12c3373955bc87762d96842d483
   FirebaseCoreInternal: df84dd300b561c27d5571684f389bf60b0a5c934
   FirebaseInstallations: 913cf60d0400ebd5d6b63a28b290372ab44590dd
   FirebaseMessaging: 88950ba9485052891ebe26f6c43a52bb62248952
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  google_maps_flutter_ios: abdac20d6ce8931f6ebc5f46616df241bfaa2cfd
+  Google-Maps-iOS-Utils: 0a484b05ed21d88c9f9ebbacb007956edd508a96
+  google_maps_flutter_ios: 0291eb2aa252298a769b04d075e4a9d747ff7264
   GoogleAppMeasurement: 9abf64b682732fed36da827aa2a68f0221fd2356
   GoogleDataTransport: 6c09b596d841063d76d4288cc2d2f42cc36e1e2a
-  GoogleMaps: 20d7b12be49a14287f797e88e0e31bc4156aaeb4
+  GoogleMaps: 634ec3ca99698b31ca2253d64f017217d70cfb38
   GoogleMLKit: 97ac7af399057e99182ee8edfa8249e3226a4065
   GoogleToolboxForMac: d1a2cbf009c453f4d6ded37c105e2f67a32206d8
   GoogleUtilities: ea963c370a38a8069cc5f7ba4ca849a60b6d7d15
   GoogleUtilitiesComponents: 679b2c881db3b615a2777504623df6122dd20afe
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
-  image_picker_ios: 4a8aadfbb6dc30ad5141a2ce3832af9214a705b5
+  image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
   MLImage: 1824212150da33ef225fbd3dc49f184cf611046c
   MLKitBarcodeScanning: 10ca0845a6d15f2f6e911f682a1998b68b973e8b
   MLKitCommon: afec63980417d29ffbb4790529a1b0a2291699e1
   MLKitVision: e858c5f125ecc288e4a31127928301eaba9ae0c1
-  mobile_scanner: 8564358885a9253c43f822435b70f9345c87224f
+  mobile_scanner: ba17a89d6a2d1847dad8cad0335856fd4b4ce1f6
   nanopb: 438bc412db1928dac798aa6fd75726007be04262
-  package_info: 873975fc26034f0b863a300ad47e7f1ac6c7ec62
-  package_info_plus: 115f4ad11e0698c8c1c5d8a689390df880f47e85
-  path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
-  permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
+  package_info: cce50adca9873c79f931618469d2114b91d71189
+  package_info_plus: 566e1b7a2f3900e4b0020914ad3fc051dcc95596
+  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
+  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  rive_common: cbbac3192af00d7341f19dae2f26298e9e37d99e
-  search_choices: b50731e8c425078048f681f39c34375c58d6ce8d
-  shared_preferences_foundation: 5b919d13b803cadd15ed2dc053125c68730e5126
-  sqflite: 673a0e54cc04b7d6dba8d24fb8095b31c3a99eec
-  url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
-  video_player_avfoundation: 7c6c11d8470e1675df7397027218274b6d2360b3
-  webview_flutter_wkwebview: 2a23822e9039b7b1bc52e5add778e5d89ad488d1
+  rive_common: dd421daaf9ae69f0125aa761dd96abd278399952
+  shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
+  sqflite: c35dad70033b8862124f8337cc994a809fcd9fa3
+  url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
+  video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
+  webview_flutter_wkwebview: 45a041c7831641076618876de3ba75c712860c6b
 
 PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2

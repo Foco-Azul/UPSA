@@ -105,7 +105,13 @@ class PushNotificationService{
       );
       print('Permisos de notificación para iOS: ${settings.authorizationStatus}');
     }
-    token = await FirebaseMessaging.instance.getToken();
+    if (Platform.isIOS) {
+      token = await FirebaseMessaging.instance.getAPNSToken();
+      print('APNS-TOKEN: $token');
+      token = await FirebaseMessaging.instance.getToken();
+    }else{
+      token = await FirebaseMessaging.instance.getToken();
+    }
     print('TOKEN: $token');
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('tokenDispositivo', token!); 
