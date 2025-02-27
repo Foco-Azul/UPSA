@@ -11,9 +11,9 @@ if (flutterRoot == null) {
     throw GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
 }
 
-def flutterVersionCode = '8'
+def flutterVersionCode = '9'
 
-def flutterVersionName = '1.5.0'
+def flutterVersionName = '1.6.0'
 
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
@@ -28,7 +28,15 @@ if (keystorePropertiesFile.exists()) {
 
 
 android {
+    namespace "com.nibu.upsa" 
     ndkVersion "25.1.8937393"
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
     compileSdkVersion 34
 
 

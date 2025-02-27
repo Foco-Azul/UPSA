@@ -17,6 +17,7 @@ import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -95,7 +96,7 @@ class _CampusScreenState extends State<CampusScreen> {
               ),
               _buildPulsableContainer(context,
                 'Internacionalización',
-                LucideIcons.heartHandshake,
+                FontAwesomeIcons.earthAmericas,
                 () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => ConvenioScreen()));
                 },
@@ -223,7 +224,7 @@ class _CampusScreenState extends State<CampusScreen> {
                 _backUrl+url,
                 height: 240.0,
                 width: double.infinity, // Asegura que la imagen ocupe todo el ancho disponible
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
               ),
             ),
           ),

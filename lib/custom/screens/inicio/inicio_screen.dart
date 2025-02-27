@@ -170,7 +170,7 @@ class _InicioScreenState extends State<InicioScreen> {
                 height: 200,
                 child: Image.network(
                   _backUrl+item['imagen'], // Reemplaza con la URL de tu imagen
-                  fit: BoxFit.cover, // Asegúrate de que la imagen cubra todo el espacio disponible
+                  fit: BoxFit.contain, // Asegúrate de que la imagen cubra todo el espacio disponible
                 ),
               ),
             ),

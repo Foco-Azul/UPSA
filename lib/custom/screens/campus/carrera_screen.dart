@@ -320,7 +320,7 @@ class _CarreraScreenState extends State<CarreraScreen> {
               _backUrl+_carreraUpsa.imagen!,
               height: 240.0,
               width: double.infinity, // Asegura que la imagen ocupe todo el ancho disponible
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
             ),
           ),
         ),

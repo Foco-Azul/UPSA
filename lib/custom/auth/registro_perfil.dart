@@ -482,6 +482,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
                 }
                 setState(() {});
               },
+              textCapitalization: TextCapitalization.words, // Para capitalizar cada palabra
               decoration: AppDecorationStyle.campoTextoForm(hintText: hintText, labelText: labelText),  
               style: AppTextStyles.parrafo(color: AppColorStyles.gris1)
             ),

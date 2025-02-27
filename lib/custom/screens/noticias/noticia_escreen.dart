@@ -287,10 +287,10 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
                   _backUrl + url,
                   height: 240.0,
                   width: double.infinity, // Asegura que la imagen ocupe todo el ancho disponible
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
                 ),
               ),
-            ),
+            ),/*
             Positioned(
               bottom: 8, // Ajusta la posición del ícono según tu preferencia
               right: 16,
@@ -317,7 +317,7 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
                   ),
                 )
               ),
-            ),
+            ),*/
           ],
         );
       }else{
@@ -343,7 +343,7 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
                   _backUrl + url,
                   height: 240.0,
                   width: double.infinity, // Asegura que la imagen ocupe todo el ancho disponible
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
@@ -534,7 +534,7 @@ class _NoticiaScreenState extends State<NoticiaScreen> {
                     borderRadius: BorderRadius.circular(5.0),
                     image: DecorationImage(
                       image: NetworkImage(_backUrl + noticia.imagen!),
-                      fit: BoxFit.cover,
+                      fit: BoxFit.contain,
                     ),
                   ),
                   height: 150,

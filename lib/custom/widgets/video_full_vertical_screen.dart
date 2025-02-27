@@ -1,7 +1,6 @@
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:video_player/video_player.dart';
 
 class FullScreenVideo extends StatefulWidget {
   const FullScreenVideo({Key? key, this.videoUrl=""}) : super(key: key);
@@ -11,23 +10,23 @@ class FullScreenVideo extends StatefulWidget {
 }
 
 class _FullScreenVideoState extends State<FullScreenVideo> {
-  late VideoPlayerController _videoController;
+  //late VideoPlayerController _videoController;
 
   @override
   void initState() {
     super.initState();
-    _videoController = VideoPlayerController.networkUrl(Uri.parse(
+    /*_videoController = VideoPlayerController.networkUrl(Uri.parse(
       widget.videoUrl))
     ..initialize().then((_) {
       // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
       setState(() {});
-    });
+    });*/
 
   }
 
   @override
   void dispose() {
-    _videoController.dispose();
+    //_videoController.dispose();
     super.dispose();
   }
 
@@ -46,7 +45,7 @@ class _FullScreenVideoState extends State<FullScreenVideo> {
             Navigator.of(context).pop();
           },
         ),
-      ),
+      ),/*
       body: Container(
         margin: EdgeInsets.only(bottom: 100),
         alignment: Alignment.topCenter,
@@ -70,7 +69,7 @@ class _FullScreenVideoState extends State<FullScreenVideo> {
           _videoController.value.isPlaying ? Icons.pause : Icons.play_arrow,
           color: AppColorStyles.altTexto1,
         ),
-      ),
+      ),*/
     );
   }
 }

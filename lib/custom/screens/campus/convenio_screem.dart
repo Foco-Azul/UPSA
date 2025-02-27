@@ -344,7 +344,7 @@ class _ConvenioScreenState extends State<ConvenioScreen> {
                 AppIconStyles.icono(nombre: icono), // Reemplaza con el icono que desees
                 color: AppColorStyles.altTexto1, // Ajusta el color si es necesario
               ), 
-              SizedBox(width: 4.0), // Espaciado entre el icono y el texto
+              SizedBox(width: 8.0), // Espaciado entre el icono y el texto
               Text(
                 titulo.toUpperCase(), // Primer texto
                 style: AppTextStyles.etiqueta(color: AppColorStyles.altTexto1),

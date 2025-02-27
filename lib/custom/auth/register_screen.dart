@@ -248,6 +248,7 @@ class _Register2ScreenState extends State<Register2Screen> {
                 }
                 setState(() {});
               },
+              textCapitalization: TextCapitalization.words, // Para capitalizar cada palabra
               decoration: AppDecorationStyle.campoTexto(hintText: hintText, labelText: labelText),
               style: AppTextStyles.parrafo(color: AppColorStyles.gris1)
             ),

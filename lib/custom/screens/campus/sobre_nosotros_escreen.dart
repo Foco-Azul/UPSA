@@ -382,7 +382,7 @@ class _SobreNosotrosScreenState extends State<SobreNosotrosScreen> {
                 _backUrl + url,
                 height: 240.0,
                 width: double.infinity, // Asegura que la imagen ocupe todo el ancho disponible
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
               ),
             ),
           ),

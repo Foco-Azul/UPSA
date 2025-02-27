@@ -679,7 +679,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
                     borderRadius: BorderRadius.circular(5.0),
                     image: DecorationImage(
                       image: NetworkImage(_backUrl + noticia.imagen!),
-                      fit: BoxFit.cover,
+                      fit: BoxFit.contain,
                     ),
                   ),
                   height: 150,
@@ -812,7 +812,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
                 _backUrl+url,
                 height: 240.0,
                 width: double.infinity, // Asegura que la imagen ocupe todo el ancho disponible
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
               ),
             ),
           ),

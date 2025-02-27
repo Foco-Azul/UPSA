@@ -162,6 +162,29 @@ class AppIconStyles {
       "people_alt_outlined": Icons.people_alt_outlined,
       "school_outlined": Icons.school_outlined,
       "maps_home_work_outlined": Icons.maps_home_work_outlined,
+      //nuevo
+      "library_books_outlined": Icons.library_books_outlined,
+      "class_outlined": Icons.class_outlined,
+      "assignment_outlined": Icons.assignment_outlined,
+      "science_outlined": Icons.science_outlined,
+      "history_edu_outlined": Icons.history_edu_outlined,
+      "calculate_outlined": Icons.calculate_outlined,
+      "engineering_outlined": Icons.engineering_outlined,
+      "computer_outlined": Icons.computer_outlined,
+      "menu_book_outlined": Icons.menu_book_outlined,
+      "biotech_outlined": Icons.biotech_outlined,
+      "psychology": Icons.psychology,
+      "school": Icons.school,
+      "sports_esports_outlined": Icons.sports_esports_outlined,
+      "language_outlined": Icons.language_outlined,
+      "business_outlined": Icons.business_outlined,
+      "medical_services_outlined": Icons.medical_services_outlined,
+      "handshake_outlined": Icons.handshake_outlined,
+      "lightbulb_outlined": Icons.lightbulb_outlined,
+      "forum_outlined": Icons.forum_outlined,
+      "grading_outlined": Icons.grading_outlined,
+      "draw_outlined": Icons.draw_outlined,
+      "architecture_outlined": Icons.architecture_outlined,
     };
     return iconMap[nombre];
   }
@@ -363,6 +386,7 @@ class AppDecorationStyle {
       contentPadding: EdgeInsets.all(15),
       enabledBorder: OutlineInputBorder(
         borderSide: BorderSide(color: AppColorStyles.blanco),
+        borderRadius: BorderRadius.circular(14), // Ajusta el valor según necesites
       ),
       hintText: hintText,
       labelText: labelText,
