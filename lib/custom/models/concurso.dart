@@ -25,6 +25,7 @@ class Concurso {
     this.noticias,
     this.seguidores,
     this.enlaceExterno,
+    this.usuariosPermitidos,
   });
 
   int? id;
@@ -44,6 +45,7 @@ class Concurso {
   List<Inscripcion>? inscripciones;
   List<int>? seguidores;
   String? enlaceExterno;
+  List<int>? usuariosPermitidos;
   
   static List<Concurso> armarConcursosPopulateFechaOriginal(String str) {
     List<Concurso> res = [];
@@ -55,12 +57,13 @@ class Concurso {
         titulo: item['attributes']["titulo"],
         categoria: Categoria.armarCategoria(item['attributes']["categoria"]["data"]),
         publicacion: FuncionUpsa.armarFechaPublicacion(item['attributes']["publishedAt"]), 
-        imagen: FuncionUpsa.getImageUrl(item['attributes']["imagen"]['data']), 
-        imagenes: FuncionUpsa.armarGaleriaImagenes(item['attributes']["imagenes"]['data'], item['attributes']["imagen"]['data']),
+        //imagen: FuncionUpsa.getImageUrl(item['attributes']["imagen"]['data']), 
+        //imagenes: FuncionUpsa.armarGaleriaImagenes(item['attributes']["imagenes"]['data'], item['attributes']["imagen"]['data']),
         fechaDeInicio: item['attributes']["fechaDeInicio"], 
         fechaDeFin: item['attributes']["fechaDeFin"],
         descripcion: item['attributes']["descripcion"], 
         etiquetas: Etiqueta.armarEtiquetas(item['attributes']["etiquetas"]['data']),
+        usuariosPermitidos: FuncionUpsa.armarListaDeEnteros(item['attributes']["colegios"]['data']),
       );
       res.add(aux);
     }
@@ -78,11 +81,12 @@ class Concurso {
         categoria: Categoria.armarCategoria(item['attributes']["categoria"]["data"]),
         publicacion: FuncionUpsa.armarFechaPublicacion(item['attributes']["publishedAt"]), 
         imagen: FuncionUpsa.getImageUrl(item['attributes']["imagen"]['data']),
-        imagenes: FuncionUpsa.armarGaleriaImagenes(item['attributes']["imagenes"]['data'], item['attributes']["imagen"]['data']),
+        //imagenes: FuncionUpsa.armarGaleriaImagenes(item['attributes']["imagenes"]['data'], item['attributes']["imagen"]['data']),
         fechaDeInicio: FuncionUpsa.armarFechaDeInicioFinConHora(item['attributes']["fechaDeInicio"]), 
         fechaDeFin: FuncionUpsa.armarFechaDeInicioFinConHora(item['attributes']["fechaDeFin"]),
         descripcion: item['attributes']["descripcion"], 
         etiquetas: Etiqueta.armarEtiquetas(item['attributes']["etiquetas"]['data']),
+        usuariosPermitidos: FuncionUpsa.armarListaDeEnteros(item['attributes']["colegios"]['data']),
       );
       res.add(aux);
     }

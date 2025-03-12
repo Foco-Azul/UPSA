@@ -92,8 +92,8 @@ class _CursilloScreenState extends State<CursilloScreen> {
     }
     _cursillo = await ApiService().getCursilloPopulate(_id);
     await FirebaseAnalytics.instance.logScreenView(
-      screenName: 'Cursillos_${FuncionUpsa.limpiarYReemplazar(_cursillo.titulo!)}',
-      screenClass: 'Cursillos_${FuncionUpsa.limpiarYReemplazar(_cursillo.titulo!)}', // Clase o tipo de pantalla
+      screenName: 'Cursos_${FuncionUpsa.limpiarYReemplazar(_cursillo.titulo!)}',
+      screenClass: 'Cursos_${FuncionUpsa.limpiarYReemplazar(_cursillo.titulo!)}', // Clase o tipo de pantalla
     );
     _cursillosData = await ApiService().getCursillosPopulate();
     _armarProximos();

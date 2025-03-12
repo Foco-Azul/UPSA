@@ -44,8 +44,8 @@ class _CursillosInicioState extends State<CursillosInicio> {
       controller.uiLoading = true;
     });
     await FirebaseAnalytics.instance.logScreenView(
-      screenName: 'Cursillos',
-      screenClass: 'Cursillos', // Clase o tipo de pantalla
+      screenName: 'Cursos',
+      screenClass: 'Cursos', // Clase o tipo de pantalla
     );
     _cursillos = await ApiService().getCursillosPopulate();
     _armarCategorias();
@@ -92,7 +92,7 @@ class _CursillosInicioState extends State<CursillosInicio> {
           backgroundColor: AppColorStyles.altFondo1,
           centerTitle: true,
           title: MyText(
-            "Cursillos",
+            "Cursos",
             style: AppTitleStyles.principal()
           ),
         ),

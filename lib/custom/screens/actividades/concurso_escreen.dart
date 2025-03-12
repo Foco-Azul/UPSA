@@ -429,7 +429,40 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
             ),
             _crearEtiquetas(),
             _crearEnlaceExterno(),
+            //cc_focoazul esta actividad no permite inscripciones
             //_botonesOpcionales((_isLoggedIn && _user.rolCustom == "estudiante" && _user.estado! == "Completado"), (!_inscrito && ((_concurso.capacidad!-_concurso.inscritos!) > 0 || _concurso.capacidad! == -1)), _inscrito, _siguiendo),
+            /*
+            if(!_isLoggedIn || (_user.rolCustom == "estudiante" && _user.estado! != "Completado"))
+            Column(
+              children: [
+                Container(
+                  margin: EdgeInsets.only(top: 8, bottom: 16),
+                  child: Divider(),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        "Ingresa con tu perfil para inscribirte a la actividad",
+                        style: AppTextStyles.menor()
+                      ),
+                    ),
+                    Icon(
+                      Icons.person_2_outlined, // Cambia el ícono según lo que necesites
+                      size: 20,
+                      color: AppColorStyles.oscuro1,
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 4,
+                ),
+                Text(
+                  'Esta actividad requiere que ingreses con tu perfil para inscribirse. Ve a Mi Perfil en el menú y registra tu cuenta o inicia sesión, y completa tu perfil ',
+                  style: AppTextStyles.menor(color: AppColorStyles.gris2)
+                ),
+              ],
+            ),*/
           ],
         ),
       );

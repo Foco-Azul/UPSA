@@ -58,12 +58,55 @@ class FuncionUpsa {
             "nombres": item["attributes"]["user"]["data"] != null ? (item["attributes"]["user"]["data"]["attributes"]["userMeta"]["data"] != null ? item["attributes"]["user"]["data"]["attributes"]["userMeta"]["data"]["attributes"]["nombres"] : "") : "",
             "apellidos": item["attributes"]["user"]["data"] != null ? (item["attributes"]["user"]["data"]["attributes"]["userMeta"]["data"] != null ? item["attributes"]["user"]["data"]["attributes"]["userMeta"]["data"]["attributes"]["apellidos"] : "") : "",
             "cedulaDeIdentidad": item["attributes"]["user"]["data"] != null ? (item["attributes"]["user"]["data"]["attributes"]["userMeta"]["data"] != null ? item["attributes"]["user"]["data"]["attributes"]["userMeta"]["data"]["attributes"]["cedulaDeIdentidad"] : "") : "",
+            "entradasEscaneadas": _armarListaDeFechasHoras(item["attributes"]["entradasEscaneadas"]),
           }
         );
       }
     }
     return res;
   } 
+  static Map<String, dynamic> armarEntradaParaVerificar(String str){
+    Map<String, dynamic> res = {};
+    final jsonData = json.decode(str);
+    final Map<String, dynamic> data = jsonData['data'];
+    res = {
+      "id": data["id"],
+      "qr": data["attributes"]["qr"] ?? "",
+      "asistencia": data["attributes"]["asistencia"] ?? false,
+      "entradasEscaneadas": _armarListaDeFechasHoras(data["attributes"]["entradasEscaneadas"]),
+    };
+    return res;
+  } 
+  static List<DateTime> _armarListaDeFechasHoras(List<dynamic> data) {
+    List<DateTime> res = [];
+
+    for (var item in data) {
+      if (item.containsKey('fechaEntradaEscaneada')) {
+        DateTime aux = DateTime.parse(item['fechaEntradaEscaneada']);
+        // Restar 4 horas
+        //DateTime auxRestado = aux.subtract(Duration(hours: 4));
+        // Formatear la fecha en el formato deseado
+        //String fechaFormateada = DateFormat('dd/MM/yyyy-HH:mm:ss').format(auxRestado);
+        res.add(aux);
+      }
+    }
+
+    // Ordenar de la más reciente a la más antigua
+    res.sort((a, b) => b.compareTo(a));
+    return res;
+  }
+  static List<String> armarListaFechasHorasParaStrapi(List<dynamic> data) {
+    List<String> res = [];
+
+    for (var item in data) {
+      // Convertir DateTime a formato ISO 8601 con 'Z' al final
+      String fechaFormateada = item.toUtc().toIso8601String(); // Convierte a UTC y luego a ISO 8601
+      res.add(fechaFormateada); // Agregar la fecha formateada a la lista
+    }
+
+    return res;
+  }
+
   static List<Map<String,dynamic>> armarActividadesPopulateParaEscanearEntradas(String str, String tipo) {
     List<Map<String,dynamic>> res = [];
     final jsonData = json.decode(str);
@@ -75,6 +118,7 @@ class FuncionUpsa {
         "tipo": tipo,
         "fechaDeInicio": item['attributes']["fechaDeInicio"],
         "fechaDeFin": item['attributes']["fechaDeFin"],
+        "cantidadEscaneosMaximo": item['attributes']["cantidadEscaneosMaximo"] ?? 1,
         "entradas": _armarEntradasParaEscanear(item['attributes']["inscripciones"]["data"])
       };
       res.add(aux);
@@ -207,9 +251,25 @@ class FuncionUpsa {
           "descripcion": item['attributes']["descripcion"],
           "categoria": Categoria.armarCategoria(item['attributes']["categoria"]["data"]), 
           "tipo": "noticias",
-          "usuariosPermitidos": Noticia.armarListaDeEnteros(item['attributes']["colegios"]['data']),
+          "usuariosPermitidos": armarListaDeEnteros(item['attributes']["colegios"]['data']),
         };
         res.add(aux);
+      }
+    }
+    return res;
+  }
+  static List<int> armarListaDeEnteros(dynamic data){
+    List<int> res = [];
+    if(data != null){
+      for (var item in data) {
+        if(item["attributes"]["usersMeta"]["data"] !=  null){
+          for (var item2 in item["attributes"]["usersMeta"]["data"]) {
+            int aux = item2["attributes"]["user"]["data"] != null ? item2["attributes"]["user"]["data"]["id"] : -1;
+            if(aux != -1){
+              res.add(aux);
+            }
+          }
+        }
       }
     }
     return res;

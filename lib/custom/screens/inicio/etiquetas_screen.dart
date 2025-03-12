@@ -56,19 +56,19 @@ class _EtiquetasScreenState extends State<EtiquetasScreen> {
     if (_isLoggedIn) {
       _user = Provider.of<AppNotifier>(context, listen: false).user;
       if(_user.rolCustom! == "estudiante" || true){
-        _filtrarNoticias(_user.id!);
+        _filtrarContenidos(_user.id!);
       }
     }else{
-      _filtrarNoticias(-1);
+      _filtrarContenidos(-1);
     }
     setState(() {
       controller.uiLoading = false;
     });
   }
-  void _filtrarNoticias(int id){
+  void _filtrarContenidos(int id){
     List<Map<String,dynamic>> aux = [];
     for (var item in _contenidos) {
-      if(item["tipo"] == "noticias"){
+      if(item["tipo"] == "Noticias" || item["tipo"] == "Eventos" || item["tipo"] == "Concursos"){
         if(item["usuariosPermitidos"].isNotEmpty){
             for (var item2 in item["usuariosPermitidos"]) {
               if(item2 == id){

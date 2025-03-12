@@ -1,6 +1,7 @@
 
 # FlutKit - Flutter UI Kit
 > version 3.0.0
+> version flutter 3.19.4
 
 FlutKit is a nicely designed and developed multipurpose mobile application UI kit developed using Flutter. Flutter is an open-source mobile application development SDK created by Google and used to develop applications for Android and iOS.
 

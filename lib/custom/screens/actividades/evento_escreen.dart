@@ -22,6 +22,7 @@ import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/widgets/my_button.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
@@ -513,6 +514,37 @@ class _EventoScreenState extends State<EventoScreen> {
               ), 
             ),
             _botonesOpcionales((_isLoggedIn && _user.rolCustom == "estudiante" && _user.estado! == "Completado" && FuncionUpsa.diferenciaDeFechas(_evento.fechaDeFin!, "", "fechaActual") > 0), (!_inscrito && ((_evento.capacidad!-_evento.inscritos!) > 0 || _evento.capacidad! == -1)), _siguiendo),
+            if(!_isLoggedIn || (_user.rolCustom == "estudiante" && _user.estado! != "Completado"))
+            Column(
+              children: [
+                Container(
+                  margin: EdgeInsets.only(top: 8, bottom: 16),
+                  child: Divider(),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        "Ingresa con tu perfil para inscribirte a la actividad",
+                        style: AppTextStyles.menor()
+                      ),
+                    ),
+                    Icon(
+                      Icons.person_2_outlined, // Cambia el ícono según lo que necesites
+                      size: 20,
+                      color: AppColorStyles.oscuro1,
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 4,
+                ),
+                Text(
+                  'Esta actividad requiere que ingreses con tu perfil para inscribirse. Ve a Mi Perfil en el menú y registra tu cuenta o inicia sesión, y completa tu perfil ',
+                  style: AppTextStyles.menor(color: AppColorStyles.gris2)
+                ),
+              ],
+            ),
           ],
         ),
       );

@@ -57,19 +57,19 @@ class _InicioScreenState extends State<InicioScreen> {
     if (_isLoggedIn) {
       _user = Provider.of<AppNotifier>(context, listen: false).user;
       if(_user.rolCustom! == "estudiante"){
-        _filtrarNoticias(_user.id!);
+        _filtrarContenido(_user.id!);
       }
     }else{
-      _filtrarNoticias(-1);
+      _filtrarContenido(-1);
     }
     setState(() {
       controller.uiLoading = false;
     });
   }
-  void _filtrarNoticias(int id){
+  void _filtrarContenido(int id){
     List<Map<String,dynamic>> aux = [];
     for (var item in _contenido) {
-      if(item["tipo"] == "Noticias"){
+      if(item["tipo"] == "Noticias" || item["tipo"] == "Eventos" || item["tipo"] == "Concursos"){
         if(item["usuariosPermitidos"].isNotEmpty){
             for (var item2 in item["usuariosPermitidos"]) {
               if(item2 == id){

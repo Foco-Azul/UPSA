@@ -735,13 +735,37 @@ class ApiService {
       return res;
     }
   }
+  Future<Map<String,dynamic>> pedirInscripcionPorId(int entradaId) async {
+    Map<String,dynamic> res = {};
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/inscripcions/$entradaId/?populate=entradasEscaneadas');
+      var response = await http.get(url,
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": "Bearer ${dotenv.get('accesToken')}"
+        },
+      );
+      if (response.statusCode == 200) {
+        res = FuncionUpsa.armarEntradaParaVerificar(response.body);
+        return res;
+      }else{
+        String error = jsonDecode(response.body)['error']['message'];
+        print('Error en  pedirInscripcionPorId: $error'); 
+        return res;
+      }
+    } catch (e) {
+      print('Error en pedirInscripcionPorId: $e');
+      return res;
+    }
+  }
   //ACTIVIDADES FIN
 
   //INSCRIPCIONES INICIO
-  Future<void> marcarAsistencia(int idInscripcion) async {
+  Future<void> marcarAsistencia(Map<String, dynamic> entrada, List<String> fechas) async {
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/inscripcions/$idInscripcion');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/inscripcions/${entrada['id']}');
       var response = await http.put(url,
         headers: {
           'Content-Type': 'application/json',
@@ -750,7 +774,8 @@ class ApiService {
         body: json.encode(
           {
             "data":{
-              "asistencia": true
+              "asistencia": entrada['asistencia'],
+               "entradasEscaneadas": fechas.map((fecha) => {'fechaEntradaEscaneada': fecha}).toList(),
             }
           }
         )
@@ -1031,7 +1056,7 @@ class ApiService {
     String fechaActual = obtenerFechaActual();
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200&filters[\$or][0][fechaDeInicio][\$gte]=$fechaActual&filters[\$or][1][fechaDeFin][\$gte]=$fechaActual');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/?populate[imagen][populate][0]=imagen&populate[categoria][populate][0]=categoria&populate[etiquetas][populate][0]=etiquetas&populate[colegios][populate][0]=usersMeta.user&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200&filters[\$or][0][fechaDeInicio][\$gte]=$fechaActual&filters[\$or][1][fechaDeFin][\$gte]=$fechaActual');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -1054,7 +1079,7 @@ class ApiService {
     List<Map<String,dynamic>> res = [];
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/?populate=*&filters[\$and][0][activo][\$eq]=true&filters[\$and][1][fechaDeInicio][\$gte]=$fechaActual&sort=id:desc&pagination[pageSize]=200');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/?populate[imagen][populate][0]=imagen&populate[categoria][populate][0]=categoria&populate[etiquetas][populate][0]=etiquetas&populate[colegios][populate][0]=usersMeta.user&filters[\$and][0][activo][\$eq]=true&filters[\$and][1][fechaDeInicio][\$gte]=$fechaActual&sort=id:desc&pagination[pageSize]=200');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -1067,6 +1092,7 @@ class ApiService {
             "fecha": evento.fechaDeInicio,
             "categoria": evento.categoria,
             "color": Color.fromRGBO(91, 119, 245, 0.9),
+            "usuariosPermitidos": evento.usuariosPermitidos,
           };
           res.add(aux);
         }
@@ -1088,11 +1114,12 @@ class ApiService {
     List<Map<String,dynamic>> res = [];
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/?filters[\$and][1][fechaDeInicio][\$lte]=$fechaActualMasUno&filters[\$and][2][fechaDeFin][\$gte]=$fechaActual&filters[\$and][0][activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200&populate[inscripciones][populate][0]=user.userMeta');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/?filters[\$and][1][fechaDeInicio][\$lte]=$fechaActualMasUno&filters[\$and][2][fechaDeFin][\$gte]=$fechaActual&filters[\$and][0][activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200&populate[inscripciones][populate][0]=user.userMeta&populate[inscripciones][populate][1]=entradasEscaneadas');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
         res = FuncionUpsa.armarActividadesPopulateParaEscanearEntradas(response.body, "evento");
+        print(res);
         return res;
       } else {
         String e = jsonDecode(response.body)['error']['message'];
@@ -1109,7 +1136,7 @@ class ApiService {
     String fechaActual = obtenerFechaActual();
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=$cantidad&filters[\$or][0][fechaDeInicio][\$gte]=$fechaActual&filters[\$or][1][fechaDeFin][\$gte]=$fechaActual');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/eventos/?populate[imagen][populate][0]=imagen&populate[categoria][populate][0]=categoria&populate[etiquetas][populate][0]=etiquetas&populate[colegios][populate][0]=usersMeta.user&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=$cantidad&filters[\$or][0][fechaDeInicio][\$gte]=$fechaActual&filters[\$or][1][fechaDeFin][\$gte]=$fechaActual');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -1123,7 +1150,8 @@ class ApiService {
             "updatedAt": item['attributes']['updatedAt'],
             "descripcion": item['attributes']['descripcion'],
             "categoria": item['attributes']['categoria']['data'] != null ? item['attributes']['categoria']['data']['attributes']['nombre'] : "Sin categoria", 
-            "imagen": item['attributes']['imagen']['data'] != null ? item['attributes']['imagen']['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",
+            "imagen": FuncionUpsa.getImageUrl(item['attributes']['imagen']['data']),
+            "usuariosPermitidos": FuncionUpsa.armarListaDeEnteros(item['attributes']["colegios"]['data']),
           };
           res.add(aux);
         }
@@ -1259,8 +1287,8 @@ class ApiService {
             "updatedAt": item['attributes']['updatedAt'],
             "descripcion": item['attributes']['descripcion'],
             "categoria": item['attributes']['categoria']['data'] != null ? item['attributes']['categoria']['data']['attributes']['nombre'] : "Sin categoria", 
-            "imagen": item['attributes']['imagen']['data'] != null ? item['attributes']['imagen']['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",
-            "usuariosPermitidos": Noticia.armarListaDeEnteros(item['attributes']["colegios"]['data']),
+            "imagen": FuncionUpsa.getImageUrl(item['attributes']['imagen']['data']),
+            "usuariosPermitidos": FuncionUpsa.armarListaDeEnteros(item['attributes']["colegios"]['data']),
           };
           res.add(aux);
         }
@@ -1321,7 +1349,7 @@ class ApiService {
             "updatedAt": item['attributes']['updatedAt'],
             "descripcion": item['attributes']['descripcion'],
             "categoria": item['attributes']['categoria']['data'] != null ? item['attributes']['categoria']['data']['attributes']['nombre'] : "Sin categoria", 
-            "imagen": item['attributes']['imagen']['data'] != null ? item['attributes']['imagen']['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",
+            "imagen": FuncionUpsa.getImageUrl(item['attributes']['imagen']['data']),
           };
           res.add(aux);
         }
@@ -1428,7 +1456,7 @@ class ApiService {
     List<Map<String,dynamic>> res = [];
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/clubes/?filters[\$and][1][fechaDeInicio][\$lte]=$fechaActualMasUno&filters[\$and][2][fechaDeFin][\$gte]=$fechaActual&filters[\$and][0][activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200&populate[inscripciones][populate][0]=user.userMeta');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/clubes/?filters[\$and][1][fechaDeInicio][\$lte]=$fechaActualMasUno&filters[\$and][2][fechaDeFin][\$gte]=$fechaActual&filters[\$and][0][activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200&populate[inscripciones][populate][0]=user.userMeta&populate[inscripciones][populate][1]=entradasEscaneadas');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -1642,7 +1670,7 @@ class ApiService {
     List<Map<String,dynamic>> res = [];
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/?populate=*&filters[\$and][0][activo][\$eq]=true&filters[\$and][1][fechaDeInicio][\$gte]=$fechaActual&sort=id:desc&pagination[pageSize]=200');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/?populate[imagen][populate][0]=imagen&populate[categoria][populate][0]=categoria&populate[etiquetas][populate][0]=etiquetas&populate[colegios][populate][0]=usersMeta.user&filters[\$and][0][activo][\$eq]=true&filters[\$and][1][fechaDeInicio][\$gte]=$fechaActual&sort=id:desc&pagination[pageSize]=200');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -1655,6 +1683,7 @@ class ApiService {
             "fecha": concurso.fechaDeInicio,
             "categoria": concurso.categoria,
             "color": Color.fromRGBO(243, 148, 61, 0.9),
+            "usuariosPermitidos": concurso.usuariosPermitidos,
           };
           res.add(aux);
         }
@@ -1676,7 +1705,7 @@ class ApiService {
     List<Map<String,dynamic>> res = [];
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/?filters[\$and][1][fechaDeInicio][\$lte]=$fechaActualMasUno&filters[\$and][2][fechaDeFin][\$gte]=$fechaActual&filters[\$and][0][activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200&populate[inscripciones][populate][0]=user.userMeta');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/?filters[\$and][1][fechaDeInicio][\$lte]=$fechaActualMasUno&filters[\$and][2][fechaDeFin][\$gte]=$fechaActual&filters[\$and][0][activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200&populate[inscripciones][populate][0]=user.userMeta&populate[inscripciones][populate][1]=entradasEscaneadas');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -1720,7 +1749,7 @@ class ApiService {
     String fechaActual = obtenerFechaActual();
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200&filters[\$or][0][fechaDeInicio][\$gte]=$fechaActual&filters[\$or][1][fechaDeFin][\$gte]=$fechaActual');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/?populate[imagen][populate][0]=imagen&populate[categoria][populate][0]=categoria&populate[etiquetas][populate][0]=etiquetas&populate[colegios][populate][0]=usersMeta.user&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=200&filters[\$or][0][fechaDeInicio][\$gte]=$fechaActual&filters[\$or][1][fechaDeFin][\$gte]=$fechaActual');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -1764,7 +1793,7 @@ class ApiService {
     String fechaActual = obtenerFechaActual();
     await dotenv.load(fileName: ".env");
     try {
-      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/?populate=*&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=$cantidad&filters[\$or][0][fechaDeInicio][\$gte]=$fechaActual&filters[\$or][1][fechaDeFin][\$gte]=$fechaActual');
+      var url = Uri.parse('${dotenv.get('baseUrl')}/concursos/?populate[imagen][populate][0]=imagen&populate[categoria][populate][0]=categoria&populate[etiquetas][populate][0]=etiquetas&populate[colegios][populate][0]=usersMeta.user&filters[activo][\$eq]=true&sort=id:desc&pagination[pageSize]=$cantidad&filters[\$or][0][fechaDeInicio][\$gte]=$fechaActual&filters[\$or][1][fechaDeFin][\$gte]=$fechaActual');
       var response = await http.get(url,
           headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
       if (response.statusCode == 200) {
@@ -1778,7 +1807,8 @@ class ApiService {
             "updatedAt": item['attributes']['updatedAt'],
             "descripcion": item['attributes']['descripcion'],
             "categoria": item['attributes']['categoria']['data'] != null ? item['attributes']['categoria']['data']['attributes']['nombre'] : "Sin categoria", 
-            "imagen": item['attributes']['imagen']['data'] != null ? item['attributes']['imagen']['data']['attributes']['url'] : "/uploads/default_02263f0f89.png",
+            "imagen": FuncionUpsa.getImageUrl(item['attributes']['imagen']['data']),
+            "usuariosPermitidos": FuncionUpsa.armarListaDeEnteros(item['attributes']["colegios"]['data']),
           };
           res.add(aux);
         }

@@ -49,25 +49,9 @@ class Noticia {
         descripcion: item['attributes']["descripcion"], 
         etiquetas: Etiqueta.armarEtiquetas(item['attributes']["etiquetas"]['data']),
         colegios: _armarColegios(item['attributes']["colegios"]['data']),
-        usuariosPermitidos: armarListaDeEnteros(item['attributes']["colegios"]['data']),
+        usuariosPermitidos: FuncionUpsa.armarListaDeEnteros(item['attributes']["colegios"]['data']),
       );
       res.add(aux);
-    }
-    return res;
-  }
-  static List<int> armarListaDeEnteros(dynamic data){
-    List<int> res = [];
-    if(data != null){
-      for (var item in data) {
-        if(item["attributes"]["usersMeta"]["data"] !=  null){
-          for (var item2 in item["attributes"]["usersMeta"]["data"]) {
-            int aux = item2["attributes"]["user"]["data"] != null ? item2["attributes"]["user"]["data"]["id"] : -1;
-            if(aux != -1){
-              res.add(aux);
-            }
-          }
-        }
-      }
     }
     return res;
   }
@@ -108,7 +92,7 @@ class Noticia {
         id: item["id"],
         titulo: item['attributes']["titulo"],
         imagen: FuncionUpsa.getImageUrl(item['attributes']["imagen"]['data']),
-        usuariosPermitidos: armarListaDeEnteros(item['attributes']["colegios"]['data']),
+        usuariosPermitidos: FuncionUpsa.armarListaDeEnteros(item['attributes']["colegios"]['data']),
       );
       res.add(aux);
     }

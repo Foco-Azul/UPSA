@@ -116,7 +116,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
       controller.uiLoading = false;
     });
   }
-  void _filtrarNoticias(int id){
+  void _filtrarContenidos(int id){
     List<Resultado> aux = [];
     for (var item in _resultados) {
       if(item.usuariosPermitidos != ";-1;"){
@@ -390,10 +390,10 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
                             if (_isLoggedIn) {
                               _user = Provider.of<AppNotifier>(context, listen: false).user;
                               if(_user.rolCustom! == "estudiante"){
-                                _filtrarNoticias(_user.id!);
+                                _filtrarContenidos(_user.id!);
                               }
                             }else{
-                              _filtrarNoticias(-1);
+                              _filtrarContenidos(-1);
                             }
                             setState(() {
                               _showPopup = true; // Alterna la visibilidad del popup

@@ -5,17 +5,20 @@ import 'package:flutkit/custom/models/club.dart';
 import 'package:flutkit/custom/models/concurso.dart';
 import 'package:flutkit/custom/models/evento.dart';
 import 'package:flutkit/custom/models/quiz_preguntas.dart';
+import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/screens/actividades/club_screen.dart';
 import 'package:flutkit/custom/screens/actividades/concurso_escreen.dart';
 import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
 import 'package:flutkit/custom/screens/actividades/quiz_screen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
 
 class ActividadesScreen extends StatefulWidget {
   const ActividadesScreen({Key? key}) : super(key: key);
@@ -45,6 +48,9 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
   List<QuizPregunta> _quizPregunta =  [];
   List<QuizPregunta> _quizPreguntaCategorizados = [];
   List<Categoria> _quizPreguntaCategorias = [];
+
+  User _user = User();
+  bool _isLoggedIn = false;
   
   @override
   void initState() {
@@ -60,6 +66,14 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
     setState(() {
       controller.uiLoading = true;
     });
+    _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
+    bool filtrar = false;
+    if (_isLoggedIn) {
+      _user = Provider.of<AppNotifier>(context, listen: false).user;
+      if(_user.rolCustom! == "estudiante"){
+        filtrar = true;
+      }
+    }
     await FirebaseAnalytics.instance.logScreenView(
       screenName: 'Actividades',
       screenClass: 'Actividades', // Clase o tipo de pantalla
@@ -72,10 +86,16 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
     _clubesCategorias = _crearCategoriasActividad("Clubes");
 
     _eventos = await ApiService().getEventos();
+    if(filtrar){
+      _eventos = _filtrarActividades(_user.id!, _eventos).cast<Evento>();
+    }
     _eventosCategorizados = _eventos;
     _eventosCategorias = _crearCategoriasActividad("Eventos");
 
     _concursos = await ApiService().getConcursos();
+    if(filtrar){
+      _concursos = _filtrarActividades(_user.id!, _concursos).cast<Concurso>();
+    }
     _concursosCategorizados = _concursos;
     _concursosCategorias = _crearCategoriasActividad("Concursos");
 
@@ -87,6 +107,21 @@ class _ActividadesScreenState extends State<ActividadesScreen> {
       controller.uiLoading = false;
     });
   }
+  List<dynamic> _filtrarActividades(int userId, dynamic actividades){
+    List<dynamic> res = [];
+    for (var actividad in actividades) {
+      if(actividad.usuariosPermitidos!.isNotEmpty){
+        for (var item in actividad.usuariosPermitidos!) {
+          if(item == userId){
+            res.add(actividad);
+          }
+        }
+      }else{
+        res.add(actividad);
+      }
+    }
+    return res;
+  } 
   List<Categoria> _crearCategoriasActividad(String actividad) {
     List<Categoria> res = [];
     if (actividad == "Eventos") {

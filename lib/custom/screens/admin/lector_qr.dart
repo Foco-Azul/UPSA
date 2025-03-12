@@ -2,13 +2,16 @@
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/theme/styles.dart';
+import 'package:flutkit/custom/utils/funciones.dart';
 import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/helpers/widgets/my_text.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:multi_dropdown/multiselect_dropdown.dart';
@@ -25,7 +28,6 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
   late CustomTheme customTheme;
   late ProfileController controller;
   bool isDark = false;
-  TextDirection textDirection = TextDirection.ltr;
   int selectedValue = 0;
   List<Map<String, dynamic>> _actividades = [];
   String _tipoSeleccionado = "";
@@ -52,37 +54,21 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
         for (var item2 in item["entradas"]) {
           if(item2["qr"] == codigo){
             bandera = true;
-            if(!item2["asistencia"]){
-              await ApiService().marcarAsistencia(item2["id"]);
-              item2["asistencia"] = true;
-              _datosDeLaEntrada("valido", item["titulo"], item2);
+            Map<String,dynamic> aux = await ApiService().pedirInscripcionPorId(item2['id']);
+            item2["asistencia"] = aux["asistencia"];
+            item2["entradasEscaneadas"] = aux["entradasEscaneadas"];
+            if (!item2["asistencia"] && item["cantidadEscaneosMaximo"] > item2["entradasEscaneadas"].length) {
+              _datosDeLaEntrada("valido", item["titulo"], item2, item["cantidadEscaneosMaximo"]);
             }else{
-              _datosDeLaEntrada("escaneado", item["titulo"], item2);
+              _datosDeLaEntrada("escaneado", item["titulo"], item2, item["cantidadEscaneosMaximo"]);
             }
           }
         }
       }
     }
     if(!bandera){
-      _datosDeLaEntrada("noValido", "", {});
+      _datosDeLaEntrada("noValido", "", {}, -1);
     }
-  }
-  int encontrarInscripcion(List<Map<String, String>> inscripciones, String claveBuscada) {
-    int res = -1;
-    for (var inscripcion in inscripciones) {
-      if (inscripcion["qr"]! ==claveBuscada) {
-        if(inscripcion["asistencia"]! == "false"){
-          _marcarAsistencia(int.parse(inscripcion["id"]!));
-          res = 1;
-        }else{
-          res = 0;
-        }
-      }
-    }
-    return res;
-  }
-  void _marcarAsistencia(int inscripcionId) async{
-    await ApiService().marcarAsistencia(inscripcionId);
   }
   
   @override
@@ -218,106 +204,136 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
     );
   }
 
-  void _datosDeLaEntrada(String caso, String titulo, Map<String, dynamic> entrada) {
-    String texto = "";
-    Color fondo = AppColorStyles.altFondo1;
-    if(caso == "noValido"){
-      texto = "Error, este QR no es valido"; 
-      fondo = Colors.red;
-    }
-    if(caso == "escaneado"){
-      texto = "Error, este QR ya fue escaneado"; 
-      fondo = Colors.red;
-    }
-    if(caso == "valido"){
-      texto = "Éxito, el QR se escaneo correctamente"; 
-      fondo = AppColorStyles.altTexto1;
-    }
-    showModalBottomSheet(
+void _datosDeLaEntrada(String caso, String titulo, Map<String, dynamic> entrada, int escaneosMaximos) {
+  String texto = "";
+  String texto2 = "";
+  String texto3 = "";
+  Color fondo = AppColorStyles.altFondo1;
+  if (caso == "noValido") {
+    texto = "Error, este QR no es valido";
+    fondo = Colors.red;
+  }
+  if (caso == "escaneado") {
+    texto = "Error, este QR ya fue escaneado";
+    texto2 = 'Último registro: ${entrada['entradasEscaneadas'].isNotEmpty ? DateFormat('dd/MM/yyyy-HH:mm:ss').format((entrada['entradasEscaneadas'][0]).subtract(Duration(hours: 4))) : "N/A"}';
+    texto3 = 'Veces registradas: ${entrada['entradasEscaneadas'].length} / $escaneosMaximos';
+    fondo = Colors.red;
+  }
+  if (caso == "valido") {
+    texto = "QR valido, registra la asistencia para continuar";
+    texto2 = 'Último registro: ${entrada['entradasEscaneadas'].isNotEmpty ? DateFormat('dd/MM/yyyy-HH:mm:ss').format((entrada['entradasEscaneadas'][0]).subtract(Duration(hours: 4))) : "N/A"}';
+    texto3 = 'Veces registradas: ${entrada['entradasEscaneadas'].length} / $escaneosMaximos';
+    fondo = AppColorStyles.altTexto1;
+  }
+  showModalBottomSheet(
       context: context,
       builder: (BuildContext buildContext) {
         return Container(
-          color: fondo,
-          width: double.infinity,
-          height: 400,
-          padding: EdgeInsets.all(15),
-          child: Column(
-            children: [
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 15),
-                child: Text(
-                  texto,
-                  style: AppTitleStyles.tarjeta(color: AppColorStyles.blanco),
+            color: fondo,
+            width: double.infinity,
+            //height: 450,
+            padding: EdgeInsets.all(15),
+            child: Column(
+              children: [
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 15),
+                  child: Text(
+                    texto,
+                    style: AppTitleStyles.tarjeta(color: AppColorStyles.blanco),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              ),
-              if(caso == "valido" || caso == "escaneado")
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 15),
-                child: Column(
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 0),
+                  child: Text(
+                    texto2,
+                    style: AppTitleStyles.tarjeta(color: AppColorStyles.blanco),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(bottom: 15),
+                  child: Text(
+                    texto3,
+                    style: AppTitleStyles.tarjeta(color: AppColorStyles.blanco),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                if (caso == "valido" || caso == "escaneado")
+                  Container(
+                      margin: EdgeInsets.symmetric(vertical: 15),
+                      child: Column(
+                        children: [
+                          _buildInfoText("Actividad: ", titulo),
+                          _buildInfoText("QR: ", entrada["qr"]),
+                          _buildInfoText("Nombre completo: ",
+                              "${entrada["nombres"]} ${entrada["apellidos"]}"),
+                          _buildInfoText("Carnet: ", entrada["cedulaDeIdentidad"]),
+                          _buildInfoText("Correo: ", entrada["email"]),
+                        ],
+                      )),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    RichText(
-                      text: TextSpan(children: <TextSpan>[
-                        TextSpan(
-                            text: "Actividad: ",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColorStyles.altFondo1)),
-                        TextSpan(
-                            text: titulo,
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.blanco)),
-                      ]),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColorStyles.gris2,
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      ),
+                      child: Text("Cancelar",
+                          style: TextStyle(color: AppColorStyles.altTexto1, fontSize: 16)),
                     ),
-                    SizedBox(height: 10,),
-                    RichText(
-                      text: TextSpan(children: <TextSpan>[
-                        TextSpan(
-                            text: "QR: ",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColorStyles.altFondo1)),
-                        TextSpan(
-                            text: entrada["qr"],
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.blanco)),
-                      ]),
-                    ),
-                    SizedBox(height: 10,),
-                    RichText(
-                      text: TextSpan(children: <TextSpan>[
-                        TextSpan(
-                            text: "Nombre completo: ",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColorStyles.altFondo1)),
-                        TextSpan(
-                            text: entrada["nombres"]+" "+entrada["apellidos"],
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.blanco)),
-                      ]),
-                    ),
-                    SizedBox(height: 10,),
-                    RichText(
-                      text: TextSpan(children: <TextSpan>[
-                        TextSpan(
-                            text: "Carnet: ",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColorStyles.altFondo1)),
-                        TextSpan(
-                            text: entrada["cedulaDeIdentidad"],
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.blanco)),
-                      ]),
-                    ),
-                    SizedBox(height: 10,),
-                    RichText(
-                      text: TextSpan(children: <TextSpan>[
-                        TextSpan(
-                            text: "Correo: ",
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColorStyles.altFondo1)),
-                        TextSpan(
-                            text: entrada["email"],
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColorStyles.blanco)),
-                      ]),
+                    if(caso == "valido")
+                    ElevatedButton(
+                      onPressed: () async{
+                        entrada['asistencia'] = (escaneosMaximos - entrada['entradasEscaneadas'].length) == 1;
+                        entrada['entradasEscaneadas'].add(DateTime.now());
+                        List<String> fechas = FuncionUpsa.armarListaFechasHorasParaStrapi(entrada['entradasEscaneadas']);
+                        await ApiService().marcarAsistencia(entrada, fechas);
+                        Navigator.pop(context);
+                        MensajeTemporalInferior().mostrarMensaje(context,"Registro exitoso.", "exito");
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColorStyles.verde2,
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      ),
+                      child: Text("Registrar",
+                          style: TextStyle(color: AppColorStyles.blanco, fontSize: 16)),
                     ),
                   ],
-                )
-              )
-            ],
-          )
-        );
-      }
-    );
-  }
+                ),
+              ],
+            ));
+      });
+}
+
+Widget _buildInfoText(String label, String value) {
+  return Column(
+    children: [
+      RichText(
+        text: TextSpan(children: <TextSpan>[
+          TextSpan(
+              text: label,
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColorStyles.altFondo1)),
+          TextSpan(
+              text: value,
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColorStyles.blanco)),
+        ]),
+      ),
+      SizedBox(height: 10),
+    ],
+  );
+}
+
   Widget _crearBoton(){
     return Container(
       width: double.infinity,

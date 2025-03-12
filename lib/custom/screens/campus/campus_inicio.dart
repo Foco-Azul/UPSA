@@ -88,7 +88,7 @@ class _CampusScreenState extends State<CampusScreen> {
               ),
               _buildPulsableContainer(
                 context,
-                'Cursillos',
+                'Cursos',
                 LucideIcons.playCircle,
                 () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => CursillosInicio()));

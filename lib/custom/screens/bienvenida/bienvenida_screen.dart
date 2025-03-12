@@ -109,7 +109,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           _crearContenido(
             'lib/custom/assets/images/bienvenida_3.png',
             'Preparate para tu futuro',
-            'Accedé a nuestros cursillos en línea, quizzes especiales e info de carreras, para estar mejor preparado para tu formación académica.'
+            'Accedé a nuestros cursos en línea, quizzes especiales e info de carreras, para estar mejor preparado para tu formación académica.'
           ),
         ],
       ),

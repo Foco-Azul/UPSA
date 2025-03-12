@@ -2,11 +2,13 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/categoria.dart';
+import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/screens/actividades/club_screen.dart';
 import 'package:flutkit/custom/screens/actividades/concurso_escreen.dart';
 import 'package:flutkit/custom/screens/actividades/evento_escreen.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/helpers/theme/app_notifier.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
 import 'package:flutkit/homes/homes_screen.dart';
@@ -14,6 +16,7 @@ import 'package:flutkit/loading_effect.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 // Define la extensión para String
 extension StringCasingExtension on String {
@@ -32,6 +35,10 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
   List<Map<String, dynamic>> _actividades = [];
   DateTime _focusedDay = DateTime.now();
   late ProfileController controller;
+
+  User _user = User();
+  bool _isLoggedIn = false;
+
   @override
   void initState() {
     super.initState();
@@ -45,6 +52,15 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
       screenClass: 'Calendario', // Clase o tipo de pantalla
     );
     _actividades = await ApiService().getActividades();
+    _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
+    if (_isLoggedIn) {
+      _user = Provider.of<AppNotifier>(context, listen: false).user;
+      if(_user.rolCustom! == "estudiante"){
+        _filtrarActividades(_user.id!);
+      }
+    }else{
+      _filtrarActividades(-1);
+    }
     setState(() {
       controller.uiLoading = false;
     });
@@ -54,6 +70,25 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
       _focusedDay = focusedDay;
     }); 
   }
+  void _filtrarActividades(int id){
+    List<Map<String,dynamic>> aux = [];
+    for (var item in _actividades) {
+      if(item["tipo"] == "Evento" || item["tipo"] == "Concurso"){
+        if(item["usuariosPermitidos"].isNotEmpty){
+            for (var item2 in item["usuariosPermitidos"]) {
+              if(item2 == id){
+                aux.add(item);
+              }
+            }
+        }else{
+          aux.add(item);
+        }
+      }else{
+        aux.add(item);
+      }
+    }
+    _actividades = aux;
+  } 
   
   @override
   Widget build(BuildContext context) {
@@ -87,13 +122,11 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
           ),
         ),
         body: SingleChildScrollView(
-          child: Center(
-            child: Column(
-              children: [
-                _construirCalendario(),
-                _construirActividadesMes(),
-              ],
-            ),
+          child: Column(
+            children: [
+              _construirCalendario(),
+              _construirActividadesMes(),
+            ],
           ),
         ),
         bottomNavigationBar: FlashyTabBar(
@@ -156,90 +189,89 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
       );
     }
   }
-Widget _construirActividadesMes() {
-  // Filtra las actividades para el mes actual
-  List<Map<String, dynamic>> actividadesFiltradas = _actividades.where((actividad) {
-    return DateTime.parse(actividad["fecha"]).month == _focusedDay.month;
-  }).toList();
+  Widget _construirActividadesMes() {
+    // Filtra las actividades para el mes actual
+    List<Map<String, dynamic>> actividadesFiltradas = _actividades.where((actividad) {
+      return DateTime.parse(actividad["fecha"]).month == _focusedDay.month;
+    }).toList();
 
-  return SizedBox(
-    height: MediaQuery.of(context).size.height * 0.6, // Ajusta el alto según sea necesario
-    child: ListView.builder(
-      itemCount: actividadesFiltradas.length,
-      itemBuilder: (context, index) {
-        Categoria categoria = actividadesFiltradas[index]["categoria"];
-        return Container(
-          margin: EdgeInsets.all(15),
-          padding: EdgeInsets.all(15),
-          decoration: AppDecorationStyle.tarjeta(),
-          child: GestureDetector(
-            onTap: () {
-              if (_actividades[index]["tipo"] == "Evento") {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => EventoScreen(id: _actividades[index]["id"])));
-              }
-              if (_actividades[index]["tipo"] == "Concurso") {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => ConcursoScreen(id: _actividades[index]['id'])));
-              }
-              if (_actividades[index]["tipo"] == "Club") {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => ClubScreen(id: _actividades[index]['id'])));
-              }
-            },
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  margin: EdgeInsets.only(right: 15),
-                  padding: EdgeInsets.all(5), 
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: actividadesFiltradas[index]["color"],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Align(
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.26, // Ajusta el alto según sea necesario
+      child: ListView.builder(
+        itemCount: actividadesFiltradas.length,
+        itemBuilder: (context, index) {
+          Categoria categoria = actividadesFiltradas[index]["categoria"];
+          return Container(
+            margin: EdgeInsets.all(15),
+            padding: EdgeInsets.all(15),
+            decoration: AppDecorationStyle.tarjeta(),
+            child: GestureDetector(
+              onTap: () {
+                if (actividadesFiltradas[index]["tipo"] == "Evento") {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => EventoScreen(id: actividadesFiltradas[index]["id"])));
+                }
+                if (actividadesFiltradas[index]["tipo"] == "Concurso") {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => ConcursoScreen(id: actividadesFiltradas[index]['id'])));
+                }
+                if (actividadesFiltradas[index]["tipo"] == "Club") {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => ClubScreen(id: actividadesFiltradas[index]['id'])));
+                }
+              },
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(right: 15),
+                    padding: EdgeInsets.all(5), 
                     alignment: Alignment.center,
-                    child: Text(
-                      (DateTime.parse(actividadesFiltradas[index]["fecha"]).day).toString(),
-                      style: TextStyle(
-                        color: AppColorStyles.blanco,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w500,
+                    decoration: BoxDecoration(
+                      color: actividadesFiltradas[index]["color"],
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        (DateTime.parse(actividadesFiltradas[index]["fecha"]).day).toString(),
+                        style: TextStyle(
+                          color: AppColorStyles.blanco,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        actividadesFiltradas[index]["titulo"],
-                        style: AppTitleStyles.tarjetaMenor(),
-                      ),
-                      Row(
-                        children: [
-                          Text(
-                            actividadesFiltradas[index]["tipo"],
-                            style: AppTextStyles.parrafo(color: AppColorStyles.gris2),
-                          ),
-                          Icon(LucideIcons.dot, color: AppColorStyles.gris2), // Espacio entre el icono y el segundo texto
-                          Text(
-                            categoria.nombre!,
-                            style: AppTextStyles.parrafo(color: AppColorStyles.gris2),
-                          ),
-                        ],
-                      ),
-                    ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          actividadesFiltradas[index]["titulo"],
+                          style: AppTitleStyles.tarjetaMenor(),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              actividadesFiltradas[index]["tipo"],
+                              style: AppTextStyles.parrafo(color: AppColorStyles.gris2),
+                            ),
+                            Icon(LucideIcons.dot, color: AppColorStyles.gris2), // Espacio entre el icono y el segundo texto
+                            Text(
+                              categoria.nombre!,
+                              style: AppTextStyles.parrafo(color: AppColorStyles.gris2),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      },
-    ),
-  );
-}
-
+          );
+        },
+      ),
+    );
+  }
   Widget _construirCalendario(){
     return Container(
       margin: EdgeInsets.all(15),
