@@ -504,7 +504,7 @@ class _EventoScreenState extends State<EventoScreen> {
             ),
             _crearEtiquetas(),
             Visibility(
-              visible: _inscrito && FuncionUpsa.diferenciaDeFechas(_evento.fechaDeFin!, "", "fechaActual") > 0,
+              visible: _inscrito && FuncionUpsa.diferenciaDeFechas(_evento.fechaDeFin!, "", "fechaActual") >= 0,
               child: Container(
                 margin: EdgeInsets.only(bottom: 15),
                 child: Text(
@@ -513,7 +513,7 @@ class _EventoScreenState extends State<EventoScreen> {
                 ),
               ), 
             ),
-            _botonesOpcionales((_isLoggedIn && _user.rolCustom == "estudiante" && _user.estado! == "Completado" && FuncionUpsa.diferenciaDeFechas(_evento.fechaDeFin!, "", "fechaActual") > 0), (!_inscrito && ((_evento.capacidad!-_evento.inscritos!) > 0 || _evento.capacidad! == -1)), _siguiendo),
+            _botonesOpcionales((_isLoggedIn && _user.rolCustom == "estudiante" && _user.estado! == "Completado" && FuncionUpsa.diferenciaDeFechas(_evento.fechaDeFin!, "", "fechaActual") >= 0), (!_inscrito && ((_evento.capacidad!-_evento.inscritos!) > 0 || _evento.capacidad! == -1)), _siguiendo),
             if(!_isLoggedIn || (_user.rolCustom == "estudiante" && _user.estado! != "Completado"))
             Column(
               children: [

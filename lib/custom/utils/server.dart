@@ -164,7 +164,7 @@ class ApiService {
         bool seEnvioCorreo = await enviarCorreo({"codigoDeVerificacion":data["codigoDeVerificacion"]}, "Código de verificación", data["email"]!);
         if(seEnvioCorreo){
           res = User.armarUsuario(response.body);
-          crearUserMeta(res.id!, data);
+          await crearUserMeta(res.id!, data);
         }
         return res;
       } else {
@@ -696,13 +696,13 @@ class ApiService {
     int res = -1;
     String aux = "";
     if(actividad == "evento"){
-      aux = "Evento-UPSA-";
+      aux = 'Evento-UPSA-$id-';
     }
-    if(actividad == "club"){
-      aux = "Club-UPSA-";
+    if(actividad == 'club'){
+      aux = 'Club-UPSA-$id-';
     }
-    if(actividad == "concurso"){
-      aux = "Concurso-UPSA-";
+    if(actividad == 'concurso'){
+      aux = 'Concurso-UPSA-$id-';
     }
     await dotenv.load(fileName: ".env");
     try {

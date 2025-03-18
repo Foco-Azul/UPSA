@@ -482,7 +482,7 @@ class _ClubScreenState extends State<ClubScreen> {
                 ),
               ), 
             ),
-            _botonesOpcionales((_isLoggedIn && _user.rolCustom == "estudiante" && _user.estado! == "Completado" && _habilitado && FuncionUpsa.diferenciaDeFechas(_club.fechaDeFin!, "", "fechaActual") > 0), (!_inscrito && ((_club.capacidad!-_club.inscritos!) > 0 || _club.capacidad! == -1)), _siguiendo),
+            _botonesOpcionales((_isLoggedIn && _user.rolCustom == "estudiante" && _user.estado! == "Completado" && _habilitado && FuncionUpsa.diferenciaDeFechas(_club.fechaDeFin!, "", "fechaActual") >= 0), (!_inscrito && ((_club.capacidad!-_club.inscritos!) > 0 || _club.capacidad! == -1)), _siguiendo),
             if(!_isLoggedIn || (_user.rolCustom == "estudiante" && _user.estado! != "Completado"))
             Column(
               children: [
