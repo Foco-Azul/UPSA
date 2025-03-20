@@ -47,6 +47,7 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
     });
   }
   void _verificarQR(String codigo) async{
+    _actividades = await ApiService().getActividadesConInscripciones();
     Navigator.of(context).pop();
     bool bandera = false;
     for (var item in _actividades) {
@@ -220,7 +221,7 @@ void _datosDeLaEntrada(String caso, String titulo, Map<String, dynamic> entrada,
     fondo = Colors.red;
   }
   if (caso == "valido") {
-    texto = "QR valido, registra la asistencia para continuar";
+    texto = "QR válido, registra la asistencia para continuar";
     texto2 = 'Último registro: ${entrada['entradasEscaneadas'].isNotEmpty ? DateFormat('dd/MM/yyyy-HH:mm:ss').format((entrada['entradasEscaneadas'][0]).subtract(Duration(hours: 4))) : "N/A"}';
     texto3 = 'Veces registradas: ${entrada['entradasEscaneadas'].length} / $escaneosMaximos';
     fondo = AppColorStyles.altTexto1;

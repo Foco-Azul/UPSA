@@ -12,6 +12,7 @@ import 'package:flutkit/custom/screens/inicio/notificaciones_screen.dart';
 import 'package:flutkit/homes/homes_screen.dart';
 import 'package:flutkit/main.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PushNotificationService{
@@ -104,6 +105,10 @@ class PushNotificationService{
         sound: true,
       );
       print('Permisos de notificación para iOS: ${settings.authorizationStatus}');
+    }else{
+      if (await Permission.notification.isDenied) {
+        await Permission.notification.request();
+      }
     }
     if (Platform.isIOS) {
       token = await FirebaseMessaging.instance.getAPNSToken();
