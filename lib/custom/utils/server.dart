@@ -2,8 +2,10 @@
 
 import 'dart:convert';
 import 'dart:io';
-//import 'package:dio/dio.dart' as dio;
-//import 'package:path/path.dart' as path;
+import 'package:dio/dio.dart';
+import 'package:dio/dio.dart' as diox; 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:path/path.dart' as path;
 import 'package:flutkit/custom/models/avatar.dart';
 import 'package:flutkit/custom/models/carrera_upsa.dart';
 import 'package:flutkit/custom/models/club.dart';
@@ -30,7 +32,6 @@ import 'package:flutkit/custom/utils/generadores.dart';
 import 'package:flutkit/main.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import 'package:flutkit/custom/models/user.dart';
     
@@ -1971,6 +1972,59 @@ class ApiService {
     }
   }
   //FORMULARIO DE CONTACTO FIN
+
+  //FORMULARIO DE RETROALIMENTACION DE NIBU INICIO
+  Future<String> crearRetroalimentacionNibu(Map<String, dynamic> data) async {
+    String res = "fail";
+    await dotenv.load(fileName: ".env");
+    String url = "${dotenv.get('baseUrl')}/retroalimentaciones-de-nibu";
+
+    try {
+      Dio dio = Dio(); // Ahora 'dio' no entra en conflicto
+      
+      // Usa el alias diox para FormData
+      diox.FormData formData = diox.FormData.fromMap({
+        "data": json.encode({
+          "correo": data["email"],
+          "mensaje": data["mensaje"],
+        }),
+      });
+
+      if (data["imagenes"] != null && data["imagenes"] is List<File>) {
+        for (var img in data["imagenes"]) {
+          formData.files.add(
+            MapEntry(
+              "files.imagenes",
+              await MultipartFile.fromFile(img.path, filename: path.basename(img.path)),
+            ),
+          );
+        }
+      }
+
+      Response response = await dio.post(
+        url,
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': 'Bearer ${dotenv.get('accesToken')}',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        res = "exito";
+      } else {
+        print('Error en crearRetroalimentacionNibu: ${response.data}');
+      }
+    } catch (e) {
+      print('Error en crearRetroalimentacionNibu: $e');
+    }
+
+    return res;
+  }
+  //FORMULARIO DE RETROALIMENTACION DE NIBU FIN
+  
 
   //BUSCADOR INICIO 
   Future<List<Resultado>> getBusquedas(String query) async {

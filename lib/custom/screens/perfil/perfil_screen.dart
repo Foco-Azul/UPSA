@@ -19,6 +19,7 @@ import 'package:flutkit/custom/screens/campus/carrera_screen.dart';
 import 'package:flutkit/custom/screens/campus/sobre_nosotros_escreen.dart';
 import 'package:flutkit/custom/screens/campus/test_vocacional_screen.dart';
 import 'package:flutkit/custom/screens/perfil/actividades_pasadas_screen.dart';
+import 'package:flutkit/custom/screens/perfil/retroalimentacion_nibu_screem.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
 import 'package:flutkit/custom/widgets/animacion_carga.dart';
@@ -645,6 +646,18 @@ class _PerfilScreenState extends State<PerfilScreen> {
               },
               child: Text(
                 "Escanear QR",
+                style: AppTextStyles.parrafo()
+              ),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 5),
+            child:  GestureDetector(
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => RetroalimentacionNibuScreen()));
+              },
+              child: Text(
+                "Retroalimentación de NIBU",
                 style: AppTextStyles.parrafo()
               ),
             ),
