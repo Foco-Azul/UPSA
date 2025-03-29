@@ -802,7 +802,7 @@ class ApiService {
             'Content-Type': 'application/json',
             "Authorization": "Bearer ${dotenv.get('accesToken')}"
           },
-          body: json.encode({"data":{"user": idUser, "nombres": data["nombres"], "apellidos": data["apellidos"]}}));
+          body: json.encode({"data":{"user": idUser, "nombres": capitalizeEachWord(data["nombres"]), "apellidos": capitalizeEachWord(data["apellidos"])}}));
       if (response.statusCode == 200) {
         res = true;
         return res;
@@ -2526,6 +2526,7 @@ class ApiService {
     }
   }
   String capitalizeEachWord(String s) {
+    s = s.trim();  // Elimina los espacios al inicio y final
     if (s.isEmpty) return s;
     return s.split(' ').map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase()).join(' ');
   }
@@ -2548,8 +2549,8 @@ class ApiService {
     String fechaActualMasUno = obtenerFechaActualMasUno();
     aux = await getEventosEnCurso(fechaActual, fechaActualMasUno);
     res.addAll(aux);
-    aux = await getConcursosEnCurso(fechaActual, fechaActualMasUno);
-    res.addAll(aux);
+    //aux = await getConcursosEnCurso(fechaActual, fechaActualMasUno);
+    //res.addAll(aux);
     aux = await getClubesEnCurso(fechaActual, fechaActualMasUno);
     res.addAll(aux);
     return res;

@@ -125,20 +125,26 @@ class FuncionUpsa {
     }
     return res;
   }
-  static String armarFechaPublicacion(String data) {
-    DateTime fechaPublicacion = DateTime.parse(data);
-    DateTime ahora = DateTime.now();
-    Duration diferencia = ahora.difference(fechaPublicacion);
+  static String armarFechaPublicacion(String? data) {
+    String res = "";
+    if(data != null){
+      DateTime fechaPublicacion = DateTime.parse(data);
+      DateTime ahora = DateTime.now();
+      Duration diferencia = ahora.difference(fechaPublicacion);
 
-    if (diferencia.inHours < 24) {
-      return "Hace ${diferencia.inHours} horas";
-    } else {
-      int dias = diferencia.inDays;
-      if (diferencia.inHours % 24 != 0) {
-        dias++; // Añadir un día si hay horas extras
+      if (diferencia.inHours < 24) {
+        return "Hace ${diferencia.inHours} horas";
+      } else {
+        int dias = diferencia.inDays;
+        if (diferencia.inHours % 24 != 0) {
+          dias++; // Añadir un día si hay horas extras
+        }
+        res = "Hace $dias días";
       }
-      return "Hace $dias días";
+    }else{
+      res = "Actividad finalizada";
     }
+    return res;
   }
   static String armarFechaDeInicioFinConHora(String data) {
     DateTime dateTime = DateTime.parse(data).toLocal();

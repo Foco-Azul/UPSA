@@ -203,7 +203,7 @@ class _EventoScreenState extends State<EventoScreen> {
               _contenedorRetroalimentacion(),
               _contenedorDescripcion(),
               _crearCalendarioOpcional(_evento.calendario!.isNotEmpty),
-              _crearIngresoOpcional(_inscrito),
+              _crearIngresoOpcional(_inscrito && FuncionUpsa.diferenciaDeFechas(_evento.fechaDeFin!, "", "fechaActual") >= 0,),
               _crearSeguimientoOpcional((_evento.noticias!.isNotEmpty)),
             ],
           ),

@@ -736,6 +736,30 @@ class _PerfilScreenState extends State<PerfilScreen> {
               ),
             ),
           ),*/
+          if(_user.rolCustom == "estudiante")
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 5),
+            child:  GestureDetector(
+              onTap: () {
+                if(_user.estado == "Nuevo"){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => ValidarEmail()));
+                }
+                if(_user.estado == "Verificado"){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroPerfil()));
+                }
+                if(_user.estado == "Perfil parte 1" || _user.estado == "Completado"){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroCarrera()));
+                }
+                if(_user.estado == "Perfil parte 2"){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroIntereses()));
+                } 
+              },
+              child: Text(
+                "Editar mi perfil",
+                style: AppTextStyles.parrafo()
+              ),
+            ),
+          ),
           Container(
             margin: EdgeInsets.symmetric(vertical: 5),
             child: GestureDetector(
@@ -1109,12 +1133,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   Icon(
                     Icons.feed_outlined, // Cambia el ícono según lo que necesites
                     size: 20,
-                    color: AppColorStyles.gris2,
+                    color: AppColorStyles.altVerde1,
                   ),
                   SizedBox(width: 8),
                   Text(
-                    "Retomar formulario de preferencias",
-                    style: AppTextStyles.botonSinFondo(color: AppColorStyles.gris2)
+                    "Editar mi perfil",
+                    style: AppTextStyles.botonSinFondo(color: AppColorStyles.altVerde1)
                   ),
                 ],
               ),

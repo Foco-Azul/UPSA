@@ -210,7 +210,7 @@ class _ClubScreenState extends State<ClubScreen> {
               _crearFechasInicioFin(FuncionUpsa.armarFechaDeInicioFin(_club.fechaDeInicio!), FuncionUpsa.armarFechaDeInicioFin(_club.fechaDeFin!)),
               _contenedorDescripcion(),
               _crearCalendarioOpcional(_club.calendario!.isNotEmpty),
-              _crearIngresoOpcional(_inscrito),
+              _crearIngresoOpcional(_inscrito && FuncionUpsa.diferenciaDeFechas(_club.fechaDeFin!, "", "fechaActual") >= 0,),
               _crearSeguimientoOpcional((_club.noticias!.isNotEmpty)),
             ],
           ),

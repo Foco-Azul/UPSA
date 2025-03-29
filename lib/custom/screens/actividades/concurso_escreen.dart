@@ -196,7 +196,7 @@ class _ConcursoScreenState extends State<ConcursoScreen> {
               _crearFechasInicioFin(FuncionUpsa.armarFechaDeInicioFin(_concurso.fechaDeInicio!), FuncionUpsa.armarFechaDeInicioFin(_concurso.fechaDeFin!)),
               _contenedorDescripcion(),
               _crearCalendarioOpcional(_concurso.calendario!.isNotEmpty),
-              _crearIngresoOpcional(_inscrito),
+              _crearIngresoOpcional(_inscrito && FuncionUpsa.diferenciaDeFechas(_concurso.fechaDeFin!, "", "fechaActual") >= 0,),
               _crearSeguimientoOpcional((_concurso.noticias!.isNotEmpty)),
             ],
           ),

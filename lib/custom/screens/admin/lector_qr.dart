@@ -4,6 +4,7 @@ import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/funciones.dart';
 import 'package:flutkit/custom/utils/server.dart';
+import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/custom/widgets/mensaje_temporal_inferior.dart';
 import 'package:flutkit/helpers/theme/app_theme.dart';
 import 'package:flutkit/helpers/widgets/my_spacing.dart';
@@ -33,11 +34,13 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
   String _tipoSeleccionado = "";
   int _idSeleccionado = -1;
   String _error = "";
+  late AnimacionCarga _animacionCarga;
   @override
   void initState() {
     super.initState();
     theme = AppTheme.theme;
     controller = ProfileController();
+    _animacionCarga = AnimacionCarga(context: context);
     _cargarDatos();
   }
   void _cargarDatos() async{
@@ -50,25 +53,25 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
     _actividades = await ApiService().getActividadesConInscripciones();
     Navigator.of(context).pop();
     bool bandera = false;
-    for (var item in _actividades) {
-      if(_tipoSeleccionado == item["tipo"] && _idSeleccionado == item["id"]){
-        for (var item2 in item["entradas"]) {
-          if(item2["qr"] == codigo){
+    for (var actividad in _actividades) {
+      if(_tipoSeleccionado == actividad["tipo"] && _idSeleccionado == actividad["id"] || true){
+        for (var entrada in actividad["entradas"]) {
+          if(entrada["qr"] == codigo){
             bandera = true;
-            Map<String,dynamic> aux = await ApiService().pedirInscripcionPorId(item2['id']);
-            item2["asistencia"] = aux["asistencia"];
-            item2["entradasEscaneadas"] = aux["entradasEscaneadas"];
-            if (!item2["asistencia"] && item["cantidadEscaneosMaximo"] > item2["entradasEscaneadas"].length) {
-              _datosDeLaEntrada("valido", item["titulo"], item2, item["cantidadEscaneosMaximo"]);
+            Map<String,dynamic> aux = await ApiService().pedirInscripcionPorId(entrada['id']);
+            entrada["asistencia"] = aux["asistencia"];
+            entrada["entradasEscaneadas"] = aux["entradasEscaneadas"];
+            if (!entrada["asistencia"] && actividad["cantidadEscaneosMaximo"] > entrada["entradasEscaneadas"].length) {
+              _datosDeLaEntrada("valido", actividad["titulo"], entrada, actividad["cantidadEscaneosMaximo"]);
             }else{
-              _datosDeLaEntrada("escaneado", item["titulo"], item2, item["cantidadEscaneosMaximo"]);
+              _datosDeLaEntrada("escaneado", actividad["titulo"], entrada, actividad["cantidadEscaneosMaximo"]);
             }
           }
         }
       }
     }
     if(!bandera){
-      _datosDeLaEntrada("noValido", "", {}, -1);
+      _datosDeLaEntrada("noValido", codigo, {}, -1);
     }
   }
   
@@ -102,12 +105,23 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
             "Escaner de entradas",
             style: AppTitleStyles.principal()
           ),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.replay_outlined, size: 30),
+              onPressed: () async{
+                _animacionCarga.setMostrar(true);
+                _actividades = await ApiService().getActividadesConInscripciones();
+                MensajeTemporalInferior().mostrarMensaje(context,"Entradas actualizadas con exito.", "exito");
+                _animacionCarga.setMostrar(false);
+              },
+            ),
+          ],
         ),
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              _crearSelectorActividades(),
+              //_crearSelectorActividades(),
               _crearBoton(),
             ],
           ),
@@ -205,135 +219,136 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
     );
   }
 
-void _datosDeLaEntrada(String caso, String titulo, Map<String, dynamic> entrada, int escaneosMaximos) {
-  String texto = "";
-  String texto2 = "";
-  String texto3 = "";
-  Color fondo = AppColorStyles.altFondo1;
-  if (caso == "noValido") {
-    texto = "Error, este QR no es valido";
-    fondo = Colors.red;
-  }
-  if (caso == "escaneado") {
-    texto = "Error, este QR ya fue escaneado";
-    texto2 = 'Último registro: ${entrada['entradasEscaneadas'].isNotEmpty ? DateFormat('dd/MM/yyyy-HH:mm:ss').format((entrada['entradasEscaneadas'][0]).subtract(Duration(hours: 4))) : "N/A"}';
-    texto3 = 'Veces registradas: ${entrada['entradasEscaneadas'].length} / $escaneosMaximos';
-    fondo = Colors.red;
-  }
-  if (caso == "valido") {
-    texto = "QR válido, registra la asistencia para continuar";
-    texto2 = 'Último registro: ${entrada['entradasEscaneadas'].isNotEmpty ? DateFormat('dd/MM/yyyy-HH:mm:ss').format((entrada['entradasEscaneadas'][0]).subtract(Duration(hours: 4))) : "N/A"}';
-    texto3 = 'Veces registradas: ${entrada['entradasEscaneadas'].length} / $escaneosMaximos';
-    fondo = AppColorStyles.altTexto1;
-  }
-  showModalBottomSheet(
-      context: context,
-      builder: (BuildContext buildContext) {
-        return Container(
-            color: fondo,
-            width: double.infinity,
-            //height: 450,
-            padding: EdgeInsets.all(15),
-            child: Column(
-              children: [
-                Container(
-                  margin: EdgeInsets.symmetric(vertical: 15),
-                  child: Text(
-                    texto,
-                    style: AppTitleStyles.tarjeta(color: AppColorStyles.blanco),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.symmetric(vertical: 0),
-                  child: Text(
-                    texto2,
-                    style: AppTitleStyles.tarjeta(color: AppColorStyles.blanco),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.only(bottom: 15),
-                  child: Text(
-                    texto3,
-                    style: AppTitleStyles.tarjeta(color: AppColorStyles.blanco),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                if (caso == "valido" || caso == "escaneado")
+  void _datosDeLaEntrada(String caso, String titulo, Map<String, dynamic> entrada, int escaneosMaximos) {
+    String texto = "";
+    String texto2 = "";
+    String texto3 = "";
+    Color fondo = AppColorStyles.altFondo1;
+    if (caso == "noValido") {
+      texto = "Error, este QR no es valido";
+      texto2 = 'Contenido de QR: $titulo';
+      fondo = Colors.red;
+    }
+    if (caso == "escaneado") {
+      texto = "Error, este QR ya fue escaneado";
+      texto2 = 'Último registro: ${entrada['entradasEscaneadas'].isNotEmpty ? DateFormat('dd/MM/yyyy-HH:mm:ss').format((entrada['entradasEscaneadas'][0]).subtract(Duration(hours: 4))) : "N/A"}';
+      texto3 = 'Veces registradas: ${entrada['entradasEscaneadas'].length} / $escaneosMaximos';
+      fondo = Colors.red;
+    }
+    if (caso == "valido") {
+      texto = "QR válido, registra la asistencia para continuar";
+      texto2 = 'Último registro: ${entrada['entradasEscaneadas'].isNotEmpty ? DateFormat('dd/MM/yyyy-HH:mm:ss').format((entrada['entradasEscaneadas'][0]).subtract(Duration(hours: 4))) : "N/A"}';
+      texto3 = 'Veces registradas: ${entrada['entradasEscaneadas'].length} / $escaneosMaximos';
+      fondo = AppColorStyles.altTexto1;
+    }
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext buildContext) {
+          return Container(
+              color: fondo,
+              width: double.infinity,
+              //height: 450,
+              padding: EdgeInsets.all(15),
+              child: Column(
+                children: [
                   Container(
-                      margin: EdgeInsets.symmetric(vertical: 15),
-                      child: Column(
-                        children: [
-                          _buildInfoText("Actividad: ", titulo),
-                          _buildInfoText("QR: ", entrada["qr"]),
-                          _buildInfoText("Nombre completo: ",
-                              "${entrada["nombres"]} ${entrada["apellidos"]}"),
-                          _buildInfoText("Carnet: ", entrada["cedulaDeIdentidad"]),
-                          _buildInfoText("Correo: ", entrada["email"]),
-                        ],
-                      )),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColorStyles.gris2,
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      ),
-                      child: Text("Cancelar",
-                          style: TextStyle(color: AppColorStyles.altTexto1, fontSize: 16)),
+                    margin: EdgeInsets.symmetric(vertical: 15),
+                    child: Text(
+                      texto,
+                      style: AppTitleStyles.tarjeta(color: AppColorStyles.blanco),
+                      textAlign: TextAlign.center,
                     ),
-                    if(caso == "valido")
-                    ElevatedButton(
-                      onPressed: () async{
-                        entrada['asistencia'] = (escaneosMaximos - entrada['entradasEscaneadas'].length) == 1;
-                        entrada['entradasEscaneadas'].add(DateTime.now());
-                        List<String> fechas = FuncionUpsa.armarListaFechasHorasParaStrapi(entrada['entradasEscaneadas']);
-                        await ApiService().marcarAsistencia(entrada, fechas);
-                        Navigator.pop(context);
-                        MensajeTemporalInferior().mostrarMensaje(context,"Registro exitoso.", "exito");
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColorStyles.verde2,
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      ),
-                      child: Text("Registrar",
-                          style: TextStyle(color: AppColorStyles.blanco, fontSize: 16)),
+                  ),
+                  Container(
+                    margin: EdgeInsets.symmetric(vertical: 0),
+                    child: Text(
+                      texto2,
+                      style: AppTitleStyles.tarjeta(color: AppColorStyles.blanco),
+                      textAlign: TextAlign.center,
                     ),
-                  ],
-                ),
-              ],
-            ));
-      });
-}
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(bottom: 15),
+                    child: Text(
+                      texto3,
+                      style: AppTitleStyles.tarjeta(color: AppColorStyles.blanco),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  if (caso == "valido" || caso == "escaneado")
+                    Container(
+                        margin: EdgeInsets.symmetric(vertical: 15),
+                        child: Column(
+                          children: [
+                            _buildInfoText("Actividad: ", titulo),
+                            _buildInfoText("QR: ", entrada["qr"]),
+                            _buildInfoText("Nombre completo: ",
+                                "${entrada["nombres"]} ${entrada["apellidos"]}"),
+                            _buildInfoText("Carnet: ", entrada["cedulaDeIdentidad"]),
+                            _buildInfoText("Correo: ", entrada["email"]),
+                          ],
+                        )),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColorStyles.gris2,
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        ),
+                        child: Text("Cancelar",
+                            style: TextStyle(color: AppColorStyles.altTexto1, fontSize: 16)),
+                      ),
+                      if(caso == "valido")
+                      ElevatedButton(
+                        onPressed: () async{
+                          entrada['asistencia'] = (escaneosMaximos - entrada['entradasEscaneadas'].length) == 1;
+                          entrada['entradasEscaneadas'].add(DateTime.now());
+                          List<String> fechas = FuncionUpsa.armarListaFechasHorasParaStrapi(entrada['entradasEscaneadas']);
+                          await ApiService().marcarAsistencia(entrada, fechas);
+                          Navigator.pop(context);
+                          MensajeTemporalInferior().mostrarMensaje(context,"Registro exitoso.", "exito");
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColorStyles.verde2,
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        ),
+                        child: Text("Registrar",
+                            style: TextStyle(color: AppColorStyles.blanco, fontSize: 16)),
+                      ),
+                    ],
+                  ),
+                ],
+              ));
+        });
+  }
 
-Widget _buildInfoText(String label, String value) {
-  return Column(
-    children: [
-      RichText(
-        text: TextSpan(children: <TextSpan>[
-          TextSpan(
-              text: label,
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColorStyles.altFondo1)),
-          TextSpan(
-              text: value,
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppColorStyles.blanco)),
-        ]),
-      ),
-      SizedBox(height: 10),
-    ],
-  );
-}
+  Widget _buildInfoText(String label, String value) {
+    return Column(
+      children: [
+        RichText(
+          text: TextSpan(children: <TextSpan>[
+            TextSpan(
+                text: label,
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColorStyles.altFondo1)),
+            TextSpan(
+                text: value,
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColorStyles.blanco)),
+          ]),
+        ),
+        SizedBox(height: 10),
+      ],
+    );
+  }
 
   Widget _crearBoton(){
     return Container(
@@ -342,7 +357,7 @@ Widget _buildInfoText(String label, String value) {
       margin: EdgeInsets.all(15),
       child: ElevatedButton(
         onPressed: () {
-          if(_idSeleccionado != -1 && _tipoSeleccionado.isNotEmpty){
+          if(_idSeleccionado != -1 && _tipoSeleccionado.isNotEmpty || true){
             _error = "";
             _showScannerModal();
           }else{
@@ -424,15 +439,6 @@ Widget _buildInfoText(String label, String value) {
             ),
           ),
         ],
-      ),
-    );
-  }
-  void showSnackBarWithFloating(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: MyText.titleSmall(message, color: theme.colorScheme.onPrimary),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
       ),
     );
   }

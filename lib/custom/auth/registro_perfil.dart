@@ -77,7 +77,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       }else{
         _errores["colegio"] = "Selecciona una opción";
       }
-      if(_userMeta.fechaDeNacimiento == null){
+      if(_userMeta.fechaDeNacimiento == null || _userMeta.fechaDeNacimiento!.isEmpty){
         _errores["fechaDeNacimiento"] = "Este campo es requerido";
       }else{
         _errores["fechaDeNacimiento"] = "";
