@@ -111,7 +111,7 @@ class _LectorQRScreenState extends State<LectorQRScreen> {
               onPressed: () async{
                 _animacionCarga.setMostrar(true);
                 _actividades = await ApiService().getActividadesConInscripciones();
-                MensajeTemporalInferior().mostrarMensaje(context,"Entradas actualizadas con exito.", "exito");
+                MensajeTemporalInferior().mostrarMensaje(context,"Entradas actualizadas con éxito.", "exito");
                 _animacionCarga.setMostrar(false);
               },
             ),

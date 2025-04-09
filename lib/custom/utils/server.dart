@@ -830,7 +830,7 @@ class ApiService {
           {"data":{
             "nombres": capitalizeEachWord(datos.nombres!),
             "apellidos":capitalizeEachWord(datos.apellidos!),
-            "cedulaDeIdentidad": datos.cedulaDeIdentidad,
+            "cedulaDeIdentidad": FuncionUpsa.eliminarEspaciosInicioFin(datos.cedulaDeIdentidad),
             "fechaDeNacimiento": datos.fechaDeNacimiento == "" ? null : datos.fechaDeNacimiento,
             "celular1": datos.celular1 == "" ? null : datos.celular1,
             "colegio": datos.colegio!.id,

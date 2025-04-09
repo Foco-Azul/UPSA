@@ -2,6 +2,7 @@ import 'package:flutkit/custom/auth/registro_carrera.dart';
 import 'package:flutkit/custom/models/colegio.dart';
 import 'package:flutkit/custom/models/user_meta.dart';
 import 'package:flutkit/custom/theme/styles.dart';
+import 'package:flutkit/custom/utils/funciones.dart';
 import 'package:flutkit/custom/utils/validaciones.dart';
 import 'package:flutkit/custom/widgets/animacion_carga.dart';
 import 'package:flutkit/helpers/widgets/my_button.dart';
@@ -70,7 +71,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
     setState(() {
       _errores["nombres"] = validacion.validarNombres(_userMeta.nombres, true);
       _errores["apellidos"] = validacion.validarNombres(_userMeta.apellidos, true);
-      _errores["cedulaDeIdentidad"] = validacion.validarNumerosPositivos(_userMeta.cedulaDeIdentidad, true, true);
+      _errores["cedulaDeIdentidad"] = validacion.validarAlfanumericos(FuncionUpsa.eliminarEspaciosInicioFin(_userMeta.cedulaDeIdentidad), true);
       _errores["celular1"] = validacion.validarCelular(_userMeta.celular1, true);
       if (_userMeta.colegio!.id! != -1){
         _errores["colegio"] = "";

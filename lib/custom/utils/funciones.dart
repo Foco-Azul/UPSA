@@ -354,4 +354,7 @@ class FuncionUpsa {
     res = res.replaceAll(RegExp(r'[^a-zA-Z0-9_]'), '');
     return res;
   }
+  static String eliminarEspaciosInicioFin(String? data) {
+    return data?.trim() ?? "";
+  }
 }
