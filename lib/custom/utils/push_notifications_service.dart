@@ -92,37 +92,65 @@ class PushNotificationService{
     navigatorKey.currentState!.push(MaterialPageRoute(builder: (context) => NotificacionesScreen()));
   }
   static Future initializeApp() async {
-    await Firebase.initializeApp();
-    if (Platform.isIOS) {
-      FirebaseMessaging messaging = FirebaseMessaging.instance;
-      NotificationSettings settings = await messaging.requestPermission(
-        alert: true,
-        announcement: false,
-        badge: true,
-        carPlay: false,
-        criticalAlert: false,
-        provisional: false,
-        sound: true,
-      );
-      print('Permisos de notificación para iOS: ${settings.authorizationStatus}');
-    }else{
-      if (await Permission.notification.isDenied) {
-        await Permission.notification.request();
+    try {
+      await Firebase.initializeApp();
+
+      if (Platform.isIOS) {
+        FirebaseMessaging messaging = FirebaseMessaging.instance;
+        NotificationSettings settings = await messaging.requestPermission(
+          alert: true,
+          announcement: false,
+          badge: true,
+          carPlay: false,
+          criticalAlert: false,
+          provisional: false,
+          sound: true,
+        );
+        print('Permisos de notificación para iOS: ${settings.authorizationStatus}');
+      } else {
+        if (await Permission.notification.isDenied) {
+          await Permission.notification.request();
+        }
       }
+
+      final hasInternet = await hasInternetConnection();
+      if (!hasInternet) {
+        print('Sin conexión a Internet, no se puede obtener el token.');
+        token = 'null';
+      } else {
+        if (Platform.isIOS) {
+          token = await FirebaseMessaging.instance.getAPNSToken();
+          print('APNS-TOKEN: $token');
+        }
+
+        try {
+          token = await FirebaseMessaging.instance.getToken();
+        } catch (e) {
+          print('Error al obtener el token: $e');
+          token = 'null';
+        }
+      }
+
+      print('TOKEN: $token');
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('tokenDispositivo', token ?? 'null');
+
+      FirebaseMessaging.onBackgroundMessage(_backgroundHandler);
+      FirebaseMessaging.onMessage.listen(_onMessageHandler);
+      FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpenApp);
+    } catch (e, stacktrace) {
+      print('Error en initializeApp: $e');
+      print('Stacktrace: $stacktrace');
     }
-    if (Platform.isIOS) {
-      token = await FirebaseMessaging.instance.getAPNSToken();
-      print('APNS-TOKEN: $token');
-      token = await FirebaseMessaging.instance.getToken();
-    }else{
-      token = await FirebaseMessaging.instance.getToken();
+  }
+  static Future<bool> hasInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('example.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } catch (_) {
+      return false;
     }
-    print('TOKEN: $token');
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('tokenDispositivo', token!); 
-    FirebaseMessaging.onBackgroundMessage(_backgroundHandler);
-    FirebaseMessaging.onMessage.listen(_onMessageHandler);
-    FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpenApp);
   }
   String getToken(){
     return token!;
