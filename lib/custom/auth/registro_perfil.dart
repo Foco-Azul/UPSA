@@ -120,7 +120,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
         locale: const Locale("es"),
         context: context,
         initialDate: selectedDate,
-        firstDate: DateTime(2005),
+        firstDate: DateTime(1960),
         lastDate: DateTime.now(),
         builder: (context, child) {
         return Theme(

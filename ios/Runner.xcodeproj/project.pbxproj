@@ -270,9 +270,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -287,9 +291,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -390,11 +398,11 @@
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = 9QAAKV38AN;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.2.1;
-				FLUTTER_BUILD_NUMBER = 6;
+				FLUTTER_BUILD_NAME = 1.5.4;
+				FLUTTER_BUILD_NUMBER = 15;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
@@ -411,7 +419,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
-				MARKETING_VERSION = 1.2.1;
+				MARKETING_VERSION = 1.5.4;
 				PRODUCT_BUNDLE_IDENTIFIER = bo.edu.upsa.nibu;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -545,11 +553,11 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = 9QAAKV38AN;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.2.1;
-				FLUTTER_BUILD_NUMBER = 6;
+				FLUTTER_BUILD_NAME = 1.5.4;
+				FLUTTER_BUILD_NUMBER = 15;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
@@ -566,7 +574,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
-				MARKETING_VERSION = 1.2.1;
+				MARKETING_VERSION = 1.5.4;
 				PRODUCT_BUNDLE_IDENTIFIER = bo.edu.upsa.nibu;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -591,11 +599,11 @@
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = 9QAAKV38AN;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 1.2.1;
-				FLUTTER_BUILD_NUMBER = 6;
+				FLUTTER_BUILD_NAME = 1.5.4;
+				FLUTTER_BUILD_NUMBER = 15;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
@@ -612,7 +620,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
-				MARKETING_VERSION = 1.2.1;
+				MARKETING_VERSION = 1.5.4;
 				PRODUCT_BUNDLE_IDENTIFIER = bo.edu.upsa.nibu;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
