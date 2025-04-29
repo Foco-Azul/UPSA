@@ -11,9 +11,9 @@ if (flutterRoot == null) {
     throw GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
 }
 
-def flutterVersionCode = '15'
+def flutterVersionCode = '16'
 
-def flutterVersionName = '1.8.2'
+def flutterVersionName = '1.9.0'
 
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'

@@ -3,7 +3,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:dio/dio.dart' as diox; 
+import 'package:dio/dio.dart' as diox;
+import 'package:flutkit/custom/models/prefixe.dart'; 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutkit/custom/models/avatar.dart';
@@ -835,6 +836,7 @@ class ApiService {
             "celular1": datos.celular1 == "" ? null : datos.celular1,
             "colegio": datos.colegio!.id,
             "promo": datos.promo,
+            "codigoDeTelefono" : datos.codigoDeTelefono,
           }}
         )
       );
@@ -2286,6 +2288,7 @@ class ApiService {
               "telefono": int.tryParse(data["telefono"]!), 
               "carreras": carreras,
               "usuario": id,
+              "codigoDeTelefono": data["codigoDeTelefono"], 
             }
           }
         )
@@ -2323,6 +2326,7 @@ class ApiService {
               "telefono": int.tryParse(data["telefono"]!), 
               "horario": data["horario"],
               "usuario": id,
+              "codigoDeTelefono": data["codigoDeTelefono"],
             }
           }
         )
@@ -2511,6 +2515,29 @@ class ApiService {
     }
   }
   //AVATAR FIN
+
+  //PREFIXE INICIO
+  Future<List<Prefixe>> getPrefixesPopulate() async {
+    List<Prefixe> res = [];
+    await dotenv.load(fileName: ".env");
+    try {
+      var url = Uri.parse('${dotenv.get('baseUrl')}/prefixes/?pagination[pageSize]=200');
+      var response = await http.get(url,
+          headers: {"Authorization": "Bearer ${dotenv.get('accesToken')}"});
+      if (response.statusCode == 200) {
+        res = Prefixe.armarPrefixesPopulate(response.body);
+        return res;
+      } else {
+        String e = jsonDecode(response.body)['error']['message'];
+        print('Error en  getPrefixesPopulate: $e');
+        return res;
+      }
+    } catch (e) {
+      print('Error en getPrefixesPopulate: $e');
+      return res;
+    }
+  }
+  //PREFIXE FIN
 
   //EXTRAS INICIO
   Future<bool> reenviarToken(int userId, String email) async {

@@ -11,6 +11,7 @@ class UserMeta {
   String? cedulaDeIdentidad;
   String? fechaDeNacimiento;
   String? celular1;
+  String? codigoDeTelefono;
   bool? testVocacional;
   String? aplicacionTest;
   List<Map<String, dynamic>>? recibirInformacion;
@@ -31,7 +32,8 @@ class UserMeta {
     this.apellidos,
     this.cedulaDeIdentidad,
     this.fechaDeNacimiento,
-    this.celular1,
+    this.celular1 = "+591",
+    this.codigoDeTelefono,
     this.testVocacional,
     this.recibirInformacion,
     this.intereses,
@@ -55,6 +57,7 @@ class UserMeta {
         nombres: data["nombres"],
         apellidos: data["apellidos"],
         celular1: data["celular1"] != null ? data["celular1"].toString() : "",
+        codigoDeTelefono: data["codigoDeTelefono"] != null ? data["codigoDeTelefono"].toString() : "+591",
         cedulaDeIdentidad: data["cedulaDeIdentidad"] ?? "",
         fechaDeNacimiento: data["fechaDeNacimiento"] ?? "",
         colegio: _armarColegio(data["colegio"]),
@@ -72,6 +75,7 @@ class UserMeta {
         nombres: data["nombres"],
         apellidos: data["apellidos"],
         celular1: data["celular1"] != null ? data["celular1"].toString() : "",
+        codigoDeTelefono: data["codigoDeTelefono"] != null ? data["codigoDeTelefono"].toString() : "+591",
         cedulaDeIdentidad: data["cedulaDeIdentidad"] ?? "",
         fechaDeNacimiento: data["fechaDeNacimiento"] ?? "",
         curso: data["curso"] ?? "",

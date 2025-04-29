@@ -755,7 +755,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 } 
               },
               child: Text(
-                "Editar mi perfil",
+                (_user.estado == "Completado" ? "Actualizar mis preferencias" : "Completa tu perfil"),
                 style: AppTextStyles.parrafo()
               ),
             ),
@@ -1136,8 +1136,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                     color: AppColorStyles.altVerde1,
                   ),
                   SizedBox(width: 8),
-                  Text(
-                    "Editar mi perfil",
+                  Text((_user.estado == "Completado" ? "Actualizar mis preferencias" : "Completa tu perfil"),
                     style: AppTextStyles.botonSinFondo(color: AppColorStyles.altVerde1)
                   ),
                 ],

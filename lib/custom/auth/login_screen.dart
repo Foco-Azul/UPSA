@@ -232,6 +232,7 @@ class _Login2ScreenState extends State<Login2Screen> {
                 }
                 setState(() {});
               },
+              autofillHints: _getAutofillHints(campo),
               decoration: AppDecorationStyle.campoTexto(hintText: hintText, labelText: labelText),
               style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
               keyboardType: tipo,
@@ -246,6 +247,20 @@ class _Login2ScreenState extends State<Login2Screen> {
         ],
       ),
     );
+  }
+  List<String>? _getAutofillHints(String campo) {
+    switch (campo) {
+      case "nombres":
+        return [AutofillHints.givenName];
+      case "apellidos":
+        return [AutofillHints.familyName];
+      case "email":
+        return [AutofillHints.email];
+      case "telefono":
+        return [AutofillHints.telephoneNumber];
+      default:
+        return null;
+    }
   }
   Widget _crearCampoPassConError(){
     return Container(

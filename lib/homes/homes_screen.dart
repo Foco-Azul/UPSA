@@ -1,5 +1,9 @@
 
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
+import 'package:flutkit/custom/auth/registro_carrera.dart';
+import 'package:flutkit/custom/auth/registro_intereses.dart';
+import 'package:flutkit/custom/auth/registro_perfil.dart';
+import 'package:flutkit/custom/auth/validar_email.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/configuracion.dart';
 import 'package:flutkit/custom/models/resultado.dart';
@@ -109,6 +113,11 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
           }
         }
       }
+      _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
+      if (_isLoggedIn) {
+        _user = Provider.of<AppNotifier>(context, listen: false).user;
+        _user = await ApiService().getUser(_user.id!);
+      }
     }else{
       Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context) => SinInternetScreen()),(Route<dynamic> route) => false);
     }
@@ -160,67 +169,84 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
                   _crearPopupBusquedas(),
                 ],
               ),
-              bottomNavigationBar: FlashyTabBar(
-                iconSize: 24,
-                backgroundColor: AppColorStyles.blanco,
-                selectedIndex: selectedIndex,
-                animationDuration: Duration(milliseconds: 500),
-                showElevation: true,
-                items: [
-                  FlashyTabBarItem(
-                    inactiveColor: AppColorStyles.altTexto1,
-                    activeColor: AppColorStyles.altTexto1,
-                    icon: Icon(Icons.home_sharp),
-                    title: Text(
-                      'Inicio',
-                      style: AppTextStyles.bottomMenu()
+              bottomNavigationBar: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if(_isLoggedIn && _user.estado != "Completado")
+                  GestureDetector(
+                    onTap: () {
+                      if(_user.estado == "Nuevo"){
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => ValidarEmail()));
+                      }
+                      if(_user.estado == "Verificado"){
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroPerfil()));
+                      }
+                      if(_user.estado == "Perfil parte 1"){
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroCarrera()));
+                      }
+                      if(_user.estado == "Perfil parte 2"){
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => RegistroIntereses()));
+                      } 
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      color: AppColorStyles.altVerde2,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: Text(
+                        'Completa tu perfil para inscribirte a actividades →'.toUpperCase(),
+                        style: AppTextStyles.etiqueta(),
+                        textAlign: TextAlign.start,
+                      ),
                     ),
                   ),
-                  FlashyTabBarItem(
-                    inactiveColor: AppColorStyles.altTexto1,
-                    activeColor: AppColorStyles.altTexto1,
-                    icon: Icon(Icons.emoji_events_sharp),
-                    title: Text(
-                      'Actividades',
-                      style: AppTextStyles.bottomMenu()
-                    ),
-                  ),
-                  FlashyTabBarItem(
-                    inactiveColor: AppColorStyles.altTexto1,
-                    activeColor: AppColorStyles.altTexto1,
-                    icon: Icon(Icons.local_library_sharp),
-                    title: Text(
-                      'Campus',
-                      style: AppTextStyles.bottomMenu()
-                    ),
-                  ),
-                  FlashyTabBarItem(
-                    inactiveColor: AppColorStyles.altTexto1,
-                    activeColor: AppColorStyles.altTexto1,
-                    icon: Icon(Icons.push_pin_sharp),
-                    title: Text(
-                      'Noticias',
-                      style: AppTextStyles.bottomMenu()
-                    ),
-                  ),
-                  FlashyTabBarItem(
-                    inactiveColor: AppColorStyles.altTexto1,
-                    activeColor: AppColorStyles.altTexto1,
-                    icon: Icon(Icons.account_circle_sharp),
-                    title: Text(
-                      'Mi perfil',
-                      style: AppTextStyles.bottomMenu()
-                    ),
+                  FlashyTabBar(
+                    iconSize: 24,
+                    backgroundColor: AppColorStyles.blanco,
+                    selectedIndex: selectedIndex,
+                    animationDuration: Duration(milliseconds: 500),
+                    showElevation: true,
+                    items: [
+                      FlashyTabBarItem(
+                        inactiveColor: AppColorStyles.altTexto1,
+                        activeColor: AppColorStyles.altTexto1,
+                        icon: Icon(Icons.home_sharp),
+                        title: Text('Inicio', style: AppTextStyles.bottomMenu()),
+                      ),
+                      FlashyTabBarItem(
+                        inactiveColor: AppColorStyles.altTexto1,
+                        activeColor: AppColorStyles.altTexto1,
+                        icon: Icon(Icons.emoji_events_sharp),
+                        title: Text('Actividades', style: AppTextStyles.bottomMenu()),
+                      ),
+                      FlashyTabBarItem(
+                        inactiveColor: AppColorStyles.altTexto1,
+                        activeColor: AppColorStyles.altTexto1,
+                        icon: Icon(Icons.local_library_sharp),
+                        title: Text('Campus', style: AppTextStyles.bottomMenu()),
+                      ),
+                      FlashyTabBarItem(
+                        inactiveColor: AppColorStyles.altTexto1,
+                        activeColor: AppColorStyles.altTexto1,
+                        icon: Icon(Icons.push_pin_sharp),
+                        title: Text('Noticias', style: AppTextStyles.bottomMenu()),
+                      ),
+                      FlashyTabBarItem(
+                        inactiveColor: AppColorStyles.altTexto1,
+                        activeColor: AppColorStyles.altTexto1,
+                        icon: Icon(Icons.account_circle_sharp),
+                        title: Text('Mi perfil', style: AppTextStyles.bottomMenu()),
+                      ),
+                    ],
+                    onItemSelected: (index) {
+                      setState(() {
+                        selectedIndex = index;
+                        _searchController.clear();
+                        _showPopup = false;
+                        _buscando = false;
+                      });
+                    },
                   ),
                 ],
-                onItemSelected: (index) {
-                  setState(() {
-                    selectedIndex = index;
-                    _searchController.clear();
-                    _showPopup = false;
-                    _buscando = false;
-                  });
-                },
               ),
             ),
           );

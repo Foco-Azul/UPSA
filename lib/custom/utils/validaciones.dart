@@ -1,3 +1,5 @@
+import 'package:flutkit/custom/models/prefixe.dart';
+
 class Validacion{
 
   bool validateEmail(String? value) {
@@ -173,25 +175,44 @@ class Validacion{
     }
     return error;
   }
-  String validarCelular(String? value, bool? esObligatorio){
+  String validarCelular(String? value, bool esObligatorio, String codigo, List<Prefixe> prefixesData) {
     String error = "";
-    if(esObligatorio!){
-      if(value != null && value.isNotEmpty){
-        if(int.tryParse(value) == null ||  (int.tryParse(value)! < 60000000 || int.tryParse(value)! > 80000000 || int.tryParse(value).toString() != value)){
-          error = "Campo no valido";
+
+    if (value != null && value.isNotEmpty) {
+      // Validación cuando el campo no es obligatorio pero se ha ingresado un valor
+      if (int.tryParse(value) == null || int.tryParse(value).toString() != value) {
+        error = "Campo no válido";
+      } else {
+        // Obtener las condiciones para la validación del código de país
+        Prefixe prefixData = Prefixe();
+        for (var item in prefixesData) {
+          if(item.codigoDeTelefono! == codigo){
+            prefixData = item; 
+          }
         }
-      }else{
+        // Validar que el número tiene la cantidad correcta de dígitos
+        List<String> validDigits = prefixData.condicionCandidaDigitos?.split(";") ?? [];
+        if (validDigits.isNotEmpty && !validDigits.contains(value.length.toString())) {
+          error = "El número debe tener ${validDigits.join(', ')} dígitos";
+        } else {
+          // Validar que el número comienza con un dígito permitido
+          List<String> validStartDigits = prefixData.condicionPrimerDigito?.split(";") ?? [];
+          if (validStartDigits.isNotEmpty && !validStartDigits.contains(value[0])) {
+            error = "El número debe comenzar con uno de los siguientes dígitos: ${validStartDigits.join(', ')}";
+          }
+        }
+      }
+    } else {
+      // Validación si el campo es obligatorio
+      if (esObligatorio) {
         error = "Este campo es requerido";
       }
-    }else{
-      if(value != null && value.isNotEmpty){
-        if(int.tryParse(value) == null ||  (int.tryParse(value)! < 60000000 || int.tryParse(value)! > 80000000 || int.tryParse(value).toString() != value)){
-          error = "Campo no valido";
-        }
-      }
     }
+
     return error;
   }
+
+
   String validarCodigoDeVerificacion(String? value, bool? esObligatorio){
     String error = "";
     if(esObligatorio!){

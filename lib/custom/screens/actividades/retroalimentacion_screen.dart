@@ -326,7 +326,7 @@ class _RetroalimentacionScreenState extends State<RetroalimentacionScreen> {
                   },
                   style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
                   child: Text(
-                    'Completar perfil',
+                    'Completa tu perfil',
                     style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
                   ),
                 ),

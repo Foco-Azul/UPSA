@@ -1,4 +1,6 @@
+import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutkit/custom/auth/registro_carrera.dart';
+import 'package:flutkit/custom/models/prefixe.dart';
 import 'package:flutkit/custom/models/colegio.dart';
 import 'package:flutkit/custom/models/user_meta.dart';
 import 'package:flutkit/custom/theme/styles.dart';
@@ -45,6 +47,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
   late AnimacionCarga _animacionCarga;
   DateTime selectedDate = DateTime.now();
   Map<String, dynamic> _campoPromo = {};
+  List<Prefixe> _prefixes = [];
 
   @override
   void initState() {
@@ -62,17 +65,18 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
     _user = await ApiService().getUserPopulateConMetasParaFormularioPerfil(_user.id!);
     _colegios = await ApiService().getColegios();
     _campoPromo = await ApiService().getCampoPersonalziadoJson(2); 
+    _prefixes = await ApiService().getPrefixesPopulate();
     _userMeta = _user.userMeta!;
     setState(() {
       controller.uiLoading = false;
     });
   }
   void _validarCampos(){
-    setState(() {
+    setState((){
       _errores["nombres"] = validacion.validarNombres(_userMeta.nombres, true);
       _errores["apellidos"] = validacion.validarNombres(_userMeta.apellidos, true);
       _errores["cedulaDeIdentidad"] = validacion.validarAlfanumericos(FuncionUpsa.eliminarEspaciosInicioFin(_userMeta.cedulaDeIdentidad), true);
-      _errores["celular1"] = validacion.validarCelular(_userMeta.celular1, true);
+      _errores["celular1"] = validacion.validarCelular(_userMeta.celular1, true, _userMeta.codigoDeTelefono!, _prefixes);
       if (_userMeta.colegio!.id! != -1){
         _errores["colegio"] = "";
       }else{
@@ -387,7 +391,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       margin: EdgeInsets.only(top: 15, bottom: 60),
       child: ElevatedButton(
         onPressed: () {
-         _validarCampos();
+        _validarCampos();
         },
         style: AppDecorationStyle.botonBienvenida(colorFondo: AppColorStyles.altVerde1),
         child: Text(
@@ -397,7 +401,7 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
       ),
     );
   }
-  Widget _crearCampoConError2(String error, String value, String labelText, String hintText, String campo){
+  Widget _crearCampoConError2(String error, String value, String labelText, String hintText, String campo) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 15),
       child: Column(
@@ -405,19 +409,29 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
         children: <Widget>[
           Row(
             children: [
+              // Dropdown para seleccionar prefijo (Single)
               Container(
-                width: 70,
+                width: 120,
                 decoration: AppDecorationStyle.campoContainerForm(),
-                child: TextFormField(
-                  readOnly: true,
-                  initialValue: "+591",
+                child: CountryCodePicker(
                   onChanged: (value) {
+                    _userMeta.codigoDeTelefono = value.dialCode ?? "+591";
                   },
-                  decoration: AppDecorationStyle.campoTextoForm(hintText: "hintText", labelText: ""),  
-                  style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
+                  headerText: "Selecciona tu país",
+                  // Initial selection and favorite can be one of code ('IT') OR dial_code('+39')
+                  initialSelection: _userMeta.codigoDeTelefono!,
+                  // Filtrar países disponibles
+                  countryFilter: _prefixes.map((item) => item.codigoDePais ?? "BO").toList(), // Códigos de país permitidos
+                  // optional. Shows only country name and flag
+                  showCountryOnly: false,
+                  // optional. Shows only country name and flag when popup is closed.
+                  showOnlyCountryWhenClosed: false,
+                  // optional. aligns the flag and the Text left
+                  alignLeft: false,
                 ),
               ),
-              SizedBox(width: 10), // Para agregar un espacio entre los campos
+              SizedBox(width: 10),
+              // Campo de texto para el número
               Expanded(
                 child: Container(
                   decoration: AppDecorationStyle.campoContainerForm(),
@@ -438,7 +452,12 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
                       }
                       setState(() {});
                     },
-                    decoration: AppDecorationStyle.campoTextoForm(hintText: hintText, labelText: labelText),  
+                    keyboardType: _getKeyboardType(campo),
+                    autofillHints: _getAutofillHints(campo),
+                    decoration: AppDecorationStyle.campoTextoForm(
+                      hintText: hintText,
+                      labelText: labelText,
+                    ),
                     style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
                   ),
                 ),
@@ -446,19 +465,19 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
             ],
           ),
           if (error.isNotEmpty)
-          Container(
-            margin: EdgeInsets.only(top: 8),
-            child: Text(
-              error,
-              style: TextStyle(color: Colors.red),
-              textAlign: TextAlign.start,
+            Container(
+              margin: EdgeInsets.only(top: 8),
+              child: Text(
+                error,
+                style: TextStyle(color: Colors.red),
+                textAlign: TextAlign.start,
+              ),
             ),
-          )
         ],
       ),
     );
   }
-  Widget _crearCampoConError(String error, String value, String labelText, String hintText, String campo){
+  Widget _crearCampoConError(String error, String value, String labelText, String hintText, String campo) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 15),
       child: Column(
@@ -469,37 +488,71 @@ class _RegistroPerfilState extends State<RegistroPerfil> {
             child: TextFormField(
               initialValue: value,
               onChanged: (value) {
-                if(campo == "nombres"){
+                if (campo == "nombres") {
                   _userMeta.nombres = value;
                 }
-                if(campo == "apellidos"){
+                if (campo == "apellidos") {
                   _userMeta.apellidos = value;
                 }
-                if(campo == "celular1"){
+                if (campo == "celular1") {
                   _userMeta.celular1 = value;
                 }
-                if(campo == "cedulaDeIdentidad"){
+                if (campo == "cedulaDeIdentidad") {
                   _userMeta.cedulaDeIdentidad = value;
                 }
                 setState(() {});
               },
-              textCapitalization: TextCapitalization.words, // Para capitalizar cada palabra
-              decoration: AppDecorationStyle.campoTextoForm(hintText: hintText, labelText: labelText),  
-              style: AppTextStyles.parrafo(color: AppColorStyles.gris1)
+              textCapitalization: TextCapitalization.words,
+              keyboardType: _getKeyboardType(campo),
+              autofillHints: _getAutofillHints(campo),
+              decoration: AppDecorationStyle.campoTextoForm(hintText: hintText, labelText: labelText),
+              style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
             ),
           ),
           if (error.isNotEmpty)
-          Container(
-            margin: EdgeInsets.only(top: 8),
-            child: Text(
-              error,
-              style: TextStyle(color: Colors.red),
-              textAlign: TextAlign.start,
-            ),
-          )
+            Container(
+              margin: EdgeInsets.only(top: 8),
+              child: Text(
+                error,
+                style: TextStyle(color: Colors.red),
+                textAlign: TextAlign.start,
+              ),
+            )
         ],
       ),
     );
+  }
+
+  // Función para definir el tipo de teclado
+  TextInputType _getKeyboardType(String campo) {
+    switch (campo) {
+      case "email":
+        return TextInputType.emailAddress;
+      case "celular1":
+        return TextInputType.number;
+      case "cedulaDeIdentidad":
+        return TextInputType.text;
+      default:
+        return TextInputType.text;
+    }
+  }
+
+  // Función para definir sugerencias de autocompletado
+  List<String>? _getAutofillHints(String campo) {
+    switch (campo) {
+      case "nombres":
+        return [AutofillHints.givenName];
+      case "apellidos":
+        return [AutofillHints.familyName];
+      case "email":
+        return [AutofillHints.email];
+      case "celular1":
+        return [AutofillHints.telephoneNumber];
+      case "cedulaDeIdentidad":
+        return [AutofillHints.name];
+      default:
+        return null;
+    }
   }
   Widget _crearDescripcion(){
     return Container(

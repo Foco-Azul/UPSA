@@ -227,7 +227,7 @@ class _Register2ScreenState extends State<Register2Screen> {
       ),
     );
   }
-  Widget _crearCampoConError(String error, String labelText, String hintText, String campo){
+  Widget _crearCampoConError(String error, String labelText, String hintText, String campo) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 15),
       child: Column(
@@ -237,31 +237,60 @@ class _Register2ScreenState extends State<Register2Screen> {
             decoration: AppDecorationStyle.campoContainer(),
             child: TextField(
               onChanged: (value) {
-                if(campo == "nombres"){
+                if (campo == "nombres") {
                   _data["nombres"] = value;
                 }
-                if(campo == "apellidos"){
+                if (campo == "apellidos") {
                   _data["apellidos"] = value;
                 }
-                if(campo == "email"){
+                if (campo == "email") {
                   _data["email"] = value;
                 }
                 setState(() {});
               },
-              textCapitalization: TextCapitalization.words, // Para capitalizar cada palabra
+              textCapitalization: TextCapitalization.words,
+              keyboardType: _getKeyboardType(campo),
+              autofillHints: _getAutofillHints(campo),
               decoration: AppDecorationStyle.campoTexto(hintText: hintText, labelText: labelText),
-              style: AppTextStyles.parrafo(color: AppColorStyles.gris1)
+              style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
             ),
           ),
           if (error.isNotEmpty)
-          Text(
-            error,
-            style: TextStyle(color: Colors.red),
-            textAlign: TextAlign.start,
-          ),
+            Text(
+              error,
+              style: TextStyle(color: Colors.red),
+              textAlign: TextAlign.start,
+            ),
         ],
       ),
     );
+  }
+  // Función para definir el tipo de teclado
+  TextInputType _getKeyboardType(String campo) {
+    switch (campo) {
+      case "email":
+        return TextInputType.emailAddress;
+      case "telefono":
+        return TextInputType.phone;
+      default:
+        return TextInputType.text;
+    }
+  }
+
+  // Función para definir sugerencias de autocompletado
+  List<String>? _getAutofillHints(String campo) {
+    switch (campo) {
+      case "nombres":
+        return [AutofillHints.givenName];
+      case "apellidos":
+        return [AutofillHints.familyName];
+      case "email":
+        return [AutofillHints.email];
+      case "telefono":
+        return [AutofillHints.telephoneNumber];
+      default:
+        return null;
+    }
   }
   Widget _crearTituloConError(){
     return Column(

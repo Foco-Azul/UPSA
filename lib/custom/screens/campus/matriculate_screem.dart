@@ -1,3 +1,4 @@
+import 'package:country_code_picker/country_code_picker.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutkit/custom/auth/login_screen.dart';
@@ -7,6 +8,7 @@ import 'package:flutkit/custom/auth/registro_perfil.dart';
 import 'package:flutkit/custom/auth/validar_email.dart';
 import 'package:flutkit/custom/controllers/profile_controller.dart';
 import 'package:flutkit/custom/models/matriculate.dart';
+import 'package:flutkit/custom/models/prefixe.dart';
 import 'package:flutkit/custom/models/user.dart';
 import 'package:flutkit/custom/theme/styles.dart';
 import 'package:flutkit/custom/utils/server.dart';
@@ -45,7 +47,8 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
   final Map<String, dynamic> _formData = {
     "fecha": "",
     "telefono": "",
-    "horario": ""
+    "horario": "",
+    "codigoDeTelefono": "+591", 
   };
   final Map<String, String> _formDataError = {
     "errorFecha": "",
@@ -58,7 +61,7 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
   late AnimacionCarga _animacionCarga;
   DateTime selectedDate = DateTime.now(); // Maneja la fecha
   TimeOfDay selectedTime = TimeOfDay.now(); // Maneja la hora
-
+  List<Prefixe> _prefixes = [];
 
   @override
   void initState() {
@@ -79,6 +82,7 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
       screenClass: 'Inscribete', // Clase o tipo de pantalla
     );
     _isLoggedIn = Provider.of<AppNotifier>(context, listen: false).isLoggedIn;
+    _prefixes = await ApiService().getPrefixesPopulate();
     if(_isLoggedIn){
       _user = Provider.of<AppNotifier>(context, listen: false).user;
       _user = await ApiService().getUserPopulateParaSolitudDeInscripcion(_user.id!);
@@ -93,10 +97,10 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
       controller.uiLoading = false;
     });
   }
-  void _validarCampos(){
-    setState(() {
+  void _validarCampos() {
+    setState((){
       _formDataError["errorFecha"] = _formData["fecha"]!.isEmpty ? "Este campo es requerido" : "";
-      _formDataError["errorTelefono"] = validacion.validarCelular(_formData["telefono"], true);
+      _formDataError["errorTelefono"] = validacion.validarCelular(_formData["telefono"], true, _formData["codigoDeTelefono"], _prefixes);
       _formDataError["errorHorario"] = _formData["horario"]!.isEmpty ? "Este campo es requerido" : "";
     });
     if(_formDataError["errorFecha"]!.isEmpty && _formDataError["errorTelefono"]!.isEmpty && _formDataError["errorHorario"]!.isEmpty){
@@ -533,7 +537,7 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
                     },
                     style: AppDecorationStyle.botonContacto(color: AppColorStyles.altVerde2),
                     child: Text(
-                      'Completar perfil',
+                      'Completa tu perfil',
                       style: AppTextStyles.botonMenor(color: AppColorStyles.altTexto1), // Estilo del texto del botón
                     ),
                   ),
@@ -716,15 +720,23 @@ class _MatriculateScreenState extends State<MatriculateScreen> {
                       Row(
                         children: [
                           Container(
-                            width: 70,
+                            width: 120,
                             decoration: AppDecorationStyle.campoContainerForm(),
-                            child: TextFormField(
-                              readOnly: true,
-                              initialValue: "+591",
+                            child: CountryCodePicker(
                               onChanged: (value) {
+                                _formData["codigoDeTelefono"] = value.dialCode ?? "+591";
                               },
-                              decoration: AppDecorationStyle.campoContacto(hintText: "hintText", labelText: ""),  
-                              style: AppTextStyles.parrafo(color: AppColorStyles.gris1),
+                              headerText: "Selecciona tu país",
+                              // Initial selection and favorite can be one of code ('IT') OR dial_code('+39')
+                              initialSelection: _formData["codigoDeTelefono"],
+                              // Filtrar países disponibles
+                              countryFilter: _prefixes.map((item) => item.codigoDePais ?? "BO").toList(), // Códigos de país permitidos
+                              // optional. Shows only country name and flag
+                              showCountryOnly: false,
+                              // optional. Shows only country name and flag when popup is closed.
+                              showOnlyCountryWhenClosed: false,
+                              // optional. aligns the flag and the Text left
+                              alignLeft: false,
                             ),
                           ),
                           SizedBox(width: 10), // Para agregar un espacio entre los campos
