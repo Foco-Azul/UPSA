@@ -172,7 +172,7 @@ class _HomesScreenState extends State<HomesScreen> with SingleTickerProviderStat
               bottomNavigationBar: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if(_isLoggedIn && _user.estado != "Completado")
+                  if(_isLoggedIn && _user.rolCustom! != "admin" && _user.estado != "Completado")
                   GestureDetector(
                     onTap: () {
                       if(_user.estado == "Nuevo"){
