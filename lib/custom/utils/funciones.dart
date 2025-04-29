@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutkit/custom/models/categoria.dart';
-import 'package:flutkit/custom/models/noticia.dart';
 import 'package:intl/intl.dart';
 
 class FuncionUpsa {
